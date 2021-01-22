@@ -56,9 +56,6 @@ ds_vars <- tribble(
    "DM",     "ACTARM",	TRUE,   NA,
    "DM",     "COUNTRY",	TRUE,   NA,
 
-
-
-
 )
 
 
@@ -181,15 +178,17 @@ DataDef <- R6Class("DataDef",
                                             value_spec, derivations, code_list){
                          private$ds_spec <- ds_spec
                          private$ds_vars <- ds_vars
-                         private$vars_spec <- vars_spec
-                         private$value_spec <- param_specs
+                         private$vars_spec <- var_spec
+                         private$value_spec <- value_spec
                          private$derivations <- derivations
                          private$code_list <- code_list
+                         # TO DO: Cross-ref functions:
+                           # * derivations, codelist, variables x2
                       },
                       print = function(...){
                          cat(private$ds_spec %>% as.character() %>% paste0(collapse = "\n"))
                       }
-                   ),
+                   ), #TODO make into empty datasets
                    private = list(
                       ds_spec = NULL,
                       ds_vars = NULL,
@@ -201,8 +200,8 @@ DataDef <- R6Class("DataDef",
                    )
 )
 
-test <- DataDef$new(ds_spec, ds_vars, vars_specs,
-            param_specs, derivations, code_list)
+test <- DataDef$new(ds_spec, ds_vars, var_spec,
+                    value_spec, derivations, code_list)
 
 test
 # Notes from creation, derivations are sometimes duplicated, should the builder reduce the duplicates
