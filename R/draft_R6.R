@@ -1,13 +1,14 @@
 library(R6)
+library(dplyr)
 
 # List of tables needed
 # 1) ds_spec (dataset, label):
 #  This contians each dataset in the study, with the labels for each
 # 2) ds_vars (dataset, variable, keep, key, codelist, origin, derivation_id):
 #  This has information on what variables are in each dataset + plus dataset specific variable information
-# 3) vars_specs (variable, label, length, ?format [might be the same as code list]):
+# 3) var_spec (variable, label, length, ?format [might be the same as code list]):
 #  This has variable information that is shared across all datasets
-# 4) param_specs (dataset, variaable, where, type, codelist, origin, derivation_id):
+# 4) value_spec (dataset, variaable, where, type, codelist, origin, derivation_id):
 #  This has parametere specific infromation, as data is long the specs for wbc might be difference the hgb
 # 5) derivations (derivation_id, derivation):
 #  This contains derivation, it allows for different variables to have the same derivation. (derivation just string)
@@ -27,33 +28,33 @@ ds_spec <- tribble(
 
 
 ds_vars <- tribble(
-   ~dataset, ~variable, ~keep, ~key, ~codelist,                    ~origin,    ~derivation_id,
-   "DM",     "STUDYID", TRUE,   1,     NULL,                      "Protocol",        NA,
-   "DM",     "DOMAIN",	TRUE,   NA,	"SDTM Domain Abbreviation", 	"Assigned",        NA,
-   "DM",     "USUBJID",	TRUE,	  2,		NULL,                      "Assigned",  "usubj_comm",
-   "DM", 	 "SUBJID",	TRUE,	  NA,	   NULL,                  "CRF Pages 61 137", 	 NA,
-   "DM",     "RFSTDTC",	TRUE,	  NA,    "iso", 	                  "Derived",    "rfstdc_der",
-   "DM", 	 "RFENDTC",	TRUE,   NA,    "iso",	                  "Derived",	  "rfendtc_der",
-   "DM",     "RFXSTDTC",TRUE,   NA,	   "iso",	                  "Derived",	  "rfstdc_der",
-   "DM",     "RFXENDTC",TRUE,   NA,	   "iso",	                  "Derived",    "rfxendtc_der",
-   "DM",     "RFICDTC",	TRUE,   NA,	   "iso",	                  "Assigned",	  "NP",
-   "DM", 	 "RFPENDTC",TRUE,   NA,	   "iso",	                  "Derived",	  "rfpendtc_der",
-   "DM",     "DTHDTC",	TRUE,   NA,	   "iso",	                "CRF Page 37",       NA,
-   "DM", 	 "DTHFL",	TRUE,   NA,	   "YONLY",	                  "Assigned",	       NA,
-   "DM", 	 "SITEID",	TRUE,   NA,		NA,	                     "Assigned",	       NA,
-   "DM",     "INVID",	TRUE,   NA,		NA,	                     "Assigned",	       NA,
-   "DM",     "INVNAM",	TRUE,   NA,		NA,	                     "Assigned",	       NA,
-   "DM",     "BRTHDTC",	TRUE,   NA,		"iso",	                "CRF Page 40",	    NA,
-   "DM",     "AGE",	   TRUE,   NA,		NA,	                     "Derived",	   "age",
-   "DM",     "AGEU",	   TRUE,   NA,		"Age Unit",	               "Assigned",	       NA,
-   "DM",	    "SEX",   	TRUE,   NA,		"Sex",	                "CRF Page 40",       NA,
-   "DM",	    "RACE",	   TRUE,   NA,		"Race",	                  "Assigned",	       NA,
-   "DM",     "ETHNIC",	TRUE,   NA,		"Ethnic Group",	       "CRF Page 40",       NA,
-   "DM",	    "ARMCD",	TRUE,   NA,		"Arm Code",	              "Assigned",	       NA,
-   "DM",     "ARM",	   TRUE,   NA,		"Arm Cod",	              "Protocol",	       NA,
-   "DM", 	 "ACTARMCD",TRUE,   NA,		"Arm Code",	              "Assigned",	       NA,
-   "DM",     "ACTARM",	TRUE,   NA,		"Arm Code",	              "Assigned",	       NA,
-   "DM",     "COUNTRY",	TRUE,   NA,		"Country",	              "Assigned",	       NA,
+   ~dataset, ~variable, ~keep, ~key,
+   "DM",     "STUDYID", TRUE,   1,
+   "DM",     "DOMAIN",	TRUE,   NA,
+   "DM",     "USUBJID",	TRUE,	  2,
+   "DM", 	 "SUBJID",	TRUE,	  NA,
+   "DM",     "RFSTDTC",	TRUE,	  NA,
+   "DM", 	 "RFENDTC",	TRUE,   NA,
+   "DM",     "RFXSTDTC",TRUE,   NA,
+   "DM",     "RFXENDTC",TRUE,   NA,
+   "DM",     "RFICDTC",	TRUE,   NA,
+   "DM", 	 "RFPENDTC",TRUE,   NA,
+   "DM",     "DTHDTC",	TRUE,   NA,
+   "DM", 	 "DTHFL",	TRUE,   NA,
+   "DM", 	 "SITEID",	TRUE,   NA,
+   "DM",     "INVID",	TRUE,   NA,
+   "DM",     "INVNAM",	TRUE,   NA,
+   "DM",     "BRTHDTC",	TRUE,   NA,
+   "DM",     "AGE",	   TRUE,   NA,
+   "DM",     "AGEU",	   TRUE,   NA,
+   "DM",	    "SEX",   	TRUE,   NA,
+   "DM",	    "RACE",	   TRUE,   NA,
+   "DM",     "ETHNIC",	TRUE,   NA,
+   "DM",	    "ARMCD",	TRUE,   NA,
+   "DM",     "ARM",	   TRUE,   NA,
+   "DM", 	 "ACTARMCD",TRUE,   NA,
+   "DM",     "ACTARM",	TRUE,   NA,
+   "DM",     "COUNTRY",	TRUE,   NA,
 
 
 
@@ -61,7 +62,7 @@ ds_vars <- tribble(
 )
 
 
-vars_specs <- tribble(
+var_spec <- tribble(
    ~variable, ~label,                               ~length,
    "STUDYID",	"Study Identifier",                     	6,
    "DOMAIN",	"Domain Abbreviation",	                  2,
@@ -92,8 +93,36 @@ vars_specs <- tribble(
 )
 
 
-param_specs <- tribble(
-   ~dataset, ~variable, ~where, ~type, ~codelist, ~origin, ~derivation_id,
+
+
+value_spec <- tribble(
+ ~dataset, ~variable,    ~where,   ~type,          ~codelist,                    ~origin,    ~derivation_id,
+  "DM",   "STUDYID",       TRUE,    "text",            NULL,                      "Protocol",         NA,
+  "DM",   "DOMAIN",        TRUE,    "text",            "SDTM Domain Abbreviation","Assigned",         NA,
+  "DM",   "USUBJID",       TRUE,    "text",            NULL,                      "Assigned",  "usubj_comm",
+  "DM",   "SUBJID",        TRUE,    "text",            NULL,                  "CRF Pages 61 137", 	 NA,
+  "DM",   "RFSTDTC",       TRUE,    "date",            "iso", 	                  "Derived",    "rfstdc_der",
+  "DM",   "RFENDTC",       TRUE,    "date",            "iso",	                  "Derived",	  "rfendtc_der",
+  "DM",   "RFXSTDTC",      TRUE,    "date",            "iso",	                  "Derived",	  "rfstdc_der",
+  "DM",   "RFXENDTC",      TRUE,    "date",            "iso",	                  "Derived",    "rfxendtc_der",
+  "DM",   "RFICDTC",       TRUE,    "date",            "iso",	                  "Assigned",	  "NP",
+  "DM",   "RFPENDTC",      TRUE,    "date",            "iso",	                  "Derived",	  "rfpendtc_der",
+  "DM",   "DTHDTC",        TRUE,    "date",            "iso",	                "CRF Page 37",          NA,
+  "DM",   "DTHFL",         TRUE,    "text",            "YONLY",	                  "Assigned",	       NA,
+  "DM",   "SITEID",        TRUE,    "text",            NA,	                     "Assigned",	          NA,
+  "DM",   "INVID",         TRUE,    "text",            NA,	                     "Assigned",	          NA,
+  "DM",   "INVNAM",        TRUE,    "text",            NA,	                     "Assigned",	          NA,
+  "DM",   "BRTHDTC",       TRUE,    "date",            "iso",	                "CRF Page 40",	       NA,
+  "DM",   "AGE",           TRUE,    "integer",            NA,	                     "Derived",	        "age",
+  "DM",   "AGEU",          TRUE,    "text",            "Age Unit",	               "Assigned",	       NA,
+  "DM",   "SEX",           TRUE,    "text",            "Sex",	                "CRF Page 40",          NA,
+  "DM",   "RACE",          TRUE,    "text",            "Race",	                  "Assigned",	       NA,
+  "DM",   "ETHNIC",        TRUE,    "text",            "Ethnic Group",	       "CRF Page 40",          NA,
+  "DM",   "ARMCD",	      TRUE,    "text",            "Arm Code",	              "Assigned",	       NA,
+  "DM",   "ARM",           TRUE,    "text",            "Arm Cod",	              "Protocol",	       NA,
+  "DM",   "ACTARMCD",      TRUE,    "text",            "Arm Code",	              "Assigned",	       NA,
+  "DM",   "ACTARM",        TRUE,    "text",            "Arm Code",	              "Assigned",	       NA,
+  "DM",   "COUNTRY",       TRUE,    "text",            "Country",	              "Assigned",	       NA,
 
 )
 
@@ -148,12 +177,12 @@ code_list <- tribble(
 
 DataDef <- R6Class("DataDef",
                    public = list(
-                      initialize = function(ds_spec, ds_vars, vars_spec,
-                                            param_specs, derivations, code_list){
+                      initialize = function(ds_spec, ds_vars, var_spec,
+                                            value_spec, derivations, code_list){
                          private$ds_spec <- ds_spec
                          private$ds_vars <- ds_vars
                          private$vars_spec <- vars_spec
-                         private$param_specs <- param_specs
+                         private$value_spec <- param_specs
                          private$derivations <- derivations
                          private$code_list <- code_list
                       },
@@ -165,7 +194,7 @@ DataDef <- R6Class("DataDef",
                       ds_spec = NULL,
                       ds_vars = NULL,
                       vars_spec = NULL,
-                      param_specs = NULL,
+                      value_spec = NULL,
                       derivations = NULL,
                       code_list = NULL,
                       change_log = NULL
@@ -177,3 +206,8 @@ test <- DataDef$new(ds_spec, ds_vars, vars_specs,
 
 test
 # Notes from creation, derivations are sometimes duplicated, should the builder reduce the duplicates
+
+
+# Potential contravertial things I have done:
+#   * Collapse format information to live in codelist table
+#   * Movae origin, codelist and derivation id to value_spec from var_spec
