@@ -86,8 +86,8 @@ var_spec <- tribble(
    "ARMCD",	   "Planned Arm Code",                    	8,
    "ARM",	   "Description of Planned Arm",	            73,
    "ACTARMCD",	"Actual Arm Code",	                     8,
-   "ACTARM",	"Description of Actual Arm",	            73,
-   "COUNTRY",	"Country",	                              3
+   #"ACTARM",	"Description of Actual Arm",	            73,
+   #"COUNTRY",	"Country",	                              3
 )
 
 
@@ -208,16 +208,24 @@ DataDef <- R6Class("DataDef",
                            # * derivations, codelist, variables x2
                          # type coulnm has a limited number of types
                       },
+
                       print = function(...){
                          cat(private$ds_spec %>% as.character() %>% paste0(collapse = "\n"))
                       },
-                      validate = function(){
+
+                      validate = function() {
+
                          var_check <- anti_join(private$ds_vars, private$var_spec, by = "variable")
+
                          if(var_check %>% nrow() != 0){
                             var_ls <- var_check %>%
-                               pull(variable) %>%
-                               str_c(collapse = ", ")
-                            warning(paste0("The following variable(s) do not have labels and lengths:\n", var_ls))
+                               pull(variable)
+
+                            warning(
+                               "The following variable(s) do not have labels and lengths: ",
+                               paste("   ", var_ls, sep = "\n   "),
+                               call. = FALSE
+                           )
                          }
                       }
                    ),
@@ -245,10 +253,9 @@ DataDef <- R6Class("DataDef",
                    )
 )
 
-test <- DataDef$new(ds_spec, ds_vars, var_spec,
-                    value_spec, derivations, code_list)
-
+test <- DataDef$new(ds_spec, ds_vars, var_spec, value_spec, derivations, code_list)
 test
+
 # Notes from creation, derivations are sometimes duplicated, should the builder reduce the duplicates
 
 
