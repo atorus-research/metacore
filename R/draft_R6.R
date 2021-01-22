@@ -1,5 +1,6 @@
 library(R6)
 library(dplyr)
+library(stringr)
 
 # List of tables needed
 # 1) ds_spec (dataset, label):
@@ -94,32 +95,32 @@ var_spec <- tribble(
 
 value_spec <- tribble(
  ~dataset, ~variable,    ~where,   ~type,          ~codelist,                    ~origin,    ~derivation_id,
-  "DM",   "STUDYID",       TRUE,    "text",            NULL,                      "Protocol",         NA,
-  "DM",   "DOMAIN",        TRUE,    "text",            "SDTM Domain Abbreviation","Assigned",         NA,
-  "DM",   "USUBJID",       TRUE,    "text",            NULL,                      "Assigned",  "usubj_comm",
-  "DM",   "SUBJID",        TRUE,    "text",            NULL,                  "CRF Pages 61 137", 	 NA,
-  "DM",   "RFSTDTC",       TRUE,    "date",            "iso", 	                  "Derived",    "rfstdc_der",
-  "DM",   "RFENDTC",       TRUE,    "date",            "iso",	                  "Derived",	  "rfendtc_der",
-  "DM",   "RFXSTDTC",      TRUE,    "date",            "iso",	                  "Derived",	  "rfstdc_der",
-  "DM",   "RFXENDTC",      TRUE,    "date",            "iso",	                  "Derived",    "rfxendtc_der",
-  "DM",   "RFICDTC",       TRUE,    "date",            "iso",	                  "Assigned",	  "NP",
-  "DM",   "RFPENDTC",      TRUE,    "date",            "iso",	                  "Derived",	  "rfpendtc_der",
-  "DM",   "DTHDTC",        TRUE,    "date",            "iso",	                "CRF Page 37",          NA,
-  "DM",   "DTHFL",         TRUE,    "text",            "YONLY",	                  "Assigned",	       NA,
-  "DM",   "SITEID",        TRUE,    "text",            NA,	                     "Assigned",	          NA,
-  "DM",   "INVID",         TRUE,    "text",            NA,	                     "Assigned",	          NA,
-  "DM",   "INVNAM",        TRUE,    "text",            NA,	                     "Assigned",	          NA,
-  "DM",   "BRTHDTC",       TRUE,    "date",            "iso",	                "CRF Page 40",	       NA,
-  "DM",   "AGE",           TRUE,    "integer",            NA,	                     "Derived",	        "age",
-  "DM",   "AGEU",          TRUE,    "text",            "Age Unit",	               "Assigned",	       NA,
-  "DM",   "SEX",           TRUE,    "text",            "Sex",	                "CRF Page 40",          NA,
-  "DM",   "RACE",          TRUE,    "text",            "Race",	                  "Assigned",	       NA,
-  "DM",   "ETHNIC",        TRUE,    "text",            "Ethnic Group",	       "CRF Page 40",          NA,
-  "DM",   "ARMCD",	      TRUE,    "text",            "Arm Code",	              "Assigned",	       NA,
-  "DM",   "ARM",           TRUE,    "text",            "Arm Cod",	              "Protocol",	       NA,
-  "DM",   "ACTARMCD",      TRUE,    "text",            "Arm Code",	              "Assigned",	       NA,
-  "DM",   "ACTARM",        TRUE,    "text",            "Arm Code",	              "Assigned",	       NA,
-  "DM",   "COUNTRY",       TRUE,    "text",            "Country",	              "Assigned",	       NA,
+  "DM",   "STUDYID",    "TRUE",    "text",            NULL,                      "Protocol",         NA,
+  "DM",   "DOMAIN",     "TRUE",    "text",            "SDTM Domain Abbreviation","Assigned",         NA,
+  "DM",   "USUBJID",    "TRUE",    "text",            NULL,                      "Assigned",  "usubj_comm",
+  "DM",   "SUBJID",     "TRUE",    "text",            NULL,                  "CRF Pages 61 137", 	 NA,
+  "DM",   "RFSTDTC",    "TRUE",    "date",            "iso", 	                  "Derived",    "rfstdc_der",
+  "DM",   "RFENDTC",    "TRUE",    "date",            "iso",	                  "Derived",	  "rfendtc_der",
+  "DM",   "RFXSTDTC",   "TRUE",    "date",            "iso",	                  "Derived",	  "rfstdc_der",
+  "DM",   "RFXENDTC",   "TRUE",    "date",            "iso",	                  "Derived",    "rfxendtc_der",
+  "DM",   "RFICDTC",    "TRUE",    "date",            "iso",	                  "Assigned",	  "NP",
+  "DM",   "RFPENDTC",   "TRUE",    "date",            "iso",	                  "Derived",	  "rfpendtc_der",
+  "DM",   "DTHDTC",     "TRUE",    "date",            "iso",	                "CRF Page 37",          NA,
+  "DM",   "DTHFL",      "TRUE",    "text",            "YONLY",	                  "Assigned",	       NA,
+  "DM",   "SITEID",     "TRUE",    "text",            NA,	                     "Assigned",	          NA,
+  "DM",   "INVID",      "TRUE",    "text",            NA,	                     "Assigned",	          NA,
+  "DM",   "INVNAM",     "TRUE",    "text",            NA,	                     "Assigned",	          NA,
+  "DM",   "BRTHDTC",    "TRUE",    "date",            "iso",	                "CRF Page 40",	       NA,
+  "DM",   "AGE",        "TRUE",    "integer",            NA,	                     "Derived",	        "age",
+  "DM",   "AGEU",       "TRUE",    "text",            "Age Unit",	               "Assigned",	       NA,
+  "DM",   "SEX",        "TRUE",    "text",            "Sex",	                "CRF Page 40",          NA,
+  "DM",   "RACE",       "TRUE",    "text",            "Race",	                  "Assigned",	       NA,
+  "DM",   "ETHNIC",     "TRUE",    "text",            "Ethnic Group",	       "CRF Page 40",          NA,
+  "DM",   "ARMCD",	   "TRUE",    "text",            "Arm Code",	              "Assigned",	       NA,
+  "DM",   "ARM",        "TRUE",    "text",            "Arm Cod",	              "Protocol",	       NA,
+  "DM",   "ACTARMCD",   "TRUE",    "text",            "Arm Code",	              "Assigned",	       NA,
+  "DM",   "ACTARM",     "TRUE",    "text",            "Arm Code",	              "Assigned",	       NA,
+  "DM",   "COUNTRY",    "TRUE",    "text",            "Country",	              "Assigned",	       NA,
 
 )
 
@@ -172,31 +173,75 @@ code_list <- tribble(
 )
 
 
+
+
+# List of tables needed
+# 1) ds_spec (dataset, label):
+#  This contians each dataset in the study, with the labels for each
+# 2) ds_vars (dataset, variable, keep, key, codelist, origin, derivation_id):
+#  This has information on what variables are in each dataset + plus dataset specific variable information
+# 3) var_spec (variable, label, length):
+#  This has variable information that is shared across all datasets
+# 4) value_spec (dataset, variable, where, type, codelist, origin, derivation_id):
+#  This has parameter specific information, as data is long the specs for wbc might be difference the hgb
+# 5) derivations (derivation_id, derivation):
+#  This contains derivation, it allows for different variables to have the same derivation. (derivation just string)
+# 6) codelist (codelist, code, decode):
+#  This contains the code/decode information, [with the potential to have format as a decode]
+# 7) change log
+
+
+
 DataDef <- R6Class("DataDef",
                    public = list(
                       initialize = function(ds_spec, ds_vars, var_spec,
                                             value_spec, derivations, code_list){
                          private$ds_spec <- ds_spec
                          private$ds_vars <- ds_vars
-                         private$vars_spec <- var_spec
+                         private$var_spec <- var_spec
                          private$value_spec <- value_spec
                          private$derivations <- derivations
-                         private$code_list <- code_list
+                         private$lib_spec <- code_list
+
+                         self$validate()
                          # TO DO: Cross-ref functions:
                            # * derivations, codelist, variables x2
+                         # type coulnm has a limited number of types
                       },
                       print = function(...){
                          cat(private$ds_spec %>% as.character() %>% paste0(collapse = "\n"))
+                      },
+                      validate = function(){
+                         var_check <- anti_join(private$ds_vars, private$var_spec, by = "variable")
+                         if(var_check %>% nrow() != 0){
+                            var_ls <- var_check %>%
+                               pull(variable) %>%
+                               str_c(collapse = ", ")
+                            warning(paste0("The following variable(s) do not have labels and lengths:\n", var_ls))
+                         }
                       }
-                   ), #TODO make into empty datasets
+                   ),
                    private = list(
-                      ds_spec = NULL,
-                      ds_vars = NULL,
-                      vars_spec = NULL,
-                      value_spec = NULL,
-                      derivations = NULL,
-                      code_list = NULL,
-                      change_log = NULL
+                      ds_spec = tibble(dataset = character(), label = character()),
+                      ds_vars = tibble(dataset = character(), variable = character(), keep = logical(),
+                                       key = integer(), codelist = character(), origin = character(),
+                                       derivation_id = character()),
+                      var_spec = tibble(variable = character(), label = character(), length = integer()),
+                      value_spec = tibble(dataset = character(),
+                                          variable = character(),
+                                          where  = character(),
+                                          type = character(),
+                                          codelist = character(),
+                                          origin = character(),
+                                          derivation_id = integer()),
+                      derivations = tibble(derivation_id = integer(), derivation = character()),
+                      lib_spec = tibble(lib_id = character(), lib = list()), # [code = ?(), decode = character()]
+                           # 1 entry per lib_id
+                           # lib rather than codelist so each entry can contain 1 of three types of information
+                              # codelist: df (code, decode), by using nested lists it means the codes can be int or char
+                              # permitted_val : vec of permitted values
+                              #  external lib id
+                      change_log = tibble(table_chg = character(), column_chg = character(), what_chg = list())
                    )
 )
 
@@ -209,4 +254,13 @@ test
 
 # Potential contravertial things I have done:
 #   * Collapse format information to live in codelist table
-#   * Movae origin, codelist and derivation id to value_spec from var_spec
+#   * Move origin, codelist and derivation id to value_spec from var_spec
+#   * argument to do autoclean on the where statement. Would still be a string but really for bang bang
+
+
+
+# Question:
+# will there ever be a codelist with a permitted_val
+# should the change log include the row that was changed
+# lib_spec too complicated should it be split into 3
+
