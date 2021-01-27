@@ -86,8 +86,8 @@ var_spec <- tribble(
    "ARMCD",	   "Planned Arm Code",                    	8,
    "ARM",	   "Description of Planned Arm",	            73,
    "ACTARMCD",	"Actual Arm Code",	                     8,
-   #"ACTARM",	"Description of Actual Arm",	            73,
-   #"COUNTRY",	"Country",	                              3
+   "ACTARM",	"Description of Actual Arm",	            73,
+   "COUNTRY",	"Country",	                              3
 )
 
 
@@ -196,26 +196,29 @@ DataDef <- R6Class("DataDef",
                    public = list(
                       initialize = function(ds_spec, ds_vars, var_spec,
                                             value_spec, derivations, code_list){
-                         private$ds_spec <- ds_spec
-                         private$ds_vars <- ds_vars
-                         private$var_spec <- var_spec
-                         private$value_spec <- value_spec
-                         private$derivations <- derivations
-                         private$lib_spec <- code_list
+
+                         private$.ds_spec <- ds_spec
+                         private$.ds_vars <- ds_vars
+                         private$.var_spec <- var_spec
+                         private$.value_spec <- value_spec
+                         private$.derivations <- derivations
+                         private$.codelist <- code_list
 
                          self$validate()
+                         message("Metadata successfully uploaded")
                          # TO DO: Cross-ref functions:
                            # * derivations, codelist, variables x2
                          # type coulnm has a limited number of types
                       },
 
                       print = function(...){
-                         cat(private$ds_spec %>% as.character() %>% paste0(collapse = "\n"))
+                         # the domain name and how many data set specs
+                         cat(private$.ds_spec %>% as.character() %>% paste0(collapse = "\n"))
                       },
 
                       validate = function() {
 
-                         var_check <- anti_join(private$ds_vars, private$var_spec, by = "variable")
+                         var_check <- anti_join(private$.ds_vars, private$.var_spec, by = "variable")
 
                          if(var_check %>% nrow() != 0){
                             var_ls <- var_check %>%
@@ -230,26 +233,73 @@ DataDef <- R6Class("DataDef",
                       }
                    ),
                    private = list(
-                      ds_spec = tibble(dataset = character(), label = character()),
-                      ds_vars = tibble(dataset = character(), variable = character(), keep = logical(),
+                      .ds_spec = tibble(dataset = character(), label = character()),
+                      .ds_vars = tibble(dataset = character(), variable = character(), keep = logical(),
                                        key = integer(), codelist = character(), origin = character(),
                                        derivation_id = character()),
-                      var_spec = tibble(variable = character(), label = character(), length = integer()),
-                      value_spec = tibble(dataset = character(),
+                      .var_spec = tibble(variable = character(), label = character(), length = integer()),
+                      .value_spec = tibble(dataset = character(),
                                           variable = character(),
                                           where  = character(),
                                           type = character(),
                                           codelist = character(),
                                           origin = character(),
                                           derivation_id = integer()),
-                      derivations = tibble(derivation_id = integer(), derivation = character()),
-                      lib_spec = tibble(lib_id = character(), lib = list()), # [code = ?(), decode = character()]
-                           # 1 entry per lib_id
-                           # lib rather than codelist so each entry can contain 1 of three types of information
-                              # codelist: df (code, decode), by using nested lists it means the codes can be int or char
-                              # permitted_val : vec of permitted values
-                              #  external lib id
-                      change_log = tibble(table_chg = character(), column_chg = character(), what_chg = list())
+                      .derivations = tibble(derivation_id = integer(), derivation = character()),
+                      # code_type == df | permitted_val | external_lib
+                      .codelist = tibble(code_id = character(), code_type = character(), codelist = list()),
+                      .change_log = tibble(table_chg = character(), column_chg = character(), what_chg = list())
+                   ),
+                   active = list(
+                      ds_spec = function(value) {
+                         if (missing(value)) {
+                            private$.ds_spec
+                         } else {
+                            stop("`$ds_spec` is read only", call. = FALSE)
+                         }
+                      },
+                      ds_vars = function(value) {
+                         if (missing(value)) {
+                            private$.ds_vars
+                         } else {
+                            stop("`$ds_vars` is read only", call. = FALSE)
+                         }
+                      },
+                      var_spec = function(value) {
+                         if (missing(value)) {
+                            private$.var_spec
+                         } else {
+                            stop("`$var_spec` is read only", call. = FALSE)
+                         }
+                      },
+                      value_spec = function(value) {
+                         if (missing(value)) {
+                            private$.value_spec
+                         } else {
+                            stop("`$value_spec` is read only", call. = FALSE)
+                         }
+                      },
+                      derivations = function(value) {
+                         if (missing(value)) {
+                            private$.derivations
+                         } else {
+                            stop("`$derivations` is read only", call. = FALSE)
+                         }
+                      },
+                      codelist = function(value) {
+                         if (missing(value)) {
+                            private$.codelist
+                         } else {
+                            stop("`$codelist` is read only", call. = FALSE)
+                         }
+                      },
+                      change_log = function(value) {
+                         if (missing(value)) {
+                            private$.change_log
+                         } else {
+                            stop("`$change_log` is read only", call. = FALSE)
+                         }
+                      }
                    )
 )
 
@@ -259,15 +309,11 @@ test
 # Notes from creation, derivations are sometimes duplicated, should the builder reduce the duplicates
 
 
-# Potential contravertial things I have done:
+# Potential controversial things I have done:
 #   * Collapse format information to live in codelist table
 #   * Move origin, codelist and derivation id to value_spec from var_spec
-#   * argument to do autoclean on the where statement. Would still be a string but really for bang bang
+#   * argument to do autoclean on the where statement.
+#     Would still be a string but really for bang bang
 
 
-
-# Question:
-# will there ever be a codelist with a permitted_val
-# should the change log include the row that was changed
-# lib_spec too complicated should it be split into 3
 
