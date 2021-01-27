@@ -205,7 +205,7 @@ DataDef <- R6Class("DataDef",
                          private$.codelist <- code_list
 
                          self$validate()
-                         message("Metadata successfully uploaded")
+                         message("Metadata successfully imported")
                          # TO DO: Cross-ref functions:
                            # * derivations, codelist, variables x2
                          # type coulnm has a limited number of types
