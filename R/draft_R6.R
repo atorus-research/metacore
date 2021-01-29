@@ -54,8 +54,8 @@ ds_vars <- tribble(
    "DM",	    "ARMCD",	TRUE,   NA,
    "DM",     "ARM",	   TRUE,   NA,
    "DM", 	 "ACTARMCD",TRUE,   NA,
-   #"DM",     "ACTARM",	TRUE,   NA,
-   #"DM",     "COUNTRY",	TRUE,   NA,
+   "DM",     "ACTARM",	TRUE,   NA,
+   "DM",     "COUNTRY",	TRUE,   NA,
 
 )
 
@@ -86,8 +86,8 @@ var_spec <- tribble(
    "ARMCD",	   "Planned Arm Code",                    	8,
    "ARM",	   "Description of Planned Arm",	            73,
    "ACTARMCD",	"Actual Arm Code",	                     8,
-   #"ACTARM",	"Description of Actual Arm",	            73,
-   #"COUNTRY",	"Country",	                              3
+   "ACTARM",	"Description of Actual Arm",	            73,
+   "COUNTRY",	"Country",	                              3
 )
 
 
@@ -210,7 +210,7 @@ datadef_initialize <- function(ds_spec, ds_vars, var_spec,
 
 datadef_print <- function(...){
    # the domain name and how many data set specs
-   cat(private[[.ds_spec]] %>% as.character() %>% paste0(collapse = "\n"))
+   cat(private$.ds_spec %>% as.character() %>% paste0(collapse = "\n"))
 }
 
 datadef_validate <-  function() {
@@ -230,18 +230,16 @@ datadef_validate <-  function() {
 }
 
 
-datadef_readonly <- function(value, nm) {
-
+datadef_readonly <- function(nm) {
    name <- deparse(substitute(nm))
-   print(name)
-
-   function(value) {
-      if (missing(value)) {
-         private[[name]]
-      } else {
-         stop(paste0(name, " is read only"), call. = FALSE)
+      readonly <- function(value, ...) {
+         if (missing(value)) {
+            private[[name]]
+            } else {
+               stop(paste0(name, " is read only"), call. = FALSE)
+            }
       }
-   }
+      return(readonly)
 }
 
 
@@ -271,13 +269,49 @@ DataDef <- R6Class("DataDef",
                       .change_log = tibble(table_chg = character(), column_chg = character(), what_chg = list())
                    ),
                    active = list(
-                      ds_spec = datadef_readonly(value, .ds_spec),
-                      ds_vars = datadef_readonly(value, .ds_vars),
-                      var_spec = datadef_readonly(value, .var_spec),
-                      value_spec = datadef_readonly(value, .value_spec),
-                      derivations = datadef_readonly(value, .derivations),
-                      codelist = datadef_readonly(value, .codelist),
-                      changelog = datadef_readonly(value, .changelog)
+                      ds_spec = datadef_readonly(.ds_spec),
+                      ds_vars =  function(value) {
+                         if (missing(value)) {
+                            private$.ds_vars
+                         } else {
+                            stop(paste0("ds_vars", " is read only"), call. = FALSE)
+                         }
+                      },
+                      var_spec = function(value) {
+                         if (missing(value)) {
+                            private$.var_spec
+                         } else {
+                            stop(paste0("var_spec", " is read only"), call. = FALSE)
+                         }
+                      },
+                      value_spec = function(value) {
+                         if (missing(value)) {
+                            private$.value_spec
+                         } else {
+                            stop(paste0("value_spec", " is read only"), call. = FALSE)
+                         }
+                      },
+                      derivations = function(value) {
+                         if (missing(value)) {
+                            private$.derivations
+                         } else {
+                            stop(paste0("derivations", " is read only"), call. = FALSE)
+                         }
+                      },
+                      codelist = function(value) {
+                         if (missing(value)) {
+                            private$.codelist
+                         } else {
+                            stop(paste0("codelist", " is read only"), call. = FALSE)
+                         }
+                      },
+                      changelog = function(value) {
+                         if (missing(value)) {
+                            private$.changelog
+                         } else {
+                            stop(paste0("changelog", " is read only"), call. = FALSE)
+                         }
+                      }
                    )
 )
 
