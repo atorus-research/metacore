@@ -54,8 +54,8 @@ ds_vars <- tribble(
    "DM",	    "ARMCD",	TRUE,   NA,
    "DM",     "ARM",	   TRUE,   NA,
    "DM", 	 "ACTARMCD",TRUE,   NA,
-   "DM",     "ACTARM",	TRUE,   NA,
-   "DM",     "COUNTRY",	TRUE,   NA,
+   #"DM",     "ACTARM",	TRUE,   NA,
+   #"DM",     "COUNTRY",	TRUE,   NA,
 
 )
 
@@ -86,8 +86,8 @@ var_spec <- tribble(
    "ARMCD",	   "Planned Arm Code",                    	8,
    "ARM",	   "Description of Planned Arm",	            73,
    "ACTARMCD",	"Actual Arm Code",	                     8,
-   "ACTARM",	"Description of Actual Arm",	            73,
-   "COUNTRY",	"Country",	                              3
+   #"ACTARM",	"Description of Actual Arm",	            73,
+   #"COUNTRY",	"Country",	                              3
 )
 
 
@@ -191,46 +191,66 @@ code_list <- tribble(
 # 7) change log
 
 
+datadef_initialize <- function(ds_spec, ds_vars, var_spec,
+         value_spec, derivations, code_list){
+
+   private$.ds_spec <- ds_spec
+   private$.ds_vars <- ds_vars
+   private$.var_spec <- var_spec
+   private$.value_spec <- value_spec
+   private$.derivations <- derivations
+   private$.codelist <- code_list
+
+   self$validate()
+   message("Metadata successfully imported")
+   # TO DO: Cross-ref functions:
+   # * derivations, codelist, variables x2
+   # type coulnm has a limited number of types
+}
+
+datadef_print <- function(...){
+   # the domain name and how many data set specs
+   cat(private[[.ds_spec]] %>% as.character() %>% paste0(collapse = "\n"))
+}
+
+datadef_validate <-  function() {
+
+   var_check <- anti_join(private$.ds_vars, private$.var_spec, by = "variable")
+
+   if(var_check %>% nrow() != 0){
+      var_ls <- var_check %>%
+         pull(variable)
+
+      warning(
+         "The following variable(s) do not have labels and lengths: ",
+         paste("   ", var_ls, sep = "\n   "),
+         call. = FALSE
+      )
+   }
+}
+
+
+datadef_readonly <- function(value, nm) {
+
+   name <- deparse(substitute(nm))
+   print(name)
+
+   function(value) {
+      if (missing(value)) {
+         private[[name]]
+      } else {
+         stop(paste0(name, " is read only"), call. = FALSE)
+      }
+   }
+}
+
+
 
 DataDef <- R6Class("DataDef",
                    public = list(
-                      initialize = function(ds_spec, ds_vars, var_spec,
-                                            value_spec, derivations, code_list){
-
-                         private$.ds_spec <- ds_spec
-                         private$.ds_vars <- ds_vars
-                         private$.var_spec <- var_spec
-                         private$.value_spec <- value_spec
-                         private$.derivations <- derivations
-                         private$.codelist <- code_list
-
-                         self$validate()
-                         message("Metadata successfully imported")
-                         # TO DO: Cross-ref functions:
-                           # * derivations, codelist, variables x2
-                         # type coulnm has a limited number of types
-                      },
-
-                      print = function(...){
-                         # the domain name and how many data set specs
-                         cat(private$.ds_spec %>% as.character() %>% paste0(collapse = "\n"))
-                      },
-
-                      validate = function() {
-
-                         var_check <- anti_join(private$.ds_vars, private$.var_spec, by = "variable")
-
-                         if(var_check %>% nrow() != 0){
-                            var_ls <- var_check %>%
-                               pull(variable)
-
-                            warning(
-                               "The following variable(s) do not have labels and lengths: ",
-                               paste("   ", var_ls, sep = "\n   "),
-                               call. = FALSE
-                           )
-                         }
-                      }
+                      initialize = datadef_initialize,
+                      print = datadef_print,
+                      validate =  datadef_validate
                    ),
                    private = list(
                       .ds_spec = tibble(dataset = character(), label = character()),
@@ -251,55 +271,13 @@ DataDef <- R6Class("DataDef",
                       .change_log = tibble(table_chg = character(), column_chg = character(), what_chg = list())
                    ),
                    active = list(
-                      ds_spec = function(value) {
-                         if (missing(value)) {
-                            private$.ds_spec
-                         } else {
-                            stop("`$ds_spec` is read only", call. = FALSE)
-                         }
-                      },
-                      ds_vars = function(value) {
-                         if (missing(value)) {
-                            private$.ds_vars
-                         } else {
-                            stop("`$ds_vars` is read only", call. = FALSE)
-                         }
-                      },
-                      var_spec = function(value) {
-                         if (missing(value)) {
-                            private$.var_spec
-                         } else {
-                            stop("`$var_spec` is read only", call. = FALSE)
-                         }
-                      },
-                      value_spec = function(value) {
-                         if (missing(value)) {
-                            private$.value_spec
-                         } else {
-                            stop("`$value_spec` is read only", call. = FALSE)
-                         }
-                      },
-                      derivations = function(value) {
-                         if (missing(value)) {
-                            private$.derivations
-                         } else {
-                            stop("`$derivations` is read only", call. = FALSE)
-                         }
-                      },
-                      codelist = function(value) {
-                         if (missing(value)) {
-                            private$.codelist
-                         } else {
-                            stop("`$codelist` is read only", call. = FALSE)
-                         }
-                      },
-                      change_log = function(value) {
-                         if (missing(value)) {
-                            private$.change_log
-                         } else {
-                            stop("`$change_log` is read only", call. = FALSE)
-                         }
-                      }
+                      ds_spec = datadef_readonly(value, .ds_spec),
+                      ds_vars = datadef_readonly(value, .ds_vars),
+                      var_spec = datadef_readonly(value, .var_spec),
+                      value_spec = datadef_readonly(value, .value_spec),
+                      derivations = datadef_readonly(value, .derivations),
+                      codelist = datadef_readonly(value, .codelist),
+                      changelog = datadef_readonly(value, .changelog)
                    )
 )
 
