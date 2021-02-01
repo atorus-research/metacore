@@ -100,3 +100,20 @@ readonly <- function(name) {
       }
    inside
 }
+
+
+# mikes idea
+readonly <- function(name) {
+   inside <-
+      function(value) {
+         if (missing(value)) {
+            name <- rlang::env_get(env = rlang::env_parent(), "name", NULL)
+            private[[name]]
+         } else {
+            remove_dot <- gsub("\\.","", name)
+            stop(paste0(remove_dot, " is read only"), call. = FALSE)
+         }
+      }
+   inside
+}
+

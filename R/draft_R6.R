@@ -243,22 +243,6 @@ readonly <- function(name) {
    inside
 }
 
-# OR if we want to "cheat" and use an environment
-# readonly <- function(name) {
-#    e <- environment()
-#    inside <-
-#       function(value, .env = e) {
-#          name <- .env[["name"]]
-#          if (missing(value)) {
-#             private[[name]]
-#          } else {
-#             remove_dot <- gsub("\\.","", name)
-#             stop(paste0(remove_dot, " is read only"), call. = FALSE)
-#          }
-#       }
-#    inside
-# }
-
 
 DataDef <- R6Class("DataDef",
                    public = list(
