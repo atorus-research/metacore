@@ -229,19 +229,35 @@ datadef_validate <-  function() {
    }
 }
 
-
-datadef_readonly <- function(nm) {
-   name <- deparse(substitute(nm))
-      readonly <- function(value, ...) {
-         if (missing(value)) {
-            private[[name]]
-            } else {
-               stop(paste0(name, " is read only"), call. = FALSE)
-            }
+readonly <- function(name) {
+   inside <- function(value) {
+      name <- attr(sys.function(sys.parent()), "name")
+      if (missing(value)) {
+         private[[name]]
+      } else {
+         remove_dot <- gsub("\\.","", name)
+         stop(paste0(remove_dot, " is read only"), call. = FALSE)
       }
-      return(readonly)
+   }
+   attributes(inside) <- list(name = name)
+   inside
 }
 
+# OR if we want to "cheat" and use an environment
+# readonly <- function(name) {
+#    e <- environment()
+#    inside <-
+#       function(value, .env = e) {
+#          name <- .env[["name"]]
+#          if (missing(value)) {
+#             private[[name]]
+#          } else {
+#             remove_dot <- gsub("\\.","", name)
+#             stop(paste0(remove_dot, " is read only"), call. = FALSE)
+#          }
+#       }
+#    inside
+# }
 
 
 DataDef <- R6Class("DataDef",
@@ -269,49 +285,13 @@ DataDef <- R6Class("DataDef",
                       .change_log = tibble(table_chg = character(), column_chg = character(), what_chg = list())
                    ),
                    active = list(
-                      ds_spec = datadef_readonly(.ds_spec),
-                      ds_vars =  function(value) {
-                         if (missing(value)) {
-                            private$.ds_vars
-                         } else {
-                            stop(paste0("ds_vars", " is read only"), call. = FALSE)
-                         }
-                      },
-                      var_spec = function(value) {
-                         if (missing(value)) {
-                            private$.var_spec
-                         } else {
-                            stop(paste0("var_spec", " is read only"), call. = FALSE)
-                         }
-                      },
-                      value_spec = function(value) {
-                         if (missing(value)) {
-                            private$.value_spec
-                         } else {
-                            stop(paste0("value_spec", " is read only"), call. = FALSE)
-                         }
-                      },
-                      derivations = function(value) {
-                         if (missing(value)) {
-                            private$.derivations
-                         } else {
-                            stop(paste0("derivations", " is read only"), call. = FALSE)
-                         }
-                      },
-                      codelist = function(value) {
-                         if (missing(value)) {
-                            private$.codelist
-                         } else {
-                            stop(paste0("codelist", " is read only"), call. = FALSE)
-                         }
-                      },
-                      changelog = function(value) {
-                         if (missing(value)) {
-                            private$.changelog
-                         } else {
-                            stop(paste0("changelog", " is read only"), call. = FALSE)
-                         }
-                      }
+                      ds_spec = readonly('.ds_spec'),
+                      ds_vars =  readonly('.ds_vars'),
+                      var_spec = readonly('.var_spec'),
+                      value_spec = readonly('.value_spec'),
+                      derivations = readonly('.derivations'),
+                      codelist = readonly('.codelist'),
+                      changelog = readonly('.changelog')
                    )
 )
 
