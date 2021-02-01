@@ -117,3 +117,18 @@ readonly <- function(name) {
    inside
 }
 
+
+#rlang way
+readonly <- function(name) {
+   args <- list(value = name)
+   body <-
+      rlang::expr({
+         if (missing(value)) {
+            private[[name]]
+         } else {
+            remove_dot <- gsub("\\.","", name)
+            stop(paste0(remove_dot, " is read only"), call. = FALSE)
+         }
+      })
+   rlang::new_function(args, body)
+}
