@@ -2,8 +2,10 @@ library(R6)
 library(dplyr)
 library(stringr)
 
+
 source("R/builders.R")
 path <- "C:/Users/cf124952/ATorus/GSK Atorus Open Source Collaboration - Metadata/GSK_SDTM_defines/mid201584/define.xml"
+
 
 # Read in the file
 doc <- xmlTreeParse(path, useInternalNodes = TRUE)
@@ -16,87 +18,106 @@ value_spec <- xml_to_value_spec(doc)
 code_list <- xml_to_code_list(doc)
 
 
-test <- var_spec %>%
-   filter(str_detect(variable, "\\."))
-test1 <- ds_vars %>%
-   filter(dataset == "DM")
-# Proof this catches things is here: IETESTCD
 
+datadef_initialize <- function(ds_spec, ds_vars, var_spec,
+         value_spec, derivations, code_list){
 
-test <- DataDef$new(ds_spec, ds_vars, var_spec, value_spec, derivations = NULL, code_list)
-test
-object.size(test)
+   private$.ds_spec <- ds_spec
+   private$.ds_vars <- ds_vars
+   private$.var_spec <- var_spec
+   private$.value_spec <- value_spec
+   private$.derivations <- derivations
+   private$.codelist <- code_list
+
+   self$validate()
+   message("Metadata successfully imported")
+   # TO DO: Cross-ref functions:
+   # * derivations, codelist, variables x2
+   # type coulnm has a limited number of types
+}
+
+datadef_print <- function(...){
+   # the domain name and how many data set specs
+   cat(private$.ds_spec %>% as.character() %>% paste0(collapse = "\n"))
+}
+
+datadef_validate <-  function() {
+
+   var_check <- anti_join(private$.ds_vars, private$.var_spec, by = "variable")
+
+   if(var_check %>% nrow() != 0){
+      var_ls <- var_check %>%
+         pull(variable) %>%
+         unique()
+
+      warning(
+         "The following variable(s) do not have labels and lengths: ",
+         paste("   ", var_ls, sep = "\n   "),
+         call. = FALSE
+      )
+   }
+}
+
+readonly <- function(name) {
+   inside <- function(value) {
+      name <- attr(sys.function(sys.parent()), "name")
+      if (missing(value)) {
+         private[[paste0(".", name)]]
+      } else {
+         stop(paste0(name, " is read only"), call. = FALSE)
+      }
+   }
+   attributes(inside) <- list(name = name)
+   inside
+}
+
 
 DataDef <- R6Class("DataDef",
                    public = list(
-                      initialize = function(ds_spec, ds_vars, var_spec,
-                                            value_spec, derivations, code_list){
-                         private$ds_spec <- ds_spec
-                         private$ds_vars <- ds_vars
-                         private$var_spec <- var_spec
-                         private$value_spec <- value_spec
-                         private$derivations <- derivations
-                         private$lib_spec <- ls(code_list)
-
-                         self$validate()
-                         # TO DO: Cross-ref functions:
-                           # * derivations, codelist, variables x2
-                         # type coulnm has a limited number of types
-                      },
-
-                      print = function(...){
-                         cat(private$ds_spec %>% as.character() %>% paste0(collapse = "\n"))
-                         # Number of datasets
-                         #
-                      },
-
-                      validate = function() {
-                         # Check variables in ds_vars tables exists in var_spec
-                         var_check <- anti_join(private$ds_vars, private$var_spec, by = "variable")
-
-                         if(var_check %>% nrow() != 0){
-                            var_ls <- var_check %>%
-                               pull(variable) %>% unique()
-
-                            warning(
-                               "The following variable(s) do not have labels and lengths: ",
-                               paste("   ", var_ls, sep = "\n   "),
-                               call. = FALSE
-                           )
-                         }
-                      }
+                      initialize = datadef_initialize,
+                      print = datadef_print,
+                      validate =  datadef_validate
                    ),
                    private = list(
-                      ds_spec = tibble(dataset = character(), label = character()),
-                      ds_vars = tibble(dataset = character(), variable = character(), keep = logical(),
+                      .ds_spec = tibble(dataset = character(), label = character()),
+                      .ds_vars = tibble(dataset = character(), variable = character(), keep = logical(),
                                        key = integer(), codelist = character(), origin = character(),
                                        derivation_id = character()),
-                      var_spec = tibble(variable = character(), label = character(), length = integer()),
-                      value_spec = tibble(dataset = character(),
+                      .var_spec = tibble(variable = character(), label = character(), length = integer()),
+                      .value_spec = tibble(dataset = character(),
                                           variable = character(),
                                           where  = character(),
                                           type = character(),
                                           codelist = character(),
                                           origin = character(),
                                           derivation_id = integer()),
-                      derivations = tibble(derivation_id = integer(), derivation = character()),
-                      lib_spec = tibble(lib_id = character(), lib = list()), # [code = ?(), decode = character()]
-                           # 1 entry per lib_id
-                           # lib rather than codelist so each entry can contain 1 of three types of information
-                              # codelist: df (code, decode), by using nested lists it means the codes can be int or char
-                              # permitted_val : vec of permitted values
-                              #  external lib id
-                      change_log = tibble(table_chg = character(), column_chg = character(), what_chg = list())
+                      .derivations = tibble(derivation_id = integer(), derivation = character()),
+                      # code_type == df | permitted_val | external_lib
+                      .codelist = tibble(code_id = character(), code_type = character(), codelist = list()),
+                      .change_log = tibble(table_chg = character(), column_chg = character(), what_chg = list())
+                   ),
+                   active = list(
+                      ds_spec = readonly('ds_spec'),
+                      ds_vars =  readonly('ds_vars'),
+                      var_spec = readonly('var_spec'),
+                      value_spec = readonly('value_spec'),
+                      derivations = readonly('derivations'),
+                      codelist = readonly('codelist'),
+                      changelog = readonly('changelog')
                    )
 )
 
+
+# Proof this catches things is here: IETESTCD
+
 test <- DataDef$new(ds_spec, ds_vars, var_spec, value_spec, derivations = NULL, code_list)
 test
+object.size(test)
 
 # Notes from creation, derivations are sometimes duplicated, should the builder reduce the duplicates
 
 
-# Potential contravertial things I have done:
+# Potential controversial things I have done:
 #   * Collapse format information to live in codelist table
 #   * Move origin, codelist and derivation id to value_spec from var_spec
 #   * argument to do autoclean on the where statement. Would still be a string but really for bang bang
@@ -130,3 +151,6 @@ test
 #        Also with normalized data it will reduce data size in the long run
 #        Con: Could result in more complex data entry, We will need a rule on knowing when to go
 # Do we want sig dig? No
+#   * argument to do autoclean on the where statement.
+#     Would still be a string but really for bang bang
+
