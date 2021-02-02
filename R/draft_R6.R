@@ -16,8 +16,16 @@ value_spec <- xml_to_value_spec(doc)
 code_list <- xml_to_code_list(doc)
 
 
+test <- var_spec %>%
+   filter(str_detect(variable, "\\."))
+test1 <- ds_vars %>%
+   filter(dataset == "DM")
+# Proof this catches things is here: IETESTCD
+
+
 test <- DataDef$new(ds_spec, ds_vars, var_spec, value_spec, derivations = NULL, code_list)
 test
+object.size(test)
 
 DataDef <- R6Class("DataDef",
                    public = list(
@@ -48,7 +56,7 @@ DataDef <- R6Class("DataDef",
 
                          if(var_check %>% nrow() != 0){
                             var_ls <- var_check %>%
-                               pull(variable)
+                               pull(variable) %>% unique()
 
                             warning(
                                "The following variable(s) do not have labels and lengths: ",

@@ -54,11 +54,10 @@ xml_to_ds_vars <- function(doc){
               key_seq = key_seq)
          }) %>%
          bind_rows()
-
       var_info %>%
          mutate(dataset = nm,
                 variable = variable %>%
-                   str_extract("(?=\\.).*$") %>%
+                   str_extract("\\.[:alnum:]*$") %>%
                    str_remove("[:punct:]"))
    })
 
@@ -84,12 +83,14 @@ xml_to_var_spec <- function(doc){
       map_chr(function(item){
          xmlValue(item, "ns:TranslatedText[@xml:lang = \"en\"]")
       })
+
    var_info %>%
       mutate(label = label) %>%
       distinct(variable, length, label, .keep_all = TRUE) %>%
       group_by(variable) %>%
       mutate(n = n(),
-             variable = if_else(n > 1, var_full, variable)) %>%
+             variable = if_else(n > 1, var_full, variable) %>%
+                str_remove(., "^IT\\.")) %>%
       select(-n, -var_full)
 }
 
