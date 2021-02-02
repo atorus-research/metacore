@@ -60,6 +60,7 @@ readonly <- function(name) {
    attributes(inside) <- list(name = name)
    inside
 }
+
 Person <- R6Class("Person",
                   private = list(
                      .age = NA,
@@ -83,7 +84,7 @@ maya$name <- "maya2"
 #> Error: .name is read only
 maya$age
 #> [1] NA
-maya$age <- 26L
+maya$age <- 30L
 #> Error: .age is read only
 
 # OR if we want to "cheat" and use an environment
@@ -131,4 +132,23 @@ readonly <- function(name) {
          }
       })
    rlang::new_function(args, body)
+}
+
+# convert to base
+readonly <- function(name) {
+   args <- list(value = name)
+   f <- eval(
+      substitute(
+         function() {
+            if (missing(value)) {
+               private[[name]]
+            } else {
+               stop(paste0(name, " is read only"), call. = FALSE)
+            }
+         },
+         list(name = name)
+      )
+   )
+   formals(f) <- eval(substitute(alist(value = name), list(name = name)))
+   f
 }
