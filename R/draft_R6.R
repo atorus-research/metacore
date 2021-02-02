@@ -233,10 +233,9 @@ readonly <- function(name) {
    inside <- function(value) {
       name <- attr(sys.function(sys.parent()), "name")
       if (missing(value)) {
-         private[[name]]
+         private[[paste0(".", name)]]
       } else {
-         remove_dot <- gsub("\\.","", name)
-         stop(paste0(remove_dot, " is read only"), call. = FALSE)
+         stop(paste0(name, " is read only"), call. = FALSE)
       }
    }
    attributes(inside) <- list(name = name)
@@ -269,18 +268,18 @@ DataDef <- R6Class("DataDef",
                       .change_log = tibble(table_chg = character(), column_chg = character(), what_chg = list())
                    ),
                    active = list(
-                      ds_spec = readonly('.ds_spec'),
-                      ds_vars =  readonly('.ds_vars'),
-                      var_spec = readonly('.var_spec'),
-                      value_spec = readonly('.value_spec'),
-                      derivations = readonly('.derivations'),
-                      codelist = readonly('.codelist'),
-                      changelog = readonly('.changelog')
+                      ds_spec = readonly('ds_spec'),
+                      ds_vars =  readonly('ds_vars'),
+                      var_spec = readonly('var_spec'),
+                      value_spec = readonly('value_spec'),
+                      derivations = readonly('derivations'),
+                      codelist = readonly('codelist'),
+                      changelog = readonly('changelog')
                    )
 )
 
 test <- DataDef$new(ds_spec, ds_vars, var_spec, value_spec, derivations, code_list)
-test
+test$ds_spec
 
 # Notes from creation, derivations are sometimes duplicated, should the builder reduce the duplicates
 
