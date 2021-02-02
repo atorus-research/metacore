@@ -1,78 +1,6 @@
 library(tidyverse)
-library(R4DSXML)
 library(rbenchmark)
-
-path <- "C:/Users/cf124952/ATorus/GSK Atorus Open Source Collaboration - Metadata/GSK_SDTM_defines/mid201584/define.xml"
-
-# Read in the file
-doc <- xmlTreeParse(path, useInternalNodes = TRUE)
-
-
-ds_spec <- xml_to_ds_spec(doc)
-ds_vars <- xml_to_ds_vars(doc)
-
-item_def <- R4DSXML:::getItemDef(doc)
-
-
-
-
-function (doc)
-{
-   namespaces <- R4DSXML:::namespaces(doc)
-   ItemDefNode <- getNodeSet(doc, "//ns:ItemDef", namespaces)
-   defVersion <- tail(str_split(namespaces[["def"]], "/", n = Inf,
-                                simplify = FALSE)[[1]], n = 1)
-   ID_OID <- getAttr(Nodeset = ItemDefNode, Attr = "OID")
-   ID_Name <- getAttr(Nodeset = ItemDefNode, Attr = "Name")
-   ID_DataType <- getAttr(Nodeset = ItemDefNode, Attr = "DataType")
-   ID_Length <- as.integer(getAttr(Nodeset = ItemDefNode, Attr = "Length"))
-   ID_SignificantDigits <- as.integer(getAttr(Nodeset = ItemDefNode,
-                                              Attr = "SignificantDigits"))
-   ID_SASFieldName <- getAttr(Nodeset = ItemDefNode, Attr = "SASFieldName")
-   if (defVersion == "v2.1") {
-      ID_DisplayFormat <- getAttr(Nodeset = ItemDefNode, Attr = "def:DisplayFormat")
-   }
-   else {
-      ID_SASFormatName <- getAttr(Nodeset = ItemDefNode, Attr = "ns:SASFormatName")
-   }
-   ItemDefNode2 <- getNodeSet(doc, "//ns:ItemDef/ns:Description",
-                              namespaces)
-   ID_Label <- R4DSXML:::getVal(ItemDefNode2, "ns:TranslatedText[@xml:lang = \"en\"]")
-   ID_CodeListOID <- getCodeListRef(ItemDefNode, namespaces)
-   originList <- getOrigin(ItemDefNode, namespaces)
-   ID_OriginType <- originList[[1]]
-   ID_OriginDescription <- originList[[2]]
-   ID_ValueListOID <- getValueListRef(ItemDefNode, namespaces)
-   if (defVersion == "v2.1") {
-      df <- data.frame(ID_OID, ID_Name, ID_Length, ID_SignificantDigits,
-                       ID_DataType, ID_Label, ID_SASFieldName, ID_DisplayFormat,
-                       ID_CodeListOID, ID_OriginType, ID_OriginDescription,
-                       ID_ValueListOID, stringsAsFactors = FALSE)
-   }
-   else {
-      df <- data.frame(ID_OID, ID_Name, ID_Length, ID_SignificantDigits,
-                       ID_DataType, ID_Label, ID_SASFieldName, ID_SASFormatName,
-                       ID_CodeListOID, ID_OriginType, ID_OriginDescription,
-                       ID_ValueListOID, stringsAsFactors = FALSE)
-   }
-}
-
-
-
-
-
-
-
-
-
-control_term <- getCT(path)
-
-ds_meta <- getDLMD(path)
-
-val_meta <- getValMD(path)
-
-
-var_meta <- getVarMD(path)
+library(XML)
 
 
 
@@ -80,11 +8,11 @@ var_meta <- getVarMD(path)
 # Create the ds_spec
 xml_to_ds_spec <- function(doc){
    item_grp <- get_nodes(doc, "//ns:ItemGroupDef")
-   ds_name <- item_group %>%
+   ds_name <- item_grp %>%
       map_chr(function(x){
          xmlGetAttr(x, "Name", default = NA)
       })
-   ds_struct <- item_group %>%
+   ds_struct <- item_grp %>%
       map_chr(function(x){
          xmlGetAttr(x, "Structure", default = NA)
       })
@@ -103,7 +31,7 @@ xml_to_ds_spec <- function(doc){
 xml_to_ds_vars <- function(doc){
    item_grp <- get_nodes(doc, "//ns:ItemGroupDef")
    # Get a list of the datasets in the xml file
-   ds_name <- item_group %>%
+   ds_name <- item_grp %>%
       map_chr(function(x){
          xmlGetAttr(x, "Name", default = NA)
       })
@@ -118,9 +46,7 @@ xml_to_ds_vars <- function(doc){
    map2_dfr(ds_name, item_ref_node, function(nm, item){
       var_info <- item %>%
          map(function(x){
-            variable = xmlGetAttr(x, "ItemOID", default = NA) %>%
-               str_extract("(?=\\.).*$") %>%
-               str_remove("[:punct:]")
+            variable = xmlGetAttr(x, "ItemOID", default = NA)
             mandatory = xmlGetAttr(x, "Mandatory", default = NA)
             key_seq = xmlGetAttr(x, "KeySequence", default = NA)
             c(variable = variable,
@@ -130,7 +56,10 @@ xml_to_ds_vars <- function(doc){
          bind_rows()
 
       var_info %>%
-         mutate(dataset = nm)
+         mutate(dataset = nm,
+                variable = variable %>%
+                   str_extract("(?=\\.).*$") %>%
+                   str_remove("[:punct:]"))
    })
 
 }
@@ -164,9 +93,113 @@ xml_to_var_spec <- function(doc){
       select(-n, -var_full)
 }
 
+xml_to_value_spec <- function(doc){
+   item_def <- get_nodes(doc, path = "//ns:ItemDef")
+   var_info <- item_def %>%
+      map(function(item){
+         dataset = xmlGetAttr(item, "OID", default = NA)
+         variable = xmlGetAttr(item, "Name", default = NA)
+         type = xmlGetAttr(item, "DataType", default = NA)
+         list(dataset= dataset, variable=variable, type = type)
+      }) %>%
+      bind_rows() %>%
+      mutate(dataset = dataset %>%
+                str_extract("(?=\\.).*(?<=\\.)") %>%
+                str_remove_all("[:punct:]"))
+   # Get namespace for origin and derivation ID
+   namespaces <- xmlNamespaceDefinitions(doc, simplify = TRUE)
+   names(namespaces)[1] <- "ns"
+   # Get code list information
+   code_list <- item_def %>%
+      map_chr(function(x){
+         code_ls_nodes <- getNodeSet(x, "./ns:CodeListRef", namespaces)
+         if(length(code_ls_nodes) > 0){
+            xmlGetAttr(code_ls_nodes[[1]], "CodeListOID", default = NA)
+         } else {
+            NA
+         }
+      })
+
+   origin_list <- item_def %>%
+      map_chr(function(x){
+         origin_ls_nodes <- getNodeSet(x, "./def:Origin", namespaces)
+         if(length(origin_ls_nodes) > 0){
+            type <- xmlGetAttr(origin_ls_nodes[[1]], "Type", default = NA)
+            if(type == "CRF"){
+               page_num <- getNodeSet(origin_ls_nodes[[1]],
+                                      "./def:DocumentRef/def:PDFPageRef",
+                                      namespaces)%>%
+                  .[[1]] %>%
+                  xmlGetAttr("PageRefs") %>%
+                  str_replace_all("\\s", ", ")
+               type<- paste(type, page_num)
+            }
+            type
+         } else {
+            NA_character_
+         }
+      })
+   var_info %>%
+      mutate(code_id = code_list,
+             origin = origin_list)
+   # TODO missing where and derivation id
+
+}
+
+
+xml_to_code_list <- function(doc){
+   cl_nodes <- get_nodes(doc, "//ns:CodeList[ns:CodeListItem]")
+   # List of each code group
+   code_grps <- cl_nodes %>%
+      map(function(node){
+         code_id <- xmlGetAttr(node, "OID", default = NA)
+         names <- xmlGetAttr(node,  "Name", default = NA)
+         dataType <- xmlGetAttr(node, "DataType", default = NA)
+         c(code_id = code_id, names = names, dataType = dataType)
+      }) %>%
+      bind_rows()
+
+   code_grps %>%
+      mutate(codes = map(code_id, get_code_decode, doc))
+
+
+}
+
+
 ### Helper functions -----------------------------------------------------------
 get_nodes <- function(doc, path){
    namespaces <- xmlNamespaceDefinitions(doc, simplify = TRUE)
    names(namespaces)[1] <- "ns"
    item_group <- getNodeSet(doc, path, namespaces)
 }
+
+
+get_code_decode <- function(id, doc){
+   grp <- get_nodes(doc, str_c("//ns:CodeList[@OID=\"",
+                               id, "\"]", "/ns:CodeListItem",
+                               sep = ""))
+   # Get codes
+   codes <- grp %>%
+      map_chr(function(node){
+         code_value = xmlGetAttr(node, "CodedValue", default = NA)
+      })
+
+   # Get decodes
+   namespaces <- xmlNamespaceDefinitions(doc, simplify = TRUE)
+   names(namespaces)[1] <- "ns"
+
+   decod_node_loc <- str_c("//ns:CodeList[@OID=\"",
+                           id, "\"]/ns:CodeListItem[", seq(1:length(codes)),
+                           "]", "/ns:Decode", sep = "")
+
+
+   decodes = decod_node_loc %>%
+      map(~getNodeSet(doc, ., namespaces)) %>%
+      map_chr(function(node){
+         xmlValue(node)
+      })
+   tibble(codes = codes, decodes = decodes)
+
+}
+
+# TODO add a normalization function in the initializer
