@@ -3,5 +3,7 @@
 #' @import dplyr
 #' @import stringr
 #' @import XML
+#' @import purrr
+#' @importFrom pryr unenclose
 
 NULL

@@ -12,7 +12,7 @@ License: `use_mit_license()`, `use_gpl3_license()` or friends to
     pick a license
 Encoding: UTF-8
 LazyData: true
-Roxygen: list(markdown = TRUE)
+Roxygen: list(markdown = TRUE, r6 = FALSE)
 RoxygenNote: 7.1.1
 Suggests: 
     testthat,
@@ -24,5 +24,7 @@ Imports:
     dplyr,
     stringr,
     magrittr,
-    XML
+    XML,
+    purrr,
+    pryr
 VignetteBuilder: knitr
