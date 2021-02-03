@@ -1,5 +1,4 @@
 library(tidyverse)
-library(rbenchmark)
 library(XML)
 
 
@@ -124,7 +123,7 @@ xml_to_value_spec <- function(doc){
       }) %>%
       bind_rows() %>%
       mutate(dataset = id %>%
-                str_extract("(?<=\\.)[:alnum:]+"),
+                str_extract("(?<=^IT\\.)[:alnum:]+(?=\\..*)"),
              variable = id_to_var (id))
 
    # Get code list information
@@ -181,13 +180,20 @@ xml_to_value_spec <- function(doc){
       full_join(where_list, by = "where_id") %>%
       select(-where_id)
 
-   full_join(var_info, value_ids, by = "id") %>%
-      mutate(dataset = if_else(dataset %in% c("STUDYID", "USUBJID", "RDOMAIN"),
-                               NA,
-                               dataset)) %>%
+
+
+   all_data <- full_join(var_info, value_ids, by = "id") %>%
       select(-id)
 
-
+   # Fill-in missing dataset information
+   full_var_ds <- ds_var_ls(doc)
+   miss_ds <- all_data %>%
+      filter(is.na(dataset)) %>%
+      select(-dataset) %>%
+      inner_join(full_var_ds, by = "variable")
+   all_data %>%
+      filter(!is.na(dataset)) %>%
+      bind_rows(miss_ds)
 }
 
 

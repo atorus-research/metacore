@@ -4,7 +4,7 @@ library(stringr)
 
 
 source("R/builders.R")
-path <- "C:/Users/cf124952/ATorus/GSK Atorus Open Source Collaboration - Metadata/GSK_SDTM_defines/mid201584/define.xml"
+path <- "C:/Users/cf124952/ATorus/GSK Atorus Open Source Collaboration - Metadata/GSK_SDTM_defines/mid207966/define.xml"
 
 
 # Read in the file
