@@ -181,9 +181,15 @@ xml_to_value_spec <- function(doc){
       select(-where_id)
 
 
-
+   # Remove duplicate infromation for variables that appear multiple times
    all_data <- full_join(var_info, value_ids, by = "id") %>%
-      select(-id)
+      mutate(remove = str_c("^.*", variable),
+             sub_cat = str_remove(id, remove)) %>%
+      group_by(variable) %>%
+      mutate(cat_test = !all(sub_cat == ""), # T if there are sub categories
+             rm_flg = cat_test & (sub_cat == "")) %>%  # T if is a sub cat var, and not a sub-cat
+      filter(!rm_flg) %>%
+      select(-remove, -sub_cat, -cat_test, -rm_flg, -id)
 
    # Fill-in missing dataset information
    full_var_ds <- ds_var_ls(doc)
@@ -193,7 +199,8 @@ xml_to_value_spec <- function(doc){
       inner_join(full_var_ds, by = "variable")
    all_data %>%
       filter(!is.na(dataset)) %>%
-      bind_rows(miss_ds)
+      bind_rows(miss_ds) %>%
+      select(dataset, variable, everything())
 }
 
 
@@ -222,7 +229,7 @@ xml_to_code_list <- function(doc){
       mutate(decodes = decodes) %>%
       group_by(code_id) %>%
       mutate(type = "code_decode") %>%
-      nest(data = c(codes, decodes))
+      nest(codes = c(codes, decodes))
 
 
    # Permitted Values
