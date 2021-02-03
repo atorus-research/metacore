@@ -160,10 +160,38 @@ xml_to_code_list <- function(doc){
       }) %>%
       bind_rows()
 
-   code_grps %>%
-      mutate(codes = map(code_id, get_code_decode, doc))
+   codes <- code_grps %>%
+      mutate(codes = code_id %>% map(get_codes, doc)) %>%
+      unnest(codes)
+
+   decodes <- get_nodes(doc, "//ns:Decode") %>%
+      map_chr(function(node){
+         xmlValue(node)
+      })
+
+   code_decode <- codes %>%
+      mutate(decodes = decodes) %>%
+      group_by(code_id) %>%
+      mutate(type = "code_decode") %>%
+      nest(data = c(codes, decodes))
 
 
+   # Permitted Values
+   permitted <-  get_nodes(doc, "//ns:CodeList[ns:EnumeratedItem]") %>%
+      map(function(node){
+         code_id <- xmlGetAttr(node, "OID", default = NA)
+         names <- xmlGetAttr(node,  "Name", default = NA)
+         dataType <- xmlGetAttr(node, "DataType", default = NA)
+         c(code_id = code_id, names = names, dataType = dataType)
+      }) %>%
+      bind_rows()
+   permitted <- permitted %>%
+      mutate(codes = code_id %>% map(get_permitted_vals, doc),
+             type = "permitted_val")
+
+   # Combinging the code decode with the permitted values
+   bind_rows(code_decode, permitted) %>%
+      select(-dataType)
 }
 
 
@@ -175,7 +203,7 @@ get_nodes <- function(doc, path){
 }
 
 
-get_code_decode <- function(id, doc){
+get_codes <- function(id, doc){
    grp <- get_nodes(doc, str_c("//ns:CodeList[@OID=\"",
                                id, "\"]", "/ns:CodeListItem",
                                sep = ""))
@@ -185,21 +213,17 @@ get_code_decode <- function(id, doc){
          code_value = xmlGetAttr(node, "CodedValue", default = NA)
       })
 
-   # Get decodes
-   namespaces <- xmlNamespaceDefinitions(doc, simplify = TRUE)
-   names(namespaces)[1] <- "ns"
+}
 
-   decod_node_loc <- str_c("//ns:CodeList[@OID=\"",
-                           id, "\"]/ns:CodeListItem[", seq(1:length(codes)),
-                           "]", "/ns:Decode", sep = "")
+get_permitted_vals <- function(id, doc){
+   grp <- get_nodes(doc, str_c("//ns:CodeList[@OID=\"",
+                               id, "\"]", "/ns:EnumeratedItem", sep = ""))
 
-
-   decodes = decod_node_loc %>%
-      map(~getNodeSet(doc, ., namespaces)) %>%
+   # Get values
+   vals <- grp %>%
       map_chr(function(node){
-         xmlValue(node)
+         code_value = xmlGetAttr(node, "CodedValue", default = NA)
       })
-   tibble(codes = codes, decodes = decodes)
 
 }
 
