@@ -1,10 +1,8 @@
-library(tidyverse)
-library(XML)
-
-
-
-### Exported functions ---------------------------------------------------------
-# Create the ds_spec
+#' Create the ds_spec table
+#'
+#' @param doc ?
+#'
+#' @export
 xml_to_ds_spec <- function(doc){
    item_grp <- get_nodes(doc, "//ns:ItemGroupDef")
    ds_name <- item_grp %>%
@@ -26,7 +24,11 @@ xml_to_ds_spec <- function(doc){
           label = ds_title)
 }
 
-# Create the ds_vars table
+#' Create the ds_vars table
+#'
+#' @param doc ?
+#'
+#' @export
 xml_to_ds_vars <- function(doc){
    item_grp <- get_nodes(doc, "//ns:ItemGroupDef")
    # Get a list of the datasets in the xml file
@@ -62,7 +64,11 @@ xml_to_ds_vars <- function(doc){
 
 }
 
-# Create the var spec table
+#' Create the var_spec table
+#'
+#' @param doc ?
+#'
+#' @export
 xml_to_var_spec <- function(doc){
    # Get infromation from the itemDef Nodes
    item_def <- get_nodes(doc, path = "//ns:ItemDef")
@@ -99,6 +105,11 @@ xml_to_var_spec <- function(doc){
 
 }
 
+#' Create the value_spec table
+#'
+#' @param doc ?
+#'
+#' @export
 xml_to_value_spec <- function(doc){
    # Variable level information
    item_def <- get_nodes(doc, path = "//ns:ItemDef")
@@ -203,7 +214,11 @@ xml_to_value_spec <- function(doc){
       select(dataset, variable, everything())
 }
 
-
+#' Create the code_list table
+#'
+#' @param doc ?
+#'
+#' @export
 xml_to_code_list <- function(doc){
    cl_nodes <- get_nodes(doc, "//ns:CodeList[ns:CodeListItem]")
    # List of each code group
@@ -250,7 +265,11 @@ xml_to_code_list <- function(doc){
       select(-dataType)
 }
 
-# Get derivation table
+#' Create the derivation table
+#'
+#' @param doc ?
+#'
+#' @export
 xml_to_derivations <- function(doc){
    # Gets derivartion node
    method_nodes <- get_nodes(doc, path = "//ns:MethodDef")
@@ -264,67 +283,4 @@ xml_to_derivations <- function(doc){
            derivation = derivation)
       }) %>%
       bind_rows()
-}
-### Helper functions -----------------------------------------------------------
-get_nodes <- function(doc, path){
-   namespaces <- xmlNamespaceDefinitions(doc, simplify = TRUE)
-   names(namespaces)[1] <- "ns"
-   item_group <- getNodeSet(doc, path, namespaces)
-}
-
-
-get_codes <- function(id, doc){
-   grp <- get_nodes(doc, str_c("//ns:CodeList[@OID=\"",
-                               id, "\"]", "/ns:CodeListItem",
-                               sep = ""))
-   # Get codes
-   codes <- grp %>%
-      map_chr(function(node){
-         code_value = xmlGetAttr(node, "CodedValue", default = NA)
-      })
-
-}
-
-get_permitted_vals <- function(id, doc){
-   grp <- get_nodes(doc, str_c("//ns:CodeList[@OID=\"",
-                               id, "\"]", "/ns:EnumeratedItem", sep = ""))
-
-   # Get values
-   vals <- grp %>%
-      map_chr(function(node){
-         code_value = xmlGetAttr(node, "CodedValue", default = NA)
-      })
-
-}
-
-id_to_var <- function(id){
-   id %>%
-      str_split("\\.") %>%
-      map_chr(function(x){
-         if(length(x) < 3){
-            x[[2]]
-         } else {
-            x[[3]]
-         }
-      })
-}
-
-ds_var_ls <- function(doc){
-   item_grp <- get_nodes(doc, "//ns:ItemGroupDef")
-   # Get a list of the datasets and variables in the xml file
-   var_ls <- item_grp %>%
-      map(function(x){
-         dataset <- xmlGetAttr(x, "Domain")
-         vars <- xmlElementsByTagName(x, "ItemRef") %>%
-            map_chr(function(node){
-               xmlGetAttr(node, "ItemOID", default = NA)
-            })
-         tibble(dataset= dataset, variable = vars)
-      }) %>%
-      bind_rows() %>%
-      mutate(remove = str_c("^", dataset, "\\."),
-             variable = str_remove(variable, "^IT\\.") %>%
-                str_remove(remove)) %>%
-      select(-remove)
-   var_ls
 }
