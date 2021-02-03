@@ -84,36 +84,53 @@ xml_to_var_spec <- function(doc){
          xmlValue(item, "ns:TranslatedText[@xml:lang = \"en\"]")
       })
 
+   possible_vars <- ds_var_ls(doc) %>%
+      pull(variable) %>%
+      unique()
+
    var_info %>%
       mutate(label = label) %>%
+      filter(variable %in% possible_vars) %>%
       distinct(variable, length, label, .keep_all = TRUE) %>%
       group_by(variable) %>%
       mutate(n = n(),
              variable = if_else(n > 1, var_full, variable) %>%
                 str_remove(., "^IT\\.")) %>%
       select(-n, -var_full)
+
 }
 
 xml_to_value_spec <- function(doc){
+   # Variable level information
    item_def <- get_nodes(doc, path = "//ns:ItemDef")
    var_info <- item_def %>%
-      map(function(item){
-         dataset = xmlGetAttr(item, "OID", default = NA)
-         variable = xmlGetAttr(item, "Name", default = NA)
+      map_dfr(function(item){
+         id = xmlGetAttr(item, "OID", default = NA)
          type = xmlGetAttr(item, "DataType", default = NA)
-         list(dataset= dataset, variable=variable, type = type)
+         # Get the child node about the origin
+         or_child <- xmlElementsByTagName(item, "Origin")
+         if(length(or_child) > 0){
+            origin <- xmlGetAttr(or_child[[1]], "Type", default = NA)
+            if(origin == "CRF"){
+               page_num <- xmlElementsByTagName(or_child[[1]], "PDFPageRef", TRUE)[[1]] %>%
+                  xmlGetAttr("PageRefs", default = NA) %>%
+                  str_replace_all("\\s", ", ")
+               origin <- paste(origin, page_num)
+            }
+         } else {
+            origin = NA
+         }
+         list(id= id, type = type, origin = origin)
       }) %>%
       bind_rows() %>%
-      mutate(dataset = dataset %>%
-                str_extract("(?=\\.).*(?<=\\.)") %>%
-                str_remove_all("[:punct:]"))
-   # Get namespace for origin and derivation ID
-   namespaces <- xmlNamespaceDefinitions(doc, simplify = TRUE)
-   names(namespaces)[1] <- "ns"
+      mutate(dataset = id %>%
+                str_extract("(?<=\\.)[:alnum:]+"),
+             variable = id_to_var (id))
+
    # Get code list information
    code_list <- item_def %>%
-      map_chr(function(x){
-         code_ls_nodes <- getNodeSet(x, "./ns:CodeListRef", namespaces)
+      map_chr(function(node){
+         code_ls_nodes <- xmlElementsByTagName(node, "CodeListRef")
          if(length(code_ls_nodes) > 0){
             xmlGetAttr(code_ls_nodes[[1]], "CodeListOID", default = NA)
          } else {
@@ -121,29 +138,55 @@ xml_to_value_spec <- function(doc){
          }
       })
 
-   origin_list <- item_def %>%
-      map_chr(function(x){
-         origin_ls_nodes <- getNodeSet(x, "./def:Origin", namespaces)
-         if(length(origin_ls_nodes) > 0){
-            type <- xmlGetAttr(origin_ls_nodes[[1]], "Type", default = NA)
-            if(type == "CRF"){
-               page_num <- getNodeSet(origin_ls_nodes[[1]],
-                                      "./def:DocumentRef/def:PDFPageRef",
-                                      namespaces)%>%
-                  .[[1]] %>%
-                  xmlGetAttr("PageRefs") %>%
-                  str_replace_all("\\s", ", ")
-               type<- paste(type, page_num)
-            }
-            type
+   var_info <- var_info %>%
+      mutate(code_id = code_list)
+
+   # Value level information
+   ref_nodes <- get_nodes(doc, path = "//ns:ItemRef")
+   value_ids <- ref_nodes %>%
+      map_dfr(function(node){
+         derivation_id <- xmlGetAttr(node, "MethodOID", default = NA)
+         id <- xmlGetAttr(node, "ItemOID", default = NA)
+         where_node <- xmlElementsByTagName(node, "WhereClauseRef")
+         if(length(where_node) > 0){
+            where_id <- xmlGetAttr(where_node[[1]], "WhereClauseOID", default = NA)
          } else {
-            NA_character_
+            where_id <- NA
          }
-      })
-   var_info %>%
-      mutate(code_id = code_list,
-             origin = origin_list)
-   # TODO missing where and derivation id
+         c(derivation_id = derivation_id, id = id, where_id = where_id)
+      }) %>%
+      distinct()
+
+
+   # Get where list information
+   where_nodes <- get_nodes(doc, path = "//def:WhereClauseDef")
+   where_list <- where_nodes %>%
+      map_dfr(function(node){
+         where_id <- xmlGetAttr(node, "OID", default = NA)
+         where_statement <- xmlElementsByTagName(node, "RangeCheck")
+         if(length(where_statement) > 0){
+            id <- xmlGetAttr(where_statement[[1]], "ItemOID", default = NA)
+            operator <- xmlGetAttr(where_statement[[1]], "Comparator", default = NA)
+            val <- xmlValue(where_statement[[1]])
+         } else {
+            id <- operator <- val <- NA
+         }
+         c(where_id = where_id, id = id, operator = operator, val = val)
+      }) %>%
+      mutate(var = id %>% str_extract("[:alnum:]*$"),
+             where =  case_when(operator == "EQ" ~  paste0(var, " = '", val, "'"),
+                                   TRUE ~ paste(var, operator, val))) %>%
+      select(-id, -operator, -val, -var)
+   value_ids <- value_ids %>%
+      full_join(where_list, by = "where_id") %>%
+      select(-where_id)
+
+   full_join(var_info, value_ids, by = "id") %>%
+      mutate(dataset = if_else(dataset %in% c("STUDYID", "USUBJID", "RDOMAIN"),
+                               NA,
+                               dataset)) %>%
+      select(-id)
+
 
 }
 
@@ -194,7 +237,21 @@ xml_to_code_list <- function(doc){
       select(-dataType)
 }
 
+# Get derivation table
+xml_to_derivations <- function(doc){
+   # Gets derivartion node
+   method_nodes <- get_nodes(doc, path = "//ns:MethodDef")
 
+   derivations <- method_nodes %>%
+      map(function(node){
+         derivation_id = xmlGetAttr(node, "OID", default = NA)
+         derivation = xmlElementsByTagName(node, "Description") %>%
+            xmlValue("ns:TranslatedText[@xml:lang = \"en\"]")
+         c(derivation_id = derivation_id,
+           derivation = derivation)
+      }) %>%
+      bind_rows()
+}
 ### Helper functions -----------------------------------------------------------
 get_nodes <- function(doc, path){
    namespaces <- xmlNamespaceDefinitions(doc, simplify = TRUE)
@@ -227,4 +284,34 @@ get_permitted_vals <- function(id, doc){
 
 }
 
-# TODO add a normalization function in the initializer
+id_to_var <- function(id){
+   id %>%
+      str_split("\\.") %>%
+      map_chr(function(x){
+         if(length(x) < 3){
+            x[[2]]
+         } else {
+            x[[3]]
+         }
+      })
+}
+
+ds_var_ls <- function(doc){
+   item_grp <- get_nodes(doc, "//ns:ItemGroupDef")
+   # Get a list of the datasets and variables in the xml file
+   var_ls <- item_grp %>%
+      map(function(x){
+         dataset <- xmlGetAttr(x, "Domain")
+         vars <- xmlElementsByTagName(x, "ItemRef") %>%
+            map_chr(function(node){
+               xmlGetAttr(node, "ItemOID", default = NA)
+            })
+         tibble(dataset= dataset, variable = vars)
+      }) %>%
+      bind_rows() %>%
+      mutate(remove = str_c("^", dataset, "\\."),
+             variable = str_remove(variable, "^IT\\.") %>%
+                str_remove(remove)) %>%
+      select(-remove)
+   var_ls
+}
