@@ -3,27 +3,12 @@
 \name{DataDef}
 \alias{DataDef}
 \title{The DataDef R6 Class}
-\arguments{
-\item{ds_spec}{things and stuff}
-
-\item{ds_vars}{things and stuff}
-
-\item{var_spec}{things and stuff}
-
-\item{value_spec}{things and stuff}
-
-\item{derivations}{things and stuff}
-
-\item{code_list}{things and stuff}
-
-\item{...}{things and stuff}
-}
 \description{
 This uses the initialize, print, and validate functions above to create a single object
 The user can query
 }
-\section{Fields}{
-
+\section{Active bindings}{
+\if{html}{\out{<div class="r6-active-bindings">}}
 \describe{
 \item{\code{ds_spec}}{First or full name of the person.}
 
@@ -38,5 +23,84 @@ The user can query
 \item{\code{codelist}}{First or full name of the person.}
 
 \item{\code{changelog}}{First or full name of the person.}
-}}
+}
+\if{html}{\out{</div>}}
+}
+\section{Methods}{
+\subsection{Public methods}{
+\itemize{
+\item \href{#method-new}{\code{DataDef$new()}}
+\item \href{#method-print}{\code{DataDef$print()}}
+\item \href{#method-validate}{\code{DataDef$validate()}}
+\item \href{#method-clone}{\code{DataDef$clone()}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-new"></a>}}
+\if{latex}{\out{\hypertarget{method-new}{}}}
+\subsection{Method \code{new()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{DataDef$new(ds_spec, ds_vars, var_spec, value_spec, derivations, code_list)}\if{html}{\out{</div>}}
+}
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{ds_spec}}{things and stuff}
+
+\item{\code{ds_vars}}{things and stuff}
+
+\item{\code{var_spec}}{things and stuff}
+
+\item{\code{value_spec}}{things and stuff}
+
+\item{\code{derivations}}{things and stuff}
+
+\item{\code{code_list}}{things and stuff}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-print"></a>}}
+\if{latex}{\out{\hypertarget{method-print}{}}}
+\subsection{Method \code{print()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{DataDef$print(...)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{...}}{things and stuff}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-validate"></a>}}
+\if{latex}{\out{\hypertarget{method-validate}{}}}
+\subsection{Method \code{validate()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{DataDef$validate()}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-clone}{}}}
+\subsection{Method \code{clone()}}{
+The objects of this class are cloneable with this method.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{DataDef$clone(deep = FALSE)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{deep}}{Whether to make a deep clone.}
+}
+\if{html}{\out{</div>}}
+}
+}
+}
