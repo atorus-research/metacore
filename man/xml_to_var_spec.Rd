@@ -2,13 +2,27 @@
 % Please edit documentation in R/xml_builders.R
 \name{xml_to_var_spec}
 \alias{xml_to_var_spec}
-\title{Create the var_spec table}
+\title{XML to variable spec}
 \usage{
 xml_to_var_spec(doc)
 }
 \arguments{
-\item{doc}{?}
+\item{doc}{define xml document}
+}
+\value{
+data frame with variable, length, label columns
 }
 \description{
-Create the var_spec table
+Takes a define xml and returns a dataset with specifications for each
+variable. The variable will just be the variable, unless the specification
+for that variable differ between datasets
 }
+\seealso{
+Other xml builder: 
+\code{\link{xml_to_code_list}()},
+\code{\link{xml_to_derivations}()},
+\code{\link{xml_to_ds_spec}()},
+\code{\link{xml_to_ds_vars}()},
+\code{\link{xml_to_value_spec}()}
+}
+\concept{xml builder}

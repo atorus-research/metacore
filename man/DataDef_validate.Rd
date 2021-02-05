@@ -9,3 +9,12 @@ DataDef_validate()
 \description{
 This checks that the labels and lengths of ds_vars match var_spec
 }
+\seealso{
+Other DataDef: 
+\code{\link{DataDef_initialize}()},
+\code{\link{DataDef_print}()},
+\code{\link{DataDef}},
+\code{\link{datadef}()},
+\code{\link{readonly}()}
+}
+\concept{DataDef}

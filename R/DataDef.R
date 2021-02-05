@@ -37,7 +37,7 @@ DataDef_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivatio
 #'
 DataDef_print <- function(...){
    # the domain name and how many data set specs
-   cat(private$.ds_spec %>% as.character() %>% paste0(collapse = "\n"))
+   cat(private$.ds_spec %>% pull(dataset) %>% paste0(collapse = "\n"))
 }
 
 

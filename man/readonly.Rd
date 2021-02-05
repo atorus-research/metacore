@@ -15,3 +15,12 @@ readonly(name)
 This function is used inside the R6 active method and allows us
 to read the selected dataframe and prevents overwriting
 }
+\seealso{
+Other DataDef: 
+\code{\link{DataDef_initialize}()},
+\code{\link{DataDef_print}()},
+\code{\link{DataDef_validate}()},
+\code{\link{DataDef}},
+\code{\link{datadef}()}
+}
+\concept{DataDef}

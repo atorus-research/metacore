@@ -6,6 +6,18 @@
 \usage{
 DataDef_print(...)
 }
+\arguments{
+\item{...}{pass in the dataframes to be validated}
+}
 \description{
 DataDef class print function
 }
+\seealso{
+Other DataDef: 
+\code{\link{DataDef_initialize}()},
+\code{\link{DataDef_validate}()},
+\code{\link{DataDef}},
+\code{\link{datadef}()},
+\code{\link{readonly}()}
+}
+\concept{DataDef}

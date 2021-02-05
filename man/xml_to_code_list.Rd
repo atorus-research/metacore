@@ -2,13 +2,28 @@
 % Please edit documentation in R/xml_builders.R
 \name{xml_to_code_list}
 \alias{xml_to_code_list}
-\title{Create the code_list table}
+\title{xml to code list}
 \usage{
 xml_to_code_list(doc)
 }
 \arguments{
-\item{doc}{?}
+\item{doc}{xml document}
+}
+\value{
+a tibble containing the code list and permitted value information
 }
 \description{
-Create the code_list table
+Reads in a define xml and creates a code_list table. The code_list table is a
+nested tibble where each row is a code list or permitted value list. The code
+column contains a vector of a tibble depending on if it is a permitted values
+or code list
 }
+\seealso{
+Other xml builder: 
+\code{\link{xml_to_derivations}()},
+\code{\link{xml_to_ds_spec}()},
+\code{\link{xml_to_ds_vars}()},
+\code{\link{xml_to_value_spec}()},
+\code{\link{xml_to_var_spec}()}
+}
+\concept{xml builder}

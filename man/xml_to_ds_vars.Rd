@@ -2,13 +2,25 @@
 % Please edit documentation in R/xml_builders.R
 \name{xml_to_ds_vars}
 \alias{xml_to_ds_vars}
-\title{Create the ds_vars table}
+\title{XML to Data Set Var table}
 \usage{
 xml_to_ds_vars(doc)
 }
 \arguments{
-\item{doc}{?}
+\item{doc}{xml document}
+}
+\value{
+data frame with the dataset and variables
 }
 \description{
-Create the ds_vars table
+Creates the ds_vars table, which acts as a key between the datasets and the var spec
 }
+\seealso{
+Other xml builder: 
+\code{\link{xml_to_code_list}()},
+\code{\link{xml_to_derivations}()},
+\code{\link{xml_to_ds_spec}()},
+\code{\link{xml_to_value_spec}()},
+\code{\link{xml_to_var_spec}()}
+}
+\concept{xml builder}

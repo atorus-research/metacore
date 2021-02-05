@@ -2,13 +2,25 @@
 % Please edit documentation in R/xml_builders.R
 \name{xml_to_ds_spec}
 \alias{xml_to_ds_spec}
-\title{Create the ds_spec table}
+\title{XML to Data Set Spec}
 \usage{
 xml_to_ds_spec(doc)
 }
 \arguments{
-\item{doc}{?}
+\item{doc}{xml document}
+}
+\value{
+data frame with the data set specifications
 }
 \description{
-Create the ds_spec table
+Creates a dataset specification, which has the domain name and label for each dataset
 }
+\seealso{
+Other xml builder: 
+\code{\link{xml_to_code_list}()},
+\code{\link{xml_to_derivations}()},
+\code{\link{xml_to_ds_vars}()},
+\code{\link{xml_to_value_spec}()},
+\code{\link{xml_to_var_spec}()}
+}
+\concept{xml builder}
