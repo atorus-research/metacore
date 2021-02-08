@@ -1,0 +1,33 @@
+---
+title: "Example"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Example}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(datadef)
+```
+
+
+```{r}
+doc <- xmlTreeParse("C:/Users/cf124952/ATorus/GSK Atorus Open Source Collaboration - Metadata/GSK_SDTM_defines/mid201584/define.xml", useInternalNodes = TRUE)
+
+ds_spec <- xml_to_ds_spec(doc)
+ds_vars <- xml_to_ds_vars(doc)
+var_spec <- xml_to_var_spec(doc)
+value_spec <- xml_to_value_spec(doc)
+code_list <- xml_to_code_list(doc)
+derivations <- xml_to_derivations(doc)
+
+datadef(ds_spec, ds_vars, var_spec, value_spec, derivations = NULL, code_list)
+```

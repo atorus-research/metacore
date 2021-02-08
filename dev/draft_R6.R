@@ -4,11 +4,12 @@ library(stringr)
 
 
 source("R/builders.R")
+
 path <- "C:/Users/cf124952/ATorus/GSK Atorus Open Source Collaboration - Metadata/GSK_SDTM_defines/mid207966/define.xml"
 
 
 # Read in the file
-doc <- xmlTreeParse(path, useInternalNodes = TRUE)
+doc <- xmlTreeParse("R/define.xml", useInternalNodes = TRUE)
 
 
 ds_spec <- xml_to_ds_spec(doc)

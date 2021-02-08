@@ -12,10 +12,19 @@ License: `use_mit_license()`, `use_gpl3_license()` or friends to
     pick a license
 Encoding: UTF-8
 LazyData: true
-Roxygen: list(markdown = TRUE)
+Roxygen: list(markdown = TRUE, r6 = FALSE)
 RoxygenNote: 7.1.1
 Suggests: 
-    testthat
+    testthat,
+    knitr,
+    rmarkdown
 Imports: 
     R6,
-    tidyr
+    tidyr,
+    dplyr,
+    stringr,
+    magrittr,
+    XML,
+    purrr,
+    pryr
+VignetteBuilder: knitr
