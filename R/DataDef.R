@@ -38,7 +38,7 @@ DataDef_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivatio
 DataDef_print <- function(...){
    # the domain name and how many data set specs
    ds_len <- private$.ds_spec %>% pull(dataset) %>% length()
-   paste0("DataDef object contains metadata for ", ds_len, " devdatasets") %>%
+   paste0("DataDef object contains metadata for ", ds_len, " devdatasets\n") %>%
       cat()
 }
 
@@ -49,31 +49,10 @@ DataDef_print <- function(...){
 #' @family DataDef
 #'
 DataDef_validate <-  function() {
-
-   var_check <- anti_join(private$.ds_vars, private$.var_spec, by = "variable")
-
-   if(var_check %>% nrow() != 0){
-      var_ls <- var_check %>%
-         pull(variable) %>%
-         unique()
-
-      var_check_dbl <- private$.ds_vars %>%
-         filter(variable %in% var_ls) %>%
-         mutate(var_name = paste0(dataset, ".", variable)) %>%
-         anti_join(., private$.var_spec, by = c("var_name" = "variable")) %>%
-         pull(variable) %>%
-         unique()
-
-      if(var_check_dbl %>% length() != 0){
-         cat("\n")
-         warning(
-            "The following variable(s) do not have labels and lengths: ",
-            paste("   ", var_check_dbl, sep = "\n   "),
-            call. = FALSE
-         )
-      }
-   }
+   ds_vars_check(private$.ds_vars, private$.var_spec)
+   var_name_check(private)
 }
+
 
 
 #' readonly function factory
@@ -155,6 +134,6 @@ DataDef <- R6::R6Class("DataDef",
 #'
 #' @export
 #'
-datadef <- function(ds_spec, ds_vars, var_spec, value_spec, derivations = NULL, code_list) {
-   DataDef$new(ds_spec, ds_vars, var_spec, value_spec, derivations = NULL, code_list)
+datadef <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, code_list) {
+   DataDef$new(ds_spec, ds_vars, var_spec, value_spec, derivations, code_list)
 }
