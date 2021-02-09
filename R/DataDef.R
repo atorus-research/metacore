@@ -51,6 +51,9 @@ DataDef_print <- function(...){
 DataDef_validate <-  function() {
    ds_vars_check(private$.ds_vars, private$.var_spec)
    var_name_check(private)
+   value_check(private$.ds_vars, private$.value_spec)
+   derivation_check(private$.value_spec, private$.derivations)
+   codelist_check(private$.value_spec, private$.codelist)
 }
 
 

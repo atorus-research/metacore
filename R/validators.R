@@ -16,7 +16,7 @@ ds_vars_check <- function(ds_vars, var_spec){
       var_check_dbl <- ds_vars %>%
          filter(.data$variable %in% var_ls) %>%
          mutate(var_name = paste0(.data$dataset, ".", .data$variable)) %>%
-         anti_join(., var_spec, by = c("var_name" = "variable")) %>%
+         anti_join(var_spec, by = c("var_name" = "variable")) %>%
          pull(.data$variable) %>%
          unique()
 
@@ -32,6 +32,122 @@ ds_vars_check <- function(ds_vars, var_spec){
 
 }
 
+
+#' Check Values
+#'
+#'
+#' Check the value spec table works with the ds_var tables. All variables in the
+#' ds_var should be in the value_spec and all variables in value_spec  should be
+#' in ds_vars
+#' @param ds_vars ds_vars table
+#' @param value_spec value_spec table
+#'
+#' @return writes warning to console if there is an issue
+#' @noRd
+value_check <- function(ds_vars, value_spec){
+   value_vars <- value_spec %>%
+      distinct(.data$dataset, .data$variable)
+
+   #Check the variables in ds_vars that don't have value specs
+   not_in_val <- anti_join(ds_vars, value_vars, by = c("dataset", "variable"))
+   if(nrow(not_in_val) != 0){
+      variables <- not_in_val %>%
+         mutate(full = str_c(.data$dataset, .data$variable, sep = ".")) %>%
+         pull(.data$full) %>%
+         str_c(collapse = ", ")
+      message <- paste("The following variables are in the ds_vars table, but don't have value specs:\n",
+                       variables)
+      warning(message, call. = FALSE)
+   }
+   # Check the variables in value spec that aren't in ds_vars
+   not_in_ds <- anti_join(value_vars, ds_vars, by = c("dataset", "variable"))
+   if(nrow(not_in_ds) != 0){
+      variables <- not_in_ds %>%
+         pull(.data$variable) %>%
+         str_c(collapse = ", ")
+      message <- paste("The following variables are have value specifications, but aren't in the ds_vars table:\n",
+                       variables)
+      warning(message, call. = FALSE)
+   }
+}
+
+
+#' Derivation check
+#'
+#' @param value_spec value_spec table
+#' @param derivations derivation table
+#'
+#' @return writes warning to console if there is an issue
+#' @noRd
+derivation_check <- function(value_spec, derivations){
+   deriv_vars <- value_spec %>%
+      filter(!is.na(.data$derivation_id)) %>%
+      distinct(.data$variable,.data$ derivation_id)
+
+   #Check the variables that don't have derivations in derivations
+   not_in_val <- anti_join(deriv_vars, derivations, by = c("derivation_id"))
+   if(nrow(not_in_val) != 0){
+      variables <- not_in_val %>%
+         pull(.data$variable) %>%
+         str_c(collapse = ", ")
+      message <- paste("The following variables are missing derivations:\n",
+                       variables)
+      warning(message, call. = FALSE)
+   }
+   # Check the derivations in deriavtion that aren't  in value spec
+   not_in_deriv <- anti_join(derivations, deriv_vars, by = c("derivation_id"))
+   if(nrow(not_in_deriv) != 0){
+      deriv <- not_in_deriv %>%
+         pull(.data$derivation) %>%
+         str_c(collapse = ", ")
+      message <- paste("The following derivations are never used:\n",
+                       deriv)
+      warning(message, call. = FALSE)
+   }
+
+}
+
+#' Codelist Check
+#'
+#' @param value_spec value spec table
+#' @param codelist codelist table
+#'
+#' @return writes warning to console if there is an issue
+#' @noRd
+codelist_check <- function(value_spec, codelist){
+   code_vars <- value_spec %>%
+      filter(!is.na(.data$code_id)) %>%
+      distinct(.data$variable, .data$code_id)
+
+   #Check the variables in don't codelists have codelist
+   not_in_val <- anti_join(code_vars, codelist, by = c("code_id"))
+   if(nrow(not_in_val) != 0){
+      variables <- not_in_val %>%
+         pull(.data$variable) %>%
+         str_c(collapse = ", ")
+      message <- paste("The following variables are missing codelist(s):\n",
+                       variables)
+      warning(message, call. = FALSE)
+   }
+   # Check the code_ids in codelist that aren't in value spec
+   not_in_cl <- anti_join(codelist, code_vars, by = c("code_id"))
+   if(nrow(not_in_cl) != 0){
+      cl_nm <- not_in_cl %>%
+         pull(.data$names) %>%
+         str_c(collapse = ", ")
+      message <- paste("The following codelist(s) are never used:\n",
+                       cl_nm)
+      warning(message, call. = FALSE)
+   }
+}
+
+
+#' Check Variable names
+#'
+#' @param envrionment the private environment of the object
+#'
+#' @return warning messages to the console if there is an issue
+#' @noRd
 var_name_check <- function(envrionment){
     # Set the name as they should be
    col_names <- list(.ds_spec = c("dataset", "structure", "label"),
@@ -47,11 +163,13 @@ var_name_check <- function(envrionment){
 
    map2(tbl_name, tbls, function(name, tbl){
       if(is.null(tbl)){
+         # Checks for null tables
          print_message <- name %>%
             str_remove("[:punct:]") %>%
             paste("is null")
          warning(print_message, call. = FALSE)
       } else if(!all(names(tbl) %in% col_names[[name]])){
+         # writes a message if the column names don't match
          print_message <- name %>%
             str_remove("[:punct:]") %>%
             paste("has incorrect column names. It should be:\n",

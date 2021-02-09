@@ -4,7 +4,7 @@
 \alias{datadef}
 \title{R6 Class wrapper to create your own datadef object}
 \usage{
-datadef(ds_spec, ds_vars, var_spec, value_spec, derivations = NULL, code_list)
+datadef(ds_spec, ds_vars, var_spec, value_spec, derivations, code_list)
 }
 \arguments{
 \item{ds_spec}{contians each dataset in the study, with the labels for each}
