@@ -108,11 +108,11 @@ get_where <- function(doc) {
       mutate(
          var = id %>% str_extract("[:alnum:]*$"),
          where = case_when(
-            operator == "EQ" ~ paste0(var, " = '", val, "'"),
-            TRUE ~ paste(var, operator, val)
+            .data$operator == "EQ" ~ paste0(.data$var, " = '",.data$val, "'"),
+            TRUE ~ paste(.data$var, .data$operator, .data$val)
          )
       ) %>%
-      select(-id, -operator, -val, -var)
+      select(-id, -.data$operator, -.data$val, -.data$var)
    where_list
 }
 
@@ -182,7 +182,7 @@ get_permitted_vals <- function(id, doc) {
 #'
 #' @param doc
 #'
-#' @return a dataframe of the variables and their corrisponding datasets
+#' @return a dataframe of the variables and their corresponding datasets
 #' @noRd
 ds_var_ls <- function(doc) {
    # Get the name of each dataset
@@ -197,6 +197,6 @@ ds_var_ls <- function(doc) {
             get_node_attr("ItemOID")
          tibble(dataset = dataset, variable = vars)
       }) %>%
-      mutate(variable = id_to_var(variable))
+      mutate(variable = id_to_var(.data$variable))
    var_ls
 }

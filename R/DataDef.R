@@ -37,7 +37,9 @@ DataDef_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivatio
 #'
 DataDef_print <- function(...){
    # the domain name and how many data set specs
-   cat(private$.ds_spec %>% pull(dataset) %>% paste0(collapse = "\n"))
+   ds_len <- private$.ds_spec %>% pull(dataset) %>% length()
+   paste0("DataDef object contains metadata for ", ds_len, " devdatasets") %>%
+      cat()
 }
 
 
@@ -55,11 +57,21 @@ DataDef_validate <-  function() {
          pull(variable) %>%
          unique()
 
-      warning(
-         "The following variable(s) do not have labels and lengths: ",
-         paste("   ", var_ls, sep = "\n   "),
-         call. = FALSE
-      )
+      var_check_dbl <- private$.ds_vars %>%
+         filter(variable %in% var_ls) %>%
+         mutate(var_name = paste0(dataset, ".", variable)) %>%
+         anti_join(., private$.var_spec, by = c("var_name" = "variable")) %>%
+         pull(variable) %>%
+         unique()
+
+      if(var_check_dbl %>% length() != 0){
+         cat("\n")
+         warning(
+            "The following variable(s) do not have labels and lengths: ",
+            paste("   ", var_check_dbl, sep = "\n   "),
+            call. = FALSE
+         )
+      }
    }
 }
 
