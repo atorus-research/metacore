@@ -22,12 +22,4 @@ datadef(ds_spec, ds_vars, var_spec, value_spec, derivations = NULL, code_list)
 \description{
 R6 Class wrapper to create your own datadef object
 }
-\seealso{
-Other DataDef: 
-\code{\link{DataDef_initialize}()},
-\code{\link{DataDef_print}()},
-\code{\link{DataDef_validate}()},
-\code{\link{DataDef}},
-\code{\link{readonly}()}
-}
 \concept{DataDef}

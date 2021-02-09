@@ -2,7 +2,8 @@
 #' @import tidyr
 #' @import dplyr
 #' @import stringr
-#' @importFrom XML xmlNamespaceDefinitions xmlGetAttr xmlElementsByTagName xmlValue
+#' @importFrom XML xmlTreeParse getNodeSet xmlNamespaceDefinitions xmlGetAttr xmlElementsByTagName xmlValue
 #' @import purrr
+#' @importFrom stats var
 
 NULL
