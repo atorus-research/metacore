@@ -213,6 +213,7 @@ xml_to_value_spec <- function(doc) {
 
    # Combining all the data
    all_data <- var_info %>%
+      filter(!is.na(.data$dataset)) %>%
       bind_rows(miss_ds) %>%
       full_join(id_df, by = "id")
 
@@ -223,7 +224,7 @@ xml_to_value_spec <- function(doc) {
          remove = str_c("^.*", .data$variable),
          sub_cat = str_remove(id, remove),
          cat_test = !all(.data$sub_cat == ""), # T if there are sub categories
-         rm_flg = .data$cat_test & (.data$sub_cat == "")
+         rm_flg = (.data$cat_test & (.data$sub_cat == "")) & is.na(.data$code_id)
       ) %>% # T if is a sub cat var, and not a sub-cat
       filter(!.data$rm_flg) %>%
       select(-.data$remove, -.data$sub_cat, -.data$cat_test, -.data$rm_flg, -.data$id)
