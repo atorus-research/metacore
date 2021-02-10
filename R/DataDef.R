@@ -49,11 +49,16 @@ DataDef_print <- function(...){
 #' @family DataDef
 #'
 DataDef_validate <-  function() {
-   ds_vars_check(private$.ds_vars, private$.var_spec)
-   var_name_check(private)
-   value_check(private$.ds_vars, private$.value_spec)
-   derivation_check(private$.value_spec, private$.derivations)
-   codelist_check(private$.value_spec, private$.codelist)
+   if(var_name_check(private)){
+      ds_vars_check(private$.ds_vars, private$.var_spec)
+      value_check(private$.ds_vars, private$.value_spec)
+      derivation_check(private$.value_spec, private$.derivations)
+      codelist_check(private$.value_spec, private$.codelist)
+   } else {
+      warning("Other checks were not preformed, because column names were incorrect",
+              call. = FALSE)
+   }
+
 }
 
 

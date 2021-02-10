@@ -287,9 +287,22 @@ xml_to_code_list <- function(doc) {
          codes = .data$code_id %>% map(get_permitted_vals, doc),
          type = "permitted_val"
       )
+   # External Libraries
+   ex_lib_nodes <- get_nodes(doc, "//ns:CodeList[ns:ExternalCodeList]")
+   ex_lib <- tibble(
+      code_id = ex_lib_nodes %>% get_node_attr("OID"),
+      names = ex_lib_nodes %>% get_node_attr("Name"),
+      dataType = ex_lib_nodes %>% get_node_attr("DataType"),
+      dictionary = ex_lib_nodes %>%
+         map_chr(~ get_child_attr(., "ExternalCodeList", "Dictionary")),
+      version = ex_lib_nodes %>%
+         map_chr(~ get_child_attr(., "ExternalCodeList", "Version")),
+      type = "external_library"
+   ) %>%
+      nest(codes = c(.data$dictionary, .data$version))
 
    # Combinging the code decode with the permitted values
-   bind_rows(code_decode, permitted) %>%
+   bind_rows(code_decode, permitted, ex_lib) %>%
       select(-.data$dataType)
 }
 

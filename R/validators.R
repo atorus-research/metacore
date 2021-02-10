@@ -160,14 +160,16 @@ var_name_check <- function(envrionment){
    # Get the tables and table names from the envrionment
    tbl_name <- ls(envrionment, all.names = TRUE)
    tbls <- map(tbl_name, get, envir = envrionment)
-
-   map2(tbl_name, tbls, function(name, tbl){
+   # Checks is names match the table above, returns T if so F else. If the names
+   # don't match, will also produce a warning of what the names should be
+   map2_lgl(tbl_name, tbls, function(name, tbl){
       if(is.null(tbl)){
          # Checks for null tables
          print_message <- name %>%
             str_remove("[:punct:]") %>%
             paste("is null")
          warning(print_message, call. = FALSE)
+         FALSE
       } else if(!all(names(tbl) %in% col_names[[name]])){
          # writes a message if the column names don't match
          print_message <- name %>%
@@ -175,8 +177,11 @@ var_name_check <- function(envrionment){
             paste("has incorrect column names. It should be:\n",
                   str_c(col_names[[name]], collapse = ", "))
          warning(print_message, call. = FALSE)
-
+         FALSE
+      } else {
+         TRUE
       }
-   })
+   }) %>%
+      all()
 
 }
