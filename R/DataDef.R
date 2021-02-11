@@ -12,6 +12,7 @@
 #' @param code_list contains the code/decode information
 #'
 #' @family DataDef
+#' @noRd
 #'
 DataDef_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, code_list){
 
@@ -23,10 +24,7 @@ DataDef_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivatio
    private$.codelist <- code_list
 
    self$validate()
-   message("Metadata successfully imported")
-   # TO DO: Cross-ref functions:
-   # * derivations, codelist, variables x2
-   # type coulnm has a limited number of types
+   message("\n Metadata successfully imported")
 }
 
 
@@ -34,10 +32,10 @@ DataDef_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivatio
 #'
 #' @param ... pass in the dataframes to be validated
 #' @family DataDef
+#' @noRd
 #'
 DataDef_print <- function(...){
-   # the domain name and how many data set specs
-   ds_len <- private$.ds_spec %>% pull(dataset) %>% length()
+   ds_len <- private$.ds_spec %>% pull(.data$dataset) %>% length()
    paste0("DataDef object contains metadata for ", ds_len, " devdatasets\n") %>%
       cat()
 }
@@ -47,6 +45,7 @@ DataDef_print <- function(...){
 #'
 #' This checks that the labels and lengths of ds_vars match var_spec
 #' @family DataDef
+#' @noRd
 #'
 DataDef_validate <-  function() {
    if(var_name_check(private)){
@@ -71,8 +70,10 @@ DataDef_validate <-  function() {
 #' @param name the name of the readonly object
 #' @param value any attempt at assignment to the readonly object
 #' @family DataDef
+#' @noRd
 #'
 readonly <- function(name) {
+   private <- NULL
    inside <- function(value) {
       name <- attr(sys.function(sys.parent()), "name")
       if (missing(value)) {
@@ -92,6 +93,7 @@ readonly <- function(name) {
 #' The user can query
 #'
 #' @family DataDef
+#' @noRd
 #
 DataDef <- R6::R6Class("DataDef",
                        public = list(
