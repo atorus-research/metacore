@@ -251,7 +251,7 @@ xml_to_code_list <- function(doc) {
    cl_nodes <- get_nodes(doc, "//ns:CodeList[ns:CodeListItem]")
    # Get a table with the information about the code list
    # Done like this because map_chr is faster than map_dfr
-   code_grps <- tibble(
+   code_decode <- tibble(
       code_id = cl_nodes %>% get_node_attr("OID"),
       names = cl_nodes %>% get_node_attr("Name"),
       dataType = cl_nodes %>% get_node_attr("DataType"),
