@@ -25,6 +25,5 @@ Imports:
     stringr,
     magrittr,
     XML,
-    purrr,
-    pryr
+    purrr
 VignetteBuilder: knitr

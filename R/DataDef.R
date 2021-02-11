@@ -12,6 +12,7 @@
 #' @param code_list contains the code/decode information
 #'
 #' @family DataDef
+#' @noRd
 #'
 DataDef_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, code_list){
 
@@ -23,10 +24,7 @@ DataDef_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivatio
    private$.codelist <- code_list
 
    self$validate()
-   message("Metadata successfully imported")
-   # TO DO: Cross-ref functions:
-   # * derivations, codelist, variables x2
-   # type coulnm has a limited number of types
+   message("\n Metadata successfully imported")
 }
 
 
@@ -34,10 +32,12 @@ DataDef_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivatio
 #'
 #' @param ... pass in the dataframes to be validated
 #' @family DataDef
+#' @noRd
 #'
 DataDef_print <- function(...){
-   # the domain name and how many data set specs
-   cat(private$.ds_spec %>% pull(dataset) %>% paste0(collapse = "\n"))
+   ds_len <- private$.ds_spec %>% pull(.data$dataset) %>% length()
+   paste0("DataDef object contains metadata for ", ds_len, " devdatasets\n") %>%
+      cat()
 }
 
 
@@ -45,23 +45,21 @@ DataDef_print <- function(...){
 #'
 #' This checks that the labels and lengths of ds_vars match var_spec
 #' @family DataDef
+#' @noRd
 #'
 DataDef_validate <-  function() {
-
-   var_check <- anti_join(private$.ds_vars, private$.var_spec, by = "variable")
-
-   if(var_check %>% nrow() != 0){
-      var_ls <- var_check %>%
-         pull(variable) %>%
-         unique()
-
-      warning(
-         "The following variable(s) do not have labels and lengths: ",
-         paste("   ", var_ls, sep = "\n   "),
-         call. = FALSE
-      )
+   if(var_name_check(private)){
+      ds_vars_check(private$.ds_vars, private$.var_spec)
+      value_check(private$.ds_vars, private$.value_spec)
+      derivation_check(private$.value_spec, private$.derivations)
+      codelist_check(private$.value_spec, private$.codelist)
+   } else {
+      warning("Other checks were not preformed, because column names were incorrect",
+              call. = FALSE)
    }
+
 }
+
 
 
 #' readonly function factory
@@ -72,8 +70,10 @@ DataDef_validate <-  function() {
 #' @param name the name of the readonly object
 #' @param value any attempt at assignment to the readonly object
 #' @family DataDef
+#' @noRd
 #'
 readonly <- function(name) {
+   private <- NULL
    inside <- function(value) {
       name <- attr(sys.function(sys.parent()), "name")
       if (missing(value)) {
@@ -93,6 +93,7 @@ readonly <- function(name) {
 #' The user can query
 #'
 #' @family DataDef
+#' @noRd
 #
 DataDef <- R6::R6Class("DataDef",
                        public = list(
@@ -143,6 +144,6 @@ DataDef <- R6::R6Class("DataDef",
 #'
 #' @export
 #'
-datadef <- function(ds_spec, ds_vars, var_spec, value_spec, derivations = NULL, code_list) {
-   DataDef$new(ds_spec, ds_vars, var_spec, value_spec, derivations = NULL, code_list)
+datadef <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, code_list) {
+   DataDef$new(ds_spec, ds_vars, var_spec, value_spec, derivations, code_list)
 }

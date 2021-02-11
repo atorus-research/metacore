@@ -1,3 +1,28 @@
+#' Define XML to DataDef Object
+#'
+#' Given a path, this function converts the define xml to a DataDef Object
+#'
+#' @param path loaction of the define xml as a string
+#'
+#' @return DataDef Object
+#' @export
+#'
+define_to_DataDef <- function(path){
+   doc <- xmlTreeParse(path, useInternalNodes = TRUE)
+
+   ds_spec <- xml_to_ds_spec(doc)
+   ds_vars <- xml_to_ds_vars(doc)
+   var_spec <- xml_to_var_spec(doc)
+   value_spec <- xml_to_value_spec(doc)
+   code_list <- xml_to_code_list(doc)
+   derivations <- xml_to_derivations(doc)
+
+   datadef(ds_spec, ds_vars, var_spec, value_spec, derivations = derivations,
+           code_list = code_list)
+}
+
+
+
 
 #' XML to Data Set Spec
 #'
@@ -8,9 +33,9 @@
 #' @family xml builder
 #' @export
 xml_to_ds_spec <- function(doc) {
-   # Read in the dataset levle nodes
+   # Read in the dataset level nodes
    ds_nodes <- get_ds_lvl_nodes(doc)
-   # Name and structure are attributes of the node, but decribtion is a child
+   # Name and structure are attributes of the node, but description is a child
    tibble(
       dataset = ds_nodes %>% get_node_attr("Name"),
       structure = ds_nodes %>% get_node_attr("Structure"),
@@ -49,10 +74,10 @@ xml_to_ds_vars <- function(doc) {
          )
       }) %>%
       mutate(
-         variable = id_to_var(variable),
-         keep = mandatory == "Yes"
+         variable = id_to_var(.data$variable),
+         keep = .data$mandatory == "Yes"
       ) %>%
-      select(-mandatory)
+      select(-.data$mandatory)
 }
 
 
@@ -82,19 +107,36 @@ xml_to_var_spec <- function(doc) {
    )
 
    possible_vars <- ds_var_ls(doc) %>%
-      pull(variable) %>%
+      pull(.data$variable) %>%
       unique()
 
-   var_info %>%
-      filter(variable %in% possible_vars) %>%
-      distinct(variable, length, label, .keep_all = TRUE) %>%
-      group_by(variable) %>%
+   # Get for each variable, get the number of distinct lengths and labels
+  dist_df <- var_info %>%
+      filter(.data$variable %in% possible_vars) %>%
+      distinct(.data$variable, .data$length, .data$label, .keep_all = TRUE) %>%
+      group_by(.data$variable) %>%
       mutate(
-         n = n(),
-         variable = if_else(n > 1, var_full, variable) %>%
-            str_remove(., "^IT\\.")
+         n = n()
       ) %>%
-      select(-n, -var_full)
+      ungroup()
+
+  # For variables with more than one distinct label, this gets all the full
+  # variable names with that root. Sometimes 3 variables will have the same root
+  # (i.e. ARMCD), 2 of them will match, but one of them won't. This means the
+  # two matching will have been collapsed to one in the distinct and we have to
+  # bring back the one that got dropped. Cause all of them need to be DS.var
+  full_name_vars <- dist_df %>%
+     filter(n > 1) %>%
+     select(.data$variable) %>%
+     inner_join(var_info, by = "variable") %>%
+     mutate(variable = str_remove(.data$var_full, "^IT\\.")) %>%
+     distinct()
+
+  # Combine the variables that need full names with the variables that don't
+  dist_df %>%
+     filter(n == 1) %>%
+     bind_rows(full_name_vars) %>%
+     select(-.data$n, -.data$var_full)
 }
 
 
@@ -103,7 +145,7 @@ xml_to_var_spec <- function(doc) {
 #' Takes a define xml and pulls out the value level metadata including codelist_id's,
 #' defines_id's, and where claus. There is one row per variable expect when there
 #' is a where, at which point there is one row per value. {this is bad english please help}
-#' @param doc
+#' @param doc ?
 #'
 #' @return tibble with the value level information
 #' @family xml builder
@@ -131,7 +173,7 @@ xml_to_value_spec <- function(doc) {
    # Get a vector of code_id
    # in each variable node there is a codelistRef, which has the value of the ID
    code_id_vec <- var_nodes %>%
-      map_chr(~ get_child_attr(., "CodeListRef", "CodeListOID"))
+      map_chr(~ get_child_attr(.x, "CodeListRef", "CodeListOID"))
 
    # Get variable/value information from each node
    var_info <- tibble(
@@ -158,33 +200,34 @@ xml_to_value_spec <- function(doc) {
    # get where statements and add them to the id's
    id_df <- get_where(doc) %>%
       full_join(id_df, by = c("where_id")) %>%
-      select(-where_id)
+      select(-.data$where_id)
 
 
    # Fill-in missing dataset information for some variables such as studyid
    full_var_ds <- ds_var_ls(doc)
    miss_ds <- var_info %>%
-      filter(is.na(dataset)) %>%
-      select(-dataset) %>%
+      filter(is.na(.data$dataset)) %>%
+      select(-.data$dataset) %>%
       inner_join(full_var_ds, by = "variable")
 
 
    # Combining all the data
    all_data <- var_info %>%
+      filter(!is.na(.data$dataset)) %>%
       bind_rows(miss_ds) %>%
       full_join(id_df, by = "id")
 
    # Remove duplicate information for variables that appear multiple times
    clean_data <- all_data %>%
-      group_by(variable) %>%
+      group_by(.data$variable) %>%
       mutate(
-         remove = str_c("^.*", variable),
+         remove = str_c("^.*", .data$variable),
          sub_cat = str_remove(id, remove),
-         cat_test = !all(sub_cat == ""), # T if there are sub categories
-         rm_flg = cat_test & (sub_cat == "")
+         cat_test = !all(.data$sub_cat == ""), # T if there are sub categories
+         rm_flg = (.data$cat_test & (.data$sub_cat == "")) & is.na(.data$code_id)
       ) %>% # T if is a sub cat var, and not a sub-cat
-      filter(!rm_flg) %>%
-      select(-remove, -sub_cat, -cat_test, -rm_flg, -id)
+      filter(!.data$rm_flg) %>%
+      select(-.data$remove, -.data$sub_cat, -.data$cat_test, -.data$rm_flg, -.data$id)
    clean_data
 }
 
@@ -213,7 +256,7 @@ xml_to_code_list <- function(doc) {
 
    # get the code for each code_id and unnest to match with the decodes
    codes <- code_grps %>%
-      mutate(codes = code_id %>% map(get_codes, doc)) %>%
+      mutate(codes = .data$code_id %>% map(get_codes, doc)) %>%
       unnest(codes)
 
    # gets a vector of all the decodes
@@ -225,7 +268,7 @@ xml_to_code_list <- function(doc) {
    # combines codes and decodes then renests
    code_decode <- codes %>%
       mutate(decodes = decodes) %>%
-      group_by(code_id) %>%
+      group_by(.data$code_id) %>%
       mutate(type = "code_decode") %>%
       nest(codes = c(codes, decodes))
 
@@ -241,13 +284,26 @@ xml_to_code_list <- function(doc) {
 
    permitted <- permitted %>%
       mutate(
-         codes = code_id %>% map(get_permitted_vals, doc),
+         codes = .data$code_id %>% map(get_permitted_vals, doc),
          type = "permitted_val"
       )
+   # External Libraries
+   ex_lib_nodes <- get_nodes(doc, "//ns:CodeList[ns:ExternalCodeList]")
+   ex_lib <- tibble(
+      code_id = ex_lib_nodes %>% get_node_attr("OID"),
+      names = ex_lib_nodes %>% get_node_attr("Name"),
+      dataType = ex_lib_nodes %>% get_node_attr("DataType"),
+      dictionary = ex_lib_nodes %>%
+         map_chr(~ get_child_attr(., "ExternalCodeList", "Dictionary")),
+      version = ex_lib_nodes %>%
+         map_chr(~ get_child_attr(., "ExternalCodeList", "Version")),
+      type = "external_library"
+   ) %>%
+      nest(codes = c(.data$dictionary, .data$version))
 
    # Combinging the code decode with the permitted values
-   bind_rows(code_decode, permitted) %>%
-      select(-dataType)
+   bind_rows(code_decode, permitted, ex_lib) %>%
+      select(-.data$dataType)
 }
 
 
@@ -256,7 +312,7 @@ xml_to_code_list <- function(doc) {
 #'
 #' This reads in a xml document and gets all the derivations/comments. These can
 #' be cross referenced to variables using the derivation_id's
-#' @param doc
+#' @param doc ?
 #'
 #' @return dataframe with derivation id's and derivations
 #' @family xml builder
