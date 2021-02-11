@@ -39,8 +39,7 @@ xml_to_ds_spec <- function(doc) {
    tibble(
       dataset = ds_nodes %>% get_node_attr("Name"),
       structure = ds_nodes %>% get_node_attr("Structure"),
-      label = ds_nodes %>% map_chr(get_node_description),
-      core = NA
+      label = ds_nodes %>% map_chr(get_node_description)
    )
 }
 
@@ -76,7 +75,8 @@ xml_to_ds_vars <- function(doc) {
       }) %>%
       mutate(
          variable = id_to_var(.data$variable),
-         keep = .data$mandatory == "Yes"
+         keep = .data$mandatory == "Yes",
+         core = NA
       ) %>%
       select(-.data$mandatory)
 }
