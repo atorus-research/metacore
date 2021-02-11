@@ -148,7 +148,7 @@ codelist_check <- function(value_spec, codelist){
 col_vars <- function(){
    list(.ds_spec = c("dataset", "structure", "label"),
         .ds_vars = c("dataset", "variable", "key_seq", "keep", "core"),
-        .var_spec = c("variable", "length", "label", "common"),
+        .var_spec = c("variable", "length", "label", "type", "common"),
         .value_spec = c("type", "origin", "code_id", "dataset", "variable", "where", "derivation_id"),
         .derivations = c("derivation_id", "derivation"),
         .codelist= c("code_id", "names","type", "codes"),

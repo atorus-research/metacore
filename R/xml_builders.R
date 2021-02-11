@@ -39,7 +39,8 @@ xml_to_ds_spec <- function(doc) {
    tibble(
       dataset = ds_nodes %>% get_node_attr("Name"),
       structure = ds_nodes %>% get_node_attr("Structure"),
-      label = ds_nodes %>% map_chr(get_node_description)
+      label = ds_nodes %>% map_chr(get_node_description),
+      core = NA
    )
 }
 
@@ -100,6 +101,7 @@ xml_to_var_spec <- function(doc) {
    var_info <- tibble(
       var_full = var_nodes %>% get_node_attr("OID"),
       variable = var_nodes %>% get_node_attr("Name"),
+      type = var_nodes %>% get_node_attr("DataType"),
       length = var_nodes %>% get_node_attr("Length") %>%
          as.integer(),
       # Get labels
@@ -113,10 +115,11 @@ xml_to_var_spec <- function(doc) {
    # Get for each variable, get the number of distinct lengths and labels
   dist_df <- var_info %>%
       filter(.data$variable %in% possible_vars) %>%
-      distinct(.data$variable, .data$length, .data$label, .keep_all = TRUE) %>%
+      distinct(.data$variable, .data$length, .data$label, .data$type, .keep_all = TRUE) %>%
       group_by(.data$variable) %>%
       mutate(
-         n = n()
+         n = n(),
+         common = NA
       ) %>%
       ungroup()
 
