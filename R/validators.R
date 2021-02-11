@@ -121,7 +121,7 @@ codelist_check <- function(value_spec, codelist){
 
    #Check the variables in don't codelists have codelist
    not_in_val <- anti_join(code_vars, codelist, by = c("code_id"))
-   if(nrow(not_in_val) != 0){
+   if(nrow(not_in_val)){
       variables <- not_in_val %>%
          pull(.data$variable) %>%
          str_c(collapse = ", ")
@@ -131,7 +131,7 @@ codelist_check <- function(value_spec, codelist){
    }
    # Check the code_ids in codelist that aren't in value spec
    not_in_cl <- anti_join(codelist, code_vars, by = c("code_id"))
-   if(nrow(not_in_cl) != 0){
+   if(nrow(not_in_cl)){
       cl_nm <- not_in_cl %>%
          pull(.data$names) %>%
          str_c(collapse = ", ")
@@ -140,6 +140,21 @@ codelist_check <- function(value_spec, codelist){
       warning(message, call. = FALSE)
    }
 }
+
+#' Column Names by dataset
+#'
+#' @return list of colum names by dataset
+#' @noRd
+col_vars <- function(){
+   list(.ds_spec = c("dataset", "structure", "label"),
+        .ds_vars = c("dataset", "variable", "key_seq", "keep", "core"),
+        .var_spec = c("variable", "length", "label", "common"),
+        .value_spec = c("type", "origin", "code_id", "dataset", "variable", "where", "derivation_id"),
+        .derivations = c("derivation_id", "derivation"),
+        .codelist= c("code_id", "names","type", "codes"),
+        .change_log = c("table_chg", "column_chg", "what_chg"))
+}
+
 
 
 #' Check Variable names
@@ -150,13 +165,7 @@ codelist_check <- function(value_spec, codelist){
 #' @noRd
 var_name_check <- function(envrionment){
     # Set the name as they should be
-   col_names <- list(.ds_spec = c("dataset", "structure", "label"),
-                     .ds_vars = c("dataset", "variable", "key_seq", "keep" ),
-                     .var_spec = c("variable", "length", "label"),
-                     .value_spec = c("type", "origin", "code_id", "dataset", "variable", "where", "derivation_id"),
-                     .derivations = c("derivation_id", "derivation"),
-                     .codelist= c("code_id", "names","type", "codes"),
-                     .change_log = c("table_chg", "column_chg", "what_chg"))
+   col_names <- col_vars()
    # Get the tables and table names from the envrionment
    tbl_name <- ls(envrionment, all.names = TRUE)
    tbls <- map(tbl_name, get, envir = envrionment)
