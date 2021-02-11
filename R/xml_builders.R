@@ -254,27 +254,10 @@ xml_to_code_list <- function(doc) {
    code_grps <- tibble(
       code_id = cl_nodes %>% get_node_attr("OID"),
       names = cl_nodes %>% get_node_attr("Name"),
-      dataType = cl_nodes %>% get_node_attr("DataType")
+      dataType = cl_nodes %>% get_node_attr("DataType"),
+      codes = cl_nodes %>% get_codes(),
+      type = "code_decode"
    )
-
-   # get the code for each code_id and unnest to match with the decodes
-   codes <- code_grps %>%
-      mutate(codes = .data$code_id %>% map(get_codes, doc)) %>%
-      unnest(codes)
-
-   # gets a vector of all the decodes
-   decodes <- get_nodes(doc, "//ns:Decode") %>%
-      map_chr(function(node) {
-         xmlValue(node)
-      })
-
-   # combines codes and decodes then renests
-   code_decode <- codes %>%
-      mutate(decodes = decodes) %>%
-      group_by(.data$code_id) %>%
-      mutate(type = "code_decode") %>%
-      nest(codes = c(codes, decodes))
-
 
    # Permitted Values
    # following the same method as above, get permitted value information
@@ -282,14 +265,11 @@ xml_to_code_list <- function(doc) {
    permitted <- tibble(
       code_id = permitted_nodes %>% get_node_attr("OID"),
       names = permitted_nodes %>% get_node_attr("Name"),
-      dataType = permitted_nodes %>% get_node_attr("DataType")
+      dataType = permitted_nodes %>% get_node_attr("DataType"),
+      type = "permitted_val",
+      codes = permitted_nodes %>% get_permitted_vals()
    )
 
-   permitted <- permitted %>%
-      mutate(
-         codes = .data$code_id %>% map(get_permitted_vals, doc),
-         type = "permitted_val"
-      )
    # External Libraries
    ex_lib_nodes <- get_nodes(doc, "//ns:CodeList[ns:ExternalCodeList]")
    ex_lib <- tibble(
