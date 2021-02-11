@@ -145,7 +145,7 @@ xml_to_var_spec <- function(doc) {
 #' Takes a define xml and pulls out the value level metadata including codelist_id's,
 #' defines_id's, and where claus. There is one row per variable expect when there
 #' is a where, at which point there is one row per value. {this is bad english please help}
-#' @param doc
+#' @param doc ?
 #'
 #' @return tibble with the value level information
 #' @family xml builder
@@ -312,7 +312,7 @@ xml_to_code_list <- function(doc) {
 #'
 #' This reads in a xml document and gets all the derivations/comments. These can
 #' be cross referenced to variables using the derivation_id's
-#' @param doc
+#' @param doc ?
 #'
 #' @return dataframe with derivation id's and derivations
 #' @family xml builder

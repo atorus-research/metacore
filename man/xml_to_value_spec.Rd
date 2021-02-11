@@ -7,7 +7,7 @@
 xml_to_value_spec(doc)
 }
 \arguments{
-\item{doc}{}
+\item{doc}{?}
 }
 \value{
 tibble with the value level information
