@@ -2,6 +2,7 @@
 
 export("%>%")
 export(datadef)
+export(define_to_DataDef)
 export(xml_to_code_list)
 export(xml_to_derivations)
 export(xml_to_ds_spec)
