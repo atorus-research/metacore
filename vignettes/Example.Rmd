@@ -20,11 +20,7 @@ library(datadef)
 
 
 ```{#r}
-<<<<<<< HEAD
-doc <- xmlTreeParse("define.xml", useInternalNodes = TRUE)
-=======
 doc <- xmlTreeParse("C:/Users/cf124952/ATorus/GSK Atorus Open Source Collaboration - Metadata/GSK_SDTM_defines/mid201584/define.xml", useInternalNodes = TRUE)
->>>>>>> abe6fe37a83f1c9c636711e0c611e9cc87dd0c8a
 
 ds_spec <- xml_to_ds_spec(doc)
 ds_vars <- xml_to_ds_vars(doc)
