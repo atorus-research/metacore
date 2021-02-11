@@ -7,3 +7,5 @@
 #' @importFrom stats var
 
 NULL
+
+globalVariables(c("private", "self"))

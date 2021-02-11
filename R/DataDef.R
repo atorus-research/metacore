@@ -25,9 +25,6 @@ DataDef_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivatio
 
    self$validate()
    message("\n Metadata successfully imported")
-   # TO DO: Cross-ref functions:
-   # * derivations, codelist, variables x2
-   # type coulmn has a limited number of types
 }
 
 
