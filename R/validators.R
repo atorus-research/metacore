@@ -172,6 +172,7 @@ var_name_check <- function(envrionment){
    # Checks is names match the table above, returns T if so F else. If the names
    # don't match, will also produce a warning of what the names should be
    map2_lgl(tbl_name, tbls, function(name, tbl){
+      name
       if(is.null(tbl)){
          # Checks for null tables
          print_message <- name %>%
@@ -179,7 +180,7 @@ var_name_check <- function(envrionment){
             paste("is null")
          warning(print_message, call. = FALSE)
          FALSE
-      } else if(!all(names(tbl) %in% col_names[[name]])){
+      } else if(!setequal(names(tbl),col_names[[name]])){
          # writes a message if the column names don't match
          print_message <- name %>%
             str_remove("[:punct:]") %>%
