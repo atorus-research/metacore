@@ -75,7 +75,8 @@ xml_to_ds_vars <- function(doc) {
       }) %>%
       mutate(
          variable = id_to_var(.data$variable),
-         keep = .data$mandatory == "Yes"
+         keep = .data$mandatory == "Yes",
+         core = NA
       ) %>%
       select(-.data$mandatory)
 }
@@ -100,6 +101,7 @@ xml_to_var_spec <- function(doc) {
    var_info <- tibble(
       var_full = var_nodes %>% get_node_attr("OID"),
       variable = var_nodes %>% get_node_attr("Name"),
+      type = var_nodes %>% get_node_attr("DataType"),
       length = var_nodes %>% get_node_attr("Length") %>%
          as.integer(),
       # Get labels
@@ -113,10 +115,11 @@ xml_to_var_spec <- function(doc) {
    # Get for each variable, get the number of distinct lengths and labels
   dist_df <- var_info %>%
       filter(.data$variable %in% possible_vars) %>%
-      distinct(.data$variable, .data$length, .data$label, .keep_all = TRUE) %>%
+      distinct(.data$variable, .data$length, .data$label, .data$type, .keep_all = TRUE) %>%
       group_by(.data$variable) %>%
       mutate(
-         n = n()
+         n = n(),
+         common = NA
       ) %>%
       ungroup()
 
@@ -248,30 +251,13 @@ xml_to_code_list <- function(doc) {
    cl_nodes <- get_nodes(doc, "//ns:CodeList[ns:CodeListItem]")
    # Get a table with the information about the code list
    # Done like this because map_chr is faster than map_dfr
-   code_grps <- tibble(
+   code_decode <- tibble(
       code_id = cl_nodes %>% get_node_attr("OID"),
       names = cl_nodes %>% get_node_attr("Name"),
-      dataType = cl_nodes %>% get_node_attr("DataType")
+      dataType = cl_nodes %>% get_node_attr("DataType"),
+      codes = cl_nodes %>% get_codes(),
+      type = "code_decode"
    )
-
-   # get the code for each code_id and unnest to match with the decodes
-   codes <- code_grps %>%
-      mutate(codes = .data$code_id %>% map(get_codes, doc)) %>%
-      unnest(codes)
-
-   # gets a vector of all the decodes
-   decodes <- get_nodes(doc, "//ns:Decode") %>%
-      map_chr(function(node) {
-         xmlValue(node)
-      })
-
-   # combines codes and decodes then renests
-   code_decode <- codes %>%
-      mutate(decodes = decodes) %>%
-      group_by(.data$code_id) %>%
-      mutate(type = "code_decode") %>%
-      nest(codes = c(codes, decodes))
-
 
    # Permitted Values
    # following the same method as above, get permitted value information
@@ -279,14 +265,11 @@ xml_to_code_list <- function(doc) {
    permitted <- tibble(
       code_id = permitted_nodes %>% get_node_attr("OID"),
       names = permitted_nodes %>% get_node_attr("Name"),
-      dataType = permitted_nodes %>% get_node_attr("DataType")
+      dataType = permitted_nodes %>% get_node_attr("DataType"),
+      type = "permitted_val",
+      codes = permitted_nodes %>% get_permitted_vals()
    )
 
-   permitted <- permitted %>%
-      mutate(
-         codes = .data$code_id %>% map(get_permitted_vals, doc),
-         type = "permitted_val"
-      )
    # External Libraries
    ex_lib_nodes <- get_nodes(doc, "//ns:CodeList[ns:ExternalCodeList]")
    ex_lib <- tibble(

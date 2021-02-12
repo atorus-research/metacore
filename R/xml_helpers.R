@@ -54,7 +54,7 @@ get_node_attr <- function(nodeSet, attrtibute) {
 #'
 #' Gets the attribute of a child. This only works if their is only one child
 #' @param node current node
-#' @param child tage of the child node
+#' @param child tag of the child node
 #' @param attribute attribute for that child
 #'
 #' @return value of the child attribute
@@ -144,37 +144,36 @@ id_to_var <- function(id) {
 
 #' Get codes
 #'
-#' @param id code_id
-#' @param doc document to search through
+#' @param cl_nodes codelist nodes, got using the following xpath "CodeList[ns:CodeListItem]"
 #'
-#' @return vector of string
+#' @return list of codes and decodes
 #' @noRd
-get_codes <- function(id, doc) {
-   # xpath code to get the CodeListItem node for each variable
-   grp <- get_nodes(doc, str_c("//ns:CodeList[@OID=\"",
-                               id, "\"]", "/ns:CodeListItem",
-                               sep = ""
-   ))
-   # Get codes
-   codes <- grp %>% get_node_attr("CodedValue")
+get_codes <- function(cl_nodes) {
+   cl_nodes %>%
+      map(function(node){
+         # Gets each code value node in the overall code group node
+         cl_vals <- node %>% xmlElementsByTagName("CodeListItem")
+         cl_vals %>%
+            xmlToDataFrame() %>% #converting to data frames gets the decodes
+            #gets the codes from the list attributes
+            mutate(code = cl_vals %>% get_node_attr("CodedValue")) %>%
+            select(decode = .data$Decode, .data$code)
+      })
 }
 
 #' Get permitted values
 #'
-#' @param id permitted value id
-#' @param doc document to search through
+#' @param permitted_nodes permitted value nodes
 #'
-#' @return vector of string
+#' @return list of permitted values
 #' @noRd
-get_permitted_vals <- function(id, doc) {
-   # xpath code to get the EnumeratedItem node for each variable
-   grp <- get_nodes(doc, str_c("//ns:CodeList[@OID=\"",
-                               id, "\"]", "/ns:EnumeratedItem",
-                               sep = ""
-   ))
-
-   # Get values
-   vals <- grp %>% get_node_attr("CodedValue")
+get_permitted_vals <- function(permitted_nodes) {
+   permitted_nodes %>%
+      map(function(node){
+         node %>%
+            xmlElementsByTagName("EnumeratedItem") %>%
+            get_node_attr("CodedValue")
+      })
 }
 
 

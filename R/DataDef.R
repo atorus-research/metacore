@@ -36,7 +36,7 @@ DataDef_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivatio
 #'
 DataDef_print <- function(...){
    ds_len <- private$.ds_spec %>% pull(.data$dataset) %>% length()
-   paste0("DataDef object contains metadata for ", ds_len, " devdatasets\n") %>%
+   paste0("DataDef object contains metadata for ", ds_len, " datasets\n") %>%
       cat()
 }
 
