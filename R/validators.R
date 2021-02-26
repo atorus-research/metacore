@@ -62,7 +62,7 @@ value_check <- function(ds_vars, value_spec){
          pull(.data$full) %>%
          str_c(collapse = ", ")
       message <- paste("The following variables are in the ds_vars table, but don't have value specs:\n",
-                       variables)
+                       variables, "\n")
       warning(message, call. = FALSE)
    }
    # Check the variables in value spec that aren't in ds_vars
@@ -72,9 +72,23 @@ value_check <- function(ds_vars, value_spec){
          pull(.data$variable) %>%
          str_c(collapse = ", ")
       message <- paste("The following variables are have value specifications, but aren't in the ds_vars table:\n",
-                       variables)
+                       variables, "\n")
       warning(message, call. = FALSE)
    }
+
+   if (!ds_vars %>% check_structure(dataset, is.character)) { warning("ds_vars$dataset is not of type character \n") }
+   if (!ds_vars %>% check_structure(variable, is.character)) { warning("ds_vars$variable is not of type character \n") }
+   if (!ds_vars %>% check_structure(key_seq, is.character)) { warning("ds_vars$key_seq is not of type character \n") }
+   if (!ds_vars %>% check_structure(keep, is.logical)) { warning("ds_vars$keep is not of type logical \n") }
+   if (!ds_vars %>% check_structure(core, check_words("Expected|Required|Permissable"))) { warning("ds_vars$core contains not permitted words \n")}
+
+   if (!value_spec %>% check_structure(type, is.character)) { warning("value_spec$type is not of type character \n") }
+   if (!value_spec %>% check_structure(origin, is.character)) { warning("value_spec$origin is not of type character \n") }
+   if (!value_spec %>% check_structure(code_id, is.character)) { warning("value_spec$code_id is not of type character \n") }
+   if (!value_spec %>% check_structure(dataset, is.character)) { warning("value_spec$datasdet is not of type character \n") }
+   if (!value_spec %>% check_structure(variable, is.character)) { warning("value_spec$variable is not of type character \n") }
+   if (!value_spec %>% check_structure(where, is.character)) { warning("value_spec$where is not of type character \n") }
+   if (!value_spec %>% check_structure(derivation_id, is.character)) { warning("value_spec$derivation_id is not of type character \n") }
 }
 
 
@@ -97,7 +111,7 @@ derivation_check <- function(value_spec, derivations){
          pull(.data$variable) %>%
          str_c(collapse = ", ")
       message <- paste("The following variables are missing derivations:\n",
-                       variables)
+                       variables, "\n")
       warning(message, call. = FALSE)
    }
    # Check the derivations in deriavtion that aren't  in value spec
@@ -107,9 +121,12 @@ derivation_check <- function(value_spec, derivations){
          pull(.data$derivation) %>%
          str_c(collapse = ", ")
       message <- paste("The following derivations are never used:\n",
-                       deriv)
+                       deriv, "\n")
       warning(message, call. = FALSE)
    }
+
+   if (!derivations %>% check_structure(derivation_id, is.character)) { warning("derivations$derivation_id is not of type character \n") }
+   if (!derivations %>% check_structure(derivation, is.character)) { warning("derivations$derivation is not of type character \n") }
 
 }
 
@@ -132,7 +149,7 @@ codelist_check <- function(value_spec, codelist){
          pull(.data$variable) %>%
          str_c(collapse = ", ")
       message <- paste("The following variables are missing codelist(s):\n",
-                       variables)
+                       variables, "\n")
       warning(message, call. = FALSE)
    }
    # Check the code_ids in codelist that aren't in value spec
@@ -142,9 +159,14 @@ codelist_check <- function(value_spec, codelist){
          pull(.data$names) %>%
          str_c(collapse = ", ")
       message <- paste("The following codelist(s) are never used:\n",
-                       cl_nm)
+                       cl_nm, "\n")
       warning(message, call. = FALSE)
    }
+
+   if (!codelist %>% check_structure(code_id, is.character)) { warning("codelist$code_id is not of type character \n") }
+   if (!codelist %>% check_structure(names, is.character)) { warning("codelist$names is not of type character \n") }
+   if (!codelist %>% check_structure(type, is.character)) { warning("codelist$type is not of type character \n") }
+   if (!codelist %>% check_structure(codes, is.data.frame)) { warning("codelist$codes is not of type list \n") }
 }
 
 #' Column Names by dataset
