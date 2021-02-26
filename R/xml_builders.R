@@ -56,13 +56,11 @@ xml_to_ds_spec <- function(doc) {
 xml_to_ds_vars <- function(doc) {
    # Get the name of each dataset
    dataset_nodes <- get_ds_lvl_nodes(doc)
-
-
    # Get the variable names, key sequence and keep for each variable in each ds
    dataset_nodes %>%
       map_dfr(function(x) {
          # Gets the name attribute of the dataset node
-         dataset <- xmlGetAttr(x, "Domain")
+         dataset <- xmlGetAttr(x, "Name")
          # Gets the child node, Item Ref, which contains variable level information
          child_var_nodes <- xmlElementsByTagName(x, "ItemRef")
          # Pulls the relevant information from child node

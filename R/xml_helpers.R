@@ -9,7 +9,8 @@
 #' @noRd
 get_nodes <- function(doc, path) {
    namespaces <- xmlNamespaceDefinitions(doc, simplify = TRUE)
-   names(namespaces)[1] <- "ns"
+   names(namespaces) <- names(namespaces) %>%
+      if_else(str_length(.) == 0, "ns", .)
    item_group <- getNodeSet(doc, path, namespaces)
 }
 
@@ -77,8 +78,12 @@ get_child_attr <- function(node, child, attribute, ...) {
 #' @return string, description
 #' @noRd
 get_node_description <- function(node) {
-   xmlElementsByTagName(node, "Description") %>%
+   out <- xmlElementsByTagName(node, "Description") %>%
       xmlValue("ns:TranslatedText[@xml:lang = \"en\"]")
+   if(length(out) == 0){
+      out <- NA
+   }
+   out
 }
 
 

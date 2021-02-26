@@ -8,7 +8,7 @@
 ds_vars_check <- function(ds_vars, var_spec){
    var_check <- anti_join(ds_vars, var_spec, by = "variable")
 
-   if(var_check %>% nrow() != 0){
+   if(var_check %>% nrow()){
       var_ls <- var_check %>%
          pull(.data$variable) %>%
          unique()
