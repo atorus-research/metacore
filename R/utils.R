@@ -52,9 +52,11 @@ check_structure <- function(.data, col, func) {
 }
 
 #' Check Words in Column
+#'
+#' This function IGNORES any NAs before checking for specific words!
+#'
 #' @param accepted_word the regex for accepted strings in the column
 #' @param col the column to check for specific words
-#'
 check_words <- function(accepted_words, col) {
-   expr(function(col) all(grepl(!!accepted_words, col)))
+   expr(function(col) all(grepl(!!accepted_words, na.omit(col))))
 }

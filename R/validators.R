@@ -30,6 +30,12 @@ ds_vars_check <- function(ds_vars, var_spec){
       }
    }
 
+   if (!ds_vars %>% check_structure(dataset, is.character)) { warning("ds_vars dataset is not of type character \n") }
+   if (!ds_vars %>% check_structure(variable, is.character)) { warning("ds_vars variable is not of type character \n") }
+   if (!ds_vars %>% check_structure(key_seq, is.character)) { warning("ds_vars key_seq is not of type character \n") }
+   if (!ds_vars %>% check_structure(keep, is.logical)) { warning("ds_vars keep is not of type logical \n") }
+   if (!ds_vars %>% check_structure(core, check_words("Expected|Required|Permissable"))) { warning("ds_vars core contains not permitted words \n")}
+
 }
 
 

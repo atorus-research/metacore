@@ -89,18 +89,6 @@ DataDef_validate <-  function() {
       warning("Other checks were not preformed, because column names were incorrect",
               call. = FALSE)
    }
-
-   if (!private$.ds_spec %>% check_structure(dataset, is.character)) { warning("dataset is not of type character") }
-   if (!private$.ds_spec %>% check_structure(structure, is.character)) { warning("structure is not of type character") }
-   if (!private$.ds_spec %>% check_structure(label, is.character)) { warning("label is not of type character") }
-
-   if (!private$.ds_vars %>% check_structure(dataset, is.character)) { warning("dataset is not of type character") }
-   if (!private$.ds_vars %>% check_structure(variable, is.character)) { warning("variable is not of type character") }
-   if (!private$.ds_vars %>% check_structure(key_seq, is.character)) { warning("key_seq is not of type character") }
-   if (!private$.ds_vars %>% check_structure(keep, is.logical)) { warning("keep is not of type logical") }
-   if (!private$.ds_vars %>% check_structure(core, check_words("Expected|Required|Permissable"))) { warning("core contains not permitted words") }
-
-
 }
 
 
