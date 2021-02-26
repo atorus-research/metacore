@@ -39,3 +39,22 @@ add_labels <- function(.data,...) {
       as_tibble()
 }
 
+#' Column Validation Function
+#'
+#' @param .data the dataframe to check the column for
+#' @param col the column to test
+#' @param func the function to use to assert column structure
+#'
+check_structure <- function(.data, col, func) {
+   column <- deparse(substitute(col))
+   assertion_func <- rlang::enexpr(func)
+   do.call(rlang::eval_tidy(func), list(.data[[column]]))
+}
+
+#' Check Words in Column
+#' @param accepted_word the regex for accepted strings in the column
+#' @param col the column to check for specific words
+#'
+check_words <- function(accepted_words, col) {
+   expr(function(col) all(grepl(!!accepted_words, col)))
+}

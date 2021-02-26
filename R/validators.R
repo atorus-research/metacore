@@ -195,3 +195,11 @@ var_name_check <- function(envrionment){
       all()
 
 }
+
+
+
+#' Check Column Type
+
+
+
+

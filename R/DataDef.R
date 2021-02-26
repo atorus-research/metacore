@@ -17,12 +17,43 @@
 #'
 DataDef_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, code_list){
 
-   private$.ds_spec <- ds_spec %>% add_labels(dataset = "Dataset Name", structure = "Value Structure", label = "Value Label")
-   private$.ds_vars <- ds_vars %>% add_labels(dataset = "Dataset Name", variable = "Variable Name", key_seq = "Sequence Key", keep = "Keep (Boolean)", core = "ADaM core (Expected, Required, Permissable)")
-   private$.var_spec <- var_spec %>% add_labels(variable = "Variable Name", length = "Variable Length", label = "Variable Label", type = "Variable Class", common = "Common Across ADaM")
-   private$.value_spec <- value_spec %>% add_labels(type = "Value Type", orgin = "Origin of Value", code_id = "ID of the Code List", dataset = "Dataset Name", variable = "Variable Name", where = "Value of the Variable", derivation_id = "ID of Derivation")
-   private$.derivations <- derivations %>% add_labels(derivation_id = "ID of Derivation", derivation = "Derivation")
-   private$.codelist <- code_list %>% add_labels(code_id = "ID of the Code List", names = "Name of the Code List", type = "Code List/Permitted Values/External Library", codes = "List of Codes")
+   private$.ds_spec <- ds_spec %>%
+      add_labels(dataset = "Dataset Name",
+                 structure = "Value Structure",
+                 label = "Value Label")
+
+   private$.ds_vars <- ds_vars %>%
+      add_labels(dataset = "Dataset Name",
+                 variable = "Variable Name",
+                 key_seq = "Sequence Key",
+                 keep = "Keep (Boolean)",
+                 core = "ADaM core (Expected, Required, Permissable)")
+
+   private$.var_spec <- var_spec %>%
+      add_labels(variable = "Variable Name",
+                 length = "Variable Length",
+                 label = "Variable Label",
+                 type = "Variable Class",
+                 common = "Common Across ADaM")
+
+   private$.value_spec <- value_spec %>%
+      add_labels(type = "Value Type",
+                 orgin = "Origin of Value",
+                 code_id = "ID of the Code List",
+                 dataset = "Dataset Name",
+                 variable = "Variable Name",
+                 where = "Value of the Variable",
+                 derivation_id = "ID of Derivation")
+
+   private$.derivations <- derivations %>%
+      add_labels(derivation_id = "ID of Derivation",
+                 derivation = "Derivation")
+
+   private$.codelist <- code_list %>%
+      add_labels(code_id = "ID of the Code List",
+                 names = "Name of the Code List",
+                 type = "Code List/Permitted Values/External Library",
+                 codes = "List of Codes")
 
    self$validate()
    message("\n Metadata successfully imported")
@@ -58,6 +89,8 @@ DataDef_validate <-  function() {
       warning("Other checks were not preformed, because column names were incorrect",
               call. = FALSE)
    }
+
+   if (!private$.ds_vars %>% check_structure(dataset, is.character)) { print("test")}
 
 }
 
