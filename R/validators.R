@@ -30,12 +30,17 @@ ds_vars_check <- function(ds_vars, var_spec){
       }
    }
 
-   if (!ds_vars %>% check_structure(dataset, is.character)) { warning("ds_vars dataset is not of type character \n") }
-   if (!ds_vars %>% check_structure(variable, is.character)) { warning("ds_vars variable is not of type character \n") }
-   if (!ds_vars %>% check_structure(key_seq, is.character)) { warning("ds_vars key_seq is not of type character \n") }
-   if (!ds_vars %>% check_structure(keep, is.logical)) { warning("ds_vars keep is not of type logical \n") }
-   if (!ds_vars %>% check_structure(core, check_words("Expected|Required|Permissable"))) { warning("ds_vars core contains not permitted words \n")}
+   if (!ds_vars %>% check_structure(dataset, is.character)) { warning("ds_vars$dataset is not of type character \n") }
+   if (!ds_vars %>% check_structure(variable, is.character)) { warning("ds_vars$variable is not of type character \n") }
+   if (!ds_vars %>% check_structure(key_seq, is.character)) { warning("ds_vars$key_seq is not of type character \n") }
+   if (!ds_vars %>% check_structure(keep, is.logical)) { warning("ds_vars$keep is not of type logical \n") }
+   if (!ds_vars %>% check_structure(core, check_words("Expected|Required|Permissable"))) { warning("ds_vars$core contains not permitted words \n")}
 
+   if (!var_spec %>% check_structure(variable, is.character)) { warning("var_spec$variable is not of type character \n") }
+   if (!var_spec %>% check_structure(type, is.character)) { warning("var_spec$type is not of type character \n") }
+   if (!var_spec %>% check_structure(length, is.integer)) { warning("var_spec$length is not of type character \n") }
+   if (!var_spec %>% check_structure(label, is.character)) { warning("var_spec$label is not of type character \n") }
+   if (!var_spec %>% check_structure(common, is.logical)) { warning("var_spec$common is not of type logical \n") }
 }
 
 
@@ -75,12 +80,6 @@ value_check <- function(ds_vars, value_spec){
                        variables, "\n")
       warning(message, call. = FALSE)
    }
-
-   if (!ds_vars %>% check_structure(dataset, is.character)) { warning("ds_vars$dataset is not of type character \n") }
-   if (!ds_vars %>% check_structure(variable, is.character)) { warning("ds_vars$variable is not of type character \n") }
-   if (!ds_vars %>% check_structure(key_seq, is.character)) { warning("ds_vars$key_seq is not of type character \n") }
-   if (!ds_vars %>% check_structure(keep, is.logical)) { warning("ds_vars$keep is not of type logical \n") }
-   if (!ds_vars %>% check_structure(core, check_words("Expected|Required|Permissable"))) { warning("ds_vars$core contains not permitted words \n")}
 
    if (!value_spec %>% check_structure(type, is.character)) { warning("value_spec$type is not of type character \n") }
    if (!value_spec %>% check_structure(origin, is.character)) { warning("value_spec$origin is not of type character \n") }
@@ -166,12 +165,26 @@ codelist_check <- function(value_spec, codelist){
    if (!codelist %>% check_structure(code_id, is.character)) { warning("codelist$code_id is not of type character \n") }
    if (!codelist %>% check_structure(names, is.character)) { warning("codelist$names is not of type character \n") }
    if (!codelist %>% check_structure(type, is.character)) { warning("codelist$type is not of type character \n") }
-   if (!codelist %>% check_structure(codes, is.data.frame)) { warning("codelist$codes is not of type list \n") }
+   if (!codelist %>% check_structure(codes, is.list)) { warning("codelist$codes is not of type list \n") }
+}
+
+
+
+#' Dataset Spec Check
+#'
+#' @param ds_spec dataset spec table
+#'
+#' @return writes warning to console if there is an issue
+#' @noRd
+ds_spec_check <- function(ds_spec) {
+   if (!ds_spec %>% check_structure(dataset, is.character)) { warning("ds_spec$dataset is not of type character \n") }
+   if (!ds_spec %>% check_structure(structure, is.character)) { warning("ds_spec$structure is not of type character \n") }
+   if (!ds_spec %>% check_structure(label, is.character)) { warning("ds_spec$label is not of type character \n") }
 }
 
 #' Column Names by dataset
 #'
-#' @return list of colum names by dataset
+#' @return list of column names by dataset
 #' @noRd
 col_vars <- function(){
    list(.ds_spec = c("dataset", "structure", "label"),
@@ -182,7 +195,6 @@ col_vars <- function(){
         .codelist= c("code_id", "names","type", "codes"),
         .change_log = c("table_chg", "column_chg", "what_chg"))
 }
-
 
 
 #' Check Variable names
@@ -223,11 +235,4 @@ var_name_check <- function(envrionment){
       all()
 
 }
-
-
-
-#' Check Column Type
-
-
-
 
