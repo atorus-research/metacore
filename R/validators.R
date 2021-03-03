@@ -40,19 +40,17 @@ ds_vars_check <- function(ds_vars, var_spec){
       check = c(is.character, is.character, is.logical,
                 check_words("Expected",
                             "Required",
-                            "Permissable",
+                            "Permissible",
                             "Conditionally Required",
                             "Conditionally Expected"))) %>%
       rowwise() %>%
-      mutate(variable = purrr::map(variable, ~sym(.x)),
-          check_structure(ds_vars, variable, check)
-      )
+      mutate(variable = purrr::pmap(list(ds_vars, sym(variable), check), check_structure))
 
    # variable = c("dataset", "variable", "key_seq", "core")
    # check = c(is.character, is.character, is.logical,
    #           check_words("Expected",
    #                       "Required",
-   #                       "Permissable",
+   #                       "Permissible",
    #                       "Conditionally Required",
    #                       "Conditionally Expected"))
    #
@@ -60,11 +58,11 @@ ds_vars_check <- function(ds_vars, var_spec){
 
 
 
-   # check_structure(ds_vars, dataset, is.character)
-   # check_structure(ds_vars, variable, is.character)
-   # check_structure(ds_vars, key_seq, is.character)
-   # check_structure(ds_vars, keep, is.logical)
-   # check_structure(ds_vars, core, check_words("Expected", "Required", "Permissable", "Conditionally Required", "Conditionally Expected"))
+   check_structure(ds_vars, dataset, is.character)
+   check_structure(ds_vars, variable, is.character)
+   check_structure(ds_vars, key_seq, is.character)
+   check_structure(ds_vars, keep, is.logical)
+   check_structure(ds_vars, core, check_words("Expected", "Required", "Permissable", "Conditionally Required", "Conditionally Expected"))
 
    # if (!ds_vars %>% check_structure(dataset, is.character)) { warning("ds_vars$dataset is not of type character \n") }
    # if (!ds_vars %>% check_structure(variable, is.character)) { warning("ds_vars$variable is not of type character \n") }

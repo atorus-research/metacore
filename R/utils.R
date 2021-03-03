@@ -80,19 +80,3 @@ check_words <- function(..., col) {
    accepted_words <- unlist(c(...))
    expr(function(col) col %in% !!accepted_words)
 }
-
-
-get_base_obj <- function(.something=NULL, lhs=NULL){
-   if (!is.null(lhs)) {
-      target_stack <- stacks[[length(stacks)-1]]
-   } else {
-      target_stack <- stacks[[1]]
-   }
-   if (typeof(target_stack$lhs) != "symbol") {
-      lhs=as.list(target_stack$lhs)[[2]]
-      return(get_base_obj(lhs=lhs))
-   } else {
-      return(target_stack$lhs)
-   }
-}
-
