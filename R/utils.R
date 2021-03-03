@@ -47,6 +47,7 @@ add_labels <- function(.data,...) {
 #' @param func the function to use to assert column structure
 #'
 check_structure <- function(.data, col, func) {
+   browser()
 
    dat <- deparse(substitute(.data))
    column <- deparse(substitute(col))

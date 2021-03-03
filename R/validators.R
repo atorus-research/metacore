@@ -34,6 +34,28 @@ ds_vars_check <- function(ds_vars, var_spec){
    # if (check_missing_columns()) {
    #    warning("you're missing stuff")
    # }
+   browser()
+   test <- tribble(
+      ~dataset,    ~var,       ~test,
+      "ds_vars",  "dataset",   is.character,
+      "ds_vars",  "variable",  is.character,
+      "ds_vars",  "key_seq",   is.character,
+      # "ds_vars",  "core",      ~check_words(., "Expected",
+      #                                      "Required",
+      #                                      "Permissible",
+      #                                      "Conditionally Required",
+      #                                      "Conditionally Expected")
+   )
+
+   test2 <- test %>%
+      mutate(dataset = dataset %>% map(sym)) %>%
+      slice(1)
+
+   check_structure(test2$dataset, dataset, is.numeric)
+
+   foo<- sym("ds_vars")
+   enquo(foo)
+
 
    tibble(
       variable = c("dataset", "variable", "key_seq", "core"),
