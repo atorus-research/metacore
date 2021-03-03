@@ -48,6 +48,17 @@ ds_vars_check <- function(ds_vars, var_spec){
           check_structure(ds_vars, variable, check)
       )
 
+   # variable = c("dataset", "variable", "key_seq", "core")
+   # check = c(is.character, is.character, is.logical,
+   #           check_words("Expected",
+   #                       "Required",
+   #                       "Permissable",
+   #                       "Conditionally Required",
+   #                       "Conditionally Expected"))
+   #
+   # purrr::map2(variable, check, ~check_structure(ds_vars, sym(.x), .y))
+
+
 
    # check_structure(ds_vars, dataset, is.character)
    # check_structure(ds_vars, variable, is.character)
