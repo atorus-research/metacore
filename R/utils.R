@@ -39,6 +39,7 @@ add_labels <- function(.data,...) {
       as_tibble()
 }
 
+
 #' Column Validation Function
 #'
 #' @param .data the dataframe to check the column for
@@ -46,17 +47,52 @@ add_labels <- function(.data,...) {
 #' @param func the function to use to assert column structure
 #'
 check_structure <- function(.data, col, func) {
+
+   dat <- deparse(substitute(.data))
    column <- deparse(substitute(col))
    assertion_func <- rlang::enexpr(func)
-   do.call(rlang::eval_tidy(func), list(.data[[column]]))
+
+   failures <- .data[[column]] %>%
+      discard(~do.call(rlang::eval_tidy(func), list(.))) %>%
+      unique()
+
+   all_fails <- paste("   ", failures, collapse = "\n")
+
+   if (length(failures) > 0) {
+
+
+      warning_string <-
+         case_when(
+         as.character(assertion_func)[[1]] == "check_words" ~
+            paste0("The following words in ", dat, "$", column, " are not allowed: \n", all_fails, "\n"),
+      TRUE ~ paste0(dat, "$", column, " fails ", as.character(assertion_func)[[1]], " check\n")
+      )
+
+      warning(warning_string, call. = FALSE)
+   }
 }
 
 #' Check Words in Column
 #'
-#' This function IGNORES any NAs before checking for specific words!
-#'
-#' @param accepted_word the regex for accepted strings in the column
+#' @param ... permissable words in the column
 #' @param col the column to check for specific words
-check_words <- function(accepted_words, col) {
-   expr(function(col) all(grepl(!!accepted_words, na.omit(col))))
+check_words <- function(..., col) {
+   accepted_words <- unlist(c(...))
+   expr(function(col) col %in% !!accepted_words)
 }
+
+
+get_base_obj <- function(.something=NULL, lhs=NULL){
+   if (!is.null(lhs)) {
+      target_stack <- stacks[[length(stacks)-1]]
+   } else {
+      target_stack <- stacks[[1]]
+   }
+   if (typeof(target_stack$lhs) != "symbol") {
+      lhs=as.list(target_stack$lhs)[[2]]
+      return(get_base_obj(lhs=lhs))
+   } else {
+      return(target_stack$lhs)
+   }
+}
+
