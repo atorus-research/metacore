@@ -55,6 +55,11 @@ check_structure <- function(.data, col, func) {
    # column <- deparse(substitute(col))
    column <- rlang::as_string(col)
 
+   # what the heck this works in broswer()
+   # browser()
+   assertion_func <- deparse(rlang::enexpr(func))
+   assertion_func <- sub('.*\\"(.*)\\").*', "\\1", assertion_func)
+
    failures <- rlang::eval_tidy(.data)[[column]] %>%
       discard(~do.call(func, list(.))) %>%
       unique()
