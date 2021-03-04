@@ -37,7 +37,7 @@ ds_vars_check <- function(ds_vars, var_spec){
 
    test <- tribble(
       ~dataset,    ~var,       ~test,
-      "ds_vars",  "dataset",   is.character,
+      "ds_vars",  "dataset",   is.numeric,
       "ds_vars",  "variable",  is.character,
       "ds_vars",  "key_seq",   is.character,
       "ds_vars",  "core",      check_words("Expected",
@@ -57,7 +57,10 @@ ds_vars_check <- function(ds_vars, var_spec){
         # z # returns the primitive function
         check_structure(sym(x), sym(y), z)
      })
-     )
+     ) %>%
+     pull(df) %>%
+     compact() %>%
+     purrr::walk(warning, call. = FALSE, immediate. = TRUE)
 
 
    tibble(
