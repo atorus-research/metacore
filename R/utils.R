@@ -48,32 +48,16 @@ add_labels <- function(.data,...) {
 #'
 check_structure <- function(.data, col, func) {
 
-
+   # browser()
    # dat <- deparse(substitute(.data))
    dat <- rlang::as_string(.data)
 
    # column <- deparse(substitute(col))
    column <- rlang::as_string(col)
 
-   # what the heck this works in broswer()
-   # browser()
-   assertion_func <- deparse(rlang::enexpr(func))
-   assertion_func <- sub('.*\\"(.*)\\").*', "\\1", assertion_func)
-
-   if (is.primitive(func)) {
-
-      failures <- rlang::eval_tidy(.data)[[column]] %>%
+   failures <- rlang::eval_tidy(.data)[[column]] %>%
       discard(~do.call(func, list(.))) %>%
       unique()
-
-
-   } else {
-
-      failures <- rlang::eval_tidy(.data)[[column]] %>%
-         discard(~do.call(func(), list(.))) %>%
-         unique()
-
-   }
 
    all_fails <- paste("   ", failures, collapse = "\n")
 
@@ -100,7 +84,7 @@ check_structure <- function(.data, col, func) {
 check_words <- function(..., col) {
    accepted_words <- unlist(c(...))
    expr <- expr(function(col) col %in% !!accepted_words)
-   make_function(body = expr, env = parent.frame())
+   make_function(body = expr, env = parent.frame())()
 }
 
 make_function <- function(args = pairlist(), body, env = parent.frame())  {
