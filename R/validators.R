@@ -34,27 +34,30 @@ ds_vars_check <- function(ds_vars, var_spec){
    # if (check_missing_columns()) {
    #    warning("you're missing stuff")
    # }
-   browser()
+
    test <- tribble(
       ~dataset,    ~var,       ~test,
       "ds_vars",  "dataset",   is.character,
       "ds_vars",  "variable",  is.character,
       "ds_vars",  "key_seq",   is.character,
-      # "ds_vars",  "core",      ~check_words(., "Expected",
-      #                                      "Required",
-      #                                      "Permissible",
-      #                                      "Conditionally Required",
-      #                                      "Conditionally Expected")
+      "ds_vars",  "core",      check_words("Expected",
+                                              "Required",
+                                              "Permissible",
+                                              "Conditionally Required",
+                                              "Conditionally Expected")
    )
 
-   test2 <- test %>%
-      mutate(dataset = dataset %>% map(sym)) %>%
-      slice(1)
 
-   check_structure(test2$dataset, dataset, is.numeric)
-
-   foo<- sym("ds_vars")
-   enquo(foo)
+  # TODO capture the name of the function so we can print
+  # get the check_words function to actually work.
+  tt <-test %>%
+     mutate(df = purrr::pmap(list(dataset, var, test), function(x, y, z) {
+        # eval(sym(x)) # returns actual dataset
+        # sym(x) # returns sym of character string
+        # z # returns the primitive function
+        check_structure(sym(x), sym(y), z)
+     })
+     )
 
 
    tibble(

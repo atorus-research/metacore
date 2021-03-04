@@ -47,30 +47,50 @@ add_labels <- function(.data,...) {
 #' @param func the function to use to assert column structure
 #'
 check_structure <- function(.data, col, func) {
-   browser()
 
-   dat <- deparse(substitute(.data))
-   column <- deparse(substitute(col))
-   assertion_func <- rlang::enexpr(func)
 
-   failures <- .data[[column]] %>%
-      discard(~do.call(rlang::eval_tidy(func), list(.))) %>%
+   # dat <- deparse(substitute(.data))
+   dat <- rlang::as_string(.data)
+
+   # column <- deparse(substitute(col))
+   column <- rlang::as_string(col)
+
+   # what the heck this works in broswer()
+   # browser()
+   assertion_func <- deparse(rlang::enexpr(func))
+   assertion_func <- sub('.*\\"(.*)\\").*', "\\1", assertion_func)
+
+   if (is.primitive(func)) {
+
+      failures <- rlang::eval_tidy(.data)[[column]] %>%
+      discard(~do.call(func, list(.))) %>%
       unique()
+
+
+   } else {
+
+      failures <- rlang::eval_tidy(.data)[[column]] %>%
+         discard(~do.call(func(), list(.))) %>%
+         unique()
+
+   }
 
    all_fails <- paste("   ", failures, collapse = "\n")
 
    if (length(failures) > 0) {
 
-
       warning_string <-
          case_when(
-         as.character(assertion_func)[[1]] == "check_words" ~
+         !is.primitive(func) ~
             paste0("The following words in ", dat, "$", column, " are not allowed: \n", all_fails, "\n"),
-      TRUE ~ paste0(dat, "$", column, " fails ", as.character(assertion_func)[[1]], " check\n")
+      TRUE ~ paste0(dat, "$", column, " fails ", assertion_func, " check\n")
       )
 
-      warning(warning_string, call. = FALSE)
+   } else {
+      warning_string <- NULL
    }
+
+   warning_string
 }
 
 #' Check Words in Column
@@ -79,5 +99,10 @@ check_structure <- function(.data, col, func) {
 #' @param col the column to check for specific words
 check_words <- function(..., col) {
    accepted_words <- unlist(c(...))
-   expr(function(col) col %in% !!accepted_words)
+   expr <- expr(function(col) col %in% !!accepted_words)
+   make_function(body = expr, env = parent.frame())
+}
+
+make_function <- function(args = pairlist(), body, env = parent.frame())  {
+   eval(call("function", args, body), env)
 }
