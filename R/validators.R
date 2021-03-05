@@ -209,7 +209,7 @@ check_columns <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, c
       "ds_vars",     "dataset",       is.character,                FALSE,
       "ds_vars",     "variable",      is.character,                FALSE,
       "ds_vars",     "key_seq",       is.character,                TRUE,
-      "ds_vars",     "core", check_words("Expected", "Required", "Permissible", "Conditionally Required", "Conditionally Expected"), TRUE,
+      "ds_vars",     "core",          check_words("Expected", "Required", "Permissible", "Conditionally Required", "Conditionally Expected"), TRUE,
       "var_spec",    "variable",      is.character,                FALSE,
       "var_spec",    "type",          is.character,                TRUE,
       "var_spec",    "length",        is.numeric,                  TRUE,

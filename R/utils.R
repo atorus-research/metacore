@@ -52,8 +52,10 @@ check_structure <- function(.data, col, func, any_na_acceptable, env) {
    dat <- rlang::as_string(.data)
 
    column <- rlang::as_string(col)
+
    vec <- rlang::eval_tidy(.data, env = env) %>%
       pull(!!col)
+
    if(any(is.na(vec)) & !any_na_acceptable){
       error_message <- (message = paste(column, "from the", dat,
                  "table contains missing values. Actual values are needed."))
