@@ -199,7 +199,7 @@ var_name_check <- function(envrionment){
 #' Check all data frames include the correct types of columns
 #'
 #' This function checks for vector types and accepted words
-check_columns <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist) {
+check_columns <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, code_list) {
 
    all_message <- tribble(
       ~dataset,     ~var,             ~test,                 ~any_na_acceptable,
@@ -230,7 +230,7 @@ check_columns <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, c
    ) %>%
       mutate(df = purrr::pmap(list(dataset, var, test, any_na_acceptable),
                               function(x, y, z, a) {
-         check_structure(sym(x), sym(y), z, a, environment())
+         check_structure(get(x), sym(y), z, a, x)
       })) %>%
       pull(df)
 

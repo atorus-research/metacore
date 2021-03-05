@@ -9,15 +9,15 @@ empty_df <- function(nms, fill) {
 # when the data def object is loaded
 # and i think its checking the wrong thing
 
-test_that("empty columns fail primitive checks", {
+test_that("specific words and primitive columns fail when character", {
 
-   dfs <- purrr::map(col_vars(), ~ empty_df(.x, fill = "")) %>%
+   dfs <- purrr::map(col_vars(), ~ empty_df(.x, fill = "A")) %>%
       setNames(c("ds_spec",
                "ds_vars",
                "var_spec",
                "value_spec",
                "derivations",
-               "codelist",
+               "code_list",
                "changelog"))
 
    expect_warning(do.call(check_columns, dfs[-7]))
@@ -32,7 +32,7 @@ test_that("NA columns fail", {
                  "var_spec",
                  "value_spec",
                  "derivations",
-                 "codelist",
+                 "code_list",
                  "changelog"))
 
    expect_error(suppressWarnings(do.call(check_columns, dfs[-7])))
