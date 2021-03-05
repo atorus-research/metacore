@@ -45,38 +45,47 @@ add_labels <- function(.data,...) {
 #' @param .data the dataframe to check the column for
 #' @param col the column to test
 #' @param func the function to use to assert column structure
+#' @param any_na_acceptable boolean, testing if the column can have missing
 #'
-check_structure <- function(.data, col, func) {
+check_structure <- function(.data, col, func, any_na_acceptable) {
 
    dat <- rlang::as_string(.data)
 
    column <- rlang::as_string(col)
+   vec <- rlang::eval_tidy(.data)[[column]]
+   if(any(is.na(vec)) & !any_na_acceptable){
+      stop(paste(column, "from the", dat,
+                 "table contains missing values. Actual values are needed."))
+   } else if (all(is.na(vec))){
+      warning_string <- paste(column, "from the", dat,
+                    "table only contain missing values.")
+   } else {
+      failures <-  vec %>%
+         discard(~do.call(func, list(.))) %>%
+         unique()
 
-   failures <- rlang::eval_tidy(.data)[[column]] %>%
-      discard(~do.call(func, list(.))) %>%
-      unique()
+      all_fails <- paste("   ", failures, collapse = "\n")
 
-   all_fails <- paste("   ", failures, collapse = "\n")
+      if (length(failures) > 0) {
 
-   if (length(failures) > 0) {
+         if (is.primitive(func)) {
+            assertion_func <- rlang::prim_name(func)
+            # call the function so we can grab its name for the error
+            # force(func)
+            # assertion_func <- deparse(rlang::enexpr(func))
+            # assertion_func <- sub('.*\\"(.*)\\").*', "\\1", assertion_func)
+            warning_string <- paste0(dat, "$", column, " fails ", assertion_func, " check \n")
 
-      if (is.primitive(func)) {
-
-         # call the function so we can grab its name for the error
-         force(func)
-         assertion_func <- deparse(rlang::enexpr(func))
-         assertion_func <- sub('.*\\"(.*)\\").*', "\\1", assertion_func)
-         warning_string <- paste0(dat, "$", column, " fails ", assertion_func, " check \n")
+         } else {
+            warning_string <- paste0("The following words in ", dat, "$", column, " are not allowed: \n", all_fails, "\n")
+         }
 
       } else {
-         warning_string <- paste0("The following words in ", dat, "$", column, " are not allowed: \n", all_fails, "\n")
+         warning_string <- NULL
       }
 
-   } else {
-      warning_string <- NULL
+      warning_string
    }
-
-   warning_string
 }
 
 #' Check Words in Column

@@ -201,35 +201,36 @@ var_name_check <- function(envrionment){
 #' This function checks for vector types and accepted words
 check_columns <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist) {
    tribble(
-      ~dataset,     ~var,             ~test,
-      "ds_spec",     "dataset",       is.character,
-      "ds_spec",     "structure",     is.character,
-      "ds_spec",     "label",         is.character,
-      "ds_vars",     "dataset",       is.character,
-      "ds_vars",     "variable",      is.character,
-      "ds_vars",     "key_seq",       is.character,
-      "ds_vars",     "core",          check_words("Expected", "Required", "Permissible", "Conditionally Required", "Conditionally Expected"),
-      "var_spec",    "variable",      is.character,
-      "var_spec",    "type",          is.character,
-      "var_spec",    "length",        is.numeric,
-      "var_spec",    "label",         is.character,
-      "var_spec",    "common",        is.logical,
-      "value_spec",  "type",          is.character,
-      "value_spec",  "origin",        is.character,
-      "value_spec",  "code_id",       is.character,
-      "value_spec",  "dataset",       is.character,
-      "value_spec",  "where",         is.character,
-      "value_spec",  "derivation_id", is.character,
-      "derivations", "derivation_id", is.character,
-      "derivations", "derivation",    is.character,
-      "code_list",    "code_id",      is.character,
-      "code_list",    "names",        is.character,
-   #  how should we check this... do we need to?
+      ~dataset,     ~var,             ~test,                 ~any_na_acceptable,
+      "ds_spec",     "dataset",       is.character,                FALSE,
+      "ds_spec",     "structure",     is.character,                TRUE,
+      "ds_spec",     "label",         is.character,                TRUE,
+      "ds_vars",     "dataset",       is.character,                FALSE,
+      "ds_vars",     "variable",      is.character,                FALSE,
+      "ds_vars",     "key_seq",       is.character,                TRUE,
+      "ds_vars",     "core", check_words("Expected", "Required", "Permissible", "Conditionally Required", "Conditionally Expected"), TRUE,
+      "var_spec",    "variable",      is.character,                FALSE,
+      "var_spec",    "type",          is.character,                TRUE,
+      "var_spec",    "length",        is.numeric,                  TRUE,
+      "var_spec",    "label",         is.character,                TRUE,
+      "var_spec",    "common",        is.logical,                  TRUE,
+      "value_spec",  "type",          is.character,                TRUE,
+      "value_spec",  "origin",        is.character,                TRUE,
+      "value_spec",  "code_id",       is.character,                TRUE,
+      "value_spec",  "dataset",       is.character,                FALSE,
+      "value_spec",  "where",         is.character,                TRUE,
+      "value_spec",  "derivation_id", is.character,                TRUE,
+      "derivations", "derivation_id", is.character,                TRUE,
+      "derivations", "derivation",    is.character,                TRUE,
+      "code_list",    "code_id",      is.character,                TRUE,
+      "code_list",    "names",        is.character,                TRUE,
+   #  how should we check this... do we need to? I think we need is.list
    #  "code_list",    "codes",        is.data.frame,
-      "code_list",    "type",         is.character,
+      "code_list",    "type",         is.character,                TRUE,
    ) %>%
-      mutate(df = purrr::pmap(list(dataset, var, test), function(x, y, z) {
-         check_structure(sym(x), sym(y), z)
+      mutate(df = purrr::pmap(list(dataset, var, test, any_na_acceptable),
+                              function(x, y, z, a) {
+         check_structure(sym(x), sym(y), z, a)
       })
       ) %>%
       pull(df) %>%
