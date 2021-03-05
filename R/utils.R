@@ -48,17 +48,9 @@ add_labels <- function(.data,...) {
 #'
 check_structure <- function(.data, col, func) {
 
-   # browser()
-   # dat <- deparse(substitute(.data))
    dat <- rlang::as_string(.data)
 
-   # column <- deparse(substitute(col))
    column <- rlang::as_string(col)
-
-   # what the heck this works in broswer()
-   # browser()
-   assertion_func <- deparse(rlang::enexpr(func))
-   assertion_func <- sub('.*\\"(.*)\\").*', "\\1", assertion_func)
 
    failures <- rlang::eval_tidy(.data)[[column]] %>%
       discard(~do.call(func, list(.))) %>%
@@ -68,12 +60,17 @@ check_structure <- function(.data, col, func) {
 
    if (length(failures) > 0) {
 
-      warning_string <-
-         case_when(
-         !is.primitive(func) ~
-            paste0("The following words in ", dat, "$", column, " are not allowed: \n", all_fails, "\n"),
-      TRUE ~ paste0(dat, "$", column, " fails ", assertion_func, " check\n")
-      )
+      if (is.primitive(func)) {
+
+         # call the function so we can grab its name for the error
+         force(func)
+         assertion_func <- deparse(rlang::enexpr(func))
+         assertion_func <- sub('.*\\"(.*)\\").*', "\\1", assertion_func)
+         warning_string <- paste0(dat, "$", column, " fails ", assertion_func, " check \n")
+
+      } else {
+         warning_string <- paste0("The following words in ", dat, "$", column, " are not allowed: \n", all_fails, "\n")
+      }
 
    } else {
       warning_string <- NULL

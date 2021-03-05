@@ -29,39 +29,6 @@ ds_vars_check <- function(ds_vars, var_spec){
          )
       }
    }
-
-   # check column exists AT ALL
-   # if (check_missing_columns()) {
-   #    warning("you're missing stuff")
-   # }
-
-   test <- tribble(
-      ~dataset,    ~var,       ~test,
-      "ds_vars",  "dataset",   is.numeric,
-      "ds_vars",  "variable",  is.character,
-      "ds_vars",  "key_seq",   is.character,
-      "ds_vars",  "core",      check_words("Expected",
-                                              "Required",
-                                              "Permissible",
-                                              "Conditionally Required",
-                                              "Conditionally Expected")
-   )
-
-
-  # TODO capture the name of the function so we can print
-  # get the check_words function to actually work.
-  tt <-test %>%
-     mutate(df = purrr::pmap(list(dataset, var, test), function(x, y, z) {
-        # eval(sym(x)) # returns actual dataset
-        # sym(x) # returns sym of character string
-        # z # returns the primitive function
-        check_structure(sym(x), sym(y), z)
-     })
-     ) %>%
-     pull(df) %>%
-     compact() %>%
-     purrr::walk(warning, call. = FALSE, immediate. = TRUE)
-
 }
 
 
@@ -101,14 +68,6 @@ value_check <- function(ds_vars, value_spec){
                        variables, "\n")
       warning(message, call. = FALSE)
    }
-
-   # if (!value_spec %>% check_structure(type, is.character)) { warning("value_spec$type is not of type character \n") }
-   # if (!value_spec %>% check_structure(origin, is.character)) { warning("value_spec$origin is not of type character \n") }
-   # if (!value_spec %>% check_structure(code_id, is.character)) { warning("value_spec$code_id is not of type character \n") }
-   # if (!value_spec %>% check_structure(dataset, is.character)) { warning("value_spec$datasdet is not of type character \n") }
-   # if (!value_spec %>% check_structure(variable, is.character)) { warning("value_spec$variable is not of type character \n") }
-   # if (!value_spec %>% check_structure(where, is.character)) { warning("value_spec$where is not of type character \n") }
-   # if (!value_spec %>% check_structure(derivation_id, is.character)) { warning("value_spec$derivation_id is not of type character \n") }
 }
 
 
@@ -145,9 +104,6 @@ derivation_check <- function(value_spec, derivations){
       warning(message, call. = FALSE)
    }
 
-   # if (!derivations %>% check_structure(derivation_id, is.character)) { warning("derivations$derivation_id is not of type character \n") }
-   # if (!derivations %>% check_structure(derivation, is.character)) { warning("derivations$derivation is not of type character \n") }
-
 }
 
 #' Codelist Check
@@ -182,25 +138,6 @@ codelist_check <- function(value_spec, codelist){
                        cl_nm, "\n")
       warning(message, call. = FALSE)
    }
-
-   # if (!codelist %>% check_structure(code_id, is.character)) { warning("codelist$code_id is not of type character \n") }
-   # if (!codelist %>% check_structure(names, is.character)) { warning("codelist$names is not of type character \n") }
-   # if (!codelist %>% check_structure(type, is.character)) { warning("codelist$type is not of type character \n") }
-   # if (!codelist %>% check_structure(codes, is.list)) { warning("codelist$codes is not of type list \n") }
-}
-
-
-
-#' Dataset Spec Check
-#'
-#' @param ds_spec dataset spec table
-#'
-#' @return writes warning to console if there is an issue
-#' @noRd
-ds_spec_check <- function(ds_spec) {
-   # if (!ds_spec %>% check_structure(dataset, is.character)) { warning("ds_spec$dataset is not of type character \n") }
-   # if (!ds_spec %>% check_structure(structure, is.character)) { warning("ds_spec$structure is not of type character \n") }
-   # if (!ds_spec %>% check_structure(label, is.character)) { warning("ds_spec$label is not of type character \n") }
 }
 
 #' Column Names by dataset
@@ -257,3 +194,46 @@ var_name_check <- function(envrionment){
 
 }
 
+
+
+#' Check all data frames include the correct types of columns
+#'
+#' This function checks for vector types and accepted words
+check_columns <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist) {
+   tribble(
+      ~dataset,     ~var,             ~test,
+      "ds_spec",     "dataset",       is.character,
+      "ds_spec",     "structure",     is.character,
+      "ds_spec",     "label",         is.character,
+      "ds_vars",     "dataset",       is.character,
+      "ds_vars",     "variable",      is.character,
+      "ds_vars",     "key_seq",       is.character,
+      "ds_vars",     "core",          check_words("Expected", "Required", "Permissible", "Conditionally Required", "Conditionally Expected"),
+      "var_spec",    "variable",      is.character,
+      "var_spec",    "type",          is.character,
+      "var_spec",    "length",        is.numeric,
+      "var_spec",    "label",         is.character,
+      "var_spec",    "common",        is.logical,
+      "value_spec",  "type",          is.character,
+      "value_spec",  "origin",        is.character,
+      "value_spec",  "code_id",       is.character,
+      "value_spec",  "dataset",       is.character,
+      "value_spec",  "where",         is.character,
+      "value_spec",  "derivation_id", is.character,
+      "derivations", "derivation_id", is.character,
+      "derivations", "derivation",    is.character,
+      "code_list",    "code_id",      is.character,
+      "code_list",    "names",        is.character,
+   #  how should we check this... do we need to?
+   #  "code_list",    "codes",        is.data.frame,
+      "code_list",    "type",         is.character,
+   ) %>%
+      mutate(df = purrr::pmap(list(dataset, var, test), function(x, y, z) {
+         check_structure(sym(x), sym(y), z)
+      })
+      ) %>%
+      pull(df) %>%
+      compact() %>%
+      purrr::walk(warning, call. = FALSE, immediate. = TRUE)
+
+}

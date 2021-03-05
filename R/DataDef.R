@@ -15,7 +15,7 @@
 #' @noRd
 #'
 #'
-DataDef_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, code_list){
+DataDef_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist){
 
    private$.ds_spec <- ds_spec %>%
       add_labels(dataset = "Dataset Name",
@@ -81,7 +81,15 @@ DataDef_print <- function(...){
 #'
 DataDef_validate <-  function() {
    if(var_name_check(private)){
-      ds_spec_check(private$.ds_spec)
+
+      check_columns(private$.ds_spec,
+                    private$.ds_vars,
+                    private$.var_spec,
+                    private$.value_spec,
+                    private$.derivations,
+                    private$.codelist
+      )
+
       ds_vars_check(private$.ds_vars, private$.var_spec)
       value_check(private$.ds_vars, private$.value_spec)
       derivation_check(private$.value_spec, private$.derivations)
@@ -176,6 +184,6 @@ DataDef <- R6::R6Class("DataDef",
 #'
 #' @export
 #'
-datadef <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, code_list) {
-   DataDef$new(ds_spec, ds_vars, var_spec, value_spec, derivations, code_list)
+datadef <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist) {
+   DataDef$new(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist)
 }
