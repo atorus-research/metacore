@@ -22,12 +22,12 @@ library(datadef)
 ```{r}
 doc <- xmlTreeParse("define.xml", useInternalNodes = TRUE)
 
-ds_spec <- xml_to_ds_spec(doc)
+ds_spec2 <- xml_to_ds_spec(doc)
 ds_vars <- xml_to_ds_vars(doc)
 var_spec <- xml_to_var_spec(doc)
 value_spec <- xml_to_value_spec(doc)
 code_list <- xml_to_code_list(doc)
 derivations <- xml_to_derivations(doc)
 
-test <- datadef(ds_spec, ds_vars, var_spec, value_spec, derivations, code_list)
+test <- datadef(ds_spec2, ds_vars, var_spec, value_spec, derivations, code_list)
 ```

@@ -200,39 +200,37 @@ var_name_check <- function(envrionment){
 #'
 #' This function checks for vector types and accepted words
 check_columns <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist) {
-   browser()
-   a <- tribble(
+   tribble(
       ~dataset,     ~var,             ~test,                 ~any_na_acceptable,
-      "ds_spec",     "dataset",       is.character,                FALSE,
-      "ds_spec",     "structure",     is.character,                TRUE,
-      "ds_spec",     "label",         is.character,                TRUE,
-      "ds_vars",     "dataset",       is.character,                FALSE,
-      "ds_vars",     "variable",      is.character,                FALSE,
-      "ds_vars",     "key_seq",       is.character,                TRUE,
+      # "ds_spec",     "dataset",       is.character,                FALSE,
+      # "ds_spec",     "structure",     is.character,                TRUE,
+      # "ds_spec",     "label",         is.character,                TRUE,
+      # "ds_vars",     "dataset",       is.character,                FALSE,
+      # "ds_vars",     "variable",      is.character,                FALSE,
+      # "ds_vars",     "key_seq",       is.character,                TRUE,
       "ds_vars",     "core", check_words("Expected", "Required", "Permissible", "Conditionally Required", "Conditionally Expected"), TRUE,
-      "var_spec",    "variable",      is.character,                FALSE,
-      "var_spec",    "type",          is.character,                TRUE,
-      "var_spec",    "length",        is.numeric,                  TRUE,
-      "var_spec",    "label",         is.character,                TRUE,
-      "var_spec",    "common",        is.logical,                  TRUE,
-      "value_spec",  "type",          is.character,                TRUE,
-      "value_spec",  "origin",        is.character,                TRUE,
-      "value_spec",  "code_id",       is.character,                TRUE,
-      "value_spec",  "dataset",       is.character,                FALSE,
-      "value_spec",  "where",         is.character,                TRUE,
-      "value_spec",  "derivation_id", is.character,                TRUE,
-      "derivations", "derivation_id", is.character,                TRUE,
-      "derivations", "derivation",    is.character,                TRUE,
-      "code_list",    "code_id",      is.character,                TRUE,
-      "code_list",    "names",        is.character,                TRUE,
-      "code_list",    "codes",        function(x){!is.null(x)},    TRUE,
-      "code_list",    "type",         is.character,                TRUE,
+      # "var_spec",    "variable",      is.character,                FALSE,
+      # "var_spec",    "type",          is.character,                TRUE,
+      # "var_spec",    "length",        is.numeric,                  TRUE,
+      # "var_spec",    "label",         is.character,                TRUE,
+      # "var_spec",    "common",        is.logical,                  TRUE,
+      # "value_spec",  "type",          is.character,                TRUE,
+      # "value_spec",  "origin",        is.character,                TRUE,
+      # "value_spec",  "code_id",       is.character,                TRUE,
+      # "value_spec",  "dataset",       is.character,                FALSE,
+      # "value_spec",  "where",         is.character,                TRUE,
+      # "value_spec",  "derivation_id", is.character,                TRUE,
+      # "derivations", "derivation_id", is.character,                TRUE,
+      # "derivations", "derivation",    is.character,                TRUE,
+      # "code_list",    "code_id",      is.character,                TRUE,
+      # "code_list",    "names",        is.character,                TRUE,
+      # "code_list",    "codes",        function(x){!is.null(x)},    TRUE,
+      # "code_list",    "type",         is.character,                TRUE,
    ) %>%
       mutate(df = purrr::pmap(list(dataset, var, test, any_na_acceptable),
                               function(x, y, z, a) {
          check_structure(sym(x), sym(y), z, a, environment())
-      })
-      )
+      })) %>%
       pull(df) %>%
       compact() %>%
       purrr::walk(warning, call. = FALSE, immediate. = TRUE)

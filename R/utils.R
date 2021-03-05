@@ -86,8 +86,9 @@ check_structure <- function(.data, col, func, any_na_acceptable, env) {
          warning_string <- NULL
       }
 
-      list(warning_string, error_message)
    }
+
+   list(warning_string, error_message)
 }
 
 #' Check Words in Column
