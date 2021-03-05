@@ -57,6 +57,7 @@ check_structure <- function(.data, col, func, any_na_acceptable, env) {
    if(any(is.na(vec)) & !any_na_acceptable){
       error_message <- (message = paste(column, "from the", dat,
                  "table contains missing values. Actual values are needed."))
+      warning_string <- NULL
    } else if (all(is.na(vec))){
       warning_string <- paste(column, "from the", dat,
                     "table only contain missing values.")
