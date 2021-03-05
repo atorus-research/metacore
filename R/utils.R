@@ -47,25 +47,27 @@ add_labels <- function(.data,...) {
 #' @param func the function to use to assert column structure
 #' @param any_na_acceptable boolean, testing if the column can have missing
 #'
-check_structure <- function(.data, col, func, any_na_acceptable) {
+check_structure <- function(.data, col, func, any_na_acceptable, env) {
 
    dat <- rlang::as_string(.data)
 
    column <- rlang::as_string(col)
-   vec <- rlang::eval_tidy(.data)[[column]]
+   vec <- rlang::eval_tidy(.data, env = env) %>%
+      pull(!!col)
    if(any(is.na(vec)) & !any_na_acceptable){
-      stop(paste(column, "from the", dat,
+      error_message <- (message = paste(column, "from the", dat,
                  "table contains missing values. Actual values are needed."))
    } else if (all(is.na(vec))){
       warning_string <- paste(column, "from the", dat,
                     "table only contain missing values.")
+      error_message <- NULL
    } else {
       failures <-  vec %>%
          discard(~do.call(func, list(.))) %>%
          unique()
 
       all_fails <- paste("   ", failures, collapse = "\n")
-
+      error_message <- NULL
       if (length(failures) > 0) {
 
          if (is.primitive(func)) {
@@ -84,7 +86,7 @@ check_structure <- function(.data, col, func, any_na_acceptable) {
          warning_string <- NULL
       }
 
-      warning_string
+      list(warning_string, error_message)
    }
 }
 

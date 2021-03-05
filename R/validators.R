@@ -200,7 +200,8 @@ var_name_check <- function(envrionment){
 #'
 #' This function checks for vector types and accepted words
 check_columns <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist) {
-   tribble(
+   browser()
+   a <- tribble(
       ~dataset,     ~var,             ~test,                 ~any_na_acceptable,
       "ds_spec",     "dataset",       is.character,                FALSE,
       "ds_spec",     "structure",     is.character,                TRUE,
@@ -224,15 +225,14 @@ check_columns <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, c
       "derivations", "derivation",    is.character,                TRUE,
       "code_list",    "code_id",      is.character,                TRUE,
       "code_list",    "names",        is.character,                TRUE,
-   #  how should we check this... do we need to? I think we need is.list
-   #  "code_list",    "codes",        is.data.frame,
+      "code_list",    "codes",        function(x){!is.null(x)},    TRUE,
       "code_list",    "type",         is.character,                TRUE,
    ) %>%
       mutate(df = purrr::pmap(list(dataset, var, test, any_na_acceptable),
                               function(x, y, z, a) {
-         check_structure(sym(x), sym(y), z, a)
+         check_structure(sym(x), sym(y), z, a, environment())
       })
-      ) %>%
+      )
       pull(df) %>%
       compact() %>%
       purrr::walk(warning, call. = FALSE, immediate. = TRUE)
