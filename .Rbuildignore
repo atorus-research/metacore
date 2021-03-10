@@ -1,4 +1,4 @@
 ^datadef\.Rproj$
 ^\.Rproj\.user$
 ^dev$
-^LICENSE\.md$
+git branch^LICENSE\.md$
