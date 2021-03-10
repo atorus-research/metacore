@@ -199,7 +199,7 @@ var_name_check <- function(envrionment){
 #' Check all data frames include the correct types of columns
 #'
 #' This function checks for vector types and accepted words
-check_columns <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist) {
+check_columns <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, code_list) {
 
    all_message <- tribble(
       ~dataset,     ~var,             ~test,                 ~any_na_acceptable,
@@ -227,28 +227,29 @@ check_columns <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, c
       "code_list",    "names",        is.character,                TRUE,
       "code_list",    "codes",        function(x){!is.null(x)},    TRUE,
       "code_list",    "type",         is.character,                TRUE,
-   ) %>%
-      mutate(df = purrr::pmap(list(dataset, var, test, any_na_acceptable),
-                              function(x, y, z, a) {
-         check_structure(sym(x), sym(y), z, a, environment())
-      })) %>%
-      pull(df)
+   )
 
-   #warnings
-   warnings <- all_message %>%
-      map(~.[[1]]) %>%
+
+   messages <- purrr::pmap(all_message,
+               ~check_structure(
+                  get(..1), sym(..2), ..3, ..4, ..1)
+               )
+
+
+   # warnings
+   warnings <- map(messages, "warning") %>%
       compact() %>%
       paste0(., collapse = "\n\n")
    if(warnings != "")
       warning(paste0(warnings, "\n\n"), call. = FALSE)
 
-   # Errors
-   errors <- all_message %>%
-      map(~.[[2]]) %>%
+   # errors
+   errors <-  map(messages, "errors") %>%
       compact() %>%
-      paste0(collapse = "\n\n")
+      paste0(., collapse = "\n\n")
    if(errors != "")
-      stop(errors, call. = FALSE)
+      stop(paste0(errors, "\n\n"), call. = FALSE)
+
 
 
 }

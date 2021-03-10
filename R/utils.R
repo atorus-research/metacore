@@ -47,21 +47,18 @@ add_labels <- function(.data,...) {
 #' @param func the function to use to assert column structure
 #' @param any_na_acceptable boolean, testing if the column can have missing
 #'
-check_structure <- function(.data, col, func, any_na_acceptable, env) {
-
-   dat <- rlang::as_string(.data)
+check_structure <- function(.data, col, func, any_na_acceptable, nm) {
 
    column <- rlang::as_string(col)
 
-   vec <- rlang::eval_tidy(.data, env = env) %>%
-      pull(!!col)
+   vec <- .data %>% pull(!!col)
 
    if(any(is.na(vec)) & !any_na_acceptable){
-      error_message <- (message = paste(column, "from the", dat,
+      error_message <- (message = paste(column, "from the", nm,
                  "table contains missing values. Actual values are needed."))
       warning_string <- NULL
    } else if (all(is.na(vec))){
-      warning_string <- paste(column, "from the", dat,
+      warning_string <- paste(column, "from the", nm,
                     "table only contain missing values.")
       error_message <- NULL
    } else {
@@ -74,15 +71,12 @@ check_structure <- function(.data, col, func, any_na_acceptable, env) {
       if (length(failures) > 0) {
 
          if (is.primitive(func)) {
+
             assertion_func <- rlang::prim_name(func)
-            # call the function so we can grab its name for the error
-            # force(func)
-            # assertion_func <- deparse(rlang::enexpr(func))
-            # assertion_func <- sub('.*\\"(.*)\\").*', "\\1", assertion_func)
-            warning_string <- paste0(dat, "$", column, " fails ", assertion_func, " check \n")
+            warning_string <- paste0(nm, "$", column, " fails ", assertion_func, " check \n")
 
          } else {
-            warning_string <- paste0("The following words in ", dat, "$", column, " are not allowed: \n", all_fails, "\n")
+            warning_string <- paste0("The following words in ", nm, "$", column, " are not allowed: \n", all_fails, "\n")
          }
 
       } else {
@@ -91,7 +85,7 @@ check_structure <- function(.data, col, func, any_na_acceptable, env) {
 
    }
 
-   list(warning_string, error_message)
+   list(warning = warning_string, error = error_message)
 }
 
 #' Check Words in Column
