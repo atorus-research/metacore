@@ -1,5 +1,5 @@
 #' This file includes the internal functions needed to create the readonly
-#' DataDef R6 object
+#' Metacore R6 object
 #'
 #' @param ds_spec contians each dataset in the study, with the labels for each
 #' @param ds_vars information on what variables are in each dataset + plus
@@ -11,11 +11,11 @@
 #'   have the same derivation
 #' @param code_list contains the code/decode information
 #'
-#' @family DataDef
+#' @family Metacore
 #' @noRd
 #'
 #'
-DataDef_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist){
+Metacore_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist){
 
    private$.ds_spec <- ds_spec %>%
       add_labels(dataset = "Dataset Name",
@@ -60,26 +60,26 @@ DataDef_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivatio
 }
 
 
-#' DataDef class print function
+#' Metacore class print function
 #'
 #' @param ... pass in the dataframes to be validated
-#' @family DataDef
+#' @family Metacore
 #' @noRd
 #'
-DataDef_print <- function(...){
+Metacore_print <- function(...){
    ds_len <- private$.ds_spec %>% pull(.data$dataset) %>% length()
-   paste0("DataDef object contains metadata for ", ds_len, " datasets\n") %>%
+   paste0("Metacore object contains metadata for ", ds_len, " datasets\n") %>%
       cat()
 }
 
 
-#' DataDef R6 object validation function
+#' Metacore R6 object validation function
 #'
 #' This checks that the labels and lengths of ds_vars match var_spec
-#' @family DataDef
+#' @family Metacore
 #' @noRd
 #'
-DataDef_validate <-  function() {
+Metacore_validate <-  function() {
    if(var_name_check(private)){
 
       check_columns(private$.ds_spec,
@@ -109,7 +109,7 @@ DataDef_validate <-  function() {
 #'
 #' @param name the name of the readonly object
 #' @param value any attempt at assignment to the readonly object
-#' @family DataDef
+#' @family Metacore
 #' @noRd
 #'
 readonly <- function(name) {
@@ -127,19 +127,19 @@ readonly <- function(name) {
 }
 
 
-#' The DataDef R6 Class
+#' The Metacore R6 Class
 #'
 #' This uses the initialize, print, and validate functions above to create a single object
 #' The user can query
 #'
-#' @family DataDef
+#' @family Metacore
 #' @noRd
 #
-DataDef <- R6::R6Class("DataDef",
+Metacore <- R6::R6Class("Metacore",
                        public = list(
-                          initialize = DataDef_initialize,
-                          print = DataDef_print,
-                          validate =  DataDef_validate
+                          initialize = Metacore_initialize,
+                          print = Metacore_print,
+                          validate =  Metacore_validate
                        ),
                        private = list(
                           .ds_spec = tibble(dataset = character(), label = character()),
@@ -171,19 +171,19 @@ DataDef <- R6::R6Class("DataDef",
 )
 
 
-#' R6 Class wrapper to create your own datadef object
+#' R6 Class wrapper to create your own metacore object
 #'
-#' @param ds_spec contians each dataset in the study, with the labels for each
+#' @param ds_spec contains each dataset in the study, with the labels for each
 #' @param ds_vars information on what variables are in each dataset + plus dataset specific variable information
 #' @param var_spec variable information that is shared across all datasets
 #' @param value_spec parameter specific information, as data is long the specs for wbc might be difference the hgb
 #' @param derivations contains derivation, it allows for different variables to have the same derivation
 #' @param code_list contains the code/decode information
 #'
-#' @family DataDef
+#' @family Metacore
 #'
 #' @export
 #'
-datadef <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist) {
-   DataDef$new(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist)
+metacore <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist) {
+   Metacore$new(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist)
 }

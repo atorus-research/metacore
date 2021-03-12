@@ -4,7 +4,7 @@
 \alias{check_structure}
 \title{Column Validation Function}
 \usage{
-check_structure(.data, col, func)
+check_structure(.data, col, func, any_na_acceptable, nm)
 }
 \arguments{
 \item{.data}{the dataframe to check the column for}
@@ -12,6 +12,8 @@ check_structure(.data, col, func)
 \item{col}{the column to test}
 
 \item{func}{the function to use to assert column structure}
+
+\item{any_na_acceptable}{boolean, testing if the column can have missing}
 }
 \description{
 Column Validation Function
