@@ -15,7 +15,7 @@
 #' @noRd
 #'
 #'
-Metacore_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist){
+MetaCore_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist){
 
    private$.ds_spec <- ds_spec %>%
       add_labels(dataset = "Dataset Name",
@@ -66,7 +66,7 @@ Metacore_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivati
 #' @family Metacore
 #' @noRd
 #'
-Metacore_print <- function(...){
+MetaCore_print <- function(...){
    ds_len <- private$.ds_spec %>% pull(.data$dataset) %>% length()
    paste0("Metacore object contains metadata for ", ds_len, " datasets\n") %>%
       cat()
@@ -79,7 +79,7 @@ Metacore_print <- function(...){
 #' @family Metacore
 #' @noRd
 #'
-Metacore_validate <-  function() {
+MetaCore_validate <-  function() {
    if(var_name_check(private)){
 
       check_columns(private$.ds_spec,
@@ -135,11 +135,11 @@ readonly <- function(name) {
 #' @family Metacore
 #' @noRd
 #
-Metacore <- R6::R6Class("Metacore",
+MetaCore <- R6::R6Class("Metacore",
                        public = list(
-                          initialize = Metacore_initialize,
-                          print = Metacore_print,
-                          validate =  Metacore_validate
+                          initialize = MetaCore_initialize,
+                          print = MetaCore_print,
+                          validate =  MetaCore_validate
                        ),
                        private = list(
                           .ds_spec = tibble(dataset = character(), label = character()),
@@ -185,5 +185,5 @@ Metacore <- R6::R6Class("Metacore",
 #' @export
 #'
 metacore <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist) {
-   Metacore$new(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist)
+   MetaCore$new(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist)
 }
