@@ -14,14 +14,46 @@
 #' @family DataDef
 #' @noRd
 #'
-DataDef_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, code_list){
+#'
+DataDef_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist){
 
-   private$.ds_spec <- ds_spec
-   private$.ds_vars <- ds_vars
-   private$.var_spec <- var_spec
-   private$.value_spec <- value_spec
-   private$.derivations <- derivations
-   private$.codelist <- code_list
+   private$.ds_spec <- ds_spec %>%
+      add_labels(dataset = "Dataset Name",
+                 structure = "Value Structure",
+                 label = "Value Label")
+
+   private$.ds_vars <- ds_vars %>%
+      add_labels(dataset = "Dataset Name",
+                 variable = "Variable Name",
+                 key_seq = "Sequence Key",
+                 keep = "Keep (Boolean)",
+                 core = "ADaM core (Expected, Required, Permissable)")
+
+   private$.var_spec <- var_spec %>%
+      add_labels(variable = "Variable Name",
+                 length = "Variable Length",
+                 label = "Variable Label",
+                 type = "Variable Class",
+                 common = "Common Across ADaM")
+
+   private$.value_spec <- value_spec %>%
+      add_labels(type = "Value Type",
+                 orgin = "Origin of Value",
+                 code_id = "ID of the Code List",
+                 dataset = "Dataset Name",
+                 variable = "Variable Name",
+                 where = "Value of the Variable",
+                 derivation_id = "ID of Derivation")
+
+   private$.derivations <- derivations %>%
+      add_labels(derivation_id = "ID of Derivation",
+                 derivation = "Derivation")
+
+   private$.codelist <- code_list %>%
+      add_labels(code_id = "ID of the Code List",
+                 names = "Name of the Code List",
+                 type = "Code List/Permitted Values/External Library",
+                 codes = "List of Codes")
 
    self$validate()
    message("\n Metadata successfully imported")
@@ -49,6 +81,15 @@ DataDef_print <- function(...){
 #'
 DataDef_validate <-  function() {
    if(var_name_check(private)){
+
+      check_columns(private$.ds_spec,
+                    private$.ds_vars,
+                    private$.var_spec,
+                    private$.value_spec,
+                    private$.derivations,
+                    private$.codelist
+      )
+
       ds_vars_check(private$.ds_vars, private$.var_spec)
       value_check(private$.ds_vars, private$.value_spec)
       derivation_check(private$.value_spec, private$.derivations)
@@ -57,7 +98,6 @@ DataDef_validate <-  function() {
       warning("Other checks were not preformed, because column names were incorrect",
               call. = FALSE)
    }
-
 }
 
 
@@ -144,6 +184,6 @@ DataDef <- R6::R6Class("DataDef",
 #'
 #' @export
 #'
-datadef <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, code_list) {
-   DataDef$new(ds_spec, ds_vars, var_spec, value_spec, derivations, code_list)
+datadef <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist) {
+   DataDef$new(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist)
 }

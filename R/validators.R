@@ -29,7 +29,6 @@ ds_vars_check <- function(ds_vars, var_spec){
          )
       }
    }
-
 }
 
 
@@ -56,7 +55,7 @@ value_check <- function(ds_vars, value_spec){
          pull(.data$full) %>%
          str_c(collapse = ", ")
       message <- paste("The following variables are in the ds_vars table, but don't have value specs:\n",
-                       variables)
+                       variables, "\n")
       warning(message, call. = FALSE)
    }
    # Check the variables in value spec that aren't in ds_vars
@@ -66,7 +65,7 @@ value_check <- function(ds_vars, value_spec){
          pull(.data$variable) %>%
          str_c(collapse = ", ")
       message <- paste("The following variables are have value specifications, but aren't in the ds_vars table:\n",
-                       variables)
+                       variables, "\n")
       warning(message, call. = FALSE)
    }
 }
@@ -91,7 +90,7 @@ derivation_check <- function(value_spec, derivations){
          pull(.data$variable) %>%
          str_c(collapse = ", ")
       message <- paste("The following variables are missing derivations:\n",
-                       variables)
+                       variables, "\n")
       warning(message, call. = FALSE)
    }
    # Check the derivations in deriavtion that aren't  in value spec
@@ -101,7 +100,7 @@ derivation_check <- function(value_spec, derivations){
          pull(.data$derivation) %>%
          str_c(collapse = ", ")
       message <- paste("The following derivations are never used:\n",
-                       deriv)
+                       deriv, "\n")
       warning(message, call. = FALSE)
    }
 
@@ -126,7 +125,7 @@ codelist_check <- function(value_spec, codelist){
          pull(.data$variable) %>%
          str_c(collapse = ", ")
       message <- paste("The following variables are missing codelist(s):\n",
-                       variables)
+                       variables, "\n")
       warning(message, call. = FALSE)
    }
    # Check the code_ids in codelist that aren't in value spec
@@ -136,14 +135,14 @@ codelist_check <- function(value_spec, codelist){
          pull(.data$names) %>%
          str_c(collapse = ", ")
       message <- paste("The following codelist(s) are never used:\n",
-                       cl_nm)
+                       cl_nm, "\n")
       warning(message, call. = FALSE)
    }
 }
 
 #' Column Names by dataset
 #'
-#' @return list of colum names by dataset
+#' @return list of column names by dataset
 #' @noRd
 col_vars <- function(){
    list(.ds_spec = c("dataset", "structure", "label"),
@@ -154,7 +153,6 @@ col_vars <- function(){
         .codelist= c("code_id", "names","type", "codes"),
         .change_log = c("table_chg", "column_chg", "what_chg"))
 }
-
 
 
 #' Check Variable names
@@ -193,5 +191,65 @@ var_name_check <- function(envrionment){
       }
    }) %>%
       all()
+
+}
+
+
+
+#' Check all data frames include the correct types of columns
+#'
+#' This function checks for vector types and accepted words
+check_columns <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, code_list) {
+
+   all_message <- tribble(
+      ~dataset,     ~var,             ~test,                 ~any_na_acceptable,
+      "ds_spec",     "dataset",       is.character,                FALSE,
+      "ds_spec",     "structure",     is.character,                TRUE,
+      "ds_spec",     "label",         is.character,                TRUE,
+      "ds_vars",     "dataset",       is.character,                FALSE,
+      "ds_vars",     "variable",      is.character,                FALSE,
+      "ds_vars",     "key_seq",       is.character,                TRUE,
+      "ds_vars",     "core",          check_words("Expected", "Required", "Permissible", "Conditionally Required", "Conditionally Expected"), TRUE,
+      "var_spec",    "variable",      is.character,                FALSE,
+      "var_spec",    "type",          is.character,                TRUE,
+      "var_spec",    "length",        is.numeric,                  TRUE,
+      "var_spec",    "label",         is.character,                TRUE,
+      "var_spec",    "common",        is.logical,                  TRUE,
+      "value_spec",  "type",          is.character,                TRUE,
+      "value_spec",  "origin",        is.character,                TRUE,
+      "value_spec",  "code_id",       is.character,                TRUE,
+      "value_spec",  "dataset",       is.character,                FALSE,
+      "value_spec",  "where",         is.character,                TRUE,
+      "value_spec",  "derivation_id", is.character,                TRUE,
+      "derivations", "derivation_id", is.character,                TRUE,
+      "derivations", "derivation",    is.character,                TRUE,
+      "code_list",    "code_id",      is.character,                TRUE,
+      "code_list",    "names",        is.character,                TRUE,
+      "code_list",    "codes",        function(x){!is.null(x)},    TRUE,
+      "code_list",    "type",         is.character,                TRUE,
+   )
+
+
+   messages <- purrr::pmap(all_message,
+               ~check_structure(
+                  get(..1), sym(..2), ..3, ..4, ..1)
+               )
+
+
+   # warnings
+   warnings <- map(messages, "warning") %>%
+      compact() %>%
+      paste0(., collapse = "\n\n")
+   if(warnings != "")
+      warning(paste0(warnings, "\n\n"), call. = FALSE)
+
+   # errors
+   errors <-  map(messages, "errors") %>%
+      compact() %>%
+      paste0(., collapse = "\n\n")
+   if(errors != "")
+      stop(paste0(errors, "\n\n"), call. = FALSE)
+
+
 
 }
