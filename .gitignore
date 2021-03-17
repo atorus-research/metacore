@@ -4,6 +4,7 @@
 
 # Session Data files
 .RData
+.gitignore
 
 # Example code in package build process
 *-Ex.R
@@ -36,3 +37,5 @@ vignettes/*.pdf
 rsconnect/
 .Rproj.user
 inst/doc
+tests/testthat/temp_data/*
+

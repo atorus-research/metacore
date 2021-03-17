@@ -1,0 +1,25 @@
+---
+title: "Building Specification Readers"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Building Specification Readers}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(datadef)
+```
+
+Step 1) Attempt to run the built-in specification to metacore build. Even if this fails it will help identify the issues.
+
+-   A common issue will be different column names / sheet names. If this is the cause you just need to provide a named list of column names to the built in functions
+
+-   
