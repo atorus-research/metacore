@@ -139,7 +139,11 @@ MetaCore <- R6::R6Class("Metacore",
                        public = list(
                           initialize = MetaCore_initialize,
                           print = MetaCore_print,
-                          validate =  MetaCore_validate
+                          validate =  MetaCore_validate,
+                          filter = function(x) {
+                             self$.ds_spec <- self$.ds_spec %>% dplyr::filter(dataset == x)
+                             invisible(self)
+                          }
                        ),
                        private = list(
                           .ds_spec = tibble(dataset = character(), label = character()),
