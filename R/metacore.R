@@ -126,10 +126,10 @@ readonly <- function(name) {
    inside
 }
 
-#' Filter method to subset by a single dataframe
+#' Select method to subset by a single dataframe
 #' @param value the dataframe to subset by
 #'
-metacore_filter <- function(value) {
+MetaCore_filter <- function(value) {
    # should we do a check of available filtering options?
    # like check DM, AE whatever?
 
@@ -160,7 +160,7 @@ MetaCore <- R6::R6Class("Metacore",
                           initialize = MetaCore_initialize,
                           print = MetaCore_print,
                           validate =  MetaCore_validate,
-                          metacore_filter = metacore_filter
+                          metacore_filter = MetaCore_filter
                        ),
                        private = list(
                           .ds_spec = tibble(dataset = character(), label = character()),
