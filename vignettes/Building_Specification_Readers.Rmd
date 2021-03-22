@@ -18,7 +18,9 @@ knitr::opts_chunk$set(
 library(datadef)
 ```
 
-Step 1) Attempt to run the built-in specification to metacore build. Even if this fails it will help identify the issues.
+Step 1) Identify what type of specification format you have
+
+Step 2) If you have the type style of specification. Attempt to run with the lower level built-in specification to metacore build. Even if this fails it will help identify the issues.
 
 -   A common issue will be different column names / sheet names. If this is the cause you just need to provide a named list of column names to the built in functions
 
