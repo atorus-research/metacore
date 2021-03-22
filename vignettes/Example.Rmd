@@ -31,18 +31,9 @@ derivations <- xml_to_derivations(doc)
 
 test <- metacore(ds_spec2, ds_vars, var_spec, value_spec, derivations, code_list)
 
-# filter object by dataset
-test %>%
-  select_dataset("DM")
+# a metacore object with all your dataframes
+subset <- test %>% select_dataset("DM")
 
-
-
-test$ds_spec
-test$ds_vars
-test$var_spec
-test$value_spec
-test$codelist
-test$derivations
-
-
+# a simplified dataframe 
+subset_t <- test %>% select_dataset("DM", simplify = TRUE)
 ```
