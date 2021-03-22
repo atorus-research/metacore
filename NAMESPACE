@@ -2,6 +2,7 @@
 
 export("%>%")
 export(define_to_MetaCore)
+export(filter_dataset)
 export(metacore)
 export(xml_to_code_list)
 export(xml_to_derivations)

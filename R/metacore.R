@@ -204,3 +204,17 @@ MetaCore <- R6::R6Class("Metacore",
 metacore <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist) {
    MetaCore$new(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist)
 }
+
+
+
+#' Filter metacore object to single dataset
+#'
+#' @param .data the metacore object of dataframes
+#' @param dataset the specific dataset to subset by
+#'
+#' @return
+#' @export
+#'
+filter_dataset <- function(.data, dataset) {
+   .data$metacore_filter(dataset)
+}
