@@ -140,9 +140,22 @@ MetaCore <- R6::R6Class("Metacore",
                           initialize = MetaCore_initialize,
                           print = MetaCore_print,
                           validate =  MetaCore_validate,
-                          filter = function(x) {
-                             self$.ds_spec <- self$.ds_spec %>% dplyr::filter(dataset == x)
-                             invisible(self)
+                          metacore_filter = function(value) {
+
+                             # should we do a check of available filtering options?
+                             # like check DM, AE whatever?
+
+                             private$.ds_spec <- private$.ds_spec %>% dplyr::filter(dataset == value)
+                             private$.ds_vars <- private$.ds_vars %>% dplyr::filter(dataset == value)
+                             private$.value_spec <- private$.value_spec %>% dplyr::filter(dataset == value)
+                             private$.var_spec <- private$.var_spec %>%
+                                right_join(private$.ds_vars %>% select(variable), by="variable")
+
+                             private$.derivations <- private$.derivations %>%
+                                dplyr::right_join(private$.value_spec %>% select(derivation_id), by = "derivation_id")
+
+                             private$.codelist <- private$.codelist %>%
+                                dplyr::right_join(private$.value_spec %>% select(code_id), by = "code_id")
                           }
                        ),
                        private = list(
