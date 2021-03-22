@@ -1,4 +1,4 @@
 library(testthat)
-library(datadef)
+library(metacore)
 
-test_check("datadef")
+test_check("metacore")

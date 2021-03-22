@@ -7,7 +7,7 @@
 #' @return DataDef Object
 #' @export
 #'
-define_to_DataDef <- function(path){
+define_to_MetaCore <- function(path){
    doc <- xmlTreeParse(path, useInternalNodes = TRUE)
 
    ds_spec <- xml_to_ds_spec(doc)
@@ -17,11 +17,8 @@ define_to_DataDef <- function(path){
    code_list <- xml_to_code_list(doc)
    derivations <- xml_to_derivations(doc)
 
-   datadef(ds_spec, ds_vars, var_spec, value_spec, derivations = derivations,
-           code_list = code_list)
+   metacore(ds_spec, ds_vars, var_spec, value_spec, derivations, code_list)
 }
-
-
 
 
 #' XML to Data Set Spec
@@ -111,7 +108,7 @@ xml_to_var_spec <- function(doc) {
       unique()
 
    # Get for each variable, get the number of distinct lengths and labels
-  dist_df <- var_info %>%
+   dist_df <- var_info %>%
       filter(.data$variable %in% possible_vars) %>%
       distinct(.data$variable, .data$length, .data$label, .data$type, .keep_all = TRUE) %>%
       group_by(.data$variable) %>%
@@ -121,23 +118,23 @@ xml_to_var_spec <- function(doc) {
       ) %>%
       ungroup()
 
-  # For variables with more than one distinct label, this gets all the full
-  # variable names with that root. Sometimes 3 variables will have the same root
-  # (i.e. ARMCD), 2 of them will match, but one of them won't. This means the
-  # two matching will have been collapsed to one in the distinct and we have to
-  # bring back the one that got dropped. Cause all of them need to be DS.var
-  full_name_vars <- dist_df %>%
-     filter(n > 1) %>%
-     select(.data$variable) %>%
-     inner_join(var_info, by = "variable") %>%
-     mutate(variable = str_remove(.data$var_full, "^IT\\.")) %>%
-     distinct()
+   # For variables with more than one distinct label, this gets all the full
+   # variable names with that root. Sometimes 3 variables will have the same root
+   # (i.e. ARMCD), 2 of them will match, but one of them won't. This means the
+   # two matching will have been collapsed to one in the distinct and we have to
+   # bring back the one that got dropped. Cause all of them need to be DS.var
+   full_name_vars <- dist_df %>%
+      filter(n > 1) %>%
+      select(.data$variable) %>%
+      inner_join(var_info, by = "variable") %>%
+      mutate(variable = str_remove(.data$var_full, "^IT\\.")) %>%
+      distinct()
 
-  # Combine the variables that need full names with the variables that don't
-  dist_df %>%
-     filter(n == 1) %>%
-     bind_rows(full_name_vars) %>%
-     select(-.data$n, -.data$var_full)
+   # Combine the variables that need full names with the variables that don't
+   dist_df %>%
+      filter(n == 1) %>%
+      bind_rows(full_name_vars) %>%
+      select(-.data$n, -.data$var_full)
 }
 
 

@@ -49,7 +49,7 @@ add_labels <- function(.data,...) {
 #'
 check_structure <- function(.data, col, func, any_na_acceptable, nm) {
 
-   column <- rlang::as_string(col)
+   column <- as_string(col)
 
    vec <- .data %>% pull(!!col)
 
@@ -72,7 +72,7 @@ check_structure <- function(.data, col, func, any_na_acceptable, nm) {
 
          if (is.primitive(func)) {
 
-            assertion_func <- rlang::prim_name(func)
+            assertion_func <- prim_name(func)
             warning_string <- paste0(nm, "$", column, " fails ", assertion_func, " check \n")
 
          } else {
