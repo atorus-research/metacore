@@ -145,9 +145,9 @@ MetaCore <- R6::R6Class("Metacore",
                              # should we do a check of available filtering options?
                              # like check DM, AE whatever?
 
-                             private$.ds_spec <- private$.ds_spec %>% dplyr::filter(dataset == value)
-                             private$.ds_vars <- private$.ds_vars %>% dplyr::filter(dataset == value)
-                             private$.value_spec <- private$.value_spec %>% dplyr::filter(dataset == value)
+                             private$.ds_spec <- private$.ds_spec %>% filter(dataset == value)
+                             private$.ds_vars <- private$.ds_vars %>% filter(dataset == value)
+                             private$.value_spec <- private$.value_spec %>% filter(dataset == value)
 
                              private$.var_spec <- private$.var_spec %>%
                                 right_join(private$.ds_vars %>% select(variable), by="variable")
@@ -232,7 +232,7 @@ select_dataset <- function(.data, dataset, simplify = FALSE) {
             cl$derivations,
             cl$codelist
          ) %>%
-            purrr::reduce(left_join)
+            reduce(left_join)
       )
 
    } else {
