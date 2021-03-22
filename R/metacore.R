@@ -126,6 +126,26 @@ readonly <- function(name) {
    inside
 }
 
+#' Filter method to subset by a single dataframe
+#' @param value the dataframe to subset by
+#'
+metacore_filter <- function(value) {
+   # should we do a check of available filtering options?
+   # like check DM, AE whatever?
+
+   private$.ds_spec <- private$.ds_spec %>% filter(dataset == value)
+   private$.ds_vars <- private$.ds_vars %>% filter(dataset == value)
+   private$.value_spec <- private$.value_spec %>% filter(dataset == value)
+
+   private$.var_spec <- private$.var_spec %>%
+      right_join(private$.ds_vars %>% select(variable), by="variable")
+
+   private$.derivations <- private$.derivations %>%
+      dplyr::right_join(private$.value_spec %>% select(derivation_id) %>% na.omit(), by = "derivation_id")
+
+   private$.codelist <- private$.codelist %>%
+      dplyr::right_join(private$.value_spec %>% select(code_id) %>% na.omit(), by = "code_id")
+}
 
 #' The Metacore R6 Class
 #'
@@ -140,24 +160,7 @@ MetaCore <- R6::R6Class("Metacore",
                           initialize = MetaCore_initialize,
                           print = MetaCore_print,
                           validate =  MetaCore_validate,
-                          metacore_filter = function(value) {
-
-                             # should we do a check of available filtering options?
-                             # like check DM, AE whatever?
-
-                             private$.ds_spec <- private$.ds_spec %>% filter(dataset == value)
-                             private$.ds_vars <- private$.ds_vars %>% filter(dataset == value)
-                             private$.value_spec <- private$.value_spec %>% filter(dataset == value)
-
-                             private$.var_spec <- private$.var_spec %>%
-                                right_join(private$.ds_vars %>% select(variable), by="variable")
-
-                             private$.derivations <- private$.derivations %>%
-                                dplyr::right_join(private$.value_spec %>% select(derivation_id) %>% na.omit(), by = "derivation_id")
-
-                             private$.codelist <- private$.codelist %>%
-                                dplyr::right_join(private$.value_spec %>% select(code_id) %>% na.omit(), by = "code_id")
-                          }
+                          metacore_filter = metacore_filter
                        ),
                        private = list(
                           .ds_spec = tibble(dataset = character(), label = character()),
