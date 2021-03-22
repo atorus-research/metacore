@@ -1,13 +1,13 @@
-#' Define XML to DataDef Object
+#' Define XML to metacore Object
 #'
-#' Given a path, this function converts the define xml to a DataDef Object
+#' Given a path, this function converts the define xml to a metacore Object
 #'
 #' @param path loaction of the define xml as a string
 #'
-#' @return DataDef Object
+#' @return metacore Object
 #' @export
 #'
-define_to_DataDef <- function(path){
+define_to_metacore <- function(path){
    doc <- xmlTreeParse(path, useInternalNodes = TRUE)
 
    ds_spec <- xml_to_ds_spec(doc)
@@ -17,7 +17,7 @@ define_to_DataDef <- function(path){
    code_list <- xml_to_code_list(doc)
    derivations <- xml_to_derivations(doc)
 
-   datadef(ds_spec, ds_vars, var_spec, value_spec, derivations = derivations,
+   metacore(ds_spec, ds_vars, var_spec, value_spec, derivations = derivations,
            code_list = code_list)
 }
 

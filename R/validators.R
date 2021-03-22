@@ -195,42 +195,49 @@ var_name_check <- function(envrionment){
 }
 
 
+#' Column Data Check <- lol horrible name
+#'
+#' @return a data frame of the datasets, column
+#' @noRd
+#'
+all_message <- function() {
+
+   tribble(
+   ~dataset,     ~var,             ~test,                 ~any_na_acceptable,
+   "ds_spec",     "dataset",       is.character,                FALSE,
+   "ds_spec",     "structure",     is.character,                TRUE,
+   "ds_spec",     "label",         is.character,                TRUE,
+   "ds_vars",     "dataset",       is.character,                FALSE,
+   "ds_vars",     "variable",      is.character,                FALSE,
+   "ds_vars",     "key_seq",       is.character,                TRUE,
+   "ds_vars",     "core",          check_words("Expected", "Required", "Permissible", "Conditionally Required", "Conditionally Expected"), TRUE,
+   "var_spec",    "variable",      is.character,                FALSE,
+   "var_spec",    "type",          is.character,                TRUE,
+   "var_spec",    "length",        is.numeric,                  TRUE,
+   "var_spec",    "label",         is.character,                TRUE,
+   "var_spec",    "common",        is.logical,                  TRUE,
+   "value_spec",  "type",          is.character,                TRUE,
+   "value_spec",  "origin",        is.character,                TRUE,
+   "value_spec",  "code_id",       is.character,                TRUE,
+   "value_spec",  "dataset",       is.character,                FALSE,
+   "value_spec",  "where",         is.character,                TRUE,
+   "value_spec",  "derivation_id", is.character,                TRUE,
+   "derivations", "derivation_id", is.character,                TRUE,
+   "derivations", "derivation",    is.character,                TRUE,
+   "code_list",    "code_id",      is.character,                TRUE,
+   "code_list",    "names",        is.character,                TRUE,
+   "code_list",    "codes",        function(x){!is.null(x)},    TRUE,
+   "code_list",    "type",         is.character,                TRUE,
+)
+}
+
 
 #' Check all data frames include the correct types of columns
 #'
 #' This function checks for vector types and accepted words
 check_columns <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, code_list) {
 
-   all_message <- tribble(
-      ~dataset,     ~var,             ~test,                 ~any_na_acceptable,
-      "ds_spec",     "dataset",       is.character,                FALSE,
-      "ds_spec",     "structure",     is.character,                TRUE,
-      "ds_spec",     "label",         is.character,                TRUE,
-      "ds_vars",     "dataset",       is.character,                FALSE,
-      "ds_vars",     "variable",      is.character,                FALSE,
-      "ds_vars",     "key_seq",       is.character,                TRUE,
-      "ds_vars",     "core",          check_words("Expected", "Required", "Permissible", "Conditionally Required", "Conditionally Expected"), TRUE,
-      "var_spec",    "variable",      is.character,                FALSE,
-      "var_spec",    "type",          is.character,                TRUE,
-      "var_spec",    "length",        is.numeric,                  TRUE,
-      "var_spec",    "label",         is.character,                TRUE,
-      "var_spec",    "common",        is.logical,                  TRUE,
-      "value_spec",  "type",          is.character,                TRUE,
-      "value_spec",  "origin",        is.character,                TRUE,
-      "value_spec",  "code_id",       is.character,                TRUE,
-      "value_spec",  "dataset",       is.character,                FALSE,
-      "value_spec",  "where",         is.character,                TRUE,
-      "value_spec",  "derivation_id", is.character,                TRUE,
-      "derivations", "derivation_id", is.character,                TRUE,
-      "derivations", "derivation",    is.character,                TRUE,
-      "code_list",    "code_id",      is.character,                TRUE,
-      "code_list",    "names",        is.character,                TRUE,
-      "code_list",    "codes",        function(x){!is.null(x)},    TRUE,
-      "code_list",    "type",         is.character,                TRUE,
-   )
-
-
-   messages <- purrr::pmap(all_message,
+   messages <- purrr::pmap(all_message(),
                ~check_structure(
                   get(..1), sym(..2), ..3, ..4, ..1)
                )
