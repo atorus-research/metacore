@@ -30,4 +30,10 @@ code_list <- xml_to_code_list(doc)
 derivations <- xml_to_derivations(doc)
 
 test <- metacore(ds_spec2, ds_vars, var_spec, value_spec, derivations, code_list)
+
+# a metacore object with all your dataframes
+subset <- test %>% select_dataset("DM")
+
+# a simplified dataframe 
+subset_t <- test %>% select_dataset("DM", simplify = TRUE)
 ```

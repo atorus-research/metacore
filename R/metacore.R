@@ -139,7 +139,25 @@ MetaCore <- R6::R6Class("Metacore",
                        public = list(
                           initialize = MetaCore_initialize,
                           print = MetaCore_print,
-                          validate =  MetaCore_validate
+                          validate =  MetaCore_validate,
+                          metacore_filter = function(value) {
+
+                             # should we do a check of available filtering options?
+                             # like check DM, AE whatever?
+
+                             private$.ds_spec <- private$.ds_spec %>% filter(dataset == value)
+                             private$.ds_vars <- private$.ds_vars %>% filter(dataset == value)
+                             private$.value_spec <- private$.value_spec %>% filter(dataset == value)
+
+                             private$.var_spec <- private$.var_spec %>%
+                                right_join(private$.ds_vars %>% select(variable), by="variable")
+
+                             private$.derivations <- private$.derivations %>%
+                                dplyr::right_join(private$.value_spec %>% select(derivation_id) %>% na.omit(), by = "derivation_id")
+
+                             private$.codelist <- private$.codelist %>%
+                                dplyr::right_join(private$.value_spec %>% select(code_id) %>% na.omit(), by = "code_id")
+                          }
                        ),
                        private = list(
                           .ds_spec = tibble(dataset = character(), label = character()),
@@ -186,4 +204,38 @@ MetaCore <- R6::R6Class("Metacore",
 #'
 metacore <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist) {
    MetaCore$new(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist)
+}
+
+
+
+#' Select metacore object to single dataset
+#'
+#' @param .data the metacore object of dataframes
+#' @param dataset the specific dataset to subset by
+#' @param simplify return a single dataframe
+#'
+#' @return
+#' @export
+#'
+select_dataset <- function(.data, dataset, simplify = FALSE) {
+
+   cl <- .data$clone()
+   cl$metacore_filter(dataset)
+
+   if (simplify) {
+
+      suppressMessages(
+         list(
+            cl$ds_vars,
+            cl$var_spec,
+            cl$value_spec,
+            cl$derivations,
+            cl$codelist
+         ) %>%
+            reduce(left_join)
+      )
+
+   } else {
+      return(cl)
+   }
 }
