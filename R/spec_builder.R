@@ -343,9 +343,6 @@ spec_type_to_code_list <- function(doc, codelist_cols = c("code_id" = "ID",
    }
 
    cd_out
-
-
-
 }
 
 #' Title
@@ -383,7 +380,7 @@ spec_type_to_derivations <- function(doc, cols = c("derivation_id" = "ID",
 #' @param cols vector of regex to get a datasets base on which columns it has.
 #'   If the vector is named it will also rename the columns
 #'
-#' @return dataset (or list of datasets if not spefic engough)
+#' @return dataset (or list of datasets if not specific enough)
 #' @noRd
 create_tbl <- function(doc, cols){
    matches <- doc %>%
