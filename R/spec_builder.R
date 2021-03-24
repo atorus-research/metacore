@@ -11,7 +11,6 @@
 spec_to_metacore <- function(path){
    doc <- read_all_sheets(path)
    if(spec_type(path) == "by_type"){
-      browser()
       ds_spec <- spec_type_to_ds_spec(doc)
       ds_vars <- spec_type_to_ds_vars(doc)
       var_spec <- spec_type_to_var_spec(doc)
@@ -100,8 +99,14 @@ spec_type_to_ds_spec <- function(doc, cols = c("dataset" = "[N|n]ame|[D|d]ataset
       sheet_ls <- str_subset(names(doc), sheet)
       doc <- doc[sheet_ls]
    }
+
+   # Get missing columns
+   missing <- col_vars()$.ds_spec %>%
+      discard(~. %in% names(cols))
+
    create_tbl(doc, cols) %>%
-      distinct()
+      distinct() %>%
+      `is.na<-`(missing)
 }
 
 #' Spec to ds_vars
@@ -136,9 +141,15 @@ spec_type_to_ds_vars <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]oma
       sheet_ls <- str_subset(names(doc), sheet)
       doc <- doc[sheet_ls]
    }
+
+   # Get missing columns
+   missing <- col_vars()$.ds_vars %>%
+      discard(~. %in% names(cols))
+
    doc %>%
       create_tbl(cols) %>%
-      distinct()
+      distinct() %>%
+      `is.na<-`(missing)
 }
 
 #' Spec to var_spec
@@ -212,10 +223,16 @@ spec_type_to_var_spec <- function(doc, cols = c("variable" = "[N|n]ame|[V|v]aria
          group_by(variable) %>%
          mutate(n = n(),
                 variable = if_else(n > 1, paste0(dataset, ".", variable),
-                                   variable)) %>%
+                                   variable),
+                length = as.numeric(length)) %>%
          select(-n, -dataset)
    }
-   out
+
+   # Get missing columns
+   missing <- col_vars()$.var_spec %>%
+      discard(~. %in% names(out))
+   out %>%
+      `is.na<-`(missing)
 }
 
 #' Spec to value_spec
@@ -279,7 +296,12 @@ spec_type_to_value_spec <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]
       out <- out %>%
          mutate(derivation_id = paste0(dataset, ".", variable))
    }
-   out
+
+   # Get missing columns
+   missing <- col_vars()$.value_spec %>%
+      discard(~. %in% names(out))
+   out %>%
+      `is.na<-`(missing)
 
 }
 
@@ -383,8 +405,12 @@ spec_type_to_code_list <- function(doc, codelist_cols = c("code_id" = "ID",
          nest(codes = c(dictionary, version))
       cd_out <- bind_rows(cd_out, dic_out)
    }
+   # Get missing columns
+   missing <- col_vars()$.codelist %>%
+      discard(~. %in% names(cd_out))
 
-   cd_out
+   cd_out %>%
+      `is.na<-`(missing)
 }
 
 #' Spec to derivation
@@ -418,7 +444,13 @@ spec_type_to_derivations <- function(doc, cols = c("derivation_id" = "ID",
       doc <- doc[sheet_ls]
    }
    out <- create_tbl(doc, cols)
-   out
+
+   # Get missing columns
+   missing <- col_vars()$.derivations %>%
+      discard(~. %in% names(out))
+
+   out %>%
+      `is.na<-`(missing)
 }
 
 
