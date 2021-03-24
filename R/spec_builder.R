@@ -1,3 +1,32 @@
+#' Specification document to metacore object
+#'
+#' This function takes the location of an excel specification document and reads
+#' it in as a meta core object. At the moment it only supports specification in
+#' the format of pinnacle 21 specifications. But, the @family spec builder can
+#' be used as building blocks for bespoke specification documents
+#' @param path string of file location
+#'
+#' @return
+#' @export
+spec_to_metacore <- function(path){
+   doc <- read_all_sheets(path)
+   if(spec_type(path) == "by_type"){
+      browser()
+      ds_spec <- spec_type_to_ds_spec(doc)
+      ds_vars <- spec_type_to_ds_vars(doc)
+      var_spec <- spec_type_to_var_spec(doc)
+      value_spec <- spec_type_to_value_spec(doc)
+      derivations <- spec_type_to_derivations(doc)
+      code_list <- spec_type_to_code_list(doc)
+      metacore(ds_spec, ds_vars, var_spec, value_spec,
+               derivations, code_list)
+   } else {
+      stop("This specification format is not currently supported. You will need to write your own reader",
+           call. = FALSE)
+   }
+}
+
+
 
 
 #' Check the type of spec document
@@ -33,7 +62,6 @@ spec_type <- function(path){
 #' @param path string of the file path
 #'
 #' @return
-#' @importFrom readxl excel_sheets read_excel
 read_all_sheets <- function(path){
    sheets <- excel_sheets(path)
    all_dat <- sheets %>%
@@ -51,7 +79,7 @@ read_all_sheets <- function(path){
 #' @param doc Named list of datasets @seealso [read_all_sheets()] for exact
 #'   format
 #' @param cols Named vector of column names. The column names can be regular
-#'   expressions for more flexibility.
+#'   expressions for more flexibility. But, the names must follow the given pattern
 #' @param sheet Regular expression for the sheet name
 #'
 #' @return
@@ -84,7 +112,7 @@ spec_type_to_ds_spec <- function(doc, cols = c("dataset" = "[N|n]ame|[D|d]ataset
 #' @param doc Named list of datasets @seealso [read_all_sheets()] for exact
 #'   format
 #' @param cols Named vector of column names. The column names can be regular
-#'   expressions for more flexibility
+#'   expressions for more flexibility. But, the names must follow the given pattern
 #' @param sheet Regular expression for the sheet name
 #'
 #' @return
@@ -121,7 +149,7 @@ spec_type_to_ds_vars <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]oma
 #' @param doc Named list of datasets @seealso [read_all_sheets()] for exact
 #'   format
 #' @param cols Named vector of column names. The column names can be regular
-#'   expressions for more flexibility
+#'   expressions for more flexibility. But, the names must follow the given pattern
 #' @param sheet Regular expression for the sheet name
 #'
 #' @return
@@ -199,12 +227,13 @@ spec_type_to_var_spec <- function(doc, cols = c("variable" = "[N|n]ame|[V|v]aria
 #' @param doc Named list of datasets @seealso [read_all_sheets()] for exact
 #'   format
 #' @param cols Named vector of column names. The column names can be regular
-#'   expressions for more flexibility
+#'   expressions for more flexibility. But, the names must follow the given pattern
 #' @param sheet Regular expression for the sheet name
 #' @param where_sep_sheet Boolean value to control if the where information in a
 #'   separate dataset. If the where information is on a separate sheet, set to
 #'   true and provide the column information with the `where_cols` inputs.
-#' @param where_cols
+#' @param where_cols Named list with an id and where field. All coumns in the
+#'   where field will be collapsed together
 #'
 #' @return
 #' @export
@@ -254,19 +283,32 @@ spec_type_to_value_spec <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]
 
 }
 
-#' Title
+#' Spec to code_list
 #'
-#' @param doc
-#' @param codelist_cols
-#' @param permitted_val_cols
-#' @param dict_cols
-#' @param sheets
-#' @param simplify
+#' Creates the value_spec from a list of datasets (optionally filtered by the
+#' sheet input). The named vector `*_cols` is used to determine which is the
+#' correct sheet and renames the columns.
+#' @param doc Named list of datasets @seealso [read_all_sheets()] for exact
+#'   format
+#' @param codelist_cols Named vector of column names that make up the codelist.
+#'   The column names can be regular expressions for more flexibility. But, the
+#'   names must follow the given pattern
+#' @param permitted_val_cols Named vector of column names that make up the
+#'   permitted value The column names can be regular expressions for more
+#'   flexibility. This is optional, can be left as null if there isn't a
+#'   permitted value sheet
+#' @param dict_cols Named vector of column names that make up the dictionary
+#'   value The column names can be regular expressions for more flexibility.
+#'   This is optional, can be left as null if there isn't a permitted value
+#'   sheet
+#' @param sheets Optional, regular expressions of the sheets
+#' @param simplify Boolean value, if true will convert code/decode pairs that
+#'   are all equal to a permitted value list
 #'
 #' @return
 #' @export
 #'
-#' @examples
+#' @family spec builder
 spec_type_to_code_list <- function(doc, codelist_cols = c("code_id" = "ID",
                                                           "name" = "[N|n]ame",
                                                           "code" = "^[C|c]ode|^[T|t]erm",
@@ -345,16 +387,22 @@ spec_type_to_code_list <- function(doc, codelist_cols = c("code_id" = "ID",
    cd_out
 }
 
-#' Title
+#' Spec to derivation
 #'
-#' @param doc
-#' @param cols
-#' @param sheet
+#' Creates the derivation table from a list of datasets (optionally filtered by
+#' the sheet input). The named vector `cols` is used to determine which is the
+#' correct sheet and renames the columns
+#' @param doc Named list of datasets @seealso [read_all_sheets()] for exact
+#'   format
+#' @param cols Named vector of column names. The column names can be regular
+#'   expressions for more flexibility. But, the names must follow the given
+#'   pattern
+#' @param sheet Regular expression for the sheet name
 #'
 #' @return
 #' @export
 #'
-#' @examples
+#' @family spec builder
 spec_type_to_derivations <- function(doc, cols = c("derivation_id" = "ID",
                                                    "derivation" = "[D|d]efinition|[D|d]escription"),
                                      sheet = "Method|Derivations?"){
