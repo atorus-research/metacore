@@ -194,7 +194,7 @@ ds_var_ls <- function(doc) {
    var_ls <- dataset_nodes %>%
       map_dfr(function(x) {
          # Gets the name attribute of the dataset node
-         dataset <- xmlGetAttr(x, "SASDatasetName")
+         dataset <- xmlGetAttr(x, "Name")
          # Gets the child node, Item Ref, and gets the OID
          vars <- xmlElementsByTagName(x, "ItemRef") %>%
             get_node_attr("ItemOID")
