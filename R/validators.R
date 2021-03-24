@@ -25,6 +25,7 @@ ds_vars_check <- function(ds_vars, var_spec){
          warning(
             "The following variable(s) do not have labels and lengths: ",
             paste("   ", var_check_dbl, sep = "\n   "),
+            "\n\n",
             call. = FALSE
          )
       }
@@ -55,7 +56,7 @@ value_check <- function(ds_vars, value_spec){
          pull(.data$full) %>%
          str_c(collapse = ", ")
       message <- paste("The following variables are in the ds_vars table, but don't have value specs:\n",
-                       variables, "\n")
+                       variables, "\n\n")
       warning(message, call. = FALSE)
    }
    # Check the variables in value spec that aren't in ds_vars
@@ -65,7 +66,7 @@ value_check <- function(ds_vars, value_spec){
          pull(.data$variable) %>%
          str_c(collapse = ", ")
       message <- paste("The following variables are have value specifications, but aren't in the ds_vars table:\n",
-                       variables, "\n")
+                       variables, "\n\n")
       warning(message, call. = FALSE)
    }
 }
@@ -88,9 +89,9 @@ derivation_check <- function(value_spec, derivations){
    if(nrow(not_in_val) != 0){
       variables <- not_in_val %>%
          pull(.data$variable) %>%
-         str_c(collapse = ", ")
+         str_c(collapse = "\n ")
       message <- paste("The following variables are missing derivations:\n",
-                       variables, "\n")
+                       variables, "\n\n")
       warning(message, call. = FALSE)
    }
    # Check the derivations in deriavtion that aren't  in value spec
@@ -98,9 +99,9 @@ derivation_check <- function(value_spec, derivations){
    if(nrow(not_in_deriv) != 0){
       deriv <- not_in_deriv %>%
          pull(.data$derivation) %>%
-         str_c(collapse = ", ")
+         str_c(collapse = "\n ")
       message <- paste("The following derivations are never used:\n",
-                       deriv, "\n")
+                       deriv, "\n\n")
       warning(message, call. = FALSE)
    }
 
@@ -123,7 +124,7 @@ codelist_check <- function(value_spec, codelist){
    if(nrow(not_in_val)){
       variables <- not_in_val %>%
          pull(.data$variable) %>%
-         str_c(collapse = ", ")
+         str_c(collapse = "\n ")
       message <- paste("The following variables are missing codelist(s):\n",
                        variables, "\n")
       warning(message, call. = FALSE)
@@ -133,9 +134,9 @@ codelist_check <- function(value_spec, codelist){
    if(nrow(not_in_cl)){
       cl_nm <- not_in_cl %>%
          pull(.data$name) %>%
-         str_c(collapse = ", ")
+         str_c(collapse = "\n ")
       message <- paste("The following codelist(s) are never used:\n",
-                       cl_nm, "\n")
+                       cl_nm, "\n\n")
       warning(message, call. = FALSE)
    }
 }
