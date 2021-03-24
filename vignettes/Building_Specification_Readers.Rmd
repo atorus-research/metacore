@@ -15,10 +15,15 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup}
-library(datadef)
+library(metacore)
 ```
 
 Step 1) Identify what type of specification format you have
+
+```{r step1}
+spec_to_metacore("SDTM_spec_CDISC_pilot.xlsx")
+
+```
 
 Step 2) If you have the type style of specification. Attempt to run with the lower level built-in specification to metacore build. Even if this fails it will help identify the issues.
 

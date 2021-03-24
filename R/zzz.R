@@ -6,6 +6,7 @@
 #' @import purrr
 #' @importFrom stats var
 #' @importFrom rlang as_string prim_name
+#' @importFrom readxl excel_sheets read_excel
 
 NULL
 
