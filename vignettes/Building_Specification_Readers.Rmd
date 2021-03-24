@@ -22,6 +22,7 @@ Step 1) Identify what type of specification format you have
 
 ```{r step1}
 spec_to_metacore("SDTM_spec_CDISC_pilot.xlsx")
+spec_to_metacore("ADaM_spec_CDISC_pilot.xlsx")
 
 ```
 

@@ -98,7 +98,8 @@ derivation_check <- function(value_spec, derivations){
    not_in_deriv <- anti_join(derivations, deriv_vars, by = c("derivation_id"))
    if(nrow(not_in_deriv) != 0){
       deriv <- not_in_deriv %>%
-         pull(.data$derivation) %>%
+         mutate(message = paste0(.data$derivation_id, ": ", .data$derivation)) %>%
+         pull(.data$message) %>%
          str_c(collapse = "\n ")
       message <- paste("The following derivations are never used:\n",
                        deriv, "\n\n")
@@ -165,7 +166,7 @@ col_vars <- function(){
 var_name_check <- function(envrionment){
     # Set the name as they should be
    col_names <- col_vars()
-   # Get the tables and table names from the envrionment
+   # Get the tables and table names from the environment
    tbl_name <- ls(envrionment, all.names = TRUE)
    tbls <- map(tbl_name, get, envir = envrionment)
    # Checks is names match the table above, returns T if so F else. If the names

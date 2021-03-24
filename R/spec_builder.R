@@ -219,13 +219,13 @@ spec_type_to_var_spec <- function(doc, cols = c("variable" = "[N|n]ame|[V|v]aria
 
       # Remove any multiples and add ds if different metadata for different ds's
       out <- out %>%
-         distinct(variable, length, label, type, .keep_all = TRUE) %>%
          group_by(variable) %>%
-         mutate(n = n(),
-                variable = if_else(n > 1, paste0(dataset, ".", variable),
-                                   variable),
+         mutate(unique = n_distinct(length, label, type),
+                variable = if_else(unique == 1, variable,
+                                   paste0(dataset, ".", variable)),
                 length = as.numeric(length)) %>%
-         select(-n, -dataset)
+         distinct(variable, length, label, type, .keep_all = TRUE) %>%
+         select(-dataset, -unique)
    }
 
    # Get missing columns
@@ -261,7 +261,8 @@ spec_type_to_value_spec <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]
                                                   "origin" = "[O|o]rigin",
                                                   "type" = "[T|t]ype",
                                                   "code_id" = "[C|c]odelist|Controlled Term",
-                                                  "where" = "[W|w]here"),
+                                                  "where" = "[W|w]here",
+                                                  "derivation_id" = "Method"),
                                     sheet = NULL,
                                     where_sep_sheet = TRUE,
                                     where_cols = c("id" = "ID",
@@ -269,6 +270,7 @@ spec_type_to_value_spec <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]
    name_check <- names(cols) %in% c("variable", "origin", "code_id",
                                     "type", "dataset", "where", "derivation_id") %>%
       all()
+
    if(!name_check){
       stop("Supplied column vector must be named using the following names:
               'dataset', 'variable', 'origin', 'code_id', 'type', 'where', 'derivation_id'
@@ -281,15 +283,50 @@ spec_type_to_value_spec <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]
       sheet_ls <- str_subset(names(doc), sheet)
       doc <- doc[sheet_ls]
    }
+
    out <- create_tbl(doc, cols)
-   if(where_sep_sheet){
+
+   # Does a var sheet exsist?
+   var_sheet <- names(doc) %>%
+      keep(~str_detect(., "[V|v]ar"))
+
+   # If so, add any variables not in the value sheet
+   if(length(var_sheet) > 0){
+      var_out <- doc[var_sheet] %>%
+         map_dfr(function(x){
+            var_out <- x %>%
+               select(matches(cols))
+            if(nrow(out) > 0){
+               var_out  %>%
+                  anti_join(out, by = "variable")
+            } else {
+               var_out
+            }
+         })
+
+      # THIS ISN'T VERY PRETTY, IF SOMEONE HAS A BETTER IDEA PLEASE FIX
+      # Needed in cause the value sheet is empty
+      if(nrow(out) > 0 & nrow(var_out) > 0){
+         out <- bind_rows(out, var_out)
+      } else if(nrow(var_out) > 0) {
+         out <- var_out
+      } else {
+         out
+      }
+
+   }
+
+   if(where_sep_sheet & "where" %in% names(out)){
       where_df <- create_tbl(doc, where_cols) %>%
          rowwise() %>%
          mutate(where_new = paste(c_across(matches("where")), collapse = " ")) %>%
          select(id, where_new)
-      out <- out %>%
-         left_join(where_df, by = c("where" = "id")) %>%
-         select(-where, where = where_new)
+         out <- out %>%
+            left_join(where_df, by = c("where" = "id")) %>%
+            select(-where, where = where_new)
+   } else if(where_sep_sheet) {
+      warning("Not able to add where infromation from seperate sheet cause a where column is needed to cross-reference the information",
+              call. = FALSE)
    }
 
    if(!"derivation_id" %in% names(cols)){
