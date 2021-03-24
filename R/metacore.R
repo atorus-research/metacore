@@ -141,10 +141,10 @@ MetaCore_filter <- function(value) {
       right_join(private$.ds_vars %>% select(variable), by="variable")
 
    private$.derivations <- private$.derivations %>%
-      dplyr::right_join(private$.value_spec %>% select(derivation_id) %>% na.omit(), by = "derivation_id")
+      right_join(private$.value_spec %>% select(derivation_id) %>% na.omit(), by = "derivation_id")
 
    private$.codelist <- private$.codelist %>%
-      dplyr::right_join(private$.value_spec %>% select(code_id) %>% na.omit(), by = "code_id")
+      right_join(private$.value_spec %>% select(code_id) %>% na.omit(), by = "code_id")
 }
 
 #' The Metacore R6 Class
