@@ -49,7 +49,7 @@ MetaCore_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivati
       add_labels(derivation_id = "ID of Derivation",
                  derivation = "Derivation")
 
-   private$.codelist <- code_list %>%
+   private$.codelist <- codelist %>%
       add_labels(code_id = "ID of the Code List",
                  names = "Name of the Code List",
                  type = "Code List/Permitted Values/External Library",

@@ -132,7 +132,7 @@ codelist_check <- function(value_spec, codelist){
    not_in_cl <- anti_join(codelist, code_vars, by = c("code_id"))
    if(nrow(not_in_cl)){
       cl_nm <- not_in_cl %>%
-         pull(.data$names) %>%
+         pull(.data$name) %>%
          str_c(collapse = ", ")
       message <- paste("The following codelist(s) are never used:\n",
                        cl_nm, "\n")
@@ -150,7 +150,7 @@ col_vars <- function(){
         .var_spec = c("variable", "length", "label", "type", "common"),
         .value_spec = c("type", "origin", "code_id", "dataset", "variable", "where", "derivation_id"),
         .derivations = c("derivation_id", "derivation"),
-        .codelist= c("code_id", "names","type", "codes"),
+        .codelist= c("code_id", "name","type", "codes"),
         .change_log = c("table_chg", "column_chg", "what_chg"))
 }
 
@@ -182,8 +182,8 @@ var_name_check <- function(envrionment){
          # writes a message if the column names don't match
          print_message <- name %>%
             str_remove("[:punct:]") %>%
-            paste("has incorrect column names. It should be:\n",
-                  str_c(col_names[[name]], collapse = ", "))
+            paste0("'", ., "' has incorrect column names. It should be:\n",
+                  str_c(col_names[[name]], collapse = ", "), "\n")
          warning(print_message, call. = FALSE)
          FALSE
       } else {
@@ -224,10 +224,10 @@ all_message <- function() {
    "value_spec",  "derivation_id", is.character,                TRUE,
    "derivations", "derivation_id", is.character,                FALSE,
    "derivations", "derivation",    is.character,                TRUE,
-   "code_list",    "code_id",      is.character,                FALSE,
-   "code_list",    "names",        is.character,                TRUE,
-   "code_list",    "codes",        function(x){!is.null(x)},    TRUE,
-   "code_list",    "type",         is.character,                TRUE,
+   "codelist",    "code_id",      is.character,                FALSE,
+   "codelist",    "name",        is.character,                TRUE,
+   "codelist",    "codes",        function(x){!is.null(x)},    TRUE,
+   "codelist",    "type",         is.character,                TRUE,
 )
 }
 
@@ -235,7 +235,7 @@ all_message <- function() {
 #' Check all data frames include the correct types of columns
 #'
 #' This function checks for vector types and accepted words
-check_columns <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, code_list) {
+check_columns <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist) {
 
    messages <- purrr::pmap(all_message(),
                ~check_structure(
