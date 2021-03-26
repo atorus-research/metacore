@@ -100,7 +100,8 @@ xml_to_var_spec <- function(doc) {
       length = var_nodes %>% get_node_attr("Length") %>%
          as.integer(),
       # Get labels
-      label = var_nodes %>% map_chr(get_node_description)
+      label = var_nodes %>% map_chr(get_node_description),
+      format = var_nodes %>% get_node_attr("DisplayFormat")
    )
 
    possible_vars <- ds_var_ls(doc) %>%

@@ -171,15 +171,16 @@ spec_type_to_var_spec <- function(doc, cols = c("variable" = "[N|n]ame|[V|v]aria
                                                 "length" = "[L|l]ength",
                                                 "label" = "[L|l]abel",
                                                 "type" = "[T|t]ype",
-                                                "dataset" = "[D|d]ataset|[D|d]omain"),
+                                                "dataset" = "[D|d]ataset|[D|d]omain",
+                                                "format" = "Format"),
                                   sheet = NULL){
    # Check the names
    name_check <- names(cols) %in% c("variable", "length", "label",
-                                    "type", "dataset", "common") %>%
+                                    "type", "dataset", "common", "format") %>%
       all()
    if(!name_check){
       stop("Supplied column vector must be named using the following names:
-              'variable', 'length', 'label', 'type', 'dataset', 'common'
+              'variable', 'length', 'label', 'type', 'dataset', 'common', 'format'
               If common is not avaliable it can be excluded and will be automatically filled in.")
    }
 
