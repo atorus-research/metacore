@@ -544,8 +544,8 @@ create_tbl <- function(doc, cols){
       if(length(nm_test) > 0) {
          str_c(names(nm_test),  " matches ",nm_test, " columns") %>%
             str_c(collapse = "\n ") %>%
-            paste("Unable to rename the following columns:\n", .,
-                  "\nPlease check your regular expression") %>%
+            paste0("Unable to rename the following columns in ", names(matches[1]), ":\n ", .,
+                  "\nPlease check your regular expression ") %>%
             stop(call. = FALSE)
       }
       matches[[1]] %>%

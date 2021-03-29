@@ -48,8 +48,8 @@ With an understanding of the basic structure we can figure out what is needed fo
 
 ```{r, echo=FALSE}
 all_message()%>% 
-   mutate(across(everything(), as.character)) %>% 
-   gt::gt()
+  mutate(across(everything(), as.character)) %>% 
+  gt::gt()
 
 ```
 ## THIS SECTION NEEDS BEEFING UP, but you get the idea
@@ -76,9 +76,9 @@ We only need the Domain `Name`, `Label`, and `Data Structure` columns. So we can
 
 ```{r}
 ds_spec <- spec_type_to_ds_spec(doc, 
-                     cols = c("dataset" = "Name", 
-                              "structure" = "Data Structure",  
-                              "label" = "Label"))
+                                cols = c("dataset" = "Name", 
+                                         "structure" = "Data Structure",  
+                                         "label" = "Label"))
 head(ds_spec)
 ```
 
@@ -98,11 +98,15 @@ Unfortunately we have the same issue as before. So we need to have a quick look 
 ```{r}
 doc$Specs %>% head()
 
-spec_type_to_ds_vars(doc, cols = c("dataset" = "Domain",
-                                               "variable" = "[V|v]ariable [N|n]ame",
-                                               "key_seq" = "Sort Order",
-                                               "keep" = "[K|k]eep|[M|m]andatory", 
+ds_vars<- spec_type_to_ds_vars(doc, cols = c("dataset" = "Domain",
+                                   "variable" = "[V|v]ariable [N|n]ame",
+                                   "key_seq" = "Sort Order",
+                                   "keep" = "[K|k]eep|[M|m]andatory", 
                                    "core" = "Required"),
-                                 sheet = NULL)
+                     sheet = NULL)
+head(ds_vars)
+```
+```{r}
+spec_type_to_var_spec(doc)
 ```
 
