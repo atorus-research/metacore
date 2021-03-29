@@ -88,7 +88,6 @@ read_all_sheets <- function(path){
 spec_type_to_ds_spec <- function(doc, cols = c("dataset" = "[N|n]ame|[D|d]ataset|[D|d]omain",
                                                "structure" = "[S|s]tructure",
                                                "label" = "[L|l]abel|[D|d]escription"), sheet = NULL){
-
    name_check <- names(cols) %in% c("dataset", "structure", "label") %>%
       all()
    if(!name_check){
@@ -130,11 +129,11 @@ spec_type_to_ds_vars <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]oma
                                                "keep" = "[K|k]eep|[M|m]andatory"),
                                  sheet = "[V|v]ar"){
    name_check <- names(cols) %in% c("variable", "dataset", "key_seq",
-                                    "keep") %>%
+                                    "keep", "core") %>%
       all()
    if(!name_check){
       stop("Supplied column vector must be named using the following names:
-              'variable', 'dataset', 'key_seq', 'keep'")
+              'variable', 'dataset', 'key_seq', 'keep', 'core'")
    }
 
    if(!is.null(sheet)){
@@ -322,9 +321,9 @@ spec_type_to_value_spec <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]
          rowwise() %>%
          mutate(where_new = paste(c_across(matches("where")), collapse = " ")) %>%
          select(id, where_new)
-         out <- out %>%
-            left_join(where_df, by = c("where" = "id")) %>%
-            select(-where, where = where_new)
+      out <- out %>%
+         left_join(where_df, by = c("where" = "id")) %>%
+         select(-where, where = where_new)
    } else if(where_sep_sheet) {
       warning("Not able to add where infromation from seperate sheet cause a where column is needed to cross-reference the information",
               call. = FALSE)
@@ -536,6 +535,19 @@ create_tbl <- function(doc, cols){
          stop(call. = FALSE)
 
    } else if(length(matches) == 1){
+      # Check names and write a better warning message if names don't work
+      ds_nm <- matches[[1]] %>%
+         names()
+      nm_test <- cols %>%
+         map_int(~sum(str_detect(ds_nm, .))) %>%
+         keep(~ . != 1)
+      if(length(nm_test) > 0) {
+         str_c(names(nm_test),  " matches ",nm_test, " columns") %>%
+            str_c(collapse = "\n ") %>%
+            paste("Unable to rename the following columns:\n", .,
+                  "\nPlease check your regular expression") %>%
+            stop(call. = FALSE)
+      }
       matches[[1]] %>%
          select(matches(cols))
    } else {
