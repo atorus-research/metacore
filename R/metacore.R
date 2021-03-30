@@ -94,6 +94,7 @@ MetaCore_validate <-  function() {
       value_check(private$.ds_vars, private$.value_spec)
       derivation_check(private$.value_spec, private$.derivations)
       codelist_check(private$.value_spec, private$.codelist)
+
    } else {
       warning("Other checks were not preformed, because column names were incorrect",
               call. = FALSE)
@@ -137,7 +138,18 @@ MetaCore_filter <- function(value) {
    private$.ds_vars <- private$.ds_vars %>% filter(dataset == value)
    private$.value_spec <- private$.value_spec %>% filter(dataset == value)
 
-   private$.var_spec <- private$.var_spec %>%
+
+   # Need clarity on X.Y.Z situation: SUPPY8.QVAL
+   private$.var_spec <- private.var_spec %>%
+      # variables have the dataset prefix so we make this into its own column
+      mutate(dataset = ifelse(str_detect(variable, "\\."), str_extract(variable, "^.*(?=\\.)"), ""),
+             variable = str_remove(variable, "^.*\\.")
+      ) %>%
+      # then keep the variables that occur once or in the dataset to filter
+      filter(dataset == "" | dataset == value) %>%
+      # remove the temporary column
+      select(-dataset) %>%
+      # right join
       right_join(private$.ds_vars %>% select(variable), by="variable")
 
    private$.derivations <- private$.derivations %>%
