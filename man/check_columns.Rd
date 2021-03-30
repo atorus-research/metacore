@@ -4,7 +4,7 @@
 \alias{check_columns}
 \title{Check all data frames include the correct types of columns}
 \usage{
-check_columns(ds_spec, ds_vars, var_spec, value_spec, derivations, code_list)
+check_columns(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist)
 }
 \description{
 This function checks for vector types and accepted words

@@ -8,10 +8,11 @@ spec_type_to_value_spec(
   doc,
   cols = c(dataset = "[D|d]ataset|[D|d]omain", variable = "[N|n]ame|[V|v]ariables?",
     origin = "[O|o]rigin", type = "[T|t]ype", code_id = "[C|c]odelist|Controlled Term",
-    where = "[W|w]here"),
+    where = "[W|w]here", derivation_id = "Method"),
   sheet = NULL,
   where_sep_sheet = TRUE,
-  where_cols = c(id = "ID", where = c("Variable", "Comparator", "Value"))
+  where_cols = c(id = "ID", where = c("Variable", "Comparator", "Value")),
+  var_sheet = "[V|v]ar"
 )
 }
 \arguments{
@@ -19,7 +20,8 @@ spec_type_to_value_spec(
 format}
 
 \item{cols}{Named vector of column names. The column names can be regular
-expressions for more flexibility. But, the names must follow the given pattern}
+expressions for more flexibility. But, the names must follow the given
+pattern}
 
 \item{sheet}{Regular expression for the sheet name}
 
@@ -29,6 +31,12 @@ true and provide the column information with the \code{where_cols} inputs.}
 
 \item{where_cols}{Named list with an id and where field. All coumns in the
 where field will be collapsed together}
+
+\item{var_sheet}{Name of sheet with the Variable information on it. Metacore
+expects each variable will have a row in the value_spec. Because many
+specification only have information in the value tab this is added. If the
+information already exsists in the value tab of your specification set to
+NULL}
 }
 \value{
 
@@ -40,7 +48,7 @@ correct sheet and renames the columns
 }
 \seealso{
 Other spec builder: 
-\code{\link{spec_type_to_code_list}()},
+\code{\link{spec_type_to_codelist}()},
 \code{\link{spec_type_to_derivations}()},
 \code{\link{spec_type_to_ds_spec}()},
 \code{\link{spec_type_to_ds_vars}()},

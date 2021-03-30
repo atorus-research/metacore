@@ -30,7 +30,7 @@ sheet and renames the columns
 }
 \seealso{
 Other spec builder: 
-\code{\link{spec_type_to_code_list}()},
+\code{\link{spec_type_to_codelist}()},
 \code{\link{spec_type_to_derivations}()},
 \code{\link{spec_type_to_ds_vars}()},
 \code{\link{spec_type_to_value_spec}()},

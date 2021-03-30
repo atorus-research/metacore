@@ -27,14 +27,15 @@ MetaCore_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivati
                  variable = "Variable Name",
                  key_seq = "Sequence Key",
                  keep = "Keep (Boolean)",
-                 core = "ADaM core (Expected, Required, Permissable)")
+                 core = "ADaM core (Expected, Required, Permissible)")
 
    private$.var_spec <- var_spec %>%
       add_labels(variable = "Variable Name",
                  length = "Variable Length",
                  label = "Variable Label",
                  type = "Variable Class",
-                 common = "Common Across ADaM")
+                 common = "Common Across ADaM",
+                 format = "Variable Format")
 
    private$.value_spec <- value_spec %>%
       add_labels(type = "Value Type",

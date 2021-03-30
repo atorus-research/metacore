@@ -7,7 +7,8 @@
 spec_type_to_var_spec(
   doc,
   cols = c(variable = "[N|n]ame|[V|v]ariables?", length = "[L|l]ength", label =
-    "[L|l]abel", type = "[T|t]ype", dataset = "[D|d]ataset|[D|d]omain"),
+    "[L|l]abel", type = "[T|t]ype", dataset = "[D|d]ataset|[D|d]omain", format =
+    "Format"),
   sheet = NULL
 )
 }
@@ -30,7 +31,7 @@ sheet and renames the columns
 }
 \seealso{
 Other spec builder: 
-\code{\link{spec_type_to_code_list}()},
+\code{\link{spec_type_to_codelist}()},
 \code{\link{spec_type_to_derivations}()},
 \code{\link{spec_type_to_ds_spec}()},
 \code{\link{spec_type_to_ds_vars}()},
