@@ -211,7 +211,7 @@ all_message <- function() {
    "ds_spec",     "label",         is.character,                TRUE,
    "ds_vars",     "dataset",       is.character,                FALSE,
    "ds_vars",     "variable",      is.character,                FALSE,
-   "ds_vars",     "key_seq",       is.character,                TRUE,
+   "ds_vars",     "key_seq",       is.numeric,                  TRUE,
    "ds_vars",     "core",          check_words("Expected", "Required", "Permissible", "Conditionally Required", "Conditionally Expected"), TRUE,
    "var_spec",    "variable",      is.character,                FALSE,
    "var_spec",    "type",          is.character,                TRUE,

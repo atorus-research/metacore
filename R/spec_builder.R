@@ -233,7 +233,8 @@ spec_type_to_var_spec <- function(doc, cols = c("variable" = "[N|n]ame|[V|v]aria
    missing <- col_vars()$.var_spec %>%
       discard(~. %in% names(out))
    out %>%
-      `is.na<-`(missing)
+      `is.na<-`(missing) %>%
+      distinct()
 }
 
 #' Spec to value_spec
@@ -305,7 +306,8 @@ spec_type_to_value_spec <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]
       var_out <- doc[var_sheet] %>%
          map_dfr(function(x){
             var_out <- x %>%
-               select(matches(cols))
+               select(matches(cols)) %>%
+               mutate(where = "TRUE")
             if(nrow(out) > 0){
                var_out  %>%
                   anti_join(out, by = "variable")
@@ -348,7 +350,8 @@ spec_type_to_value_spec <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]
    missing <- col_vars()$.value_spec %>%
       discard(~. %in% names(out))
    out %>%
-      `is.na<-`(missing)
+      `is.na<-`(missing) %>%
+      distinct()
 
 }
 

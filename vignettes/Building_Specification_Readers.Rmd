@@ -144,7 +144,7 @@ The next table we have is var_spec, the table of variable level metadata. var_sp
 
 -   common: boolean if variable is common across ADaM
 
-Looking back at our specification we see this will also be built using the Variable tab. So, we know we need to edit the regular expression fro variable to make it more specific. Additionally, if you look at the default for `cols` you see there is a dataset input. This is because some standards aren't 100% consistent, some variables (e.g. visit) have different lengths depending on the dataset. So to accommodate this some of the variables in var_spec are in the ds.variable format. These builders will do this conversion for you , but dataset is needed. The other thing the builders can automatically deal with is the common variable. If given a dataset column, the builder function will automatically figure out which variables are common to all dataset. This is good because we don't have a common variable in our specs.
+Looking back at our specification we see this will also be built using the Variable tab. So, we know we need to edit the regular expression fro variable to make it more specific. Additionally, if you look at the default for `cols` you see there is a dataset input. This is because some standards aren't 100% consistent, some variables (e.g. visit) have different lengths depending on the dataset. **So to accommodate this some of the variables in var_spec are in the ds.variable format**. These builders will do this conversion for you , but dataset is needed. The other thing the builders can automatically deal with is the common variable. If given a dataset column, the builder function will automatically figure out which variables are common to all dataset. This is good because we don't have a common variable in our specs.
 
 ```{r}
 var_spec <- spec_type_to_var_spec(doc, cols = c("variable" = "Variable Name",
@@ -165,6 +165,20 @@ var_spec <- var_spec %>%
 
 The next dataset is value_spec, which contains the value level metadata. It is made up of 7 columns:
 
+-   dataset: dataset name
+
+-   variable: variable name
+
+-   origin: origin of data
+
+-   type: value type
+
+-   code_id: id used to cross-reference the code/decode
+
+-   where: value of the variable
+
+-   derivation_id: id used to cross-reference the derivation
+
 By default, `spec_type_to_value_spec` is set up to have the where information on different sheet because that is the format of a P21 spec, but in our spec we don't have that. In fact, we don't have any value level metadata in our spec. But, that is fine, the default builders will just pull what information it can from the variable tab.
 
 ```{r}
@@ -179,17 +193,30 @@ value_spec <- spec_type_to_value_spec(doc, cols = c("dataset" = "VLM Name|Domain
 head(value_spec)
 ```
 
-The derivation table is relatively simple by comparison. It just has two columns, the derivation id and the derivation. The derivation id should match the derivation id in the the value spec table. 
+The derivation table is relatively simple by comparison. It just has two columns, the derivation id and the derivation. The derivation id should match the derivation id in the the value spec table.
+
 ```{r}
 derivation <- spec_type_to_derivations(doc, cols = c("derivation_id" = "Name",
                                                    "derivation" = "[D|d]efinition|[D|d]escription")) 
 head(derivation)
 ```
 
-The final table is codelist. This table contains all the code/decode pairs, all lists of permitted values and information about external libraries. What is somewhat special about the structure of this table is there isn't just a code 
+The final table is codelist. This table contains all the code/decode pairs, all lists of permitted values and information about external libraries. What is somewhat special about the structure of this table is there isn't just a code and a decode column, but rather a codes column that contains a list of code/decode tables, permitted value vectors and external dictionary vectors. So there is one row per code (i.e. a row for country and one for yes/no codes etc.). This structure makes it easier to see all the codes at once and allows some code to be numeric and others to be character.
+
+By default the `spec_type_to_codelist` function expects codelists and external dictionaries. But, in the specification we only have codelist so `dict_cols` needs to be set to null.
 
 ```{r}
-spec_type_to_code_list()
+codelist <- spec_type_to_codelist(doc, codelist_cols = c("code_id" = "Codelist Code",
+                                                          "name" = "Codelist Name",
+                                                          "code" = "Coded Value",
+                                                          "decode" = "Decoded Value"),
+                      dict_cols = NULL)
+head(codelist)
 ```
 
+Now we have all the tables we need we can make the metacore object
 
+```{r}
+metacore(ds_spec, ds_vars, var_spec, value_spec,
+               derivation, codelist)
+```
