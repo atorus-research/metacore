@@ -180,7 +180,8 @@ spec_type_to_var_spec <- function(doc, cols = c("variable" = "[N|n]ame|[V|v]aria
    if(!name_check){
       stop("Supplied column vector must be named using the following names:
               'variable', 'length', 'label', 'type', 'dataset', 'common', 'format'
-              If common is not avaliable it can be excluded and will be automatically filled in.")
+              If common is not avaliable it can be excluded and will be automatically filled in.
+           Additionally, dataset is only used to clarify if information differs by domain")
    }
 
    # Check if sheet is specified
@@ -244,13 +245,19 @@ spec_type_to_var_spec <- function(doc, cols = c("variable" = "[N|n]ame|[V|v]aria
 #' @param doc Named list of datasets @seealso [read_all_sheets()] for exact
 #'   format
 #' @param cols Named vector of column names. The column names can be regular
-#'   expressions for more flexibility. But, the names must follow the given pattern
+#'   expressions for more flexibility. But, the names must follow the given
+#'   pattern
 #' @param sheet Regular expression for the sheet name
 #' @param where_sep_sheet Boolean value to control if the where information in a
 #'   separate dataset. If the where information is on a separate sheet, set to
 #'   true and provide the column information with the `where_cols` inputs.
 #' @param where_cols Named list with an id and where field. All coumns in the
 #'   where field will be collapsed together
+#' @param var_sheet Name of sheet with the Variable information on it. Metacore
+#'   expects each variable will have a row in the value_spec. Because many
+#'   specification only have information in the value tab this is added. If the
+#'   information already exsists in the value tab of your specification set to
+#'   NULL
 #'
 #' @return
 #' @export
@@ -266,7 +273,8 @@ spec_type_to_value_spec <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]
                                     sheet = NULL,
                                     where_sep_sheet = TRUE,
                                     where_cols = c("id" = "ID",
-                                                   "where" = c("Variable", "Comparator", "Value"))){
+                                                   "where" = c("Variable", "Comparator", "Value")),
+                                    var_sheet = "[V|v]ar"){
    name_check <- names(cols) %in% c("variable", "origin", "code_id",
                                     "type", "dataset", "where", "derivation_id") %>%
       all()
@@ -287,8 +295,10 @@ spec_type_to_value_spec <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]
    out <- create_tbl(doc, cols)
 
    # Does a var sheet exsist?
-   var_sheet <- names(doc) %>%
-      keep(~str_detect(., "[V|v]ar"))
+   if(!is.null(var_sheet)){
+      var_sheet <- names(doc) %>%
+         keep(~str_detect(., var_sheet))
+   }
 
    # If so, add any variables not in the value sheet
    if(length(var_sheet) > 0){
@@ -342,7 +352,7 @@ spec_type_to_value_spec <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]
 
 }
 
-#' Spec to code_list
+#' Spec to codelist
 #'
 #' Creates the value_spec from a list of datasets (optionally filtered by the
 #' sheet input). The named vector `*_cols` is used to determine which is the
@@ -368,7 +378,7 @@ spec_type_to_value_spec <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]
 #' @export
 #'
 #' @family spec builder
-spec_type_to_code_list <- function(doc, codelist_cols = c("code_id" = "ID",
+spec_type_to_codelist <- function(doc, codelist_cols = c("code_id" = "ID",
                                                           "name" = "[N|n]ame",
                                                           "code" = "^[C|c]ode|^[T|t]erm",
                                                           "decode" = "[D|d]ecode"),
@@ -447,7 +457,9 @@ spec_type_to_code_list <- function(doc, codelist_cols = c("code_id" = "ID",
       discard(~. %in% names(cd_out))
 
    cd_out %>%
-      `is.na<-`(missing)
+      `is.na<-`(missing) %>%
+      distinct() %>%
+      filter(!is.na(code_id))
 }
 
 #' Spec to derivation
@@ -487,7 +499,9 @@ spec_type_to_derivations <- function(doc, cols = c("derivation_id" = "ID",
       discard(~. %in% names(out))
 
    out %>%
-      `is.na<-`(missing)
+      `is.na<-`(missing) %>%
+      distinct() %>%
+      filter(!is.na(derivation_id))
 }
 
 
@@ -531,7 +545,7 @@ create_tbl <- function(doc, cols){
                    paste(names(vars), collapse = "\n"))
          }) %>%
          paste0(collapse = "\n") %>%
-         paste0("Unable to identify a sheet with all cloumns.\n", . ) %>%
+         paste0("Unable to identify a sheet with all columns.\n", . ) %>%
          stop(call. = FALSE)
 
    } else if(length(matches) == 1){
@@ -549,7 +563,7 @@ create_tbl <- function(doc, cols){
             stop(call. = FALSE)
       }
       matches[[1]] %>%
-         select(matches(cols))
+         select(matches(cols, ignore.case = FALSE))
    } else {
       sheets_mats <- matches %>%
          names()
