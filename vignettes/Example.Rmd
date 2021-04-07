@@ -33,6 +33,7 @@ test <- metacore(ds_spec2, ds_vars, var_spec, value_spec, derivations, code_list
 
 # a metacore object with all your dataframes
 subset <- test %>% select_dataset("DM")
+subset$ds_spec
 
 # a simplified dataframe 
 subset_t <- test %>% select_dataset("DM", simplify = TRUE)

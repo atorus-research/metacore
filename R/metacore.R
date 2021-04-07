@@ -94,6 +94,7 @@ MetaCore_validate <-  function() {
       value_check(private$.ds_vars, private$.value_spec)
       derivation_check(private$.value_spec, private$.derivations)
       codelist_check(private$.value_spec, private$.codelist)
+
    } else {
       warning("Other checks were not preformed, because column names were incorrect",
               call. = FALSE)
@@ -126,6 +127,37 @@ readonly <- function(name) {
    inside
 }
 
+#' Select method to subset by a single dataframe
+#' @param value the dataframe to subset by
+#'
+MetaCore_filter <- function(value) {
+   # should we do a check of available filtering options?
+   # like check DM, AE whatever?
+
+   private$.ds_spec <- private$.ds_spec %>% filter(dataset == value)
+   private$.ds_vars <- private$.ds_vars %>% filter(dataset == value)
+   private$.value_spec <- private$.value_spec %>% filter(dataset == value)
+
+
+   # Need clarity on X.Y.Z situation: SUPPY8.QVAL
+   private$.var_spec <- private$.var_spec %>%
+      # variables have the dataset prefix so we make this into its own column
+      mutate(dataset = ifelse(str_detect(variable, "\\."), str_extract(variable, "^.*(?=\\.)"), ""),
+             variable = str_remove(variable, "^.*\\.")
+      ) %>%
+      # then keep the variables that occur once or in the dataset to filter
+      filter(dataset == "" | dataset == value) %>%
+      # remove the temporary column
+      select(-dataset) %>%
+      # right join
+      right_join(private$.ds_vars %>% select(variable), by="variable")
+
+   private$.derivations <- private$.derivations %>%
+      right_join(private$.value_spec %>% select(derivation_id) %>% na.omit(), by = "derivation_id")
+
+   private$.codelist <- private$.codelist %>%
+      right_join(private$.value_spec %>% select(code_id) %>% na.omit(), by = "code_id")
+}
 
 #' The Metacore R6 Class
 #'
@@ -140,24 +172,7 @@ MetaCore <- R6::R6Class("Metacore",
                           initialize = MetaCore_initialize,
                           print = MetaCore_print,
                           validate =  MetaCore_validate,
-                          metacore_filter = function(value) {
-
-                             # should we do a check of available filtering options?
-                             # like check DM, AE whatever?
-
-                             private$.ds_spec <- private$.ds_spec %>% filter(dataset == value)
-                             private$.ds_vars <- private$.ds_vars %>% filter(dataset == value)
-                             private$.value_spec <- private$.value_spec %>% filter(dataset == value)
-
-                             private$.var_spec <- private$.var_spec %>%
-                                right_join(private$.ds_vars %>% select(variable), by="variable")
-
-                             private$.derivations <- private$.derivations %>%
-                                dplyr::right_join(private$.value_spec %>% select(derivation_id) %>% na.omit(), by = "derivation_id")
-
-                             private$.codelist <- private$.codelist %>%
-                                dplyr::right_join(private$.value_spec %>% select(code_id) %>% na.omit(), by = "code_id")
-                          }
+                          metacore_filter = MetaCore_filter
                        ),
                        private = list(
                           .ds_spec = tibble(dataset = character(), label = character()),
