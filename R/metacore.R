@@ -140,7 +140,7 @@ MetaCore_filter <- function(value) {
 
 
    # Need clarity on X.Y.Z situation: SUPPY8.QVAL
-   private$.var_spec <- private.var_spec %>%
+   private$.var_spec <- private$.var_spec %>%
       # variables have the dataset prefix so we make this into its own column
       mutate(dataset = ifelse(str_detect(variable, "\\."), str_extract(variable, "^.*(?=\\.)"), ""),
              variable = str_remove(variable, "^.*\\.")

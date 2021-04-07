@@ -17,7 +17,7 @@ define_to_MetaCore <- function(path){
    code_list <- xml_to_code_list(doc)
    derivations <- xml_to_derivations(doc)
 
-   metacore(ds_spec, ds_vars, var_spec, value_spec, derivations, code_list)
+   metacore(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist = code_list)
 }
 
 
@@ -126,8 +126,10 @@ xml_to_var_spec <- function(doc) {
    full_name_vars <- dist_df %>%
       filter(n > 1) %>%
       select(.data$variable) %>%
-      inner_join(var_info, by = "variable") %>%
-      mutate(variable = str_remove(.data$var_full, "^IT\\.")) %>%
+      inner_join(var_info, by = "variable")  %>%
+      mutate(variable = str_remove(.data$var_full, "^IT\\."),
+             variable = ifelse(str_count(variable, "\\.") > 0,
+             str_extract(variable, "(?<=\\.)\\w*"), variable)) %>%
       distinct()
 
    # Combine the variables that need full names with the variables that don't
