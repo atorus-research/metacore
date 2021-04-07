@@ -100,7 +100,8 @@ xml_to_var_spec <- function(doc) {
       length = var_nodes %>% get_node_attr("Length") %>%
          as.integer(),
       # Get labels
-      label = var_nodes %>% map_chr(get_node_description)
+      label = var_nodes %>% map_chr(get_node_description),
+      format = var_nodes %>% get_node_attr("DisplayFormat")
    )
 
    possible_vars <- ds_var_ls(doc) %>%
@@ -250,7 +251,7 @@ xml_to_code_list <- function(doc) {
    # Done like this because map_chr is faster than map_dfr
    code_decode <- tibble(
       code_id = cl_nodes %>% get_node_attr("OID"),
-      names = cl_nodes %>% get_node_attr("Name"),
+      name = cl_nodes %>% get_node_attr("Name"),
       dataType = cl_nodes %>% get_node_attr("DataType"),
       codes = cl_nodes %>% get_codes(),
       type = "code_decode"
@@ -261,7 +262,7 @@ xml_to_code_list <- function(doc) {
    permitted_nodes <- get_nodes(doc, "//ns:CodeList[ns:EnumeratedItem]")
    permitted <- tibble(
       code_id = permitted_nodes %>% get_node_attr("OID"),
-      names = permitted_nodes %>% get_node_attr("Name"),
+      name = permitted_nodes %>% get_node_attr("Name"),
       dataType = permitted_nodes %>% get_node_attr("DataType"),
       type = "permitted_val",
       codes = permitted_nodes %>% get_permitted_vals()
@@ -271,7 +272,7 @@ xml_to_code_list <- function(doc) {
    ex_lib_nodes <- get_nodes(doc, "//ns:CodeList[ns:ExternalCodeList]")
    ex_lib <- tibble(
       code_id = ex_lib_nodes %>% get_node_attr("OID"),
-      names = ex_lib_nodes %>% get_node_attr("Name"),
+      name = ex_lib_nodes %>% get_node_attr("Name"),
       dataType = ex_lib_nodes %>% get_node_attr("DataType"),
       dictionary = ex_lib_nodes %>%
          map_chr(~ get_child_attr(., "ExternalCodeList", "Dictionary")),

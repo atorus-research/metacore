@@ -25,6 +25,7 @@ ds_vars_check <- function(ds_vars, var_spec){
          warning(
             "The following variable(s) do not have labels and lengths: ",
             paste("   ", var_check_dbl, sep = "\n   "),
+            "\n\n",
             call. = FALSE
          )
       }
@@ -55,7 +56,7 @@ value_check <- function(ds_vars, value_spec){
          pull(.data$full) %>%
          str_c(collapse = ", ")
       message <- paste("The following variables are in the ds_vars table, but don't have value specs:\n",
-                       variables, "\n")
+                       variables, "\n\n")
       warning(message, call. = FALSE)
    }
    # Check the variables in value spec that aren't in ds_vars
@@ -65,7 +66,7 @@ value_check <- function(ds_vars, value_spec){
          pull(.data$variable) %>%
          str_c(collapse = ", ")
       message <- paste("The following variables are have value specifications, but aren't in the ds_vars table:\n",
-                       variables, "\n")
+                       variables, "\n\n")
       warning(message, call. = FALSE)
    }
 }
@@ -88,19 +89,20 @@ derivation_check <- function(value_spec, derivations){
    if(nrow(not_in_val) != 0){
       variables <- not_in_val %>%
          pull(.data$variable) %>%
-         str_c(collapse = ", ")
+         str_c(collapse = "\n ")
       message <- paste("The following variables are missing derivations:\n",
-                       variables, "\n")
+                       variables, "\n\n")
       warning(message, call. = FALSE)
    }
    # Check the derivations in deriavtion that aren't  in value spec
    not_in_deriv <- anti_join(derivations, deriv_vars, by = c("derivation_id"))
    if(nrow(not_in_deriv) != 0){
       deriv <- not_in_deriv %>%
-         pull(.data$derivation) %>%
-         str_c(collapse = ", ")
+         mutate(message = paste0(.data$derivation_id, ": ", .data$derivation)) %>%
+         pull(.data$message) %>%
+         str_c(collapse = "\n ")
       message <- paste("The following derivations are never used:\n",
-                       deriv, "\n")
+                       deriv, "\n\n")
       warning(message, call. = FALSE)
    }
 
@@ -123,7 +125,7 @@ codelist_check <- function(value_spec, codelist){
    if(nrow(not_in_val)){
       variables <- not_in_val %>%
          pull(.data$variable) %>%
-         str_c(collapse = ", ")
+         str_c(collapse = "\n ")
       message <- paste("The following variables are missing codelist(s):\n",
                        variables, "\n")
       warning(message, call. = FALSE)
@@ -132,10 +134,10 @@ codelist_check <- function(value_spec, codelist){
    not_in_cl <- anti_join(codelist, code_vars, by = c("code_id"))
    if(nrow(not_in_cl)){
       cl_nm <- not_in_cl %>%
-         pull(.data$names) %>%
-         str_c(collapse = ", ")
+         pull(.data$name) %>%
+         str_c(collapse = "\n ")
       message <- paste("The following codelist(s) are never used:\n",
-                       cl_nm, "\n")
+                       cl_nm, "\n\n")
       warning(message, call. = FALSE)
    }
 }
@@ -147,10 +149,10 @@ codelist_check <- function(value_spec, codelist){
 col_vars <- function(){
    list(.ds_spec = c("dataset", "structure", "label"),
         .ds_vars = c("dataset", "variable", "key_seq", "keep", "core"),
-        .var_spec = c("variable", "length", "label", "type", "common"),
+        .var_spec = c("variable", "length", "label", "type", "common", "format"),
         .value_spec = c("type", "origin", "code_id", "dataset", "variable", "where", "derivation_id"),
         .derivations = c("derivation_id", "derivation"),
-        .codelist= c("code_id", "names","type", "codes"),
+        .codelist= c("code_id", "name","type", "codes"),
         .change_log = c("table_chg", "column_chg", "what_chg"))
 }
 
@@ -164,7 +166,7 @@ col_vars <- function(){
 var_name_check <- function(envrionment){
     # Set the name as they should be
    col_names <- col_vars()
-   # Get the tables and table names from the envrionment
+   # Get the tables and table names from the environment
    tbl_name <- ls(envrionment, all.names = TRUE)
    tbls <- map(tbl_name, get, envir = envrionment)
    # Checks is names match the table above, returns T if so F else. If the names
@@ -182,8 +184,8 @@ var_name_check <- function(envrionment){
          # writes a message if the column names don't match
          print_message <- name %>%
             str_remove("[:punct:]") %>%
-            paste("has incorrect column names. It should be:\n",
-                  str_c(col_names[[name]], collapse = ", "))
+            paste0("'", ., "' has incorrect column names. It should be:\n",
+                  str_c(col_names[[name]], collapse = ", "), "\n")
          warning(print_message, call. = FALSE)
          FALSE
       } else {
@@ -209,12 +211,13 @@ all_message <- function() {
    "ds_spec",     "label",         is.character,                TRUE,
    "ds_vars",     "dataset",       is.character,                FALSE,
    "ds_vars",     "variable",      is.character,                FALSE,
-   "ds_vars",     "key_seq",       is.character,                TRUE,
+   "ds_vars",     "key_seq",       is.numeric,                  TRUE,
    "ds_vars",     "core",          check_words("Expected", "Required", "Permissible", "Conditionally Required", "Conditionally Expected"), TRUE,
    "var_spec",    "variable",      is.character,                FALSE,
    "var_spec",    "type",          is.character,                TRUE,
    "var_spec",    "length",        is.numeric,                  TRUE,
    "var_spec",    "label",         is.character,                TRUE,
+   "var_spec",    "format",        is.character,                TRUE,
    "var_spec",    "common",        is.logical,                  TRUE,
    "value_spec",  "type",          is.character,                TRUE,
    "value_spec",  "origin",        is.character,                TRUE,
@@ -224,10 +227,10 @@ all_message <- function() {
    "value_spec",  "derivation_id", is.character,                TRUE,
    "derivations", "derivation_id", is.character,                FALSE,
    "derivations", "derivation",    is.character,                TRUE,
-   "code_list",    "code_id",      is.character,                FALSE,
-   "code_list",    "names",        is.character,                TRUE,
-   "code_list",    "codes",        function(x){!is.null(x)},    TRUE,
-   "code_list",    "type",         is.character,                TRUE,
+   "codelist",    "code_id",      is.character,                FALSE,
+   "codelist",    "name",        is.character,                TRUE,
+   "codelist",    "codes",        function(x){!is.null(x)},    TRUE,
+   "codelist",    "type",         is.character,                TRUE,
 )
 }
 
@@ -235,7 +238,7 @@ all_message <- function() {
 #' Check all data frames include the correct types of columns
 #'
 #' This function checks for vector types and accepted words
-check_columns <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, code_list) {
+check_columns <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist) {
 
    messages <- purrr::pmap(all_message(),
                ~check_structure(

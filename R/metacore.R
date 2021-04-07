@@ -27,14 +27,15 @@ MetaCore_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivati
                  variable = "Variable Name",
                  key_seq = "Sequence Key",
                  keep = "Keep (Boolean)",
-                 core = "ADaM core (Expected, Required, Permissable)")
+                 core = "ADaM core (Expected, Required, Permissible)")
 
    private$.var_spec <- var_spec %>%
       add_labels(variable = "Variable Name",
                  length = "Variable Length",
                  label = "Variable Label",
                  type = "Variable Class",
-                 common = "Common Across ADaM")
+                 common = "Common Across ADaM",
+                 format = "Variable Format")
 
    private$.value_spec <- value_spec %>%
       add_labels(type = "Value Type",
@@ -49,7 +50,7 @@ MetaCore_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivati
       add_labels(derivation_id = "ID of Derivation",
                  derivation = "Derivation")
 
-   private$.codelist <- code_list %>%
+   private$.codelist <- codelist %>%
       add_labels(code_id = "ID of the Code List",
                  names = "Name of the Code List",
                  type = "Code List/Permitted Values/External Library",
