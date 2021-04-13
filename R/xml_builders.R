@@ -65,7 +65,9 @@ xml_to_ds_vars <- function(doc) {
             dataset = dataset,
             variable = child_var_nodes %>% get_node_attr("ItemOID"),
             mandatory = child_var_nodes %>% get_node_attr("Mandatory"),
-            key_seq = child_var_nodes %>% get_node_attr("KeySequence")
+            key_seq = child_var_nodes %>%
+               get_node_attr("KeySequence") %>%
+               as.integer()
          )
       }) %>%
       mutate(

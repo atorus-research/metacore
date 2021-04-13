@@ -148,8 +148,11 @@ spec_type_to_ds_vars <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]oma
    doc %>%
       create_tbl(cols) %>%
       distinct() %>%
-      `is.na<-`(missing)
+      `is.na<-`(missing) %>%
+      mutate(key_seq = as.integer(key_seq),
+             keep = yn_to_tf(keep))
 }
+
 
 #' Spec to var_spec
 #'
@@ -506,7 +509,7 @@ spec_type_to_derivations <- function(doc, cols = c("derivation_id" = "ID",
       distinct() %>%
       filter(!is.na(derivation_id))
 }
-
+### Helper Functions
 
 #' Select sheet
 #'
@@ -576,5 +579,26 @@ create_tbl <- function(doc, cols){
          warning(., call. = FALSE)
       matches %>%
          map(~select(., matches(cols)))
+   }
+}
+
+
+#' Yes No to True False
+#'
+#' @param x takes in a vector to convert
+#'
+#' @return returns a logical vector or normal vector with warning
+#' @noRd
+#'
+#' @examples
+yn_to_tf <- function(x){
+   if(all(is.na(x) ||str_detect(x, "[Y|y]es|[N|n]o|^[Y|y]$|^[N|n]$"))){
+      case_when(str_detect(x, "[Y|y]es") ~ TRUE,
+                str_detect(x, "[N|n]o") ~ FALSE,
+                is.na(x) ~ NA)
+   } else {
+      warning("Keep column needs to be True or False, please correct before converting to a Metacore object",
+              call. = FALSE)
+      x
    }
 }
