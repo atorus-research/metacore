@@ -38,3 +38,8 @@ test_that("NA columns fail", {
    expect_error(suppressWarnings(do.call(check_columns, dfs[-7])))
 })
 
+test_that("all_message dataframe contains 6 datasets", {
+   expect_equal(all_message() %>%
+                   distinct(dataset) %>%
+                   nrow(), 6)
+})
