@@ -46,6 +46,7 @@ add_labels <- function(.data,...) {
 #' @param col the column to test
 #' @param func the function to use to assert column structure
 #' @param any_na_acceptable boolean, testing if the column can have missing
+#' @param nm
 #'
 check_structure <- function(.data, col, func, any_na_acceptable, nm) {
 
@@ -53,9 +54,8 @@ check_structure <- function(.data, col, func, any_na_acceptable, nm) {
 
    vec <- .data %>% pull(!!col)
 
-   if(any(is.na(vec)) & !any_na_acceptable){
-      error_message <- (message = paste(column, "from the", nm,
-                 "table contains missing values. Actual values are needed."))
+   if(any(is.na(vec)) & !any_na_acceptable) {
+      error_message <- paste(column, "from the", nm, "table contains missing values. Actual values are needed.")
       warning_string <- NULL
    } else if (all(is.na(vec))){
       warning_string <- paste(column, "from the", nm,

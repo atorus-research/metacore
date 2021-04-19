@@ -255,3 +255,13 @@ select_dataset <- function(.data, dataset, simplify = FALSE) {
       return(cl)
    }
 }
+
+
+save_metacore <- function(metacore_object) {
+
+}
+
+load_metacore <- function(metacore_object) {
+
+}
+

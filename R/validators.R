@@ -240,11 +240,18 @@ all_message <- function() {
 #' This function checks for vector types and accepted words
 check_columns <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist) {
 
+
    messages <- purrr::pmap(all_message(),
                ~check_structure(
                   get(..1), sym(..2), ..3, ..4, ..1)
-               )
+   )
 
+   # errors
+   errors <-  map(messages, "error") %>%
+      compact() %>%
+      paste0(., collapse = "\n\n")
+   if(errors != "")
+      stop(paste0(errors, "\n\n"), call. = FALSE)
 
    # warnings
    warnings <- map(messages, "warning") %>%
@@ -252,13 +259,6 @@ check_columns <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, c
       paste0(., collapse = "\n\n")
    if(warnings != "")
       warning(paste0(warnings, "\n\n"), call. = FALSE)
-
-   # errors
-   errors <-  map(messages, "errors") %>%
-      compact() %>%
-      paste0(., collapse = "\n\n")
-   if(errors != "")
-      stop(paste0(errors, "\n\n"), call. = FALSE)
 
 
 
