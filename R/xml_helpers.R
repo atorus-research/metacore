@@ -46,8 +46,10 @@ get_var_lvl_nodes <- function(doc) {
 #' @return character vector of the attribute searched
 #' @noRd
 get_node_attr <- function(nodeSet, attrtibute) {
-   nodeSet %>%
+   out <- nodeSet %>%
       map_chr(~ xmlGetAttr(., attrtibute, default = NA))
+   attr(out, "names") <- NULL
+   out
 }
 
 
