@@ -16,11 +16,12 @@ knitr::opts_chunk$set(
 
 ```{r setup}
 library(metacore)
+library(dplyr)
 ```
 
 The first thing to do when trying to build a specification reader is to try the default. By default metacore can read in specification that are in the pinnacle 21 format. If your document isn't that format it is still worth trying the default cause the error messages can be helpful.
 
-```{r}
+```{r, error=TRUE}
 spec_to_metacore("mock_spec.xlsx")
 ```
 
@@ -40,7 +41,7 @@ As we can see, the mock spec we are using here doesn't match the format. So, we 
 
 Here is a schema of how all this fits together
 
-![](labeled_schema.png "Metacore Schema")
+![](labeled-schema.png "Metacore Schema")
 
 ds_spec is connect to ds_vars by the 'dataset' variable and ds_vars is connected to var_spec by the 'variable' variable etc.
 
@@ -57,7 +58,7 @@ Now we understand what makes a metacore object we can start to develop the reade
 
 First, we need to dentify what type of specification format you have. At the moment we support the specification where each tab contains different information i.e. a domain tab, a variable tab etc. To test this you can use the `spec_type` function.
 
-```{r}
+```{r, error=TRUE}
 spec_type("mock_spec.xlsx")
 ```
 
@@ -75,7 +76,7 @@ Let's start with making the ds_spec (dataset specification) table using `spec_ty
 
 This function takes in our named list of datasets (doc), a named vector of columns (cols) and a sheet name (sheet). But, only doc is needed, the other inputs have defaults. So we can try with just the default and see what we get.
 
-```{r}
+```{r, error=TRUE}
 spec_type_to_ds_spec(doc)
 ```
 
@@ -113,7 +114,7 @@ The ds_vars table has 5 columns:
 
 When we look back at our specification document we can see all this information is in the variable tab. The inputs for the `spec_type_to_ds_vars` function are the same as before, but with slightly different defaults. By default ds_vars only checks sheets labelled "Variable" (this is because all the settings are defaulted to read in p21 formatted specs). But, those default work for our specifications cause all the information is in the variable tab; so we can try with just the defaults again .
 
-```{r}
+```{r, error=TRUE}
 spec_type_to_ds_vars(doc)
 ```
 
