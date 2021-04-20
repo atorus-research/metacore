@@ -258,10 +258,10 @@ select_dataset <- function(.data, dataset, simplify = FALSE) {
 
 
 save_metacore <- function(metacore_object) {
-
+   nm <- deparse(substitute(metacore_object))
+   saveRDS(metacore_object, paste0(nm, ".rda"))
 }
 
-load_metacore <- function(metacore_object) {
-
+load_metacore <- function(path = "") {
+   readRDS(file = path)
 }
-
