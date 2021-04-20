@@ -20,7 +20,7 @@ MetaCore_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivati
    private$.ds_spec <- ds_spec %>%
       add_labels(dataset = "Dataset Name",
                  structure = "Value Structure",
-                 label = "Value Label")
+                 label = "Dataset Label")
 
    private$.ds_vars <- ds_vars %>%
       add_labels(dataset = "Dataset Name",

@@ -13,7 +13,6 @@ dfs <- purrr::map(col_vars(), ~ empty_df(.x, fill = "A")) %>%
               "derivations",
               "code_list",
               "changelog"))
-#
 
 # test_that("metacore print function works", {
 #    private <- list(.ds_pec = data.frame(dataset = c("a", "b", "c"), structure = 1:3))

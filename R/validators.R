@@ -197,6 +197,7 @@ var_name_check <- function(envrionment){
 }
 
 
+
 #' Column Data Check <- lol horrible name
 #'
 #' @return a data frame of the datasets, column
@@ -205,32 +206,33 @@ var_name_check <- function(envrionment){
 all_message <- function() {
 
    tribble(
-   ~dataset,     ~var,             ~test,                 ~any_na_acceptable,
-   "ds_spec",     "dataset",       is.character,                FALSE,
-   "ds_spec",     "structure",     is.character,                TRUE,
-   "ds_spec",     "label",         is.character,                TRUE,
-   "ds_vars",     "dataset",       is.character,                FALSE,
-   "ds_vars",     "variable",      is.character,                FALSE,
-   "ds_vars",     "key_seq",       is.numeric,                  TRUE,
-   "ds_vars",     "core",          check_words("Expected", "Required", "Permissible", "Conditionally Required", "Conditionally Expected"), TRUE,
-   "var_spec",    "variable",      is.character,                FALSE,
-   "var_spec",    "type",          is.character,                TRUE,
-   "var_spec",    "length",        is.numeric,                  TRUE,
-   "var_spec",    "label",         is.character,                TRUE,
-   "var_spec",    "format",        is.character,                TRUE,
-   "var_spec",    "common",        is.logical,                  TRUE,
-   "value_spec",  "type",          is.character,                TRUE,
-   "value_spec",  "origin",        is.character,                TRUE,
-   "value_spec",  "code_id",       is.character,                TRUE,
-   "value_spec",  "dataset",       is.character,                FALSE,
-   "value_spec",  "where",         is.character,                TRUE,
-   "value_spec",  "derivation_id", is.character,                TRUE,
-   "derivations", "derivation_id", is.character,                FALSE,
-   "derivations", "derivation",    is.character,                TRUE,
-   "codelist",    "code_id",      is.character,                FALSE,
-   "codelist",    "name",        is.character,                TRUE,
-   "codelist",    "codes",        function(x){!is.null(x)},    TRUE,
-   "codelist",    "type",         is.character,                TRUE,
+   ~dataset,     ~var,             ~test,                 ~any_na_acceptable,     ~label,
+   "ds_spec",     "dataset",       is.character,                FALSE,            "Dataset Name",
+   "ds_spec",     "structure",     is.character,                TRUE,             "Value Structure",
+   "ds_spec",     "label",         is.character,                TRUE,             "Value Label",
+   "ds_vars",     "dataset",       is.character,                FALSE,            "Dataset Name",
+   "ds_vars",     "variable",      is.character,                FALSE,            "Variable Name",
+   "ds_vars",     "key_seq",       is.numeric,                  TRUE,             "Sequence Key",
+   "ds_vars",     "keep",          is.logical,                  TRUE,             "Keep (Boolean)",
+   "ds_vars",     "core",          check_words("Expected", "Required", "Permissible", "Conditionally Required", "Conditionally Expected"), TRUE, "ADaM core (Expected, Required, Permissible)",
+   "var_spec",    "variable",      is.character,                FALSE,            "Variable Name",
+   "var_spec",    "type",          is.character,                TRUE,             "Variable Class",
+   "var_spec",    "length",        is.numeric,                  TRUE,             "Variable Length",
+   "var_spec",    "label",         is.character,                TRUE,             "Variable Label",
+   "var_spec",    "format",        is.character,                TRUE,             "Variable Format",
+   "var_spec",    "common",        is.logical,                  TRUE,             "Common Across ADaM",
+   "value_spec",  "type",          is.character,                TRUE,             "Value Type",
+   "value_spec",  "origin",        is.character,                TRUE,             "Origin of Value",
+   "value_spec",  "code_id",       is.character,                TRUE,             "ID of the Code List",
+   "value_spec",  "dataset",       is.character,                FALSE,            "Dataset Name",
+   "value_spec",  "where",         is.character,                TRUE,             "Value of the Variable",
+   "value_spec",  "derivation_id", is.character,                TRUE,             "ID of Derivation",
+   "derivations", "derivation_id", is.character,                FALSE,            "ID of Derivation",
+   "derivations", "derivation",    is.character,                TRUE,             "Derivation",
+   "codelist",    "code_id",       is.character,                FALSE,            "ID of the Code List",
+   "codelist",    "name",          is.character,                TRUE,             "Name of the Code List",
+   "codelist",    "codes",         function(x){!is.null(x)},    TRUE,             "List of Codes",
+   "codelist",    "type",          is.character,                TRUE,             "Code List/Permitted Values/External Library",
 )
 }
 
