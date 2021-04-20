@@ -2,7 +2,9 @@
 
 export("%>%")
 export(define_to_MetaCore)
+export(load_metacore)
 export(metacore)
+export(save_metacore)
 export(select_dataset)
 export(spec_to_metacore)
 export(spec_type_to_codelist)

@@ -14,6 +14,8 @@ check_structure(.data, col, func, any_na_acceptable, nm)
 \item{func}{the function to use to assert column structure}
 
 \item{any_na_acceptable}{boolean, testing if the column can have missing}
+
+\item{nm}{}
 }
 \description{
 Column Validation Function

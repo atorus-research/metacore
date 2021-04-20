@@ -257,11 +257,25 @@ select_dataset <- function(.data, dataset, simplify = FALSE) {
 }
 
 
+#' save metacore object
+#'
+#' @param metacore_object the metacore object in memory to save to disc
+#'
+#' @return an .rda file with the same name as your object in memory saved to your working directory
+#' @export
+#'
 save_metacore <- function(metacore_object) {
    nm <- deparse(substitute(metacore_object))
    saveRDS(metacore_object, paste0(nm, ".rda"))
 }
 
+#' load metacore object
+#'
+#' @param path location of the metacore object to load into memory
+#'
+#' @return
+#' @export
+#'
 load_metacore <- function(path = "") {
    readRDS(file = path)
 }
