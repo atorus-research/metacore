@@ -260,13 +260,26 @@ select_dataset <- function(.data, dataset, simplify = FALSE) {
 #' save metacore object
 #'
 #' @param metacore_object the metacore object in memory to save to disc
+#' @param path file path and file name to save metacore object
 #'
-#' @return an .rda file with the same name as your object in memory saved to your working directory
+#' @return an .rda file
 #' @export
 #'
-save_metacore <- function(metacore_object) {
-   nm <- deparse(substitute(metacore_object))
-   saveRDS(metacore_object, paste0(nm, ".rda"))
+save_metacore <- function(metacore_object, path = NULL) {
+   # if no path save to working directory
+   # with same name as object
+   if (is.null(path)) {
+      nm <- deparse(substitute(metacore_object))
+      path <- paste0(nm, ".rda")
+   # if path ends with .rda extension use it
+   } else if (sub('.*\\.', '', email) == "rda") {
+      path <- path
+   } else {
+   # otherwise replace bad extension (the last dots) with .rda
+      path <- paste0(gsub("\\..*","", path), ".rda")
+   }
+
+   saveRDS(metacore_object, path)
 }
 
 #' load metacore object
