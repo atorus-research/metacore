@@ -1,3 +1,9 @@
+# test_that("metacore print function works", {
+# })
+#
+# test_that("metacore wrapper function works", {
+# })
+
 # # where should this function go
 # empty_df <- function(nms, fill) {
 #    df <- as.data.frame(matrix(fill,1,length(nms)))
