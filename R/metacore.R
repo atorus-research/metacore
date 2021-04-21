@@ -26,6 +26,7 @@ MetaCore_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivati
       add_labels(dataset = "Dataset Name",
                  variable = "Variable Name",
                  key_seq = "Sequence Key",
+                 order = "Variable Order",
                  keep = "Keep (Boolean)",
                  core = "ADaM core (Expected, Required, Permissible)")
 
@@ -178,8 +179,7 @@ MetaCore <- R6::R6Class("Metacore",
                        private = list(
                           .ds_spec = tibble(dataset = character(), label = character()),
                           .ds_vars = tibble(dataset = character(), variable = character(), keep = logical(),
-                                            key = integer(), codelist = character(), origin = character(),
-                                            derivation_id = character()),
+                                            key_seq = integer(), order = integer(), core = character()),
                           .var_spec = tibble(variable = character(), label = character(), length = integer()),
                           .value_spec = tibble(dataset = character(),
                                                variable = character(),

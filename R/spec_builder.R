@@ -117,7 +117,7 @@ spec_type_to_ds_spec <- function(doc, cols = c("dataset" = "[N|n]ame|[D|d]ataset
 #'   format
 #' @param cols Named vector of column names. The column names can be regular
 #'   expressions for more flexibility. But, the names must follow the given pattern
-#' @param sheet Regular expression for the sheet name
+#' @param sheet Regular expression for the sheet names
 #'
 #' @return
 #' @export
@@ -125,32 +125,58 @@ spec_type_to_ds_spec <- function(doc, cols = c("dataset" = "[N|n]ame|[D|d]ataset
 #' @family spec builder
 spec_type_to_ds_vars <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]omain",
                                                "variable" = "[V|v]ariable [[N|n]ame]?|[V|v]ariables?",
-                                               "key_seq" = "[V|v]ariable [O|o]rder|[S|s]eq|[O|o]rder",
+                                               "order" = "[V|v]ariable [O|o]rder|[O|o]rder",
                                                "keep" = "[K|k]eep|[M|m]andatory"),
-                                 sheet = "[V|v]ar"){
-   name_check <- names(cols) %in% c("variable", "dataset", "key_seq",
-                                    "keep", "core") %>%
+                                 key_seq_sep_sheet = TRUE,
+                                 key_seq_cols = c("dataset" = "Dataset",
+                                                "key_seq" = "Key Variables"),
+                                 sheet = "[V|v]ar|Datasets"){
+   name_check <- names(cols) %in% c("variable", "dataset", "order",
+                                    "keep", "core", "key_seq") %>%
       all()
-   if(!name_check){
-      stop("Supplied column vector must be named using the following names:
-              'variable', 'dataset', 'key_seq', 'keep', 'core'")
-   }
 
+   name_check_extra <- names(key_seq_cols) %in% c("variable", "dataset", "order",
+                                    "keep", "core", "key_seq") %>%
+      all() %>%
+      ifelse(key_seq_sep_sheet, ., TRUE) # Adding it cause we only want to check when sep sheet is true
+
+   # Testing for names of vectors
+   if(!name_check& !name_check_extra){
+      stop("Supplied column vector must be named using the following names:
+              'variable', 'dataset', 'order', 'keep', 'core', 'key_seq'")
+   }
+   # Subsetting sheets
    if(!is.null(sheet)){
       sheet_ls <- str_subset(names(doc), sheet)
       doc <- doc[sheet_ls]
    }
+   #Get base doc
+   out <-doc %>%
+      create_tbl(cols)
+
+   # Getting the key seq values
+   if(key_seq_sep_sheet){
+      key_seq_df <- doc %>%
+         create_tbl(key_seq_cols) %>%
+         mutate(key_seq = str_split(key_seq, ",\\s"),
+                key_seq = map(key_seq, function(x){
+                   tibble(variable = x) %>%
+                      mutate(key_seq = row_number())
+                })) %>%
+         unnest(key_seq)
+      out <- left_join(out, key_seq_df, by = c("dataset", "variable"))
+   }
 
    # Get missing columns
    missing <- col_vars()$.ds_vars %>%
-      discard(~. %in% names(cols))
+      discard(~. %in% names(out))
 
-   doc %>%
-      create_tbl(cols) %>%
+   out %>%
       distinct() %>%
       `is.na<-`(missing) %>%
       mutate(key_seq = as.integer(key_seq),
-             keep = yn_to_tf(keep))
+             keep = yn_to_tf(keep),
+             core = as.character(core))
 }
 
 
@@ -158,7 +184,7 @@ spec_type_to_ds_vars <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]oma
 #'
 #' Creates the var_spec from a list of datasets (optionally filtered by the sheet
 #' input). The named vector `cols` is used to determine which is the correct
-#' sheet and renames the columns
+#' sheet and renames the columns. (Note: the keep column will be converted logical)
 #' @param doc Named list of datasets @seealso [read_all_sheets()] for exact
 #'   format
 #' @param cols Named vector of column names. The column names can be regular
@@ -590,7 +616,8 @@ create_tbl <- function(doc, cols){
 #' @return returns a logical vector or normal vector with warning
 #' @noRd
 #'
-#' @examples
+
+#ToDo add true false as string to logical
 yn_to_tf <- function(x){
    if(all(is.na(x) ||str_detect(x, "[Y|y]es|[N|n]o|^[Y|y]$|^[N|n]$"))){
       case_when(str_detect(x, "[Y|y]es") ~ TRUE,

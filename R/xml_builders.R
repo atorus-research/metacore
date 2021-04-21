@@ -53,6 +53,7 @@ xml_to_ds_spec <- function(doc) {
 xml_to_ds_vars <- function(doc) {
    # Get the name of each dataset
    dataset_nodes <- get_ds_lvl_nodes(doc)
+
    # Get the variable names, key sequence and keep for each variable in each ds
    dataset_nodes %>%
       map_dfr(function(x) {
@@ -67,13 +68,16 @@ xml_to_ds_vars <- function(doc) {
             mandatory = child_var_nodes %>% get_node_attr("Mandatory"),
             key_seq = child_var_nodes %>%
                get_node_attr("KeySequence") %>%
+               as.integer(),
+            order = child_var_nodes %>%
+               get_node_attr("OrderNumber") %>%
                as.integer()
          )
       }) %>%
       mutate(
          variable = id_to_var(.data$variable),
          keep = .data$mandatory == "Yes",
-         core = NA
+         core = NA_character_
       ) %>%
       select(-.data$mandatory)
 }
