@@ -263,7 +263,9 @@ spec_type_to_var_spec <- function(doc, cols = c("variable" = "[N|n]ame|[V|v]aria
       discard(~. %in% names(out))
    out %>%
       `is.na<-`(missing) %>%
-      distinct()
+      distinct() %>%
+      ungroup() %>%
+      mutate(length = as.integer(length))
 }
 
 #' Spec to value_spec

@@ -153,19 +153,126 @@ test_that("Test ds_vars readers", {
 })
 
 
+test_that("Test var_spec readers", {
+   ref_var_spec <-
+      tibble::tribble(
+      ~variable,      ~type, ~length,                                    ~label, ~format, ~common,
+      "ACTARM",     "text",     20L,               "Description of Actual Arm",      NA,      NA,
+      "ACTARMCD",     "text",      8L,                         "Actual Arm Code",      NA,      NA,
+      "AEACN",     "text",     30L,       "Action Taken with Study Treatment",      NA,      NA,
+      "AEBDSYCD",  "integer",      8L,         "Body System or Organ Class Code",      NA,      NA,
+      "AEBODSYS",     "text",     67L,              "Body System or Organ Class",      NA,      NA,
+      "AEDECOD",     "text",    200L,                 "Dictionary-Derived Term",      NA,      NA,
+      "AEDTC",     "date",     10L,                 "Date/Time of Collection",      NA,      NA,
+      "AEDY",  "integer",      8L,      "Study Day of Visit/Collection/Exam",      NA,      NA,
+      "AEENDTC",     "date",     10L,          "End Date/Time of Adverse Event",      NA,      NA,
+      "AEENDY",  "integer",      8L,       "Study Day of End of Adverse Event",      NA,      NA,
+      "AEHLGT",     "text",    100L,                   "High Level Group Term",      NA,      NA,
+      "AEHLGTCD",  "integer",      8L,              "High Level Group Term Code",      NA,      NA,
+      "AEHLT",     "text",    100L,                         "High Level Term",      NA,      NA,
+      "AEHLTCD",  "integer",      8L,                    "High Level Term Code",      NA,      NA,
+      "AELLT",     "text",    100L,                       "Lowest Level Term",      NA,      NA,
+      "AELLTCD",  "integer",      8L,                  "Lowest Level Term Code",      NA,      NA,
+      "AEOUT",     "text",    200L,                "Outcome of Adverse Event",      NA,      NA,
+      "AEPTCD",  "integer",      8L,                     "Preferred Term Code",      NA,      NA,
+      "AEREL",     "text",      8L,                               "Causality",      NA,      NA,
+      "AESCAN",     "text",      1L,                         "Involves Cancer",      NA,      NA,
+      "AESCONG",     "text",      1L,      "Congenital Anomaly or Birth Defect",      NA,      NA,
+      "AESDISAB",     "text",      1L, "Persist or Signif Disability/Incapacity",      NA,      NA,
+      "AESDTH",     "text",      1L,                        "Results in Death",      NA,      NA,
+      "AESEQ",  "integer",      8L,                         "Sequence Number",      NA,      NA,
+      "AESER",     "text",      1L,                           "Serious Event",      NA,      NA,
+      "AESEV",     "text",      8L,                      "Severity/Intensity",      NA,      NA,
+      "AESHOSP",     "text",      1L,    "Requires or Prolongs Hospitalization",      NA,      NA,
+      "AESLIFE",     "text",      1L,                     "Is Life Threatening",      NA,      NA,
+      "AESOC",     "text",    100L,              "Primary System Organ Class",      NA,      NA,
+      "AESOCCD",  "integer",      8L,         "Primary System Organ Class Code",      NA,      NA,
+      "AESOD",     "text",      1L,                  "Occurred with Overdose",      NA,      NA,
+      "AESPID",     "text",      3L,              "Sponsor-Defined Identifier",      NA,      NA,
+      "AESTDTC",     "date",     10L,        "Start Date/Time of Adverse Event",      NA,      NA,
+      "AESTDY",  "integer",      8L,     "Study Day of Start of Adverse Event",      NA,      NA,
+      "AETERM",     "text",    200L,     "Reported Term for the Adverse Event",      NA,      NA,
+      "AGE",  "integer",      8L,                                     "Age",      NA,      NA,
+      "AGEU",     "text",      6L,                               "Age Units",      NA,      NA,
+      "ARM",     "text",     20L,              "Description of Planned Arm",      NA,      NA,
+      "ARMCD",     "text",      8L,                        "Planned Arm Code",      NA,      NA,
+      "COUNTRY",     "text",      3L,                                 "Country",      NA,      NA,
+      "DMDTC",     "date",     10L,                 "Date/Time of Collection",      NA,      NA,
+      "DMDY",  "integer",      8L,                 "Study Day of Collection",      NA,      NA,
+      "DOMAIN",     "text",      2L,                     "Domain Abbreviation",      NA,      NA,
+      "DTHDTC", "datetime",     20L,                      "Date/Time of Death",      NA,      NA,
+      "DTHFL",     "text",      1L,                      "Subject Death Flag",      NA,      NA,
+      "EPOCH",     "text",      9L,                                   "Epoch",      NA,      NA,
+      "ETHNIC",     "text",     25L,                               "Ethnicity",      NA,      NA,
+      "EXDOSE",  "integer",      8L,                                    "Dose",      NA,      NA,
+      "EXDOSFRM",     "text",      5L,                               "Dose Form",      NA,      NA,
+      "EXDOSFRQ",     "text",      2L,           "Dosing Frequency per Interval",      NA,      NA,
+      "EXDOSU",     "text",      2L,                              "Dose Units",      NA,      NA,
+      "EXENDTC",     "date",     10L,              "End Date/Time of Treatment",      NA,      NA,
+      "EXENDY",  "integer",      8L,           "Study Day of End of Treatment",      NA,      NA,
+      "EXROUTE",     "text",     11L,                 "Route of Administration",      NA,      NA,
+      "EXSEQ",  "integer",      8L,                         "Sequence Number",      NA,      NA,
+      "EXSTDTC",     "date",     10L,            "Start Date/Time of Treatment",      NA,      NA,
+      "EXSTDY",  "integer",      8L,         "Study Day of Start of Treatment",      NA,      NA,
+      "EXTRT",     "text",     10L,                      "Name of  Treatment",      NA,      NA,
+      "IDVAR",     "text",      8L,                    "Identifying Variable",      NA,      NA,
+      "IDVARVAL",     "text",    200L,              "Identifying Variable Value",      NA,      NA,
+      "QEVAL",     "text",    200L,                               "Evaluator",      NA,      NA,
+      "QLABEL",     "text",     40L,                "Qualifier Variable Label",      NA,      NA,
+      "QNAM",     "text",      8L,                 "Qualifier Variable Name",      NA,      NA,
+      "QORIG",     "text",    200L,                                  "Origin",      NA,      NA,
+      "QVAL",     "text",    200L,                              "Data Value",      NA,      NA,
+      "RACE",     "text",     78L,                                    "Race",      NA,      NA,
+      "RDOMAIN",     "text",      2L,             "Related Domain Abbreviation",      NA,      NA,
+      "RFENDTC",     "date",     10L,         "Subject Reference End Date/Time",      NA,      NA,
+      "RFICDTC", "datetime",     20L,           "Date/Time of Informed Consent",      NA,      NA,
+      "RFPENDTC", "datetime",     20L,       "Date/Time of End of Participation",      NA,      NA,
+      "RFSTDTC",     "date",     10L,       "Subject Reference Start Date/Time",      NA,      NA,
+      "RFXENDTC", "datetime",     20L,       "Date/Time of Last Study Treatment",      NA,      NA,
+      "RFXSTDTC", "datetime",     20L,      "Date/Time of First Study Treatment",      NA,      NA,
+      "SEX",     "text",      1L,                                     "Sex",      NA,      NA,
+      "SITEID",     "text",      3L,                   "Study Site Identifier",      NA,      NA,
+      "STUDYID",     "text",     12L,                        "Study Identifier",      NA,      NA,
+      "SUBJID",     "text",      4L,        "Subject Identifier for the Study",      NA,      NA,
+      "USUBJID",     "text",     11L,               "Unique Subject Identifier",      NA,      NA,
+      "VISIT",     "text",     19L,                              "Visit Name",      NA,      NA,
+      "VISITDY",  "integer",      8L,              "Planned Study Day of Visit",      NA,      NA,
+      "VISITNUM",    "float",      8L,                            "Visit Number",   "8.1",      NA
+   )
+
+   # Read from define
+   def_var_spec <- xml_to_var_spec(define) %>%
+      arrange(variable)
+
+   # Read from spec
+   spec_var_spec <- spec_type_to_var_spec(spec) %>%
+      arrange(variable) %>%
+      select(variable, type, length, label, format)
+   # remove common as it is derived when reading in specs but left alone from defines
+
+   # Tests
+   expect_equal(def_var_spec, ref_var_spec)
+   expect_equal(spec_var_spec,
+                ref_var_spec %>%
+                   select(-common))
+
+})
+
+
 # #
 # # test_that()
 #
 
 # ds_vars <- xml_to_ds_vars(define)
-# var_spec <- xml_to_var_spec(doc)
+# var_spec <- xml_to_var_spec(decins)
 # value_spec <- xml_to_value_spec(doc)
 # code_list <- xml_to_code_list(doc)
 # derivations <- xml_to_derivations(doc)
 # datapasta::dpasta(def_ds_vars)
-# xml_to_ds_vars(define) %>%
-#    arrange(dataset, variable) %>%
-#    datapasta::dpasta()
+xml_to_var_spec(define) %>%
+   arrange(variable) %>%
+   datapasta::dpasta()
+
 
 
 

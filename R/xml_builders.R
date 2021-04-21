@@ -135,7 +135,7 @@ xml_to_var_spec <- function(doc) {
       select(.data$variable) %>%
       inner_join(var_info, by = "variable")  %>%
       mutate(variable = str_remove(.data$var_full, "^IT\\."),
-             variable = ifelse(str_count(variable, "\\.") > 0,
+             variable = if_else(str_count(variable, "\\.") > 0,
              str_extract(variable, "(?<=\\.)\\w*"), variable)) %>%
       distinct()
 
