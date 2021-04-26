@@ -139,12 +139,6 @@ test_that("Test ds_vars readers", {
       arrange(dataset, variable) %>%
       select(dataset, variable, key_seq, order, keep, core)
 
-   test <- spec_ds_vars %>%
-      select(dataset, variable, spec_ord = order) %>%
-      full_join(select(ref_ds_vars, dataset, variable, order),
-                by = c("dataset", "variable")) %>%
-      filter( order != spec_ord)
-
    # Tests
    expect_equal(def_ds_vars, ref_ds_vars)
    expect_equal(spec_ds_vars,
@@ -259,20 +253,154 @@ test_that("Test var_spec readers", {
 })
 
 
+test_that("values_spec reader tests", {
+   ref_value_spec <- tibble::tribble(
+      ~dataset,  ~variable,      ~type,    ~origin,         ~code_id,                ~where,            ~derivation_id,
+      "AE",    "AEACN",     "text",  "Derived",               NA,                    NA,             "MT.AE.AEACN",
+      "AE", "AEBDSYCD",  "integer", "Assigned",               NA,                    NA,                        NA,
+      "AE", "AEBODSYS",     "text", "Assigned",      "CL.AEDICT",                    NA,                        NA,
+      "AE",  "AEDECOD",     "text", "Assigned",      "CL.AEDICT",                    NA,                        NA,
+      "AE",    "AEDTC",     "date",  "Derived",               NA,                    NA,             "MT.AE.AEDTC",
+      "AE",     "AEDY",  "integer",  "Derived",               NA,                    NA, "MT.COMPMETHOD.STUDY_DAY",
+      "AE",  "AEENDTC",     "date",      "CRF",               NA,                    NA,                        NA,
+      "AE",   "AEENDY",  "integer",  "Derived",               NA,                    NA, "MT.COMPMETHOD.STUDY_DAY",
+      "AE",   "AEHLGT",     "text", "Assigned",      "CL.AEDICT",                    NA,                        NA,
+      "AE", "AEHLGTCD",  "integer", "Assigned",               NA,                    NA,                        NA,
+      "AE",    "AEHLT",     "text", "Assigned",      "CL.AEDICT",                    NA,                        NA,
+      "AE",  "AEHLTCD",  "integer", "Assigned",               NA,                    NA,                        NA,
+      "AE",    "AELLT",     "text", "Assigned",      "CL.AEDICT",                    NA,                        NA,
+      "AE",  "AELLTCD",  "integer", "Assigned",               NA,                    NA,                        NA,
+      "AE",    "AEOUT",     "text",      "CRF",         "CL.OUT",                    NA,                        NA,
+      "AE",   "AEPTCD",  "integer", "Assigned",               NA,                    NA,                        NA,
+      "AE",    "AEREL",     "text",      "CRF",      "CL.AECAUS",                    NA,                        NA,
+      "AE",   "AESCAN",     "text",      "CRF",          "CL.YN",                    NA,                        NA,
+      "AE",  "AESCONG",     "text",      "CRF",          "CL.YN",                    NA,                        NA,
+      "AE", "AESDISAB",     "text",      "CRF",          "CL.YN",                    NA,                        NA,
+      "AE",   "AESDTH",     "text",      "CRF",          "CL.YN",                    NA,                        NA,
+      "AE",    "AESEQ",  "integer",  "Derived",               NA,                    NA,             "MT.AE.AESEQ",
+      "AE",    "AESER",     "text",      "CRF",          "CL.YN",                    NA,                        NA,
+      "AE",    "AESEV",     "text",      "CRF",         "CL.SEV",                    NA,                        NA,
+      "AE",  "AESHOSP",     "text",      "CRF",          "CL.YN",                    NA,                        NA,
+      "AE",  "AESLIFE",     "text",      "CRF",          "CL.YN",                    NA,                        NA,
+      "AE",    "AESOC",     "text", "Assigned",      "CL.AEDICT",                    NA,                        NA,
+      "AE",  "AESOCCD",  "integer", "Assigned",               NA,                    NA,                        NA,
+      "AE",    "AESOD",     "text",      "CRF",          "CL.YN",                    NA,                        NA,
+      "AE",   "AESPID",     "text",      "CRF",               NA,                    NA,                        NA,
+      "AE",  "AESTDTC",     "date",      "CRF",               NA,                    NA,                        NA,
+      "AE",   "AESTDY",  "integer",  "Derived",               NA,                    NA, "MT.COMPMETHOD.STUDY_DAY",
+      "AE",   "AETERM",     "text",      "CRF",               NA,                    NA,                        NA,
+      "AE",   "DOMAIN",     "text", "Assigned",               NA,                    NA,                        NA,
+      "AE",    "EPOCH",     "text",  "Derived",       "CL.EPOCH",                    NA,             "MT.AE.EPOCH",
+      "AE",  "STUDYID",     "text",      "CRF",               NA,                    NA,                        NA,
+      "AE",  "USUBJID",     "text",  "Derived",               NA,                    NA,           "MT.AE.USUBJID",
+      "DM",   "ACTARM",     "text",  "Derived",         "CL.ARM",                    NA,            "MT.DM.ACTARM",
+      "DM", "ACTARMCD",     "text",  "Derived",       "CL.ARMCD",                    NA,          "MT.DM.ACTARMCD",
+      "DM",      "AGE",  "integer",  "Derived",               NA,                    NA,               "MT.DM.AGE",
+      "DM",     "AGEU",     "text", "Assigned",        "CL.AGEU",                    NA,                        NA,
+      "DM",      "ARM",     "text", "Assigned",         "CL.ARM",                    NA,                        NA,
+      "DM",    "ARMCD",     "text", "Assigned",       "CL.ARMCD",                    NA,                        NA,
+      "DM",  "COUNTRY",     "text",  "Derived",     "CL.COUNTRY",                    NA,           "MT.DM.COUNTRY",
+      "DM",    "DMDTC",     "date",      "CRF",               NA,                    NA,                        NA,
+      "DM",     "DMDY",  "integer",  "Derived",               NA,                    NA, "MT.COMPMETHOD.STUDY_DAY",
+      "DM",   "DOMAIN",     "text", "Assigned",               NA,                    NA,                        NA,
+      "DM",   "DTHDTC", "datetime",  "Derived",               NA,                    NA,            "MT.DM.DTHDTC",
+      "DM",    "DTHFL",     "text",  "Derived",     "CL.Y_BLANK",                    NA,             "MT.DM.DTHFL",
+      "DM",   "ETHNIC",     "text",  "Derived",      "CL.ETHNIC",                    NA,            "MT.DM.ETHNIC",
+      "DM",     "RACE",     "text",      "CRF",        "CL.RACE",                    NA,                        NA,
+      "DM",  "RFENDTC",     "date",  "Derived",               NA,                    NA,           "MT.DM.RFENDTC",
+      "DM",  "RFICDTC", "datetime",  "Derived",               NA,                    NA,           "MT.DM.RFICDTC",
+      "DM", "RFPENDTC", "datetime",  "Derived",               NA,                    NA,          "MT.DM.RFPENDTC",
+      "DM",  "RFSTDTC",     "date",  "Derived",               NA,                    NA,           "MT.DM.RFSTDTC",
+      "DM", "RFXENDTC", "datetime",  "Derived",               NA,                    NA,          "MT.DM.RFXENDTC",
+      "DM", "RFXSTDTC", "datetime",  "Derived",               NA,                    NA,          "MT.DM.RFXSTDTC",
+      "DM",      "SEX",     "text",      "CRF",         "CL.SEX",                    NA,                        NA,
+      "DM",   "SITEID",     "text", "Assigned",               NA,                    NA,                        NA,
+      "DM",  "STUDYID",     "text",      "CRF",               NA,                    NA,                        NA,
+      "DM",   "SUBJID",     "text",      "CRF",               NA,                    NA,                        NA,
+      "DM",  "USUBJID",     "text",  "Derived",               NA,                    NA,           "MT.DM.USUBJID",
+      "EX",   "DOMAIN",     "text", "Assigned",               NA,                    NA,                        NA,
+      "EX",    "EPOCH",     "text",  "Derived",       "CL.EPOCH",                    NA,             "MT.EX.EPOCH",
+      "EX",   "EXDOSE",  "integer",      "eDT",               NA,                    NA,                        NA,
+      "EX", "EXDOSFRM",     "text",      "eDT",    "CL.EXDOSFRM",                    NA,                        NA,
+      "EX", "EXDOSFRQ",     "text",      "eDT",      "CL.EXFREQ",                    NA,                        NA,
+      "EX",   "EXDOSU",     "text",      "eDT",     "CL.EXDOSEU",                    NA,                        NA,
+      "EX",  "EXENDTC",     "date",      "CRF",               NA,                    NA,                        NA,
+      "EX",   "EXENDY",  "integer",  "Derived",               NA,                    NA, "MT.COMPMETHOD.STUDY_DAY",
+      "EX",  "EXROUTE",     "text",      "eDT",     "CL.EXROUTE",                    NA,                        NA,
+      "EX",    "EXSEQ",  "integer",  "Derived",               NA,                    NA,             "MT.EX.EXSEQ",
+      "EX",  "EXSTDTC",     "date",      "CRF",               NA,                    NA,                        NA,
+      "EX",   "EXSTDY",  "integer",  "Derived",               NA,                    NA, "MT.COMPMETHOD.STUDY_DAY",
+      "EX",    "EXTRT",     "text",      "eDT",       "CL.EXTRT",                    NA,                        NA,
+      "EX",  "STUDYID",     "text",      "CRF",               NA,                    NA,                        NA,
+      "EX",  "USUBJID",     "text",  "Derived",               NA,                    NA,           "MT.EX.USUBJID",
+      "EX",    "VISIT",     "text",      "CRF",       "CL.VISIT",                    NA,                        NA,
+      "EX",  "VISITDY",  "integer",  "Derived",               NA,                    NA,           "MT.EX.VISITDY",
+      "EX", "VISITNUM",    "float",      "CRF",    "CL.VISITNUM",                    NA,                        NA,
+      "SUPPAE",    "IDVAR",     "text", "Assigned",               NA,                    NA,                        NA,
+      "SUPPAE", "IDVARVAL",     "text",  "Derived",               NA,                    NA,      "MT.SUPPAE.IDVARVAL",
+      "SUPPAE",    "QEVAL",     "text", "Assigned",       "CL.QEVAL",                    NA,                        NA,
+      "SUPPAE",   "QLABEL",     "text", "Assigned",               NA,                    NA,                        NA,
+      "SUPPAE",     "QNAM",     "text", "Assigned", "CL.SUPPAE.QNAM",                    NA,                        NA,
+      "SUPPAE",    "QORIG",     "text", "Assigned",               NA,                    NA,                        NA,
+      "SUPPAE",     "QVAL",     "text",  "Derived",          "CL.YN",    "QNAM = 'TRTEMFL'",  "MT.SUPPAE.QNAM.TRTEMFL",
+      "SUPPAE",  "RDOMAIN",     "text", "Assigned",               NA,                    NA,                        NA,
+      "SUPPAE",  "STUDYID",     "text",      "CRF",               NA,                    NA,                        NA,
+      "SUPPAE",  "USUBJID",     "text",  "Derived",               NA,                    NA,       "MT.SUPPAE.USUBJID",
+      "SUPPDM",    "IDVAR",     "text", "Assigned",               NA,                    NA,                        NA,
+      "SUPPDM", "IDVARVAL",     "text", "Assigned",               NA,                    NA,                        NA,
+      "SUPPDM",    "QEVAL",     "text", "Assigned",       "CL.QEVAL",                    NA,                        NA,
+      "SUPPDM",   "QLABEL",     "text", "Assigned",               NA,                    NA,                        NA,
+      "SUPPDM",     "QNAM",     "text", "Assigned", "CL.SUPPDM.QNAM",                    NA,                        NA,
+      "SUPPDM",    "QORIG",     "text", "Assigned",               NA,                    NA,                        NA,
+      "SUPPDM",     "QVAL",     "text",  "Derived",     "CL.Y_BLANK",   "QNAM = 'COMPLT16'", "MT.SUPPDM.QNAM.COMPLT16",
+      "SUPPDM",     "QVAL",     "text",  "Derived",     "CL.Y_BLANK",   "QNAM = 'COMPLT24'", "MT.SUPPDM.QNAM.COMPLT24",
+      "SUPPDM",     "QVAL",     "text",  "Derived",     "CL.Y_BLANK",    "QNAM = 'COMPLT8'",  "MT.SUPPDM.QNAM.COMPLT8",
+      "SUPPDM",     "QVAL",     "text",  "Derived",     "CL.Y_BLANK",   "QNAM = 'EFFICACY'", "MT.SUPPDM.QNAM.EFFICACY",
+      "SUPPDM",     "QVAL",     "text",  "Derived",     "CL.Y_BLANK",     "QNAM = 'SAFETY'",   "MT.SUPPDM.QNAM.SAFETY",
+      "SUPPDM",     "QVAL",     "text",  "Derived",     "CL.Y_BLANK",        "QNAM = 'ITT'",      "MT.SUPPDM.QNAM.ITT",
+      "SUPPDM",  "RDOMAIN",     "text", "Assigned",               NA,                    NA,                        NA,
+      "SUPPDM",  "STUDYID",     "text",      "CRF",               NA,                    NA,                        NA,
+      "SUPPDM",  "USUBJID",     "text",  "Derived",               NA,                    NA,       "MT.SUPPDM.USUBJID"
+   )
+
+   # Read from define
+   def_value_spec <- xml_to_value_spec(define) %>%
+      arrange(dataset, variable)
+
+   # Read from spec
+   spec_value_spec <- spec_type_to_value_spec(spec) %>%
+      arrange(dataset, variable) %>%
+      select(dataset, variable, type, origin, code_id, where, derivation_id) %>%
+      #Fix naming as it is slightly different, but matches within metacore
+      mutate(code_id = if_else(!is.na(code_id), paste0("CL.", code_id), code_id, NA_character_),
+             derivation_id = if_else(!is.na(derivation_id), paste0("MT.", derivation_id), NA_character_),
+             where = str_replace(where, "EQ", "="),
+             where = str_split(where, "\\s(?=(\\w*$))") %>%
+                map(~paste0(.[1], " '", .[2])),
+             where = if_else(where == "NA 'NA", NA_character_, paste0(where, "'")))
+
+   # Tests
+   expect_equal(def_value_spec, ref_value_spec)
+   expect_equal(spec_value_spec,
+                ref_value_spec)
+
+   })
+
+
+
+
+
+
+# spec_type_to_codelist(spec)
 # #
 # # test_that()
 #
 
-# ds_vars <- xml_to_ds_vars(define)
-# var_spec <- xml_to_var_spec(decins)
-# value_spec <- xml_to_value_spec(doc)
-# code_list <- xml_to_code_list(doc)
+# code_list <- xml_to_code_list(define)
 # derivations <- xml_to_derivations(doc)
 # datapasta::dpasta(def_ds_vars)
-xml_to_var_spec(define) %>%
-   arrange(variable) %>%
-   datapasta::dpasta()
-
-
-
+# xml_to_value_spec(define) %>%
+#    arrange(dataset, variable) %>%
+#    select(dataset, variable, everything()) %>%
+#    datapasta::dpasta()
 

@@ -161,7 +161,6 @@ xml_to_var_spec <- function(doc) {
 xml_to_value_spec <- function(doc) {
    # Variable/value level node set
    var_nodes <- get_var_lvl_nodes(doc)
-
    # Gets the origin information for each node
    or_vec <- var_nodes %>%
       map_chr(function(node) {
@@ -170,8 +169,9 @@ xml_to_value_spec <- function(doc) {
          if (!is.na(origin) && origin == "CRF") {
             # gets the page number from the origin's child
             page_num <- get_child_attr(node, "PDFPageRef", "PageRefs", TRUE) %>%
-               str_replace_all("\\s", ", ")
-            origin <- paste(origin, page_num)
+               str_replace_all("\\s", ", ") %>%
+               str_replace_na(replacement = "")
+            origin <- str_c(origin, page_num)
          }
          origin
       })
@@ -235,7 +235,9 @@ xml_to_value_spec <- function(doc) {
       ) %>% # T if is a sub cat var, and not a sub-cat
       filter(!.data$rm_flg) %>%
       select(-.data$remove, -.data$sub_cat, -.data$cat_test, -.data$rm_flg, -.data$id)
-   clean_data
+   clean_data %>%
+      select(dataset, variable, everything()) %>%
+      ungroup()
 }
 
 

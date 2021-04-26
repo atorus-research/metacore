@@ -7,9 +7,11 @@
 spec_type_to_ds_vars(
   doc,
   cols = c(dataset = "[D|d]ataset|[D|d]omain", variable =
-    "[V|v]ariable [[N|n]ame]?|[V|v]ariables?", key_seq =
-    "[V|v]ariable [O|o]rder|[S|s]eq|[O|o]rder", keep = "[K|k]eep|[M|m]andatory"),
-  sheet = "[V|v]ar"
+    "[V|v]ariable [[N|n]ame]?|[V|v]ariables?", order =
+    "[V|v]ariable [O|o]rder|[O|o]rder", keep = "[K|k]eep|[M|m]andatory"),
+  key_seq_sep_sheet = TRUE,
+  key_seq_cols = c(dataset = "Dataset", key_seq = "Key Variables"),
+  sheet = "[V|v]ar|Datasets"
 )
 }
 \arguments{
@@ -19,7 +21,7 @@ format}
 \item{cols}{Named vector of column names. The column names can be regular
 expressions for more flexibility. But, the names must follow the given pattern}
 
-\item{sheet}{Regular expression for the sheet name}
+\item{sheet}{Regular expression for the sheet names}
 }
 \value{
 
