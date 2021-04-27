@@ -3,6 +3,7 @@
 export("%>%")
 export(define_to_MetaCore)
 export(metacore)
+export(read_all_sheets)
 export(select_dataset)
 export(spec_to_metacore)
 export(spec_type_to_codelist)

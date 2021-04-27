@@ -3,6 +3,12 @@ define <- xmlTreeParse("define-2021.xml", useInternalNodes = TRUE)
 spec <- read_all_sheets("p21_mock.xlsx")
 
 
+#### Fist checking some reading in
+test_that("Check spec_type", {
+   expect_equal(spec_type("p21_mock.xlsx"), "by_type")
+})
+
+#### Check reads are consistent between formats
 test_that("Test ds_spec readers", {
    # Create a reference spec to match to
    ref_ds_spec <-
@@ -438,7 +444,10 @@ test_that("derivation reader tests", {
    spec_derivation <- spec_type_to_derivations(spec) %>%
       arrange(derivation_id) %>%
       mutate(derivation_id = paste0("MT.", derivation_id)) %>%
-      mutate(derivation = str_replace_all(derivation, '\\"', "\\'"))
+      mutate(derivation = str_replace_all(derivation, '\\"', "\\'"),
+             derivation = derivation %>% str_remove_all("\\\r|\\\n$") %>%
+                str_trim()
+             )
 
    # Tests
    expect_equal(def_derivation, ref_derivation)
@@ -480,8 +489,6 @@ test_that("codelist reader tests", {
       "CL.YN",                         "YN",                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  tibble(code = c("N", "Y"), decode = c("No", "Yes")),      "code_decode"
    )
 
-
-
    # Read from define
    def_codelist <- xml_to_codelist(define) %>%
       arrange(code_id)
@@ -498,18 +505,5 @@ test_that("codelist reader tests", {
 })
 
 
-
-# spec_type_to_codelist(spec)
-# #
-# # test_that()
-#
-
-# code_list <- xml_to_code_list(define)
-# derivations <- xml_to_derivations(doc)
-# datapasta::dpasta(def_ds_vars)
-xml_to_value_spec(define) %>%
-   arrange(dataset, variable) %>%
-   select(dataset, variable, everything()) %>%
-   datapasta::dpasta()
 
 

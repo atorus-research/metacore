@@ -59,6 +59,7 @@ spec_type <- function(path){
 #' Given a path to a file, this function reads in all sheets of an excle file
 #'
 #' @param path string of the file path
+#' @export
 #'
 #' @return
 read_all_sheets <- function(path){

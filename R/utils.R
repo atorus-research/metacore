@@ -101,3 +101,22 @@ check_words <- function(..., col) {
 make_function <- function(args = pairlist(), body, env = parent.frame())  {
    eval(call("function", args, body), env)
 }
+
+
+#' Get path to metacore example
+#'
+#' metacore comes bundled with a number of sample files in its `inst/extdata`
+#' directory. This function make them easy to access
+#'
+#' @param file Name of file. If `NULL`, the example files will be listed.
+#' @export
+#' @examples
+#' metacore_example()
+#' metacore_example("mock_spec.xlsx")
+metacore_example <- function(file = NULL) {
+   if (is.null(file)) {
+      dir(system.file("extdata", package = "metacore"))
+   } else {
+      system.file("extdata", file, package = "metacore", mustWork = TRUE)
+   }
+}

@@ -17,6 +17,7 @@ knitr::opts_chunk$set(
 ```{r setup}
 library(metacore)
 library(dplyr)
+library(purrr)
 ```
 
 The first thing to do when trying to build a specification reader is to try the default. By default metacore can read in specification that are in the pinnacle 21 format. If your document isn't that format it is still worth trying the default cause the error messages can be helpful.
@@ -48,7 +49,7 @@ ds_spec is connect to ds_vars by the 'dataset' variable and ds_vars is connected
 With an understanding of the basic structure we can figure out what is needed for variable. This information can be found with the `all_message` function, which details the requirement for each variable
 
 ```{r, echo=FALSE}
-all_message()%>% 
+metacore:::all_message()%>% 
   mutate(across(everything(), as.character)) %>% 
   gt::gt()
 
@@ -58,8 +59,8 @@ Now we understand what makes a metacore object we can start to develop the reade
 
 First, we need to dentify what type of specification format you have. At the moment we support the specification where each tab contains different information i.e. a domain tab, a variable tab etc. To test this you can use the `spec_type` function.
 
-```{r, error=TRUE}
-spec_type("mock_spec.xlsx")
+```{r}
+spec_type(metacore_example("mock_spec.xlsx"))
 ```
 
 Given we have the type style of specification, we can attempt to run with the lower level built-in specification to metacore build. There are 6 lower level specification builders to match each of the 6 datasets needed, spec_type_to\_\*. Even if these fail, the error messages should help identify the issues.
