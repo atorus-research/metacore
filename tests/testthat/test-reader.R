@@ -6,6 +6,9 @@ spec <- read_all_sheets("p21_mock.xlsx")
 #### Fist checking some reading in
 test_that("Check spec_type", {
    expect_equal(spec_type("p21_mock.xlsx"), "by_type")
+   expect_equal(spec_type(metacore_example("mock_spec.xlsx")), "by_type")
+   # Check it errors when format is not acceptable
+   expect_error(spec_type("example_spec.xlsx"))
 })
 
 #### Check reads are consistent between formats
@@ -23,10 +26,12 @@ test_that("Test ds_spec readers", {
 
    # Read from spec
    spec_ds_spec <- spec_type_to_ds_spec(spec)
+   spec_ds_spec2 <- spec_type_to_ds_spec(spec, sheet = "D")
 
-   # Test
+   # Test against reference
    expect_equal(def_ds_spec, ref_ds_spec)
    expect_equal(spec_ds_spec, arrange(ref_ds_spec, dataset))
+   expect_equal(spec_ds_spec2, arrange(ref_ds_spec, dataset))
 })
 
 
@@ -147,8 +152,7 @@ test_that("Test ds_vars readers", {
 
    # Tests
    expect_equal(def_ds_vars, ref_ds_vars)
-   expect_equal(spec_ds_vars,
-                ref_ds_vars)
+   expect_equal(spec_ds_vars, ref_ds_vars)
 
 })
 
@@ -504,6 +508,21 @@ test_that("codelist reader tests", {
    expect_equal(spec_codelist, ref_codelist)
 })
 
+test_that("Specification Reader's errors and warnings", {
+   # Check the name-checks work for each
+   expect_error(spec_type_to_ds_spec(spec, cols = c("foo")))
+   expect_error(spec_type_to_ds_spec(spec, cols = c("foo" = "foo")))
+   expect_error(spec_type_to_ds_vars(spec, cols = c("foo")))
+   expect_error(spec_type_to_ds_vars(spec, cols = c("foo" = "foo")))
+   expect_error(spec_type_to_var_spec(spec, cols = c("foo")))
+   expect_error(spec_type_to_var_spec(spec, cols = c("foo" = "foo")))
+   expect_error(spec_type_to_value_spec(spec, cols = c("foo")))
+   expect_error(spec_type_to_value_spec(spec, cols = c("foo" = "foo")))
+   expect_error(spec_type_to_derivations(spec, cols = c("foo")))
+   expect_error(spec_type_to_derivations(spec, cols = c("foo" = "foo")))
+   expect_error(spec_type_to_codelist(spec, cols = c("foo")))
+   expect_error(spec_type_to_codelist(spec, cols = c("foo" = "foo")))
 
+})
 
 

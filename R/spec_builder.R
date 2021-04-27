@@ -33,7 +33,7 @@ spec_to_metacore <- function(path){
 #' @param path file location as a string
 #'
 #' @return returns string indicating the type of spec document
-#'
+#' @export
 #' @noRd
 spec_type <- function(path){
    sheets <- excel_sheets(path)
@@ -91,7 +91,7 @@ spec_type_to_ds_spec <- function(doc, cols = c("dataset" = "[N|n]ame|[D|d]ataset
                                                "label" = "[L|l]abel|[D|d]escription"), sheet = NULL){
    name_check <- names(cols) %in% c("dataset", "structure", "label") %>%
       all()
-   if(!name_check){
+   if(!name_check | is.null(names(cols))){
       stop("Supplied column vector must be named using the following names:
               'dataset', 'structure', 'label'")
    }
@@ -142,7 +142,7 @@ spec_type_to_ds_vars <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]oma
       ifelse(key_seq_sep_sheet, ., TRUE) # Adding it cause we only want to check when sep sheet is true
 
    # Testing for names of vectors
-   if(!name_check& !name_check_extra){
+   if((!name_check& !name_check_extra)| is.null(names(cols))){
       stop("Supplied column vector must be named using the following names:
               'variable', 'dataset', 'order', 'keep', 'core', 'key_seq'")
    }
@@ -207,7 +207,7 @@ spec_type_to_var_spec <- function(doc, cols = c("variable" = "[N|n]ame|[V|v]aria
    name_check <- names(cols) %in% c("variable", "length", "label",
                                     "type", "dataset", "common", "format") %>%
       all()
-   if(!name_check){
+   if(!name_check | is.null(names(cols))){
       stop("Supplied column vector must be named using the following names:
               'variable', 'length', 'label', 'type', 'dataset', 'common', 'format'
               If common is not avaliable it can be excluded and will be automatically filled in.
@@ -312,7 +312,7 @@ spec_type_to_value_spec <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]
                                     "type", "dataset", "where", "derivation_id") %>%
       all()
 
-   if(!name_check){
+   if(!name_check| is.null(names(cols))){
       stop("Supplied column vector must be named using the following names:
               'dataset', 'variable', 'origin', 'code_id', 'type', 'where', 'derivation_id'
               If derivation_id is not avaliable it can be excluded and dataset.variable will be used.
@@ -428,7 +428,7 @@ spec_type_to_codelist <- function(doc, codelist_cols = c("code_id" = "ID",
    } else {
       name_check <- names(codelist_cols) %in% c("code_id", "name", "code", "decode") %>%
          all()
-      if(!name_check){
+      if(!name_check| is.null(names(codelist_cols))){
          stop("Supplied column vector for codelist_cols must be named using the following names:
               'code_id', 'name', 'code', 'decode'",
               call. = FALSE
@@ -519,7 +519,7 @@ spec_type_to_derivations <- function(doc, cols = c("derivation_id" = "ID",
                                      sheet = "Method|Derivations?"){
    name_check <- names(cols) %in% c("derivation_id", "derivation") %>%
       all()
-   if(!name_check){
+   if(!name_check| is.null(names(cols))){
       stop("Supplied column vector must be names using the following names:
               'derivation_id', 'derivation'")
    }
