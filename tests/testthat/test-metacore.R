@@ -52,7 +52,7 @@ test_that("metacore wrapper function works", {
    expect_equal(wrapper, r6)
 })
 
-test_that("save_metacore creates .rda", {
+test_that("save_metacore creates .rda with no file path", {
    wrapper <- suppressWarnings(
       metacore(dfs$ds_spec, dfs$ds_vars, dfs$var_spec,
                dfs$value_spec, dfs$derivations, dfs$code_list)
@@ -60,6 +60,26 @@ test_that("save_metacore creates .rda", {
    save_metacore(wrapper)
    expect_true("wrapper.rda" %in% list.files("."))
    file.remove("wrapper.rda")
+})
+
+test_that("save_metacore replaces file path", {
+   wrapper <- suppressWarnings(
+      metacore(dfs$ds_spec, dfs$ds_vars, dfs$var_spec,
+               dfs$value_spec, dfs$derivations, dfs$code_list)
+   )
+   save_metacore(wrapper, "wrapper.csv")
+   expect_true("wrapper.rda" %in% list.files("."))
+   file.remove("wrapper.rda")
+})
+
+test_that("save_metacore uses file path", {
+   wrapper <- suppressWarnings(
+      metacore(dfs$ds_spec, dfs$ds_vars, dfs$var_spec,
+               dfs$value_spec, dfs$derivations, dfs$code_list)
+   )
+   save_metacore(wrapper, "test.rda")
+   expect_true("test.rda" %in% list.files("."))
+   file.remove("test.rda")
 })
 
 test_that("load_metacore loads .rda", {
@@ -70,5 +90,19 @@ test_that("load_metacore loads .rda", {
    save_metacore(wrapper)
    wrapper <- load_metacore("wrapper.rda")
    expect_equal(class(wrapper), c("Metacore", "R6"))
+   file.remove("wrapper.rda")
+})
+
+test_that("load metacore fails with no path", {
+   expect_error(load_metacore())
+})
+
+test_that("load metacore fails with no path and rdas in wd", {
+   wrapper <- suppressWarnings(
+      metacore(dfs$ds_spec, dfs$ds_vars, dfs$var_spec,
+               dfs$value_spec, dfs$derivations, dfs$code_list)
+   )
+   save_metacore(wrapper)
+   expect_error(load_metacore())
    file.remove("wrapper.rda")
 })

@@ -271,14 +271,18 @@ save_metacore <- function(metacore_object, path = NULL) {
    if (is.null(path)) {
       nm <- deparse(substitute(metacore_object))
       path <- paste0(nm, ".rda")
-   # if path ends with .rda extension use it
-   } else if (sub('.*\\.', '', email) == "rda") {
-      path <- path
+   # check the suffix of the path
    } else {
-   # otherwise replace bad extension (the last dots) with .rda
-      path <- paste0(gsub("\\..*","", path), ".rda")
+      suffix <- str_extract(path, "\\.\\w*$")
+      # if the extention is .rda keep it
+      if (suffix == ".rda") {
+         path <- path
+      # otherwise we need to replace it with .rda
+      } else {
+         prefix <- str_remove(path, "\\.\\w*$")
+         path <- paste0(prefix, ".rda")
+      }
    }
-
    saveRDS(metacore_object, path)
 }
 
@@ -288,7 +292,15 @@ save_metacore <- function(metacore_object, path = NULL) {
 #'
 #' @return
 #' @export
-#'
-load_metacore <- function(path = "") {
+load_metacore <- function(path = NULL) {
+   if (is.null(path)) {
+      rdas <- list.files(".", ".rda")
+      if (length(rdas) == 0) {
+         stop("please supply path to metacore object ending with extension .rda", call. = FALSE)
+      } else {
+         stop("metacore object path required, did you mean:",
+              paste("   ", rdas, sep = "\n   "), call. = FALSE)
+      }
+   }
    readRDS(file = path)
 }
