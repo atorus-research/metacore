@@ -493,7 +493,8 @@ spec_type_to_codelist <- function(doc, codelist_cols = c("code_id" = "ID",
    cd_out %>%
       `is.na<-`(missing) %>%
       distinct() %>%
-      filter(!is.na(code_id))
+      filter(!is.na(code_id)) %>%
+      ungroup()
 }
 
 #' Spec to derivation

@@ -14,7 +14,7 @@ define_to_MetaCore <- function(path){
    ds_vars <- xml_to_ds_vars(doc)
    var_spec <- xml_to_var_spec(doc)
    value_spec <- xml_to_value_spec(doc)
-   code_list <- xml_to_code_list(doc)
+   code_list <- xml_to_codelist(doc)
    derivations <- xml_to_derivations(doc)
 
    metacore(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist = code_list)
@@ -253,7 +253,7 @@ xml_to_value_spec <- function(doc) {
 #' @return a tibble containing the code list and permitted value information
 #' @family xml builder
 #' @export
-xml_to_code_list <- function(doc) {
+xml_to_codelist <- function(doc) {
    cl_nodes <- get_nodes(doc, "//ns:CodeList[ns:CodeListItem]")
    # Get a table with the information about the code list
    # Done like this because map_chr is faster than map_dfr

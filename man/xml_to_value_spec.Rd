@@ -19,7 +19,7 @@ is a where, at which point there is one row per value. {this is bad english plea
 }
 \seealso{
 Other xml builder: 
-\code{\link{xml_to_code_list}()},
+\code{\link{xml_to_codelist}()},
 \code{\link{xml_to_derivations}()},
 \code{\link{xml_to_ds_spec}()},
 \code{\link{xml_to_ds_vars}()},
