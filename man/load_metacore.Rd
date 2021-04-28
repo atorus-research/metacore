@@ -4,7 +4,7 @@
 \alias{load_metacore}
 \title{load metacore object}
 \usage{
-load_metacore(path = "")
+load_metacore(path = NULL)
 }
 \arguments{
 \item{path}{location of the metacore object to load into memory}

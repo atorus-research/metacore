@@ -274,7 +274,7 @@ save_metacore <- function(metacore_object, path = NULL) {
    # check the suffix of the path
    } else {
       suffix <- str_extract(path, "\\.\\w*$")
-      # if the extention is .rda keep it
+      # if the extension is .rda keep it
       if (suffix == ".rda") {
          path <- path
       # otherwise we need to replace it with .rda

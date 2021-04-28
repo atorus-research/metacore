@@ -4,13 +4,15 @@
 \alias{save_metacore}
 \title{save metacore object}
 \usage{
-save_metacore(metacore_object)
+save_metacore(metacore_object, path = NULL)
 }
 \arguments{
 \item{metacore_object}{the metacore object in memory to save to disc}
+
+\item{path}{file path and file name to save metacore object}
 }
 \value{
-an .rda file with the same name as your object in memory saved to your working directory
+an .rda file
 }
 \description{
 save metacore object
