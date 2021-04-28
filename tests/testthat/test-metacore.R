@@ -11,7 +11,7 @@ dfs <- purrr::map(col_vars(), ~ empty_df(.x, fill = "A")) %>%
               "var_spec",
               "value_spec",
               "derivations",
-              "code_list",
+              "codelist",
               "changelog"))
 
 # test_that("metacore print function works", {
@@ -39,58 +39,60 @@ test_that("readonly function factory", {
 })
 
 test_that("metacore wrapper function works", {
-   wrapper <- suppressWarnings(
-      metacore(dfs$ds_spec, dfs$ds_vars, dfs$var_spec,
-            dfs$value_spec, dfs$derivations, dfs$code_list)
-   )
+   wrapper <- suppressWarnings(do.call(metacore, dfs[1:6]))
 
    r6 <- suppressWarnings(
-      MetaCore$new(dfs$ds_spec, dfs$ds_vars, dfs$var_spec,
-                      dfs$value_spec, dfs$derivations, dfs$code_list)
+      MetaCore$new(dfs$ds_spec,
+                   dfs$ds_vars,
+                   dfs$var_spec,
+                   dfs$value_spec,
+                   dfs$derivations,
+                   dfs$codelist)
    )
 
    expect_equal(wrapper, r6)
 })
 
-test_that("save_metacore creates .rda with no file path", {
-   wrapper <- suppressWarnings(
-      metacore(dfs$ds_spec, dfs$ds_vars, dfs$var_spec,
-               dfs$value_spec, dfs$derivations, dfs$code_list)
-   )
-   save_metacore(wrapper)
-   expect_true("wrapper.rda" %in% list.files("."))
-   file.remove("wrapper.rda")
+
+test_that("save_metacore creates .rds with no file path", {
+   wrapper <- suppressWarnings(do.call(metacore, dfs[1:6]))
+   my_temp_dir <- tempdir()
+   withr::with_dir(my_temp_dir, save_metacore(wrapper))
+   expect_true("wrapper.rds" %in% list.files(my_temp_dir))
+   unlink(my_temp_dir)
 })
 
 test_that("save_metacore replaces file path", {
    wrapper <- suppressWarnings(
-      metacore(dfs$ds_spec, dfs$ds_vars, dfs$var_spec,
-               dfs$value_spec, dfs$derivations, dfs$code_list)
+      metacore(dfs$ds_spec,
+               dfs$ds_vars,
+               dfs$var_spec,
+               dfs$value_spec,
+               dfs$derivations,
+               dfs$code_list)
    )
-   save_metacore(wrapper, "wrapper.csv")
-   expect_true("wrapper.rda" %in% list.files("."))
-   file.remove("wrapper.rda")
+
+   my_temp_dir <- tempdir()
+   save_metacore(wrapper, file.path(my_temp_dir, "wrapper.csv"))
+   expect_true("wrapper.rds" %in% list.files(my_temp_dir))
+   unlink(my_temp_dir)
 })
 
 test_that("save_metacore uses file path", {
-   wrapper <- suppressWarnings(
-      metacore(dfs$ds_spec, dfs$ds_vars, dfs$var_spec,
-               dfs$value_spec, dfs$derivations, dfs$code_list)
-   )
-   save_metacore(wrapper, "test.rda")
-   expect_true("test.rda" %in% list.files("."))
-   file.remove("test.rda")
+   wrapper <- suppressWarnings(do.call(metacore, dfs[1:6]))
+   my_temp_dir <- tempdir()
+   save_metacore(wrapper, file.path(my_temp_dir, "wrapper.rds"))
+   expect_true("wrapper.rds" %in% list.files(my_temp_dir))
+   unlink(my_temp_dir)
 })
 
-test_that("load_metacore loads .rda", {
-   wrapper <- suppressWarnings(
-      metacore(dfs$ds_spec, dfs$ds_vars, dfs$var_spec,
-               dfs$value_spec, dfs$derivations, dfs$code_list)
-   )
-   save_metacore(wrapper)
-   wrapper <- load_metacore("wrapper.rda")
+test_that("load_metacore loads .rds", {
+   wrapper <- suppressWarnings(do.call(metacore, dfs[1:6]))
+   my_temp_dir <- tempdir()
+   save_metacore(wrapper, file.path(my_temp_dir, "wrapper.rds"))
+   wrapper <- load_metacore(file.path(my_temp_dir, "wrapper.rds"))
    expect_equal(class(wrapper), c("Metacore", "R6"))
-   file.remove("wrapper.rda")
+   unlink(my_temp_dir)
 })
 
 test_that("load metacore fails with no path", {
@@ -98,11 +100,9 @@ test_that("load metacore fails with no path", {
 })
 
 test_that("load metacore fails with no path and rdas in wd", {
-   wrapper <- suppressWarnings(
-      metacore(dfs$ds_spec, dfs$ds_vars, dfs$var_spec,
-               dfs$value_spec, dfs$derivations, dfs$code_list)
-   )
-   save_metacore(wrapper)
+   wrapper <- suppressWarnings(do.call(metacore, dfs[1:6]))
+   my_temp_dir <- tempdir()
+   save_metacore(wrapper, file.path(my_temp_dir, "wrapper.rds"))
    expect_error(load_metacore())
-   file.remove("wrapper.rda")
+   unlink(my_temp_dir)
 })
