@@ -257,11 +257,56 @@ select_dataset <- function(.data, dataset, simplify = FALSE) {
 }
 
 
-save_metacore <- function(metacore_object) {
-
+#' save metacore object
+#'
+#' @param metacore_object the metacore object in memory to save to disc
+#' @param path file path and file name to save metacore object
+#'
+#' @return an .rda file
+#' @export
+#'
+save_metacore <- function(metacore_object, path = NULL) {
+   # if no path save to working directory
+   # with same name as object
+   if (is.null(path)) {
+      nm <- deparse(substitute(metacore_object))
+      path <- paste0(nm, ".rds")
+      # check the suffix of the path
+   } else {
+      suffix <- str_extract(path, "\\.\\w*$")
+      # if the extension is .rda keep it
+      if (suffix == ".rds") {
+         path <- path
+         # otherwise we need to replace it with .rda
+      } else {
+         prefix <- str_remove(path, "\\.\\w*$")
+         path <- paste0(prefix, ".rds")
+      }
+   }
+   saveRDS(metacore_object, path)
 }
 
-load_metacore <- function(metacore_object) {
+#' load metacore object
+#'
+#' @param path location of the metacore object to load into memory
+#'
+#' @return
+#' @export
+load_metacore <- function(path = NULL) {
 
+   # check if metacore pkg loaded
+
+
+   if (is.null(path)) {
+      rdas <- list.files(".", ".rda")
+      if (length(rdas) == 0) {
+         stop("please supply path to metacore object ending with extension .rda", call. = FALSE)
+      } else {
+         stop("metacore object path required, did you mean:",
+              paste("   ", rdas, sep = "\n   "), call. = FALSE)
+      }
+   }
+   readRDS(file = path)
 }
+
 
