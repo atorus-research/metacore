@@ -10,7 +10,7 @@ spec_to_metacore(path)
 \item{path}{string of file location}
 }
 \value{
-
+given a spec document it returns a metacore object
 }
 \description{
 This function takes the location of an excel specification document and reads

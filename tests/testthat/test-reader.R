@@ -150,6 +150,7 @@ test_that("Test ds_vars readers", {
       arrange(dataset, variable) %>%
       select(dataset, variable, key_seq, order, keep, core)
 
+
    # Tests
    expect_equal(def_ds_vars, ref_ds_vars)
    expect_equal(spec_ds_vars, ref_ds_vars)

@@ -10,7 +10,7 @@ read_all_sheets(path)
 \item{path}{string of the file path}
 }
 \value{
-
+a list of datasets
 }
 \description{
 Given a path to a file, this function reads in all sheets of an excle file

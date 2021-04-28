@@ -18,12 +18,14 @@ knitr::opts_chunk$set(
 library(metacore)
 library(dplyr)
 library(purrr)
+library(stringr)
+library(gt)
 ```
 
 The first thing to do when trying to build a specification reader is to try the default. By default metacore can read in specification that are in the pinnacle 21 format. If your document isn't that format it is still worth trying the default cause the error messages can be helpful.
 
 ```{r, error=TRUE}
-spec_to_metacore("mock_spec.xlsx")
+spec_to_metacore(metacore_example("mock_spec.xlsx"))
 ```
 
 As we can see, the mock spec we are using here doesn't match the format. So, we will have to build bespoke reader. Before we start that, it is important to understand the structure of the metacore object. Each object acts as its own database for all dataset related metadata. It has 7 tables, 6 inputted tables and 1 change log. The 6 tables and there general purpose are as follows:
@@ -60,7 +62,7 @@ Now we understand what makes a metacore object we can start to develop the reade
 First, we need to dentify what type of specification format you have. At the moment we support the specification where each tab contains different information i.e. a domain tab, a variable tab etc. To test this you can use the `spec_type` function.
 
 ```{r}
-spec_type(metacore_example("mock_spec.xlsx"))
+metacore:::spec_type(metacore_example("mock_spec.xlsx"))
 ```
 
 Given we have the type style of specification, we can attempt to run with the lower level built-in specification to metacore build. There are 6 lower level specification builders to match each of the 6 datasets needed, spec_type_to\_\*. Even if these fail, the error messages should help identify the issues.
@@ -68,7 +70,7 @@ Given we have the type style of specification, we can attempt to run with the lo
 But, before we to any of that we need to read in our document using the `read_all_sheets` function. This function reads in a multisheet excel file into a named list, where the name of each dataset is the name of the tab. The lower level specification builders do assume the provided `doc` is a named list. This mock specification has 5 tabs, domain, variables, value level metadata, controlled terms, and computational method. So it looks like we might need to split the information in these tabs to get the 6 tables needed for the metacore object.
 
 ```{r}
-doc <- read_all_sheets("mock_spec.xlsx")
+doc <- read_all_sheets(metacore_example("mock_spec.xlsx"))
 doc %>% map(head)
 
 ```
@@ -121,7 +123,7 @@ spec_type_to_ds_vars(doc)
 
 This error means it is trying to match the sheet entitled Variable, the variable and key_seq columns match to two different columns. This is the same error we had before. We just need to have a quick look at the columns and adjust the regular expression to be more specific.
 
-```{r}
+```{#r}
 doc$Variables %>% head()
 
 ds_vars<- spec_type_to_ds_vars(doc, cols = c("dataset" = "Domain",
@@ -218,7 +220,7 @@ head(codelist)
 
 Now we have all the tables we need we can make the metacore object
 
-```{r}
+```{#r}
 metacore(ds_spec, ds_vars, var_spec, value_spec,
                derivation, codelist)
 ```

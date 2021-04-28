@@ -16,7 +16,8 @@ RoxygenNote: 7.1.1
 Suggests: 
     testthat,
     knitr,
-    rmarkdown
+    rmarkdown,
+    gt
 Imports: 
     R6,
     tidyr,
@@ -24,5 +25,8 @@ Imports:
     stringr,
     magrittr,
     XML,
-    purrr
+    purrr,
+    readxl,
+    rlang,
+    tibble
 VignetteBuilder: knitr

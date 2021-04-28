@@ -7,6 +7,7 @@
 #' @importFrom stats var
 #' @importFrom rlang as_string prim_name
 #' @importFrom readxl excel_sheets read_excel
+#' @importFrom tibble tibble as_tibble
 
 NULL
 

@@ -6,7 +6,7 @@
 #' be used as building blocks for bespoke specification documents
 #' @param path string of file location
 #'
-#' @return
+#' @return given a spec document it returns a metacore object
 #' @export
 spec_to_metacore <- function(path){
    doc <- read_all_sheets(path)
@@ -61,7 +61,7 @@ spec_type <- function(path){
 #' @param path string of the file path
 #' @export
 #'
-#' @return
+#' @return a list of datasets
 read_all_sheets <- function(path){
    sheets <- excel_sheets(path)
    all_dat <- sheets %>%
@@ -82,7 +82,7 @@ read_all_sheets <- function(path){
 #'   expressions for more flexibility. But, the names must follow the given pattern
 #' @param sheet Regular expression for the sheet name
 #'
-#' @return
+#' @return a dataset formatted for the metacore object
 #' @export
 #'
 #' @family spec builder
@@ -120,7 +120,7 @@ spec_type_to_ds_spec <- function(doc, cols = c("dataset" = "[N|n]ame|[D|d]ataset
 #'   expressions for more flexibility. But, the names must follow the given pattern
 #' @param sheet Regular expression for the sheet names
 #'
-#' @return
+#' @return a dataset formatted for the metacore object
 #' @export
 #'
 #' @family spec builder
@@ -142,7 +142,7 @@ spec_type_to_ds_vars <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]oma
       ifelse(key_seq_sep_sheet, ., TRUE) # Adding it cause we only want to check when sep sheet is true
 
    # Testing for names of vectors
-   if((!name_check& !name_check_extra)| is.null(names(cols))){
+   if(any(!name_check, !name_check_extra, is.null(names(cols)))){
       stop("Supplied column vector must be named using the following names:
               'variable', 'dataset', 'order', 'keep', 'core', 'key_seq'")
    }
@@ -192,7 +192,7 @@ spec_type_to_ds_vars <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]oma
 #'   expressions for more flexibility. But, the names must follow the given pattern
 #' @param sheet Regular expression for the sheet name
 #'
-#' @return
+#' @return a dataset formatted for the metacore object
 #' @export
 #'
 #' @family spec builder
@@ -292,7 +292,7 @@ spec_type_to_var_spec <- function(doc, cols = c("variable" = "[N|n]ame|[V|v]aria
 #'   information already exsists in the value tab of your specification set to
 #'   NULL
 #'
-#' @return
+#' @return a dataset formatted for the metacore object
 #' @export
 #'
 #' @family spec builder
@@ -409,7 +409,7 @@ spec_type_to_value_spec <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]
 #' @param simplify Boolean value, if true will convert code/decode pairs that
 #'   are all equal to a permitted value list
 #'
-#' @return
+#' @return a dataset formatted for the metacore object
 #' @export
 #'
 #' @family spec builder
@@ -510,7 +510,7 @@ spec_type_to_codelist <- function(doc, codelist_cols = c("code_id" = "ID",
 #'   pattern
 #' @param sheet Regular expression for the sheet name
 #'
-#' @return
+#' @return a dataset formatted for the metacore object
 #' @export
 #'
 #' @family spec builder

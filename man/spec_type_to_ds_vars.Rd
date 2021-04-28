@@ -24,7 +24,7 @@ expressions for more flexibility. But, the names must follow the given pattern}
 \item{sheet}{Regular expression for the sheet names}
 }
 \value{
-
+a dataset formatted for the metacore object
 }
 \description{
 Creates the ds_vars from a list of datasets (optionally filtered by the sheet
