@@ -6,6 +6,19 @@
 \usage{
 check_columns(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist)
 }
+\arguments{
+\item{ds_spec}{dataset specification}
+
+\item{ds_vars}{dataset variables}
+
+\item{var_spec}{variable specification}
+
+\item{value_spec}{value specification}
+
+\item{derivations}{derivation information}
+
+\item{codelist}{codelist information}
+}
 \description{
 This function checks for vector types and accepted words
 }

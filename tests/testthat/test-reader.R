@@ -37,7 +37,7 @@ test_that("Test ds_spec readers", {
 
 test_that("Test ds_vars readers", {
    # Create a reference ds_vars
-   ref_ds_vars <- tribble(
+   ref_ds_vars <- tibble::tribble(
       ~dataset,  ~variable, ~key_seq, ~order, ~keep, ~core,
       "AE",    "AEACN",       NA,    21L, FALSE,    NA_character_,
       "AE", "AEBDSYCD",       NA,    16L, FALSE,    NA_character_,

@@ -46,7 +46,7 @@ add_labels <- function(.data,...) {
 #' @param col the column to test
 #' @param func the function to use to assert column structure
 #' @param any_na_acceptable boolean, testing if the column can have missing
-#' @param nm
+#' @param nm name of column to check (for warning and error clarification)
 #'
 check_structure <- function(.data, col, func, any_na_acceptable, nm) {
 

@@ -4,6 +4,7 @@
 #' it in as a meta core object. At the moment it only supports specification in
 #' the format of pinnacle 21 specifications. But, the @family spec builder can
 #' be used as building blocks for bespoke specification documents
+#'
 #' @param path string of file location
 #'
 #' @return given a spec document it returns a metacore object
@@ -34,7 +35,7 @@ spec_to_metacore <- function(path){
 #'
 #' @return returns string indicating the type of spec document
 #' @export
-#' @noRd
+#'
 spec_type <- function(path){
    sheets <- excel_sheets(path)
    if(!any(sheets %>% str_detect("[D|d]omains?|[D|d]atasets?"))){
@@ -114,11 +115,14 @@ spec_type_to_ds_spec <- function(doc, cols = c("dataset" = "[N|n]ame|[D|d]ataset
 #' Creates the ds_vars from a list of datasets (optionally filtered by the sheet
 #' input). The named vector `cols` is used to determine which is the correct
 #' sheet and renames the columns
+#'
 #' @param doc Named list of datasets @seealso [read_all_sheets()] for exact
 #'   format
 #' @param cols Named vector of column names. The column names can be regular
 #'   expressions for more flexibility. But, the names must follow the given pattern
 #' @param sheet Regular expression for the sheet names
+#' @param key_seq_sep_sheet TODO
+#' @param key_seq_cols TODO
 #'
 #' @return a dataset formatted for the metacore object
 #' @export
@@ -186,6 +190,7 @@ spec_type_to_ds_vars <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]oma
 #' Creates the var_spec from a list of datasets (optionally filtered by the sheet
 #' input). The named vector `cols` is used to determine which is the correct
 #' sheet and renames the columns. (Note: the keep column will be converted logical)
+#'
 #' @param doc Named list of datasets @seealso [read_all_sheets()] for exact
 #'   format
 #' @param cols Named vector of column names. The column names can be regular

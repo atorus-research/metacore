@@ -15,7 +15,7 @@ check_structure(.data, col, func, any_na_acceptable, nm)
 
 \item{any_na_acceptable}{boolean, testing if the column can have missing}
 
-\item{nm}{}
+\item{nm}{name of column to check (for warning and error clarification)}
 }
 \description{
 Column Validation Function

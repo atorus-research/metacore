@@ -212,7 +212,7 @@ MetaCore <- R6::R6Class("Metacore",
 #' @param var_spec variable information that is shared across all datasets
 #' @param value_spec parameter specific information, as data is long the specs for wbc might be difference the hgb
 #' @param derivations contains derivation, it allows for different variables to have the same derivation
-#' @param code_list contains the code/decode information
+#' @param codelist contains the code/decode information
 #'
 #' @family Metacore
 #'
@@ -230,7 +230,7 @@ metacore <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, codeli
 #' @param dataset the specific dataset to subset by
 #' @param simplify return a single dataframe
 #'
-#' @return
+#' @return a filtered subset of the metacore object
 #' @export
 #'
 select_dataset <- function(.data, dataset, simplify = FALSE) {
@@ -290,7 +290,7 @@ save_metacore <- function(metacore_object, path = NULL) {
 #'
 #' @param path location of the metacore object to load into memory
 #'
-#' @return
+#' @return a metacore object in memory
 #' @export
 load_metacore <- function(path = NULL) {
 

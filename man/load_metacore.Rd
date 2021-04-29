@@ -10,7 +10,7 @@ load_metacore(path = NULL)
 \item{path}{location of the metacore object to load into memory}
 }
 \value{
-
+a metacore object in memory
 }
 \description{
 load metacore object

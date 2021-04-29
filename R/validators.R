@@ -239,6 +239,14 @@ all_message <- function() {
 #' Check all data frames include the correct types of columns
 #'
 #' This function checks for vector types and accepted words
+#'
+#' @param ds_spec dataset specification
+#' @param ds_vars dataset variables
+#' @param var_spec variable specification
+#' @param value_spec value specification
+#' @param derivations derivation information
+#' @param codelist codelist information
+#'
 check_columns <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist) {
 
 
