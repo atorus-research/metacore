@@ -2,11 +2,31 @@ Package: metacore
 Title: What the Package Does (One Line, Title Case)
 Version: 0.0.0.9000
 Authors@R: 
-    person(given = "First",
-           family = "Last",
-           role = c("aut", "cre"),
-           email = "first.last@example.com",
-           comment = c(ORCID = "YOUR-ORCID-ID"))
+    c(person(given = "Christina",
+             family = "Fillmore",
+             role = c("aut", "cre"),
+             email = "christina.e.fillmore@gsk.com",
+             comment = c(ORCID = "TODO")),
+      person(given = "Maya",
+             family = "Gans",
+             role = "aut",
+             email = "maya.gans@atorusresearch.com",
+             comment = c(ORCID = "0000-0002-5452-6089")),
+      person(given = "Ashley",
+             family = "Tarasiewicz",
+             role = "aut",
+             email = "ashley.tarasiewicz@atorusresearch.com",
+             comment = c(ORCID = "TODO")),
+      person(given = "Mike",
+             family = "Stackhouse",
+             role = "aut",
+             email = "mike.stackhouse@atorusresearch.com",
+             comment = c(ORCID = "0000-0001-6030-723X")),
+      person(given = "Atorus Research LLC",
+             role = c("cph", "fnd")),
+      person(given = "GlaxoSmithKline",
+             role = c("cph", "fnd")),
+             )
 Description: What the package does (one paragraph).
 License: MIT + file LICENSE
 Encoding: UTF-8
