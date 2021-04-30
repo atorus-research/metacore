@@ -197,13 +197,13 @@ var_name_check <- function(envrionment){
 }
 
 
+
 #' Column Data Check <- lol horrible name
 #'
 #' @return a data frame of the datasets, column
 #' @noRd
 #'
 all_message <- function() {
-
    tribble(
    ~dataset,     ~var,             ~test,                 ~any_na_acceptable,
    "ds_spec",     "dataset",       is.character,                FALSE,
