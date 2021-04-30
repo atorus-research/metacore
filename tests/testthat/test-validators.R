@@ -17,7 +17,7 @@ test_that("specific words and primitive columns fail when character", {
                "var_spec",
                "value_spec",
                "derivations",
-               "code_list",
+               "codelist",
                "changelog"))
 
    expect_warning(do.call(check_columns, dfs[-7]))
@@ -32,10 +32,27 @@ test_that("NA columns fail", {
                  "var_spec",
                  "value_spec",
                  "derivations",
-                 "code_list",
+                 "codelist",
                  "changelog"))
 
-   expect_error(suppressWarnings(do.call(check_columns, dfs[-7])))
+   expect_error(do.call(check_columns, dfs[-7]))
+})
+
+
+test_that("NA columns fail", {
+
+   dfs <- purrr::map(col_vars(), ~ empty_df(.x, fill = "A")) %>%
+      setNames(c("ds_spec",
+                 "ds_vars",
+                 "var_spec",
+                 "value_spec",
+                 "derivations",
+                 "codelist",
+                 "changelog"))
+
+   dfs$ds_spec$label <- NA
+
+   expect_warning(do.call(check_columns, dfs[-7]))
 })
 
 test_that("all_message dataframe contains 6 datasets", {

@@ -39,7 +39,7 @@ sheet}
 are all equal to a permitted value list}
 }
 \value{
-
+a dataset formatted for the metacore object
 }
 \description{
 Creates the value_spec from a list of datasets (optionally filtered by the

@@ -22,12 +22,12 @@ expressions for more flexibility. But, the names must follow the given pattern}
 \item{sheet}{Regular expression for the sheet name}
 }
 \value{
-
+a dataset formatted for the metacore object
 }
 \description{
 Creates the var_spec from a list of datasets (optionally filtered by the sheet
 input). The named vector \code{cols} is used to determine which is the correct
-sheet and renames the columns
+sheet and renames the columns. (Note: the keep column will be converted logical)
 }
 \seealso{
 Other spec builder: 

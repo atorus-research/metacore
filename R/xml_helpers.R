@@ -46,8 +46,10 @@ get_var_lvl_nodes <- function(doc) {
 #' @return character vector of the attribute searched
 #' @noRd
 get_node_attr <- function(nodeSet, attrtibute) {
-   nodeSet %>%
+   out <- nodeSet %>%
       map_chr(~ xmlGetAttr(., attrtibute, default = NA))
+   attr(out, "names") <- NULL
+   out
 }
 
 
@@ -162,7 +164,8 @@ get_codes <- function(cl_nodes) {
             xmlToDataFrame() %>% #converting to data frames gets the decodes
             #gets the codes from the list attributes
             mutate(code = cl_vals %>% get_node_attr("CodedValue")) %>%
-            select(decode = .data$Decode, .data$code)
+            select(.data$code, decode = .data$Decode) %>%
+            as_tibble()
       })
 }
 

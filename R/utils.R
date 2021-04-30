@@ -46,6 +46,7 @@ add_labels <- function(.data,...) {
 #' @param col the column to test
 #' @param func the function to use to assert column structure
 #' @param any_na_acceptable boolean, testing if the column can have missing
+#' @param nm name of column to check (for warning and error clarification)
 #'
 check_structure <- function(.data, col, func, any_na_acceptable, nm) {
 
@@ -53,9 +54,8 @@ check_structure <- function(.data, col, func, any_na_acceptable, nm) {
 
    vec <- .data %>% pull(!!col)
 
-   if(any(is.na(vec)) & !any_na_acceptable){
-      error_message <- (message = paste(column, "from the", nm,
-                 "table contains missing values. Actual values are needed."))
+   if(any(is.na(vec)) & !any_na_acceptable) {
+      error_message <- paste(column, "from the", nm, "table contains missing values. Actual values are needed.")
       warning_string <- NULL
    } else if (all(is.na(vec))){
       warning_string <- paste(column, "from the", nm,
@@ -100,4 +100,23 @@ check_words <- function(..., col) {
 
 make_function <- function(args = pairlist(), body, env = parent.frame())  {
    eval(call("function", args, body), env)
+}
+
+
+#' Get path to metacore example
+#'
+#' metacore comes bundled with a number of sample files in its `inst/extdata`
+#' directory. This function make them easy to access
+#'
+#' @param file Name of file. If `NULL`, the example files will be listed.
+#' @export
+#' @examples
+#' metacore_example()
+#' metacore_example("mock_spec.xlsx")
+metacore_example <- function(file = NULL) {
+   if (is.null(file)) {
+      dir(system.file("extdata", package = "metacore"))
+   } else {
+      system.file("extdata", file, package = "metacore", mustWork = TRUE)
+   }
 }
