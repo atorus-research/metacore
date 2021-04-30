@@ -1,11 +1,11 @@
 # Read in doc to be used for testing
 define <- xmlTreeParse("define-2021.xml", useInternalNodes = TRUE)
-spec <- read_all_sheets("p21_mock.xlsx")
+spec <- read_all_sheets(metacore_example("p21_mock.xlsx"))
 
 
 #### Fist checking some reading in
 test_that("Check spec_type", {
-   expect_equal(spec_type("p21_mock.xlsx"), "by_type")
+   expect_equal(spec_type(metacore_example("p21_mock.xlsx")), "by_type")
    expect_equal(spec_type(metacore_example("mock_spec.xlsx")), "by_type")
    # Check it errors when format is not acceptable
    expect_error(spec_type("example_spec.xlsx"))

@@ -24,8 +24,8 @@ Authors@R:
              comment = c(ORCID = "0000-0001-6030-723X")),
       person(given = "Atorus Research LLC",
              role = c("cph", "fnd")),
-      person(given = "GlaxoSmithKline",
-             role = c("cph", "fnd")),
+      person(given = "GlaxoSmithKline LLC",
+             role = c("cph", "fnd"))
              )
 Description: What the package does (one paragraph).
 License: MIT + file LICENSE

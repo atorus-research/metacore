@@ -17,7 +17,7 @@ spec_to_metacore <- function(path){
       var_spec <- spec_type_to_var_spec(doc)
       value_spec <- spec_type_to_value_spec(doc)
       derivations <- spec_type_to_derivations(doc)
-      code_list <- spec_type_to_code_list(doc)
+      code_list <- spec_type_to_codelist(doc)
       metacore(ds_spec, ds_vars, var_spec, value_spec,
                derivations, code_list)
    } else {
