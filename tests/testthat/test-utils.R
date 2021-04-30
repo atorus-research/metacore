@@ -46,3 +46,7 @@ test_that("add labels adds NULL to missing labels", {
   expect_null(attr(a$b, "label"))
 })
 
+test_that("metacore example returns file options", {
+  expect_equal(metacore_example(),
+               c("define.xml", "mock_spec.xlsx", "p21_mock.xlsx"))
+})
