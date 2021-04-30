@@ -25,7 +25,7 @@ Authors@R:
       person(given = "Atorus Research LLC",
              role = c("cph", "fnd")),
       person(given = "GlaxoSmithKline",
-             role = c("cph", "fnd")),
+             role = c("cph", "fnd"))
              )
 Description: What the package does (one paragraph).
 License: MIT + file LICENSE
