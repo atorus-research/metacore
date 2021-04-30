@@ -53,11 +53,17 @@ test_that("metacore wrapper function works", {
    expect_equal(wrapper, r6)
 })
 
+# function from the withr package
+with_dir <- function (new, code) {
+   old <- setwd(dir = new)
+   on.exit(setwd(old))
+   force(code)
+}
 
 test_that("save_metacore creates .rds with no file path", {
    wrapper <- suppressWarnings(do.call(metacore, dfs[1:6]))
    my_temp_dir <- tempdir()
-   withr::with_dir(my_temp_dir, save_metacore(wrapper))
+   with_dir(my_temp_dir, save_metacore(wrapper))
    expect_true("wrapper.rds" %in% list.files(my_temp_dir))
    unlink(my_temp_dir)
 })

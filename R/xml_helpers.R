@@ -164,7 +164,8 @@ get_codes <- function(cl_nodes) {
             xmlToDataFrame() %>% #converting to data frames gets the decodes
             #gets the codes from the list attributes
             mutate(code = cl_vals %>% get_node_attr("CodedValue")) %>%
-            select(decode = .data$Decode, .data$code)
+            select(.data$code, decode = .data$Decode) %>%
+            as_tibble()
       })
 }
 

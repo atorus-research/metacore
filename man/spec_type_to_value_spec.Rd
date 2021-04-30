@@ -39,7 +39,7 @@ information already exsists in the value tab of your specification set to
 NULL}
 }
 \value{
-
+a dataset formatted for the metacore object
 }
 \description{
 Creates the value_spec from a list of datasets (optionally filtered by the

@@ -26,6 +26,7 @@ MetaCore_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivati
       add_labels(dataset = "Dataset Name",
                  variable = "Variable Name",
                  key_seq = "Sequence Key",
+                 order = "Variable Order",
                  keep = "Keep (Boolean)",
                  core = "ADaM core (Expected, Required, Permissible)")
 
@@ -178,8 +179,7 @@ MetaCore <- R6::R6Class("Metacore",
                        private = list(
                           .ds_spec = tibble(dataset = character(), label = character()),
                           .ds_vars = tibble(dataset = character(), variable = character(), keep = logical(),
-                                            key = integer(), codelist = character(), origin = character(),
-                                            derivation_id = character()),
+                                            key_seq = integer(), order = integer(), core = character()),
                           .var_spec = tibble(variable = character(), label = character(), length = integer()),
                           .value_spec = tibble(dataset = character(),
                                                variable = character(),
@@ -212,7 +212,7 @@ MetaCore <- R6::R6Class("Metacore",
 #' @param var_spec variable information that is shared across all datasets
 #' @param value_spec parameter specific information, as data is long the specs for wbc might be difference the hgb
 #' @param derivations contains derivation, it allows for different variables to have the same derivation
-#' @param code_list contains the code/decode information
+#' @param codelist contains the code/decode information
 #'
 #' @family Metacore
 #'
@@ -230,7 +230,7 @@ metacore <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, codeli
 #' @param dataset the specific dataset to subset by
 #' @param simplify return a single dataframe
 #'
-#' @return
+#' @return a filtered subset of the metacore object
 #' @export
 #'
 select_dataset <- function(.data, dataset, simplify = FALSE) {
@@ -271,12 +271,14 @@ save_metacore <- function(metacore_object, path = NULL) {
    if (is.null(path)) {
       nm <- deparse(substitute(metacore_object))
       path <- paste0(nm, ".rds")
+
    # check the suffix of the path
    } else {
       suffix <- str_extract(path, "\\.\\w*$")
       # if the extension is .rda keep it
       if (suffix == ".rds") {
          path <- path
+
       # otherwise we need to replace it with .rda
       } else {
          prefix <- str_remove(path, "\\.\\w*$")
@@ -290,10 +292,9 @@ save_metacore <- function(metacore_object, path = NULL) {
 #'
 #' @param path location of the metacore object to load into memory
 #'
-#' @return
+#' @return metacore object in memory
 #' @export
 load_metacore <- function(path = NULL) {
-
    if (is.null(path)) {
       rdss <- list.files(".", ".rds")
       if (length(rdss) == 0) {
@@ -303,5 +304,5 @@ load_metacore <- function(path = NULL) {
               paste("   ", rdss, sep = "\n   "), call. = FALSE)
       }
    }
-   readRDS(file = path)
+   readRDS(path)
 }

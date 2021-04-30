@@ -14,7 +14,7 @@ define_to_MetaCore <- function(path){
    ds_vars <- xml_to_ds_vars(doc)
    var_spec <- xml_to_var_spec(doc)
    value_spec <- xml_to_value_spec(doc)
-   code_list <- xml_to_code_list(doc)
+   code_list <- xml_to_codelist(doc)
    derivations <- xml_to_derivations(doc)
 
    metacore(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist = code_list)
@@ -53,6 +53,7 @@ xml_to_ds_spec <- function(doc) {
 xml_to_ds_vars <- function(doc) {
    # Get the name of each dataset
    dataset_nodes <- get_ds_lvl_nodes(doc)
+
    # Get the variable names, key sequence and keep for each variable in each ds
    dataset_nodes %>%
       map_dfr(function(x) {
@@ -67,13 +68,16 @@ xml_to_ds_vars <- function(doc) {
             mandatory = child_var_nodes %>% get_node_attr("Mandatory"),
             key_seq = child_var_nodes %>%
                get_node_attr("KeySequence") %>%
+               as.integer(),
+            order = child_var_nodes %>%
+               get_node_attr("OrderNumber") %>%
                as.integer()
          )
       }) %>%
       mutate(
          variable = id_to_var(.data$variable),
          keep = .data$mandatory == "Yes",
-         core = NA
+         core = NA_character_
       ) %>%
       select(-.data$mandatory)
 }
@@ -131,7 +135,7 @@ xml_to_var_spec <- function(doc) {
       select(.data$variable) %>%
       inner_join(var_info, by = "variable")  %>%
       mutate(variable = str_remove(.data$var_full, "^IT\\."),
-             variable = ifelse(str_count(variable, "\\.") > 0,
+             variable = if_else(str_count(variable, "\\.") > 0,
              str_extract(variable, "(?<=\\.)\\w*"), variable)) %>%
       distinct()
 
@@ -157,7 +161,6 @@ xml_to_var_spec <- function(doc) {
 xml_to_value_spec <- function(doc) {
    # Variable/value level node set
    var_nodes <- get_var_lvl_nodes(doc)
-
    # Gets the origin information for each node
    or_vec <- var_nodes %>%
       map_chr(function(node) {
@@ -166,8 +169,9 @@ xml_to_value_spec <- function(doc) {
          if (!is.na(origin) && origin == "CRF") {
             # gets the page number from the origin's child
             page_num <- get_child_attr(node, "PDFPageRef", "PageRefs", TRUE) %>%
-               str_replace_all("\\s", ", ")
-            origin <- paste(origin, page_num)
+               str_replace_all("\\s", ", ") %>%
+               str_replace_na(replacement = "")
+            origin <- str_c(origin, page_num)
          }
          origin
       })
@@ -231,7 +235,9 @@ xml_to_value_spec <- function(doc) {
       ) %>% # T if is a sub cat var, and not a sub-cat
       filter(!.data$rm_flg) %>%
       select(-.data$remove, -.data$sub_cat, -.data$cat_test, -.data$rm_flg, -.data$id)
-   clean_data
+   clean_data %>%
+      select(dataset, variable, everything()) %>%
+      ungroup()
 }
 
 
@@ -247,7 +253,7 @@ xml_to_value_spec <- function(doc) {
 #' @return a tibble containing the code list and permitted value information
 #' @family xml builder
 #' @export
-xml_to_code_list <- function(doc) {
+xml_to_codelist <- function(doc) {
    cl_nodes <- get_nodes(doc, "//ns:CodeList[ns:CodeListItem]")
    # Get a table with the information about the code list
    # Done like this because map_chr is faster than map_dfr
