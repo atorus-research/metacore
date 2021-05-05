@@ -27,7 +27,7 @@ Authors@R:
       person(given = "GlaxoSmithKline LLC",
              role = c("cph", "fnd"))
              )
-Description: What the package does (one paragraph).
+Description: Create an immutable container holding metadata for the purpose of better enabling programming activities and functionality of other packages within the clinical programming workflow.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
