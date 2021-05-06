@@ -44,18 +44,9 @@ As we can see, the mock spec we are using here doesn't match the format. So, we 
 
 Here is a schema of how all this fits together
 
-![](labeled-schema.png "Metacore Schema")
+![](../man/figures/labeled-schema.png "Metacore Schema")
 
-ds_spec is connect to ds_vars by the 'dataset' variable and ds_vars is connected to var_spec by the 'variable' variable etc.
-
-With an understanding of the basic structure we can figure out what is needed for variable. This information can be found with the `all_message` function, which details the requirement for each variable
-
-```{r, echo=FALSE}
-metacore:::all_message()%>% 
-  mutate(across(everything(), as.character)) %>% 
-  gt::gt()
-
-```
+ds_spec is connect to ds_vars by the 'dataset' variable and ds_vars is connected to var_spec by the 'variable' variable etc. For more information on the make-up of metacore objects please see the readme. 
 
 Now we understand what makes a metacore object we can start to develop the reader.
 
@@ -111,6 +102,8 @@ The ds_vars table has 5 columns:
 
 -   key_seq: integers controlling the sort order of each dataset
 
+-   order: integer controling the column order of each dataset
+
 -   keep: boolean to determine if the variable is needed
 
 -   core: ADaM core (Expected, Required, Permissible)
@@ -121,16 +114,18 @@ When we look back at our specification document we can see all this information 
 spec_type_to_ds_vars(doc)
 ```
 
-This error means it is trying to match the sheet entitled Variable, the variable and key_seq columns match to two different columns. This is the same error we had before. We just need to have a quick look at the columns and adjust the regular expression to be more specific.
+This error means it is trying to match the sheet entitled Variable, the variable column matches to two different columns. This is the same error we had before. We just need to have a quick look at the columns and adjust the regular expression to be more specific. Additionally, for the key sequence variable isn't in the variable tab. We saw this information above in the domain tab. So we will need to do two things to fix this. First, adjust the dataset name in the `key_seq_cols` argument. Second, change the sheets to include the variable and the domain sheet. 
 
-```{#r}
+```{r}
 doc$Variables %>% head()
 
 ds_vars<- spec_type_to_ds_vars(doc, cols = c("dataset" = "Domain",
-                                   "variable" = "[V|v]ariable [N|n]ame",
-                                   "key_seq" = "Sort Order",
-                                   "keep" = "[K|k]eep|[M|m]andatory", 
-                                   "core" = "Required"))
+                                               "variable" = "[V|v]ariable [N|n]ame",
+                                               "order" = "[V|v]ariable [O|o]rder",
+                                               "keep" = "[M|m]andatory"),
+                               key_seq_cols = c("dataset" = "Domain Name",
+                                                "key_seq" = "Key"),
+                               sheet = "[V|v]ar|Domains")
 head(ds_vars)
 ```
 
@@ -220,7 +215,7 @@ head(codelist)
 
 Now we have all the tables we need we can make the metacore object
 
-```{#r}
+```{r}
 metacore(ds_spec, ds_vars, var_spec, value_spec,
                derivation, codelist)
 ```

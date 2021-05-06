@@ -121,8 +121,8 @@ spec_type_to_ds_spec <- function(doc, cols = c("dataset" = "[N|n]ame|[D|d]ataset
 #' @param cols Named vector of column names. The column names can be regular
 #'   expressions for more flexibility. But, the names must follow the given pattern
 #' @param sheet Regular expression for the sheet names
-#' @param key_seq_sep_sheet TODO
-#' @param key_seq_cols TODO
+#' @param key_seq_sep_sheet A boolean to indicate if the key sequence is on a separate sheet
+#' @param key_seq_cols names vector to get the key_sequence for each dataset
 #'
 #' @return a dataset formatted for the metacore object
 #' @export
@@ -137,11 +137,10 @@ spec_type_to_ds_vars <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]oma
                                                 "key_seq" = "Key Variables"),
                                  sheet = "[V|v]ar|Datasets"){
    name_check <- names(cols) %in% c("variable", "dataset", "order",
-                                    "keep", "core", "key_seq") %>%
+                                    "keep", "key_seq", "core") %>%
       all()
 
-   name_check_extra <- names(key_seq_cols) %in% c("variable", "dataset", "order",
-                                    "keep", "core", "key_seq") %>%
+   name_check_extra <- names(key_seq_cols) %in% c("dataset", "key_seq") %>%
       all() %>%
       ifelse(key_seq_sep_sheet, ., TRUE) # Adding it cause we only want to check when sep sheet is true
 

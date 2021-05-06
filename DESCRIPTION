@@ -37,7 +37,8 @@ Suggests:
     testthat,
     knitr,
     rmarkdown,
-    gt
+    gt,
+    covr
 Imports: 
     R6,
     tidyr,
