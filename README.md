@@ -4,7 +4,7 @@
 # metacore <a href='https://github.com/atorus-research/metacore'><img src="man/figures/metacore.PNG" align="right" height="139"/></a>
 
 <!-- badges: start -->
-[<img src="https://img.shields.io/badge/Slack-OSTCR-blue?style=flat&logo=slack">](https://ostinclinicalresearch.slack.com)
+<!-- [<img src="https://img.shields.io/badge/Slack-OSTCR-blue?style=flat&logo=slack">](https://ostinclinicalresearch.slack.com) -->
 [<img src="https://img.shields.io/badge/Slack-RValidationHub-blue?style=flat&logo=slack">](https://RValidationHub.slack.com)
 [![R build status](https://github.com/atorus-research/metacore/workflows/R-CMD-check/badge.svg)](https://github.com/atorus-research/metacore/actions?workflow=R-CMD-check)
 [<img src="https://img.shields.io/codecov/c/github/atorus-research/metacore">](https://codecov.io/gh/atorus-research/metacore)
