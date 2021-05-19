@@ -43,7 +43,7 @@ normalize the information as much as possible, while keeping together
 like information. Each table has a basic theme to make them easier to
 remember. They are as follows:
 
--   **ds\_sep**: Contains dataset level information
+-   **ds\_spec**: Contains dataset level information
 
 -   **ds\_vars**: Bridges the dataset and variable level information
 
