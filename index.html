@@ -78,16 +78,17 @@
   <div class="contents col-md-9">
 <div id="metacore-" class="section level1">
 <div class="page-header"><h1 class="hasAnchor">
-<a href="#metacore-" class="anchor"></a>metacore <a href="https://github.com/atorus-research/metacore"><img src="reference/figures/metacore.PNG" align="right" height="139"></a>
+<a href="#metacore-" class="anchor"></a>metacore <a href="https://github.com/atorus-research/metacore"><img src="reference/figures/metacore.png" align="right" height="139"></a>
 </h1></div>
 <!-- badges: start -->
-<!-- [<img src="https://img.shields.io/badge/Slack-OSTCR-blue?style=flat&logo=slack">](https://ostinclinicalresearch.slack.com) -->
 
-<p>The goal of this package is to standardize the metadata associated with clinical trial datasets. Clinical trial data follow a data standard known as CDISC, which covers the not only the dataset formatting, but also which datasets are needed for a given study. Because of the complex nature of clinical trials, these datasets often have a complex, interdependent relationships. To help keep track of all the information needed to build datasets, specification documents are created prior to dataset creation. Additionally, define documents are submitted with the datasets to explain to regulators the eccentricities of given study. This package takes in either specifications or defines and creates and R6 metacore object. This object is a standardized, immutable object to ask as a single source of truth across multiple dataset building scripts.</p>
+<!-- badges: end -->
+<p>Programming for clinical trial data analysis tends to be very standardized. With data standards such as <a href="https://www.cdisc.org/">CDISC</a>, expectations tend to be very clearly defined. Within these programming activities, there’s ample room for the use of metadata. Metadata can be used for several different purposes, such as applying dataset attributes, establishing sort sequences, working with controlled terminology, and more. Despite CDISC standards, organizations tend to have their own means of storing metadata, be it in excel spreadsheets, databases, and more.</p>
+<p>The purpose of metacore is to establish a common foundation for the use of metadata within an R session. This is done by creating an R object that can hold the necessary data in a standardized, immutable structure (using R6) that makes it easy to extract out necessary information when needed. Users can read in their metadata from their various sources. To make this easy, we’ve provided some helper functions - and even have readers that can read directly from Define.xml 2.0. By establishing a common and consistent object in memory, further packages that support these work flows can have a common foundation upon which tools can be built that leverage metadata in the future. This reduces the need to hold different data structures containing metadata and instead allows programs to pull this information from a centralized source.</p>
 <div id="installation" class="section level2">
 <h2 class="hasAnchor">
 <a href="#installation" class="anchor"></a>Installation</h2>
-<p>You can install the released version of metacore from <a href="https://github.com/atorus-research/metacore">github</a> with:</p>
+<p>You can install the current development version of metacore from <a href="https://github.com/atorus-research/metacore">github</a> with:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"atorus-research/metacore"</span><span class="op">)</span></code></pre></div>
 </div>
@@ -120,7 +121,7 @@
 <h3 class="hasAnchor">
 <a href="#ds_vars-" class="anchor"></a>ds_vars <img src="reference/figures/labeled-ds_vars.png" align="right" height="150">
 </h3>
-<p>thuis table contains the information that bridges between purely dataset level and purely variable level. There is one row per dataset per variable:</p>
+<p>This table contains the information that bridges between purely dataset level and purely variable level. There is one row per dataset per variable:</p>
 <ul>
 <li><p><em>dataset</em>: The abbreviated name of the dataset. This will match to the name in <strong>ds_spec</strong></p></li>
 <li><p><em>variable</em>: Variable name</p></li>
@@ -214,11 +215,7 @@
   <div class="dev-status">
 <h2>Dev status</h2>
 <ul class="list-unstyled">
-<li><a href="https://RValidationHub.slack.com"><img src="https://img.shields.io/badge/Slack-RValidationHub-blue?style=flat&amp;logo=slack"></a></li>
-<li><a href="https://github.com/atorus-research/metacore/actions?workflow=R-CMD-check"><img src="https://github.com/atorus-research/metacore/workflows/R-CMD-check/badge.svg" alt="R build status"></a></li>
-<li><a href="https://codecov.io/gh/atorus-research/metacore"><img src="https://img.shields.io/codecov/c/github/atorus-research/metacore"></a></li>
-<li><a href="https://github.com/atorus-research/metacore/blob/master/LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg"></a></li>
-<li><a href="https://lifecycle.r-lib.org/articles/stages.html#experimental-1"><img src="https://img.shields.io/badge/lifecycle-experimental-orange.svg" alt="Lifecycle: experimental"></a></li>
+<li><a href="https://www.tidyverse.org/lifecycle/#experimental"><img src="https://img.shields.io/badge/lifecycle-experimental-orange.svg" alt="Lifecycle: experimental"></a></li>
 </ul>
 </div>
 </div>

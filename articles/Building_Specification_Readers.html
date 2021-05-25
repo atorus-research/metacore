@@ -101,13 +101,13 @@
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://purrr.tidyverse.org">purrr</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://stringr.tidyverse.org">stringr</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://gt.rstudio.com/">gt</a></span><span class="op">)</span></code></pre></div>
-<p>The first thing to do when trying to build a specification reader is to try the default. By default metacore can read in specification that are in the pinnacle 21 format. If your document isn’t that format it is still worth trying the default cause the error messages can be helpful.</p>
+<p>The first thing to do when trying to build a specification reader is to try the default. By default metacore can read in specification that are in the Pinnacle 21 specification format. If your document isn’t in that format, it is still worth trying the default readers, as the error messages can be helpful.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/spec_to_metacore.html">spec_to_metacore</a></span><span class="op">(</span><span class="fu"><a href="../reference/metacore_example.html">metacore_example</a></span><span class="op">(</span><span class="st">"mock_spec.xlsx"</span><span class="op">)</span><span class="op">)</span>
 <span class="co">#&gt; Error: Unable to rename the following columns in Domains:</span>
 <span class="co">#&gt;  label matches 2 columns</span>
 <span class="co">#&gt; Please check your regular expression</span></code></pre></div>
-<p>As we can see, the mock spec we are using here doesn’t match the format. So, we will have to build bespoke reader. Before we start that, it is important to understand the structure of the metacore object. Each object acts as its own database for all dataset related metadata. It has 7 tables, 6 inputted tables and 1 change log. The 6 tables and there general purpose are as follows:</p>
+<p>As we can see, the mock spec we are using here doesn’t match the format. Therefore we will have to build bespoke reader. Before we start, it is important to understand the structure of the metacore object. Each object acts as its own database for all dataset related metadata. The object has 7 tables, 6 tables holding metadata and 1 change log. The 6 tables and their general purpose are as follows:</p>
 <ul>
 <li><p><strong>ds_sep</strong>: Contains dataset level information</p></li>
 <li><p><strong>ds_vars</strong>: Bridges the dataset and variable level information</p></li>
@@ -118,14 +118,14 @@
 </ul>
 <p>Here is a schema of how all this fits together</p>
 <p><img src="../man/figures/labeled-schema.png" title="Metacore Schema"></p>
-<p>ds_spec is connect to ds_vars by the ‘dataset’ variable and ds_vars is connected to var_spec by the ‘variable’ variable etc. For more information on the make-up of metacore objects please see the readme.</p>
-<p>Now we understand what makes a metacore object we can start to develop the reader.</p>
-<p>First, we need to dentify what type of specification format you have. At the moment we support the specification where each tab contains different information i.e. a domain tab, a variable tab etc. To test this you can use the <code>spec_type</code> function.</p>
+<p>ds_spec is connected to ds_vars by the ‘dataset’ variable and ds_vars is connected to var_spec by the ‘variable’ variable, etc. For more information on the make-up of metacore objects please see the README.</p>
+<p>Now that we understand what makes a metacore object, we can start to develop the reader.</p>
+<p>First, we need to identify what type of specification format you have. At the moment we support a specification where each tab contains information relevant to a different table, such as a domain tab, a variable tab, etc. To test this you can use the <code>spec_type</code> function.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">metacore</span><span class="fu">:::</span><span class="fu"><a href="../reference/spec_type.html">spec_type</a></span><span class="op">(</span><span class="fu"><a href="../reference/metacore_example.html">metacore_example</a></span><span class="op">(</span><span class="st">"mock_spec.xlsx"</span><span class="op">)</span><span class="op">)</span>
 <span class="co">#&gt; [1] "by_type"</span></code></pre></div>
 <p>Given we have the type style of specification, we can attempt to run with the lower level built-in specification to metacore build. There are 6 lower level specification builders to match each of the 6 datasets needed, spec_type_to_*. Even if these fail, the error messages should help identify the issues.</p>
-<p>But, before we to any of that we need to read in our document using the <code>read_all_sheets</code> function. This function reads in a multisheet excel file into a named list, where the name of each dataset is the name of the tab. The lower level specification builders do assume the provided <code>doc</code> is a named list. This mock specification has 5 tabs, domain, variables, value level metadata, controlled terms, and computational method. So it looks like we might need to split the information in these tabs to get the 6 tables needed for the metacore object.</p>
+<p>But, before we start any of that, we need to read in our document using the <code>read_all_sheets</code> function. This function reads in a multisheet excel file into a named list, where the name of each dataset is the name of the tab. The lower level specification builders do assume the provided <code>doc</code> is a named list. This mock specification has 5 tabs, domain, variables, value level metadata, controlled terms, and computational method. So it looks like we might need to split the information in these tabs to get the 6 tables needed for the metacore object.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">doc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_all_sheets.html">read_all_sheets</a></span><span class="op">(</span><span class="fu"><a href="../reference/metacore_example.html">metacore_example</a></span><span class="op">(</span><span class="st">"mock_spec.xlsx"</span><span class="op">)</span><span class="op">)</span>
 <span class="va">doc</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html">map</a></span><span class="op">(</span><span class="va">head</span><span class="op">)</span>
@@ -186,7 +186,7 @@
 <span class="co">#&gt; 4 TPERADY              Contains the number of days from the … &lt;NA&gt;              </span>
 <span class="co">#&gt; 5 TPERSTDY             Contains the number of days from the … &lt;NA&gt;              </span>
 <span class="co">#&gt; 6 TPERENDY             Contains the number of days from the … &lt;NA&gt;</span></code></pre></div>
-<p>Let’s start with making the ds_spec (dataset specification) table using <code>spec_type_to_ds_spec</code>. The ds_spec table is made of 3 columns, the dataset name, the dataset structure, and the dataset label. If we look at our specification document, it looks like all this information is in the Domains tab. Now we know what we need we can start building the table by trying the <code>spec_type_to_ds_spec</code> function.</p>
+<p>Let’s start with making the ds_spec (dataset specification) table using <code>spec_type_to_ds_spec</code>. The ds_spec table is made of 3 columns: the dataset name, the dataset structure, and the dataset label. If we look at our specification document, it looks like all this information is in the Domains tab. Now we know what we need we can start building the table by trying the <code>spec_type_to_ds_spec</code> function.</p>
 <p>This function takes in our named list of datasets (doc), a named vector of columns (cols) and a sheet name (sheet). But, only doc is needed, the other inputs have defaults. So we can try with just the default and see what we get.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/spec_type_to_ds_spec.html">spec_type_to_ds_spec</a></span><span class="op">(</span><span class="va">doc</span><span class="op">)</span>
@@ -200,7 +200,7 @@
 <span class="co">#&gt;  [5] "Class"          "Source"         "Data Structure" "Key Variables" </span>
 <span class="co">#&gt;  [9] "Description"    "Documentation"</span></code></pre></div>
 <p>If we look at the default input for cols, <code>"label" = "[L|l]abel|[D|d]escription"</code>, we can see the label is matching to the <code>Label</code> and the <code>Description</code> columns .</p>
-<p>We only need the Domain <code>Name</code>, <code>Label</code>, and <code>Data Structure</code> columns. So we can rewrite the regular expressions to be more specific.</p>
+<p>We only need the Domain <code>Name</code>, <code>Label</code>, and <code>Data Structure</code> columns. So we can update the expressions to be more specific.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">ds_spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spec_type_to_ds_spec.html">spec_type_to_ds_spec</a></span><span class="op">(</span><span class="va">doc</span>, 
                                 cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"dataset"</span> <span class="op">=</span> <span class="st">"Name"</span>, 
@@ -214,7 +214,7 @@
 <span class="co">#&gt; 2 ADRACE  One record per subject per analysis sequence … Race Analysis          </span>
 <span class="co">#&gt; 3 ADTRT   One record per subject per period              Treatment Analysis     </span>
 <span class="co">#&gt; 4 ADSL    One record per subject                         Subject-Level Analysis…</span></code></pre></div>
-<p>Regular expressions are used to match the columns, so if you needed a more flexible input you could do that. Now, we have the ds_spec table we can move on to the ds_vars table.</p>
+<p>Regular expressions are used to match the columns, so if you needed a more flexible input, you could do that. Now, we have the ds_spec table we can move on to the ds_vars table.</p>
 <p>The ds_vars table has 5 columns:</p>
 <ul>
 <li><p>dataset: dataset name</p></li>
@@ -224,7 +224,7 @@
 <li><p>keep: boolean to determine if the variable is needed</p></li>
 <li><p>core: ADaM core (Expected, Required, Permissible)</p></li>
 </ul>
-<p>When we look back at our specification document we can see all this information is in the variable tab. The inputs for the <code>spec_type_to_ds_vars</code> function are the same as before, but with slightly different defaults. By default ds_vars only checks sheets labelled “Variable” (this is because all the settings are defaulted to read in p21 formatted specs). But, those default work for our specifications cause all the information is in the variable tab; so we can try with just the defaults again .</p>
+<p>When we look back at our specification document we can see all this information is in the variable tab. The inputs for the <code>spec_type_to_ds_vars</code> function are the same as before, but with slightly different defaults. By default ds_vars only checks sheets labeled “Variable” (this is because all the settings are defaulted to read in P21 formatted specs). But, those default work for our specifications cause all the information is in the variable tab; so we can try with just the defaults again .</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/spec_type_to_ds_vars.html">spec_type_to_ds_vars</a></span><span class="op">(</span><span class="va">doc</span><span class="op">)</span>
 <span class="co">#&gt; Error: Unable to rename the following columns in Variables:</span>
@@ -266,7 +266,7 @@
 <span class="co">#&gt; 4 ADAE    SITEID      30 NA         NA &lt;NA&gt; </span>
 <span class="co">#&gt; 5 ADAE    AGE         40 NA         NA &lt;NA&gt; </span>
 <span class="co">#&gt; 6 ADAE    SEX         50 NA         NA &lt;NA&gt;</span></code></pre></div>
-<p>The next table we have is var_spec, the table of variable level metadata. var_spec is seperate from ds_vars because, in accordance with CDISC standards, labels and lengths should be the same for a given variable across all datasets. So, we are able to normalize the data to only have one row per variable, which ensures this rule and helps reduce the size of the object. There are 6 columns in var_spec:</p>
+<p>The next table we have is var_spec, the table of variable level metadata. var_spec is separate from ds_vars because, in accordance with CDISC standards, labels and lengths should be the same for a given variable across all datasets. So, we are able to normalize the data to only have one row per variable, which ensures this rule and helps reduce the size of the object. There are 6 columns in var_spec:</p>
 <ul>
 <li><p>variable: variable name</p></li>
 <li><p>length: variable length</p></li>
@@ -275,7 +275,7 @@
 <li><p>format: variable format</p></li>
 <li><p>common: boolean if variable is common across ADaM</p></li>
 </ul>
-<p>Looking back at our specification we see this will also be built using the Variable tab. So, we know we need to edit the regular expression fro variable to make it more specific. Additionally, if you look at the default for <code>cols</code> you see there is a dataset input. This is because some standards aren’t 100% consistent, some variables (e.g. visit) have different lengths depending on the dataset. <strong>So to accommodate this some of the variables in var_spec are in the ds.variable format</strong>. These builders will do this conversion for you , but dataset is needed. The other thing the builders can automatically deal with is the common variable. If given a dataset column, the builder function will automatically figure out which variables are common to all dataset. This is good because we don’t have a common variable in our specs.</p>
+<p>Looking back at our specification we see this will also be built using the Variable tab. So, we know we need to edit the regular expression for the variable to make it more specific. Additionally, if you look at the default for <code>cols</code> you see there is a dataset input. This is because some standards aren’t 100% consistent, some variables (e.g. visit) have different lengths depending on the dataset. <strong>So to accommodate this some of the variables in var_spec are in the ds.variable format</strong>. These builders will do this conversion for you , but the dataset is needed. The other thing the builders can automatically deal with is the common variable. If given a dataset column, the builder function will automatically figure out which variables are common to all dataset. This is good because we don’t have a common variable in our specs.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">var_spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spec_type_to_var_spec.html">spec_type_to_var_spec</a></span><span class="op">(</span><span class="va">doc</span>, cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"variable"</span> <span class="op">=</span> <span class="st">"Variable Name"</span>,
                                                 <span class="st">"length"</span> <span class="op">=</span> <span class="st">"[L|l]ength"</span>,
@@ -293,7 +293,7 @@
 <span class="co">#&gt; 4 SITEID       10 Study Site Identifier            Text    &lt;NA&gt;   TRUE  </span>
 <span class="co">#&gt; 5 AGE           8 Age                              Integer &lt;NA&gt;   TRUE  </span>
 <span class="co">#&gt; 6 SEX           1 Sex                              Text    SEX    TRUE</span></code></pre></div>
-<p>There is one issue here, the format column also the codelist names. This is cause the information came from the “Controlled Term or Format” column of my spec document. So the final step of preparing var_spec table is to remove the control terms. It is easy here cause all the formats end in a full stop (.), but the control terms don’t.</p>
+<p>There is one issue here: the format column is also the codelist names. This is because the information came from the “Controlled Term or Format” column of my spec document. So the final step of preparing var_spec table is to remove the controlled terms. It is easy here because all the formats end in a full stop (.), but the controlled terms don’t.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">var_spec</span> <span class="op">&lt;-</span> <span class="va">var_spec</span> <span class="op">%&gt;%</span> 
    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>format <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/if_else.html">if_else</a></span><span class="op">(</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_detect.html">str_detect</a></span><span class="op">(</span><span class="va">format</span>, <span class="st">"\\."</span><span class="op">)</span>, <span class="va">format</span>, <span class="st">""</span><span class="op">)</span><span class="op">)</span></code></pre></div>
@@ -307,7 +307,7 @@
 <li><p>where: value of the variable</p></li>
 <li><p>derivation_id: id used to cross-reference the derivation</p></li>
 </ul>
-<p>By default, <code>spec_type_to_value_spec</code> is set up to have the where information on different sheet because that is the format of a P21 spec, but in our spec we don’t have that. In fact, we don’t have any value level metadata in our spec. But, that is fine, the default builders will just pull what information it can from the variable tab.</p>
+<p>By default, <code>spec_type_to_value_spec</code> is set up to have the where information on different sheet because that is the format of a P21 spec, but in our spec we don’t have that. In fact, we don’t have any value level metadata in our spec. But, that is fine - the default builders will just pull what information it can from the variable tab.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">value_spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spec_type_to_value_spec.html">spec_type_to_value_spec</a></span><span class="op">(</span><span class="va">doc</span>, cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"dataset"</span> <span class="op">=</span> <span class="st">"VLM Name|Domain"</span>,
                                                   <span class="st">"variable"</span> <span class="op">=</span> <span class="st">"VLM Name|Variable Name"</span>,
@@ -454,6 +454,7 @@
 <span class="co">#&gt; </span>
 <span class="co">#&gt;  Metadata successfully imported</span>
 <span class="co">#&gt; Metacore object contains metadata for 4 datasets</span></code></pre></div>
+<p>And we’re good to go!</p>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
