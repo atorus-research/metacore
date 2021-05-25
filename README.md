@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# metacore <a href='https://github.com/atorus-research/metacore'><img src="man/figures/metacore.png" align="right" height="139"/></a>
+# metacore <a href='https://github.com/atorus-research/metacore'><img src="man/figures/metacore.PNG" align="right" height="139"/></a>
 
 <!-- badges: start -->
 
