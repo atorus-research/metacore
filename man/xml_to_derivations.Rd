@@ -18,7 +18,7 @@ be cross referenced to variables using the derivation_id's
 }
 \seealso{
 Other xml builder: 
-\code{\link{xml_to_code_list}()},
+\code{\link{xml_to_codelist}()},
 \code{\link{xml_to_ds_spec}()},
 \code{\link{xml_to_ds_vars}()},
 \code{\link{xml_to_value_spec}()},

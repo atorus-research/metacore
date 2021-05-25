@@ -1,0 +1,9 @@
+destination: docs
+
+template:
+  params:
+    bootswatch: yeti
+  opengraph:
+    image:
+      src: man/figures/metacore.PNG
+      alt: "metacore Hex Sticker"

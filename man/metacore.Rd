@@ -17,7 +17,7 @@ metacore(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist)
 
 \item{derivations}{contains derivation, it allows for different variables to have the same derivation}
 
-\item{code_list}{contains the code/decode information}
+\item{codelist}{contains the code/decode information}
 }
 \description{
 R6 Class wrapper to create your own metacore object

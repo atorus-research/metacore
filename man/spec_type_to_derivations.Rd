@@ -21,7 +21,7 @@ pattern}
 \item{sheet}{Regular expression for the sheet name}
 }
 \value{
-
+a dataset formatted for the metacore object
 }
 \description{
 Creates the derivation table from a list of datasets (optionally filtered by

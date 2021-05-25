@@ -4,9 +4,10 @@
 #' it in as a meta core object. At the moment it only supports specification in
 #' the format of pinnacle 21 specifications. But, the @family spec builder can
 #' be used as building blocks for bespoke specification documents
+#'
 #' @param path string of file location
 #'
-#' @return
+#' @return given a spec document it returns a metacore object
 #' @export
 spec_to_metacore <- function(path){
    doc <- read_all_sheets(path)
@@ -16,7 +17,7 @@ spec_to_metacore <- function(path){
       var_spec <- spec_type_to_var_spec(doc)
       value_spec <- spec_type_to_value_spec(doc)
       derivations <- spec_type_to_derivations(doc)
-      code_list <- spec_type_to_code_list(doc)
+      code_list <- spec_type_to_codelist(doc)
       metacore(ds_spec, ds_vars, var_spec, value_spec,
                derivations, code_list)
    } else {
@@ -33,8 +34,8 @@ spec_to_metacore <- function(path){
 #' @param path file location as a string
 #'
 #' @return returns string indicating the type of spec document
+#' @export
 #'
-#' @noRd
 spec_type <- function(path){
    sheets <- excel_sheets(path)
    if(!any(sheets %>% str_detect("[D|d]omains?|[D|d]atasets?"))){
@@ -59,8 +60,9 @@ spec_type <- function(path){
 #' Given a path to a file, this function reads in all sheets of an excle file
 #'
 #' @param path string of the file path
+#' @export
 #'
-#' @return
+#' @return a list of datasets
 read_all_sheets <- function(path){
    sheets <- excel_sheets(path)
    all_dat <- sheets %>%
@@ -81,7 +83,7 @@ read_all_sheets <- function(path){
 #'   expressions for more flexibility. But, the names must follow the given pattern
 #' @param sheet Regular expression for the sheet name
 #'
-#' @return
+#' @return a dataset formatted for the metacore object
 #' @export
 #'
 #' @family spec builder
@@ -90,7 +92,7 @@ spec_type_to_ds_spec <- function(doc, cols = c("dataset" = "[N|n]ame|[D|d]ataset
                                                "label" = "[L|l]abel|[D|d]escription"), sheet = NULL){
    name_check <- names(cols) %in% c("dataset", "structure", "label") %>%
       all()
-   if(!name_check){
+   if(!name_check | is.null(names(cols))){
       stop("Supplied column vector must be named using the following names:
               'dataset', 'structure', 'label'")
    }
@@ -113,56 +115,88 @@ spec_type_to_ds_spec <- function(doc, cols = c("dataset" = "[N|n]ame|[D|d]ataset
 #' Creates the ds_vars from a list of datasets (optionally filtered by the sheet
 #' input). The named vector `cols` is used to determine which is the correct
 #' sheet and renames the columns
+#'
 #' @param doc Named list of datasets @seealso [read_all_sheets()] for exact
 #'   format
 #' @param cols Named vector of column names. The column names can be regular
 #'   expressions for more flexibility. But, the names must follow the given pattern
-#' @param sheet Regular expression for the sheet name
+#' @param sheet Regular expression for the sheet names
+#' @param key_seq_sep_sheet A boolean to indicate if the key sequence is on a separate sheet
+#' @param key_seq_cols names vector to get the key_sequence for each dataset
 #'
-#' @return
+#' @return a dataset formatted for the metacore object
 #' @export
 #'
 #' @family spec builder
 spec_type_to_ds_vars <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]omain",
                                                "variable" = "[V|v]ariable [[N|n]ame]?|[V|v]ariables?",
-                                               "key_seq" = "[V|v]ariable [O|o]rder|[S|s]eq|[O|o]rder",
+                                               "order" = "[V|v]ariable [O|o]rder|[O|o]rder",
                                                "keep" = "[K|k]eep|[M|m]andatory"),
-                                 sheet = "[V|v]ar"){
-   name_check <- names(cols) %in% c("variable", "dataset", "key_seq",
-                                    "keep", "core") %>%
+                                 key_seq_sep_sheet = TRUE,
+                                 key_seq_cols = c("dataset" = "Dataset",
+                                                "key_seq" = "Key Variables"),
+                                 sheet = "[V|v]ar|Datasets"){
+   name_check <- names(cols) %in% c("variable", "dataset", "order",
+                                    "keep", "key_seq", "core") %>%
       all()
-   if(!name_check){
-      stop("Supplied column vector must be named using the following names:
-              'variable', 'dataset', 'key_seq', 'keep', 'core'")
-   }
 
+   name_check_extra <- names(key_seq_cols) %in% c("dataset", "key_seq") %>%
+      all() %>%
+      ifelse(key_seq_sep_sheet, ., TRUE) # Adding it cause we only want to check when sep sheet is true
+
+   # Testing for names of vectors
+   if(any(!name_check, !name_check_extra, is.null(names(cols)))){
+      stop("Supplied column vector must be named using the following names:
+              'variable', 'dataset', 'order', 'keep', 'core', 'key_seq'")
+   }
+   # Subsetting sheets
    if(!is.null(sheet)){
       sheet_ls <- str_subset(names(doc), sheet)
       doc <- doc[sheet_ls]
    }
+   #Get base doc
+   out <-doc %>%
+      create_tbl(cols)
+
+   # Getting the key seq values
+   if(key_seq_sep_sheet){
+      key_seq_df <- doc %>%
+         create_tbl(key_seq_cols) %>%
+         mutate(key_seq = str_split(key_seq, ",\\s"),
+                key_seq = map(key_seq, function(x){
+                   tibble(variable = x) %>%
+                      mutate(key_seq = row_number())
+                })) %>%
+         unnest(key_seq)
+      out <- left_join(out, key_seq_df, by = c("dataset", "variable"))
+   }
 
    # Get missing columns
    missing <- col_vars()$.ds_vars %>%
-      discard(~. %in% names(cols))
+      discard(~. %in% names(out))
 
-   doc %>%
-      create_tbl(cols) %>%
+   out %>%
       distinct() %>%
-      `is.na<-`(missing)
+      `is.na<-`(missing) %>%
+      mutate(key_seq = as.integer(key_seq),
+             keep = yn_to_tf(keep),
+             core = as.character(core))
 }
+
 
 #' Spec to var_spec
 #'
 #' Creates the var_spec from a list of datasets (optionally filtered by the sheet
 #' input). The named vector `cols` is used to determine which is the correct
-#' sheet and renames the columns
+#' sheet and renames the columns. (Note: the keep column will be converted logical)
+#'
 #' @param doc Named list of datasets @seealso [read_all_sheets()] for exact
 #'   format
 #' @param cols Named vector of column names. The column names can be regular
 #'   expressions for more flexibility. But, the names must follow the given pattern
 #' @param sheet Regular expression for the sheet name
 #'
-#' @return
+#' @return a dataset formatted for the metacore object
 #' @export
 #'
 #' @family spec builder
@@ -177,7 +211,7 @@ spec_type_to_var_spec <- function(doc, cols = c("variable" = "[N|n]ame|[V|v]aria
    name_check <- names(cols) %in% c("variable", "length", "label",
                                     "type", "dataset", "common", "format") %>%
       all()
-   if(!name_check){
+   if(!name_check | is.null(names(cols))){
       stop("Supplied column vector must be named using the following names:
               'variable', 'length', 'label', 'type', 'dataset', 'common', 'format'
               If common is not avaliable it can be excluded and will be automatically filled in.
@@ -234,7 +268,9 @@ spec_type_to_var_spec <- function(doc, cols = c("variable" = "[N|n]ame|[V|v]aria
       discard(~. %in% names(out))
    out %>%
       `is.na<-`(missing) %>%
-      distinct()
+      distinct() %>%
+      ungroup() %>%
+      mutate(length = as.integer(length))
 }
 
 #' Spec to value_spec
@@ -260,7 +296,7 @@ spec_type_to_var_spec <- function(doc, cols = c("variable" = "[N|n]ame|[V|v]aria
 #'   information already exsists in the value tab of your specification set to
 #'   NULL
 #'
-#' @return
+#' @return a dataset formatted for the metacore object
 #' @export
 #'
 #' @family spec builder
@@ -280,7 +316,7 @@ spec_type_to_value_spec <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]
                                     "type", "dataset", "where", "derivation_id") %>%
       all()
 
-   if(!name_check){
+   if(!name_check| is.null(names(cols))){
       stop("Supplied column vector must be named using the following names:
               'dataset', 'variable', 'origin', 'code_id', 'type', 'where', 'derivation_id'
               If derivation_id is not avaliable it can be excluded and dataset.variable will be used.
@@ -377,7 +413,7 @@ spec_type_to_value_spec <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]
 #' @param simplify Boolean value, if true will convert code/decode pairs that
 #'   are all equal to a permitted value list
 #'
-#' @return
+#' @return a dataset formatted for the metacore object
 #' @export
 #'
 #' @family spec builder
@@ -396,7 +432,7 @@ spec_type_to_codelist <- function(doc, codelist_cols = c("code_id" = "ID",
    } else {
       name_check <- names(codelist_cols) %in% c("code_id", "name", "code", "decode") %>%
          all()
-      if(!name_check){
+      if(!name_check| is.null(names(codelist_cols))){
          stop("Supplied column vector for codelist_cols must be named using the following names:
               'code_id', 'name', 'code', 'decode'",
               call. = FALSE
@@ -462,7 +498,8 @@ spec_type_to_codelist <- function(doc, codelist_cols = c("code_id" = "ID",
    cd_out %>%
       `is.na<-`(missing) %>%
       distinct() %>%
-      filter(!is.na(code_id))
+      filter(!is.na(code_id)) %>%
+      ungroup()
 }
 
 #' Spec to derivation
@@ -477,7 +514,7 @@ spec_type_to_codelist <- function(doc, codelist_cols = c("code_id" = "ID",
 #'   pattern
 #' @param sheet Regular expression for the sheet name
 #'
-#' @return
+#' @return a dataset formatted for the metacore object
 #' @export
 #'
 #' @family spec builder
@@ -486,7 +523,7 @@ spec_type_to_derivations <- function(doc, cols = c("derivation_id" = "ID",
                                      sheet = "Method|Derivations?"){
    name_check <- names(cols) %in% c("derivation_id", "derivation") %>%
       all()
-   if(!name_check){
+   if(!name_check| is.null(names(cols))){
       stop("Supplied column vector must be names using the following names:
               'derivation_id', 'derivation'")
    }
@@ -506,7 +543,7 @@ spec_type_to_derivations <- function(doc, cols = c("derivation_id" = "ID",
       distinct() %>%
       filter(!is.na(derivation_id))
 }
-
+### Helper Functions
 
 #' Select sheet
 #'
@@ -576,5 +613,27 @@ create_tbl <- function(doc, cols){
          warning(., call. = FALSE)
       matches %>%
          map(~select(., matches(cols)))
+   }
+}
+
+
+#' Yes No to True False
+#'
+#' @param x takes in a vector to convert
+#'
+#' @return returns a logical vector or normal vector with warning
+#' @noRd
+#'
+
+#ToDo add true false as string to logical
+yn_to_tf <- function(x){
+   if(all(is.na(x) | str_detect(x, "[Y|y]es|[N|n]o|^[Y|y]$|^[N|n]$"))){
+      case_when(str_detect(x, "[Y|y]es") ~ TRUE,
+                str_detect(x, "[N|n]o") ~ FALSE,
+                is.na(x) ~ NA)
+   } else {
+      warning("Keep column needs to be True or False, please correct before converting to a Metacore object",
+              call. = FALSE)
+      x
    }
 }

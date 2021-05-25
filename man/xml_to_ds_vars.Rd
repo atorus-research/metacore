@@ -17,7 +17,7 @@ Creates the ds_vars table, which acts as a key between the datasets and the var 
 }
 \seealso{
 Other xml builder: 
-\code{\link{xml_to_code_list}()},
+\code{\link{xml_to_codelist}()},
 \code{\link{xml_to_derivations}()},
 \code{\link{xml_to_ds_spec}()},
 \code{\link{xml_to_value_spec}()},

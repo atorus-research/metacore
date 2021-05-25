@@ -16,12 +16,16 @@ knitr::opts_chunk$set(
 
 ```{r setup}
 library(metacore)
+library(dplyr)
+library(purrr)
+library(stringr)
+library(gt)
 ```
 
 The first thing to do when trying to build a specification reader is to try the default. By default metacore can read in specification that are in the pinnacle 21 format. If your document isn't that format it is still worth trying the default cause the error messages can be helpful.
 
-```{r}
-spec_to_metacore("mock_spec.xlsx")
+```{r, error=TRUE}
+spec_to_metacore(metacore_example("mock_spec.xlsx"))
 ```
 
 As we can see, the mock spec we are using here doesn't match the format. So, we will have to build bespoke reader. Before we start that, it is important to understand the structure of the metacore object. Each object acts as its own database for all dataset related metadata. It has 7 tables, 6 inputted tables and 1 change log. The 6 tables and there general purpose are as follows:
@@ -40,25 +44,16 @@ As we can see, the mock spec we are using here doesn't match the format. So, we 
 
 Here is a schema of how all this fits together
 
-![](labeled_schema.png "Metacore Schema")
+![](../man/figures/labeled-schema.png "Metacore Schema")
 
-ds_spec is connect to ds_vars by the 'dataset' variable and ds_vars is connected to var_spec by the 'variable' variable etc.
-
-With an understanding of the basic structure we can figure out what is needed for variable. This information can be found with the `all_message` function, which details the requirement for each variable
-
-```{r, echo=FALSE}
-all_message()%>% 
-  mutate(across(everything(), as.character)) %>% 
-  gt::gt()
-
-```
+ds_spec is connect to ds_vars by the 'dataset' variable and ds_vars is connected to var_spec by the 'variable' variable etc. For more information on the make-up of metacore objects please see the readme. 
 
 Now we understand what makes a metacore object we can start to develop the reader.
 
 First, we need to dentify what type of specification format you have. At the moment we support the specification where each tab contains different information i.e. a domain tab, a variable tab etc. To test this you can use the `spec_type` function.
 
 ```{r}
-spec_type("mock_spec.xlsx")
+metacore:::spec_type(metacore_example("mock_spec.xlsx"))
 ```
 
 Given we have the type style of specification, we can attempt to run with the lower level built-in specification to metacore build. There are 6 lower level specification builders to match each of the 6 datasets needed, spec_type_to\_\*. Even if these fail, the error messages should help identify the issues.
@@ -66,7 +61,7 @@ Given we have the type style of specification, we can attempt to run with the lo
 But, before we to any of that we need to read in our document using the `read_all_sheets` function. This function reads in a multisheet excel file into a named list, where the name of each dataset is the name of the tab. The lower level specification builders do assume the provided `doc` is a named list. This mock specification has 5 tabs, domain, variables, value level metadata, controlled terms, and computational method. So it looks like we might need to split the information in these tabs to get the 6 tables needed for the metacore object.
 
 ```{r}
-doc <- read_all_sheets("mock_spec.xlsx")
+doc <- read_all_sheets(metacore_example("mock_spec.xlsx"))
 doc %>% map(head)
 
 ```
@@ -75,7 +70,7 @@ Let's start with making the ds_spec (dataset specification) table using `spec_ty
 
 This function takes in our named list of datasets (doc), a named vector of columns (cols) and a sheet name (sheet). But, only doc is needed, the other inputs have defaults. So we can try with just the default and see what we get.
 
-```{r}
+```{r, error=TRUE}
 spec_type_to_ds_spec(doc)
 ```
 
@@ -107,26 +102,30 @@ The ds_vars table has 5 columns:
 
 -   key_seq: integers controlling the sort order of each dataset
 
+-   order: integer controling the column order of each dataset
+
 -   keep: boolean to determine if the variable is needed
 
 -   core: ADaM core (Expected, Required, Permissible)
 
 When we look back at our specification document we can see all this information is in the variable tab. The inputs for the `spec_type_to_ds_vars` function are the same as before, but with slightly different defaults. By default ds_vars only checks sheets labelled "Variable" (this is because all the settings are defaulted to read in p21 formatted specs). But, those default work for our specifications cause all the information is in the variable tab; so we can try with just the defaults again .
 
-```{r}
+```{r, error=TRUE}
 spec_type_to_ds_vars(doc)
 ```
 
-This error means it is trying to match the sheet entitled Variable, the variable and key_seq columns match to two different columns. This is the same error we had before. We just need to have a quick look at the columns and adjust the regular expression to be more specific.
+This error means it is trying to match the sheet entitled Variable, the variable column matches to two different columns. This is the same error we had before. We just need to have a quick look at the columns and adjust the regular expression to be more specific. Additionally, for the key sequence variable isn't in the variable tab. We saw this information above in the domain tab. So we will need to do two things to fix this. First, adjust the dataset name in the `key_seq_cols` argument. Second, change the sheets to include the variable and the domain sheet. 
 
 ```{r}
 doc$Variables %>% head()
 
 ds_vars<- spec_type_to_ds_vars(doc, cols = c("dataset" = "Domain",
-                                   "variable" = "[V|v]ariable [N|n]ame",
-                                   "key_seq" = "Sort Order",
-                                   "keep" = "[K|k]eep|[M|m]andatory", 
-                                   "core" = "Required"))
+                                               "variable" = "[V|v]ariable [N|n]ame",
+                                               "order" = "[V|v]ariable [O|o]rder",
+                                               "keep" = "[M|m]andatory"),
+                               key_seq_cols = c("dataset" = "Domain Name",
+                                                "key_seq" = "Key"),
+                               sheet = "[V|v]ar|Domains")
 head(ds_vars)
 ```
 

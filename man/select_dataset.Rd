@@ -14,7 +14,7 @@ select_dataset(.data, dataset, simplify = FALSE)
 \item{simplify}{return a single dataframe}
 }
 \value{
-
+a filtered subset of the metacore object
 }
 \description{
 Select metacore object to single dataset

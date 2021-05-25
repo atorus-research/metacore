@@ -1,13 +1,30 @@
 Package: metacore
-Title: What the Package Does (One Line, Title Case)
+Title: A Centralized Metadata Object Focus on Clinical Trial Data Programming Workflows
 Version: 0.0.0.9000
 Authors@R: 
-    person(given = "First",
-           family = "Last",
-           role = c("aut", "cre"),
-           email = "first.last@example.com",
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
+    c(person(given = "Christina",
+             family = "Fillmore",
+             role = c("aut", "cre"),
+             email = "christina.e.fillmore@gsk.com",
+             comment = c(ORCID = "TODO")),
+      person(given = "Maya",
+             family = "Gans",
+             role = "aut",
+             email = "maya.gans@atorusresearch.com",
+             comment = c(ORCID = "0000-0002-5452-6089")),
+      person(given = "Ashley",
+             family = "Tarasiewicz",
+             role = "aut",
+             email = "ashley.tarasiewicz@atorusresearch.com",
+             comment = c(ORCID = "TODO")),
+      person(given = "Mike",
+             family = "Stackhouse",
+             role = "aut",
+             email = "mike.stackhouse@atorusresearch.com",
+             comment = c(ORCID = "0000-0001-6030-723X")),
+      person(given = "GSK/Atorus JPT",
+             role = c("cph", "fnd")))
+Description: Create an immutable container holding metadata for the purpose of better enabling programming activities and functionality of other packages within the clinical programming workflow.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
@@ -16,7 +33,9 @@ RoxygenNote: 7.1.1
 Suggests: 
     testthat,
     knitr,
-    rmarkdown
+    rmarkdown,
+    gt,
+    covr
 Imports: 
     R6,
     tidyr,
@@ -24,5 +43,8 @@ Imports:
     stringr,
     magrittr,
     XML,
-    purrr
+    purrr,
+    readxl,
+    rlang,
+    tibble
 VignetteBuilder: knitr
