@@ -7,25 +7,35 @@
 
 [![Lifecycle:
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
+
 <!-- badges: end -->
 
-The goal of this package is to standardize the metadata associated with
-clinical trial datasets. Clinical trial data follow a data standard
-known as CDISC, which covers the not only the dataset formatting, but
-also which datasets are needed for a given study. Because of the complex
-nature of clinical trials, these datasets often have a complex,
-interdependent relationships. To help keep track of all the information
-needed to build datasets, specification documents are created prior to
-dataset creation. Additionally, define documents are submitted with the
-datasets to explain to regulators the eccentricities of given study.
-This package takes in either specifications or defines and creates and
-R6 metacore object. This object is a standardized, immutable object to
-ask as a single source of truth across multiple dataset building
-scripts.
+Programming for clinical trial data analysis tends to be very
+standardized. With data standards such as
+[CDISC](https://www.cdisc.org/), expectations tend to be very clearly
+defined. Within these programming activities, there’s ample room for the
+use of metadata. Metadata can be used for several different purposes,
+such as applying dataset attributes, establishing sort sequences,
+working with controlled terminology, and more. Despite CDISC standards,
+organizations tend to have their own means of storing metadata, be it in
+excel spreadsheets, databases, and more.
+
+The purpose of metacore is to establish a common foundation for the use
+of metadata within an R session. This is done by creating an R object
+that can hold the necessary data in a standardized, immutable structure
+(using R6) that makes it easy to extract out necessary information when
+needed. Users can read in their metadata from their various sources. To
+make this easy, we’ve provided some helper functions - and even have
+readers that can read directly from Define.xml 2.0. By establishing a
+common and consistent object in memory, further packages that support
+these work flows can have a common foundation upon which tools can be
+built that leverage metadata in the future. This reduces the need to
+hold different data structures containing metadata and instead allows
+programs to pull this information from a centralized source.
 
 ## Installation
 
-You can install the released version of metacore from
+You can install the current development version of metacore from
 [github](https://github.com/atorus-research/metacore) with:
 
 ``` r
@@ -70,7 +80,7 @@ only a single row per dataset, with the following information:
 
 ### ds\_vars <img src="man/figures/labeled-ds_vars.png" align="right" height="150"/>
 
-thuis table contains the information that bridges between purely dataset
+This table contains the information that bridges between purely dataset
 level and purely variable level. There is one row per dataset per
 variable:
 

@@ -18,13 +18,16 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
+
 <!-- badges: end -->
 
-The goal of this package is to standardize the metadata associated with clinical trial datasets. Clinical trial data follow a data standard known as CDISC, which covers the not only the dataset formatting, but also which datasets are needed for a given study. Because of the complex nature of clinical trials, these datasets often have a complex, interdependent relationships. To help keep track of all the information needed to build datasets, specification documents are created prior to dataset creation. Additionally, define documents are submitted with the datasets to explain to regulators the eccentricities of given study. This package takes in either specifications or defines and creates and R6 metacore object. This object is a standardized, immutable object to ask as a single source of truth across multiple dataset building scripts.
+Programming for clinical trial data analysis tends to be very standardized. With data standards such as [CDISC](https://www.cdisc.org/), expectations tend to be very clearly defined. Within these programming activities, there's ample room for the use of metadata. Metadata can be used for several different purposes, such as applying dataset attributes, establishing sort sequences, working with controlled terminology, and more. Despite CDISC standards, organizations tend to have their own means of storing metadata, be it in excel spreadsheets, databases, and more.
+
+The purpose of metacore is to establish a common foundation for the use of metadata within an R session. This is done by creating an R object that can hold the necessary data in a standardized, immutable structure (using R6) that makes it easy to extract out necessary information when needed. Users can read in their metadata from their various sources. To make this easy, we've provided some helper functions - and even have readers that can read directly from Define.xml 2.0. By establishing a common and consistent object in memory, further packages that support these work flows can have a common foundation upon which tools can be built that leverage metadata in the future. This reduces the need to hold different data structures containing metadata and instead allows programs to pull this information from a centralized source.
 
 ## Installation
 
-You can install the released version of metacore from [github](https://github.com/atorus-research/metacore) with:
+You can install the current development version of metacore from [github](https://github.com/atorus-research/metacore) with:
 
 ``` r
 devtools::install_github("atorus-research/metacore")
@@ -62,7 +65,7 @@ This table covers the basic information about each dataset. There is only a sing
 
 ### ds_vars <img src="man/figures/labeled-ds_vars.png" align="right" height="150"/>
 
-thuis table contains the information that bridges between purely dataset level and purely variable level. There is one row per dataset per variable:
+This table contains the information that bridges between purely dataset level and purely variable level. There is one row per dataset per variable:
 
 -   *dataset*: The abbreviated name of the dataset. This will match to the name in **ds_spec**
 
@@ -70,7 +73,7 @@ thuis table contains the information that bridges between purely dataset level a
 
 -   *key_seq*: Sequence key, which are the variables used to order a dataset. This is a column of integers, where 1 is the first sorting variable and 2 is the second etc. If the variable is not used in sorting it will be left `NA`
 
--   *order*: Order sets the order of the columns to appear in the dataset. This is also a numeric value 
+-   *order*: Order sets the order of the columns to appear in the dataset. This is also a numeric value
 
 -   *keep*: Logical value about if the variable needs to be kept
 
@@ -78,7 +81,7 @@ thuis table contains the information that bridges between purely dataset level a
 
 ### var_spec <img src="man/figures/labeled-var_spec.png" align="right" height="150"/>
 
-This table contains the information the purely variable level information. The goal is there is a single row per variable, which is common across all datasets. This helps ensure variables follow the CDISC standard. But, this isn't always possible, so if information for a given variable differs across datasets, the variable will be recorded as dataset.variable in the variable column. 
+This table contains the information the purely variable level information. The goal is there is a single row per variable, which is common across all datasets. This helps ensure variables follow the CDISC standard. But, this isn't always possible, so if information for a given variable differs across datasets, the variable will be recorded as dataset.variable in the variable column.
 
 -   *variable*: Variable name, which should match the name in **ds_spec**. Unless the variable needs to be duplicated, then the name will be a combination of the the dataset name and variable name from **ds_spec** (dataset.variable)
 
@@ -88,55 +91,52 @@ This table contains the information the purely variable level information. The g
 
 -   *label*: Variable label
 
--   *common*: Common across ADaM datasets 
+-   *common*: Common across ADaM datasets
 
 -   *format*: Variable format
 
-
 ### value_spec <img src="man/figures/labeled-value_spec.png" align="right" height="150"/>
 
-This table contains the information the information at the value level. There will be at least one row per dataset/variable combination. There is more than one row per dataset/variable combination if the combination has values which have differing metadata. For instance LBORRES that are different data types depending on the value. The information contained are as follows: 
+This table contains the information the information at the value level. There will be at least one row per dataset/variable combination. There is more than one row per dataset/variable combination if the combination has values which have differing metadata. For instance LBORRES that are different data types depending on the value. The information contained are as follows:
 
 -   *dataset*: The abbreviated name of the dataset. This will match to the name in **ds_spec**
 
 -   *variable*: Variable name. This will match to the name in **ds_spec**
 
--   *type*: String of the value type 
+-   *type*: String of the value type
 
--   *origin*: Origin of the value 
+-   *origin*: Origin of the value
 
--   *code_id*: ID for the code list to match the id in the **codelist** table 
+-   *code_id*: ID for the code list to match the id in the **codelist** table
 
 -   *where*: Value of the variable
 
--   *derivation_id*: ID for the derivation to match with the **derivation** table 
-
+-   *derivation_id*: ID for the derivation to match with the **derivation** table
 
 ### derivation <img src="man/figures/labeled-derivation.png" align="right" height="150"/>
 
 This table has all the derivation information, with one row per derivation ID and the following information:
 
--   *derivation_id*: The ID, which should match to **value_spec** 
+-   *derivation_id*: The ID, which should match to **value_spec**
 
 -   *derivation*: Text describing the derivation
-
 
 ### codelist <img src="man/figures/labeled-code_list.png" align="right" height="150"/>
 
 This table contains the code lists, permitted value lists, and external libraries nested within a tibble. There is only a single row per list/library, with the following information:
 
--   *code_id*: the ID used to identify the code list. This should be the same as the *code_id* in **val_spec** 
+-   *code_id*: the ID used to identify the code list. This should be the same as the *code_id* in **val_spec**
 
--   *name*: Name of the code list 
+-   *name*: Name of the code list
 
 -   *code*: A list of tibbles (for code / decode combinations) and vectors (for permitted values and libraries), which contain all the codes
 
 -   *type*: An indicator of if the information in the code column is a code/decode table, permitted value, or external library
-
 
 To see a metacore object in about please see our vignettes
 
 ![](man/figures/labeled-schema.png "man/figures/Metacore Schema")
 
 ## Future Development
+
 This is an alpha release of this package, so if you have ideas on future improvements please add them to the issue log. Additionally we are looking into creating an additional **changelog** table to track any changes to metacore objects. This would provide a robust and traceable solution to changing data requirements.
