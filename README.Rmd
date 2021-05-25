@@ -37,7 +37,7 @@ devtools::install_github("atorus-research/metacore")
 
 A metacore object is made-up of 6 different tables, which are connected with a series of identifying columns. The goal of these tables is to normalize the information as much as possible, while keeping together like information. Each table has a basic theme to make them easier to remember. They are as follows:
 
--   **ds_sep**: Contains dataset level information
+-   **ds_spec**: Contains dataset level information
 
 -   **ds_vars**: Bridges the dataset and variable level information
 
