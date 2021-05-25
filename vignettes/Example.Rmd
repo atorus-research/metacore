@@ -19,23 +19,47 @@ library(metacore)
 library(XML)
 ```
 
+[CDISC](https://www.cdisc.org/) standards provide a standard for submission of data set metadata through a document known as define.xml. The define provides a great deal of useful information that is both machine readable and can be viewed through your web browser. While many organizations wait to produce a define until the datasets are finalized, it can still be advantageous to be able to read metadata directly from a define. For this purpose, we developed readers that can go directly from a define.xml to a metacore object.
+
+To do this, we've built separate reader function for each of the metacore tables. For more information on the structure of the metacore tables, check out the README.
+
+We start by reading the define from disk using the `xmlTreeParse()` function from the `XML` package.
 
 ```{r}
 doc <- xmlTreeParse(metacore_example("define.xml"), useInternalNodes = TRUE)
+```
 
+
+Next, we use the metacore readers for each of the separate tables necessary for a metacore object.
+
+```{r}
 ds_spec2 <- xml_to_ds_spec(doc)
 ds_vars <- xml_to_ds_vars(doc)
 var_spec <- xml_to_var_spec(doc)
 value_spec <- xml_to_value_spec(doc)
 code_list <- xml_to_codelist(doc)
 derivations <- xml_to_derivations(doc)
+```
 
+Great! Now we're ready to create our metacore object.
+
+```{r}
 test <- metacore(ds_spec2, ds_vars, var_spec, value_spec, derivations, code_list)
+```
 
+Something to note about a metacore object is that it inherently holds all data from your source of metadata, be it your specification, define.xml, database, etc. So that means you have _all_ the metadata. In your program, it's likely that you'll just want to keep metadata relevant to the dataset you're currently programming. We've made process easily, with functions that filter metadata down to information only relevant to a specific dataset.
+
+```{r}
 # a metacore object with all your dataframes
 subset <- test %>% select_dataset("DM")
 subset$ds_spec
 
 # a simplified dataframe 
 subset_t <- test %>% select_dataset("DM", simplify = TRUE)
+```
+
+As can be seen above, the metacore object can be filtered directly, or by using the `simplify = TRUE` argument, a simplified data frame can be returned. 
+
+```{r}
+subset_t
 ```
