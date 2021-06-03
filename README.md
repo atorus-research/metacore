@@ -5,9 +5,13 @@
 
 <!-- badges: start -->
 
+[<img src="https://img.shields.io/badge/Slack-RValidationHub-blue?style=flat&logo=slack">](https://RValidationHub.slack.com)
+[![R build
+status](https://github.com/atorus-research/metacore/workflows/R-CMD-check/badge.svg)](https://github.com/atorus-research/xportr/actions?workflow=R-CMD-check)
+[<img src="https://img.shields.io/codecov/c/github/atorus-research/metacore">](https://codecov.io/gh/atorus-research/metacore)
+[<img src="https://img.shields.io/badge/License-MIT-blue.svg">](https://github.com/atorus-research/metacore/blob/master/LICENSE)
 [![Lifecycle:
-experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
-
+experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental-1)
 <!-- badges: end -->
 
 Programming for clinical trial data analysis tends to be very
