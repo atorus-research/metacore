@@ -82,7 +82,6 @@
 </h1></div>
 <!-- badges: start -->
 
-<!-- badges: end -->
 <p>Programming for clinical trial data analysis tends to be very standardized. With data standards such as <a href="https://www.cdisc.org/">CDISC</a>, expectations tend to be very clearly defined. Within these programming activities, there’s ample room for the use of metadata. Metadata can be used for several different purposes, such as applying dataset attributes, establishing sort sequences, working with controlled terminology, and more. Despite CDISC standards, organizations tend to have their own means of storing metadata, be it in excel spreadsheets, databases, and more.</p>
 <p>The purpose of metacore is to establish a common foundation for the use of metadata within an R session. This is done by creating an R object that can hold the necessary data in a standardized, immutable structure (using R6) that makes it easy to extract out necessary information when needed. Users can read in their metadata from their various sources. To make this easy, we’ve provided some helper functions - and even have readers that can read directly from Define.xml 2.0. By establishing a common and consistent object in memory, further packages that support these work flows can have a common foundation upon which tools can be built that leverage metadata in the future. This reduces the need to hold different data structures containing metadata and instead allows programs to pull this information from a centralized source.</p>
 <div id="installation" class="section level2">
@@ -215,7 +214,11 @@
   <div class="dev-status">
 <h2>Dev status</h2>
 <ul class="list-unstyled">
-<li><a href="https://www.tidyverse.org/lifecycle/#experimental"><img src="https://img.shields.io/badge/lifecycle-experimental-orange.svg" alt="Lifecycle: experimental"></a></li>
+<li><a href="https://RValidationHub.slack.com"><img src="https://img.shields.io/badge/Slack-RValidationHub-blue?style=flat&amp;logo=slack"></a></li>
+<li><a href="https://github.com/atorus-research/xportr/actions?workflow=R-CMD-check"><img src="https://github.com/atorus-research/metacore/workflows/R-CMD-check/badge.svg" alt="R build status"></a></li>
+<li><a href="https://codecov.io/gh/atorus-research/metacore"><img src="https://img.shields.io/codecov/c/github/atorus-research/metacore"></a></li>
+<li><a href="https://github.com/atorus-research/metacore/blob/master/LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg"></a></li>
+<li><a href="https://lifecycle.r-lib.org/articles/stages.html#experimental-1"><img src="https://img.shields.io/badge/lifecycle-experimental-orange.svg" alt="Lifecycle: experimental"></a></li>
 </ul>
 </div>
 </div>
