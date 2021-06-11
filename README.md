@@ -78,9 +78,9 @@ only a single row per dataset, with the following information:
 
 -   *dataset*: The abbreviated name of the dataset (e.g. AE)
 
--   *Structure*: Value structure of the dataset as a sting
+-   *structure*: Value structure of the dataset as a sting
 
--   *Label*: Dataset label
+-   *label*: Dataset label
 
 ### ds\_vars <img src="man/figures/labeled-ds_vars.png" align="right" height="150"/>
 
