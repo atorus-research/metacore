@@ -130,7 +130,7 @@
 <code class="sourceCode R"><span class="va">doc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_all_sheets.html">read_all_sheets</a></span><span class="op">(</span><span class="fu"><a href="../reference/metacore_example.html">metacore_example</a></span><span class="op">(</span><span class="st">"mock_spec.xlsx"</span><span class="op">)</span><span class="op">)</span>
 <span class="va">doc</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html">map</a></span><span class="op">(</span><span class="va">head</span><span class="op">)</span>
 <span class="co">#&gt; $Domains</span>
-<span class="co">#&gt; # A tibble: 4 x 10</span>
+<span class="co">#&gt; # A tibble: 4 × 10</span>
 <span class="co">#&gt;   `Domain Name` Label   Repeating `Is Reference?` Class Source `Data Structure` </span>
 <span class="co">#&gt;   &lt;chr&gt;         &lt;chr&gt;   &lt;chr&gt;     &lt;chr&gt;           &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;            </span>
 <span class="co">#&gt; 1 ADDS          Dispos… Y         N               BDS   DS     One record per s…</span>
@@ -141,7 +141,7 @@
 <span class="co">#&gt; #   Documentation &lt;lgl&gt;</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; $Variables</span>
-<span class="co">#&gt; # A tibble: 6 x 18</span>
+<span class="co">#&gt; # A tibble: 6 × 18</span>
 <span class="co">#&gt;   `Domain Name` `Therapeutic Are… Indication `Variable Name` Label         Type </span>
 <span class="co">#&gt;   &lt;chr&gt;         &lt;chr&gt;             &lt;chr&gt;      &lt;chr&gt;           &lt;chr&gt;         &lt;chr&gt;</span>
 <span class="co">#&gt; 1 ADAE          CORE              CORE       STUDYID         Study Identi… Text </span>
@@ -157,7 +157,7 @@
 <span class="co">#&gt; #   Additional Information &lt;chr&gt;</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; $Value_level_Metadata</span>
-<span class="co">#&gt; # A tibble: 0 x 13</span>
+<span class="co">#&gt; # A tibble: 0 × 13</span>
 <span class="co">#&gt; # … with 13 variables: VLM Name &lt;lgl&gt;, Therapeutic Area &lt;lgl&gt;,</span>
 <span class="co">#&gt; #   Indication &lt;lgl&gt;, Parameter Code &lt;lgl&gt;, Parameter &lt;lgl&gt;, Type &lt;lgl&gt;,</span>
 <span class="co">#&gt; #   Max Length &lt;lgl&gt;, Signficant Digits &lt;lgl&gt;, Origin &lt;lgl&gt;,</span>
@@ -165,7 +165,7 @@
 <span class="co">#&gt; #   Definition/Comments &lt;lgl&gt;</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; $Controlled_Terms</span>
-<span class="co">#&gt; # A tibble: 6 x 8</span>
+<span class="co">#&gt; # A tibble: 6 × 8</span>
 <span class="co">#&gt;   `Codelist Name` `Codelist Code` `Coded Value`    `Description / D… `Code Info`</span>
 <span class="co">#&gt;   &lt;chr&gt;           &lt;chr&gt;           &lt;chr&gt;            &lt;chr&gt;             &lt;lgl&gt;      </span>
 <span class="co">#&gt; 1 SEX             SEX             F                Female            NA         </span>
@@ -177,7 +177,7 @@
 <span class="co">#&gt; # … with 3 more variables: Extension? &lt;lgl&gt;, Rank &lt;lgl&gt;, Source &lt;chr&gt;</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; $Computational_Method</span>
-<span class="co">#&gt; # A tibble: 6 x 3</span>
+<span class="co">#&gt; # A tibble: 6 × 3</span>
 <span class="co">#&gt;   `Computational Meth… `Definition / Comments`                `Additional Infor…</span>
 <span class="co">#&gt;   &lt;chr&gt;                &lt;chr&gt;                                  &lt;chr&gt;             </span>
 <span class="co">#&gt; 1 TRTP                 Compare ADT/ASTDT to the series of AD… &lt;NA&gt;              </span>
@@ -207,7 +207,7 @@
                                          <span class="st">"structure"</span> <span class="op">=</span> <span class="st">"Data Structure"</span>,  
                                          <span class="st">"label"</span> <span class="op">=</span> <span class="st">"Label"</span><span class="op">)</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">ds_spec</span><span class="op">)</span>
-<span class="co">#&gt; # A tibble: 4 x 3</span>
+<span class="co">#&gt; # A tibble: 4 × 3</span>
 <span class="co">#&gt;   dataset structure                                      label                  </span>
 <span class="co">#&gt;   &lt;chr&gt;   &lt;chr&gt;                                          &lt;chr&gt;                  </span>
 <span class="co">#&gt; 1 ADDS    One record per subject per datetime per param… Disposition Analysis   </span>
@@ -234,7 +234,7 @@
 <p>This error means it is trying to match the sheet entitled Variable, the variable column matches to two different columns. This is the same error we had before. We just need to have a quick look at the columns and adjust the regular expression to be more specific. Additionally, for the key sequence variable isn’t in the variable tab. We saw this information above in the domain tab. So we will need to do two things to fix this. First, adjust the dataset name in the <code>key_seq_cols</code> argument. Second, change the sheets to include the variable and the domain sheet.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">doc</span><span class="op">$</span><span class="va">Variables</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="op">)</span>
-<span class="co">#&gt; # A tibble: 6 x 18</span>
+<span class="co">#&gt; # A tibble: 6 × 18</span>
 <span class="co">#&gt;   `Domain Name` `Therapeutic Are… Indication `Variable Name` Label         Type </span>
 <span class="co">#&gt;   &lt;chr&gt;         &lt;chr&gt;             &lt;chr&gt;      &lt;chr&gt;           &lt;chr&gt;         &lt;chr&gt;</span>
 <span class="co">#&gt; 1 ADAE          CORE              CORE       STUDYID         Study Identi… Text </span>
@@ -257,7 +257,7 @@
                                                 <span class="st">"key_seq"</span> <span class="op">=</span> <span class="st">"Key"</span><span class="op">)</span>,
                                sheet <span class="op">=</span> <span class="st">"[V|v]ar|Domains"</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">ds_vars</span><span class="op">)</span>
-<span class="co">#&gt; # A tibble: 6 x 6</span>
+<span class="co">#&gt; # A tibble: 6 × 6</span>
 <span class="co">#&gt;   dataset variable order keep  key_seq core </span>
 <span class="co">#&gt;   &lt;chr&gt;   &lt;chr&gt;    &lt;dbl&gt; &lt;lgl&gt;   &lt;int&gt; &lt;chr&gt;</span>
 <span class="co">#&gt; 1 ADAE    STUDYID     10 NA         NA &lt;NA&gt; </span>
@@ -284,7 +284,7 @@
                                                 <span class="st">"dataset"</span> <span class="op">=</span> <span class="st">"[D|d]ataset|[D|d]omain"</span>,
                                                 <span class="st">"format"</span> <span class="op">=</span> <span class="st">"Format"</span><span class="op">)</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">var_spec</span><span class="op">)</span>
-<span class="co">#&gt; # A tibble: 6 x 6</span>
+<span class="co">#&gt; # A tibble: 6 × 6</span>
 <span class="co">#&gt;   variable length label                            type    format common</span>
 <span class="co">#&gt;   &lt;chr&gt;     &lt;int&gt; &lt;chr&gt;                            &lt;chr&gt;   &lt;chr&gt;  &lt;lgl&gt; </span>
 <span class="co">#&gt; 1 STUDYID       9 Study Identifier                 Text    &lt;NA&gt;   TRUE  </span>
@@ -318,7 +318,7 @@
                                                   <span class="st">"derivation_id"</span> <span class="op">=</span> <span class="st">"Method"</span><span class="op">)</span>,
                                     where_sep_sheet <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">value_spec</span><span class="op">)</span>
-<span class="co">#&gt; # A tibble: 6 x 7</span>
+<span class="co">#&gt; # A tibble: 6 × 7</span>
 <span class="co">#&gt;   dataset variable origin      type    code_id derivation_id where</span>
 <span class="co">#&gt;   &lt;chr&gt;   &lt;chr&gt;    &lt;chr&gt;       &lt;chr&gt;   &lt;chr&gt;   &lt;chr&gt;         &lt;chr&gt;</span>
 <span class="co">#&gt; 1 ADAE    STUDYID  Predecessor Text    &lt;NA&gt;    &lt;NA&gt;          TRUE </span>
@@ -332,7 +332,7 @@
 <code class="sourceCode R"><span class="va">derivation</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spec_type_to_derivations.html">spec_type_to_derivations</a></span><span class="op">(</span><span class="va">doc</span>, cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"derivation_id"</span> <span class="op">=</span> <span class="st">"Name"</span>,
                                                    <span class="st">"derivation"</span> <span class="op">=</span> <span class="st">"[D|d]efinition|[D|d]escription"</span><span class="op">)</span><span class="op">)</span> 
 <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">derivation</span><span class="op">)</span>
-<span class="co">#&gt; # A tibble: 6 x 2</span>
+<span class="co">#&gt; # A tibble: 6 × 2</span>
 <span class="co">#&gt;   derivation_id derivation                                                      </span>
 <span class="co">#&gt;   &lt;chr&gt;         &lt;chr&gt;                                                           </span>
 <span class="co">#&gt; 1 TRTP          Compare ADT/ASTDT to the series of ADSL.APxxSDT and ADSL.APxxED…</span>
@@ -350,7 +350,7 @@
                                                           <span class="st">"decode"</span> <span class="op">=</span> <span class="st">"Decoded Value"</span><span class="op">)</span>,
                       dict_cols <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">codelist</span><span class="op">)</span>
-<span class="co">#&gt; # A tibble: 6 x 4</span>
+<span class="co">#&gt; # A tibble: 6 × 4</span>
 <span class="co">#&gt;   code_id name    type        codes           </span>
 <span class="co">#&gt;   &lt;chr&gt;   &lt;chr&gt;   &lt;chr&gt;       &lt;list&gt;          </span>
 <span class="co">#&gt; 1 SEX     SEX     code_decode &lt;tibble [3 × 2]&gt;</span>
