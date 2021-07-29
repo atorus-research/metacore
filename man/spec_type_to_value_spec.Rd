@@ -29,13 +29,13 @@ pattern}
 separate dataset. If the where information is on a separate sheet, set to
 true and provide the column information with the \code{where_cols} inputs.}
 
-\item{where_cols}{Named list with an id and where field. All coumns in the
+\item{where_cols}{Named list with an id and where field. All columns in the
 where field will be collapsed together}
 
 \item{var_sheet}{Name of sheet with the Variable information on it. Metacore
 expects each variable will have a row in the value_spec. Because many
 specification only have information in the value tab this is added. If the
-information already exsists in the value tab of your specification set to
+information already exists in the value tab of your specification set to
 NULL}
 }
 \value{
