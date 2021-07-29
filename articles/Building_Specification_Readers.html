@@ -142,14 +142,14 @@
 <span class="co">#&gt; </span>
 <span class="co">#&gt; $Variables</span>
 <span class="co">#&gt; # A tibble: 6 × 18</span>
-<span class="co">#&gt;   `Domain Name` `Therapeutic Are… Indication `Variable Name` Label         Type </span>
-<span class="co">#&gt;   &lt;chr&gt;         &lt;chr&gt;             &lt;chr&gt;      &lt;chr&gt;           &lt;chr&gt;         &lt;chr&gt;</span>
-<span class="co">#&gt; 1 ADAE          CORE              CORE       STUDYID         Study Identi… Text </span>
-<span class="co">#&gt; 2 ADAE          CORE              CORE       USUBJID         Unique Subje… Text </span>
-<span class="co">#&gt; 3 ADAE          CORE              CORE       SUBJID          Subject Iden… Text </span>
-<span class="co">#&gt; 4 ADAE          CORE              CORE       SITEID          Study Site I… Text </span>
-<span class="co">#&gt; 5 ADAE          CORE              CORE       AGE             Age           Inte…</span>
-<span class="co">#&gt; 6 ADAE          CORE              CORE       SEX             Sex           Text </span>
+<span class="co">#&gt;   `Domain Name` `Therapeutic Area` Indication `Variable Name` Label        Type </span>
+<span class="co">#&gt;   &lt;chr&gt;         &lt;chr&gt;              &lt;chr&gt;      &lt;chr&gt;           &lt;chr&gt;        &lt;chr&gt;</span>
+<span class="co">#&gt; 1 ADAE          CORE               CORE       STUDYID         Study Ident… Text </span>
+<span class="co">#&gt; 2 ADAE          CORE               CORE       USUBJID         Unique Subj… Text </span>
+<span class="co">#&gt; 3 ADAE          CORE               CORE       SUBJID          Subject Ide… Text </span>
+<span class="co">#&gt; 4 ADAE          CORE               CORE       SITEID          Study Site … Text </span>
+<span class="co">#&gt; 5 ADAE          CORE               CORE       AGE             Age          Inte…</span>
+<span class="co">#&gt; 6 ADAE          CORE               CORE       SEX             Sex          Text </span>
 <span class="co">#&gt; # … with 12 more variables: Max Length &lt;dbl&gt;, Variable Order &lt;dbl&gt;,</span>
 <span class="co">#&gt; #   Mandatory &lt;chr&gt;, Signficant Digits &lt;dbl&gt;, Sort Order &lt;dbl&gt;, Required &lt;chr&gt;,</span>
 <span class="co">#&gt; #   Origin &lt;chr&gt;, Value Level Metadata &lt;chr&gt;, Controlled Term or Format &lt;chr&gt;,</span>
@@ -178,14 +178,14 @@
 <span class="co">#&gt; </span>
 <span class="co">#&gt; $Computational_Method</span>
 <span class="co">#&gt; # A tibble: 6 × 3</span>
-<span class="co">#&gt;   `Computational Meth… `Definition / Comments`                `Additional Infor…</span>
-<span class="co">#&gt;   &lt;chr&gt;                &lt;chr&gt;                                  &lt;chr&gt;             </span>
-<span class="co">#&gt; 1 TRTP                 Compare ADT/ASTDT to the series of AD… &lt;NA&gt;              </span>
-<span class="co">#&gt; 2 TRTA                 Compare ADT/ASTDT to the series of AD… &lt;NA&gt;              </span>
-<span class="co">#&gt; 3 TPERIOD              Latest value of APERIOD from ADTRT wh… &lt;NA&gt;              </span>
-<span class="co">#&gt; 4 TPERADY              Contains the number of days from the … &lt;NA&gt;              </span>
-<span class="co">#&gt; 5 TPERSTDY             Contains the number of days from the … &lt;NA&gt;              </span>
-<span class="co">#&gt; 6 TPERENDY             Contains the number of days from the … &lt;NA&gt;</span></code></pre></div>
+<span class="co">#&gt;   `Computational Method Name` `Definition / Comments`          `Additional Info…</span>
+<span class="co">#&gt;   &lt;chr&gt;                       &lt;chr&gt;                            &lt;chr&gt;            </span>
+<span class="co">#&gt; 1 TRTP                        Compare ADT/ASTDT to the series… &lt;NA&gt;             </span>
+<span class="co">#&gt; 2 TRTA                        Compare ADT/ASTDT to the series… &lt;NA&gt;             </span>
+<span class="co">#&gt; 3 TPERIOD                     Latest value of APERIOD from AD… &lt;NA&gt;             </span>
+<span class="co">#&gt; 4 TPERADY                     Contains the number of days fro… &lt;NA&gt;             </span>
+<span class="co">#&gt; 5 TPERSTDY                    Contains the number of days fro… &lt;NA&gt;             </span>
+<span class="co">#&gt; 6 TPERENDY                    Contains the number of days fro… &lt;NA&gt;</span></code></pre></div>
 <p>Let’s start with making the ds_spec (dataset specification) table using <code>spec_type_to_ds_spec</code>. The ds_spec table is made of 3 columns: the dataset name, the dataset structure, and the dataset label. If we look at our specification document, it looks like all this information is in the Domains tab. Now we know what we need we can start building the table by trying the <code>spec_type_to_ds_spec</code> function.</p>
 <p>This function takes in our named list of datasets (doc), a named vector of columns (cols) and a sheet name (sheet). But, only doc is needed, the other inputs have defaults. So we can try with just the default and see what we get.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
@@ -208,12 +208,12 @@
                                          <span class="st">"label"</span> <span class="op">=</span> <span class="st">"Label"</span><span class="op">)</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">ds_spec</span><span class="op">)</span>
 <span class="co">#&gt; # A tibble: 4 × 3</span>
-<span class="co">#&gt;   dataset structure                                      label                  </span>
-<span class="co">#&gt;   &lt;chr&gt;   &lt;chr&gt;                                          &lt;chr&gt;                  </span>
-<span class="co">#&gt; 1 ADDS    One record per subject per datetime per param… Disposition Analysis   </span>
-<span class="co">#&gt; 2 ADRACE  One record per subject per analysis sequence … Race Analysis          </span>
-<span class="co">#&gt; 3 ADTRT   One record per subject per period              Treatment Analysis     </span>
-<span class="co">#&gt; 4 ADSL    One record per subject                         Subject-Level Analysis…</span></code></pre></div>
+<span class="co">#&gt;   dataset structure                                                    label    </span>
+<span class="co">#&gt;   &lt;chr&gt;   &lt;chr&gt;                                                        &lt;chr&gt;    </span>
+<span class="co">#&gt; 1 ADDS    One record per subject per datetime per parameter per result Disposit…</span>
+<span class="co">#&gt; 2 ADRACE  One record per subject per analysis sequence number          Race Ana…</span>
+<span class="co">#&gt; 3 ADTRT   One record per subject per period                            Treatmen…</span>
+<span class="co">#&gt; 4 ADSL    One record per subject                                       Subject-…</span></code></pre></div>
 <p>Regular expressions are used to match the columns, so if you needed a more flexible input, you could do that. Now, we have the ds_spec table we can move on to the ds_vars table.</p>
 <p>The ds_vars table has 5 columns:</p>
 <ul>
@@ -235,14 +235,14 @@
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">doc</span><span class="op">$</span><span class="va">Variables</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="op">)</span>
 <span class="co">#&gt; # A tibble: 6 × 18</span>
-<span class="co">#&gt;   `Domain Name` `Therapeutic Are… Indication `Variable Name` Label         Type </span>
-<span class="co">#&gt;   &lt;chr&gt;         &lt;chr&gt;             &lt;chr&gt;      &lt;chr&gt;           &lt;chr&gt;         &lt;chr&gt;</span>
-<span class="co">#&gt; 1 ADAE          CORE              CORE       STUDYID         Study Identi… Text </span>
-<span class="co">#&gt; 2 ADAE          CORE              CORE       USUBJID         Unique Subje… Text </span>
-<span class="co">#&gt; 3 ADAE          CORE              CORE       SUBJID          Subject Iden… Text </span>
-<span class="co">#&gt; 4 ADAE          CORE              CORE       SITEID          Study Site I… Text </span>
-<span class="co">#&gt; 5 ADAE          CORE              CORE       AGE             Age           Inte…</span>
-<span class="co">#&gt; 6 ADAE          CORE              CORE       SEX             Sex           Text </span>
+<span class="co">#&gt;   `Domain Name` `Therapeutic Area` Indication `Variable Name` Label        Type </span>
+<span class="co">#&gt;   &lt;chr&gt;         &lt;chr&gt;              &lt;chr&gt;      &lt;chr&gt;           &lt;chr&gt;        &lt;chr&gt;</span>
+<span class="co">#&gt; 1 ADAE          CORE               CORE       STUDYID         Study Ident… Text </span>
+<span class="co">#&gt; 2 ADAE          CORE               CORE       USUBJID         Unique Subj… Text </span>
+<span class="co">#&gt; 3 ADAE          CORE               CORE       SUBJID          Subject Ide… Text </span>
+<span class="co">#&gt; 4 ADAE          CORE               CORE       SITEID          Study Site … Text </span>
+<span class="co">#&gt; 5 ADAE          CORE               CORE       AGE             Age          Inte…</span>
+<span class="co">#&gt; 6 ADAE          CORE               CORE       SEX             Sex          Text </span>
 <span class="co">#&gt; # … with 12 more variables: Max Length &lt;dbl&gt;, Variable Order &lt;dbl&gt;,</span>
 <span class="co">#&gt; #   Mandatory &lt;chr&gt;, Signficant Digits &lt;dbl&gt;, Sort Order &lt;dbl&gt;, Required &lt;chr&gt;,</span>
 <span class="co">#&gt; #   Origin &lt;chr&gt;, Value Level Metadata &lt;chr&gt;, Controlled Term or Format &lt;chr&gt;,</span>
