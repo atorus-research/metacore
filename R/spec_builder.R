@@ -556,12 +556,15 @@ spec_type_to_derivations <- function(doc, cols = c("derivation_id" = "ID",
 
 #' Select sheet
 #'
+#' Helper function to select a sheet when building a spec reader. Creates a tbl based on
+#' a provided excel document and specified column names.
+#'
 #' @param doc list of sheets from a excel dos
 #' @param cols vector of regex to get a datasets base on which columns it has.
 #'   If the vector is named it will also rename the columns
 #'
 #' @return dataset (or list of datasets if not specific enough)
-#' @noRd
+#' @export
 create_tbl <- function(doc, cols){
    matches <- doc %>%
       keep(function(x){
