@@ -631,6 +631,8 @@ yn_to_tf <- function(x){
       case_when(str_detect(x, "[Y|y]es") ~ TRUE,
                 str_detect(x, "[N|n]o") ~ FALSE,
                 is.na(x) ~ NA)
+   } else if(is.logical(x)){
+      x
    } else {
       warning("Keep column needs to be True or False, please correct before converting to a Metacore object",
               call. = FALSE)
