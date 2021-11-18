@@ -205,7 +205,7 @@ spec_type_to_var_spec <- function(doc, cols = c("variable" = "[N|n]ame|[V|v]aria
                                                 "label" = "[L|l]abel",
                                                 "type" = "[T|t]ype",
                                                 "dataset" = "[D|d]ataset|[D|d]omain",
-                                                "format" = "Format"),
+                                                "format" = "[F|f]ormat"),
                                   sheet = NULL){
    # Check the names
    name_check <- names(cols) %in% c("variable", "length", "label",
@@ -306,7 +306,7 @@ spec_type_to_value_spec <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]
                                                   "type" = "[T|t]ype",
                                                   "code_id" = "[C|c]odelist|Controlled Term",
                                                   "where" = "[W|w]here",
-                                                  "derivation_id" = "Method"),
+                                                  "derivation_id" = "[M|m]ethod"),
                                     sheet = NULL,
                                     where_sep_sheet = TRUE,
                                     where_cols = c("id" = "ID",
@@ -545,14 +545,17 @@ spec_type_to_derivations <- function(doc, cols = c("derivation_id" = "ID",
 }
 ### Helper Functions
 
-#' Select sheet
+#' Create table
 #'
-#' @param doc list of sheets from a excel dos
+#' This function creates a table from excel sheets. This is mainly used
+#' internally for building spec readers, but is exported so others who need to
+#' build spec readers can use it.
+#' @param doc list of sheets from a excel doc
 #' @param cols vector of regex to get a datasets base on which columns it has.
 #'   If the vector is named it will also rename the columns
 #'
 #' @return dataset (or list of datasets if not specific enough)
-#' @noRd
+#' @export
 create_tbl <- function(doc, cols){
    matches <- doc %>%
       keep(function(x){
@@ -596,11 +599,21 @@ create_tbl <- function(doc, cols){
          map_int(~sum(str_detect(ds_nm, .))) %>%
          keep(~ . != 1)
       if(length(nm_test) > 0) {
-         str_c(names(nm_test),  " matches ",nm_test, " columns") %>%
-            str_c(collapse = "\n ") %>%
-            paste0("Unable to rename the following columns in ", names(matches[1]), ":\n ", .,
-                  "\nPlease check your regular expression ") %>%
-            stop(call. = FALSE)
+         # See if an exact match will
+         test_exact <- cols[names(nm_test)] %>%
+            paste0("^", ., "$") %>%
+            map_int(~sum(str_detect(ds_nm, .))) %>%
+            keep(~ . != 1)
+         if(length(test_exact) == 0){
+            cols[names(nm_test)] <- cols[names(nm_test)] %>%
+               paste0("^", ., "$")
+         } else {
+            str_c(names(nm_test),  " matches ",nm_test, " columns") %>%
+               str_c(collapse = "\n ") %>%
+               paste0("Unable to rename the following columns in ", names(matches[1]), ":\n ", .,
+                      "\nPlease check your regular expression ") %>%
+               stop(call. = FALSE)
+         }
       }
       matches[[1]] %>%
          select(matches(cols, ignore.case = FALSE))
