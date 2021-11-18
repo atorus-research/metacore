@@ -221,6 +221,34 @@ MetaCore <- R6::R6Class("Metacore",
 #' @export
 #'
 metacore <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist) {
+   # Check if there are any empty datasets that need adding
+   is_empty_df <- as.list(environment()) %>%
+      keep(is.null)
+   if(length(is_empty_df) > 0) {
+      # Adding empty datasets
+      to_replace <- all_message() %>%
+         #get the type each variable needs to be
+         mutate(convert=
+                   map(test, function(x){
+                      if(identical(x, .Primitive("is.numeric"))){
+                         numeric()
+                      } else if(identical(x, .Primitive("is.logical"))){
+                         logical()
+                      } else {
+                         character()
+                      }
+                   })) %>%
+         filter(dataset %in% names(is_empty_df)) %>%
+         group_by(dataset) %>%
+         group_split()
+      replaced <- to_replace %>%
+         map(function(df){
+            setNames(df$convert, df$var) %>%
+               as_tibble()
+         })
+      names(replaced) <- to_replace %>% map_chr(~unique(.$dataset))
+      list2env(replaced, environment())
+      }
    MetaCore$new(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist)
 }
 
