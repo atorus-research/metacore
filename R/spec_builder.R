@@ -119,9 +119,12 @@ spec_type_to_ds_spec <- function(doc, cols = c("dataset" = "[N|n]ame|[D|d]ataset
 #' @param doc Named list of datasets @seealso [read_all_sheets()] for exact
 #'   format
 #' @param cols Named vector of column names. The column names can be regular
-#'   expressions for more flexibility. But, the names must follow the given pattern
+#'   expressions for more flexibility. But, the names must follow the given
+#'   pattern
 #' @param sheet Regular expression for the sheet names
-#' @param key_seq_sep_sheet A boolean to indicate if the key sequence is on a separate sheet
+#' @param key_seq_sep_sheet A boolean to indicate if the key sequence is on a
+#'   separate sheet. If set to false add the key_seq column name to the `cols`
+#'   vector.
 #' @param key_seq_cols names vector to get the key_sequence for each dataset
 #'
 #' @return a dataset formatted for the metacore object
