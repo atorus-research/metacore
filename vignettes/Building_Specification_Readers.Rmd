@@ -108,7 +108,9 @@ The ds_vars table has 5 columns:
 
 -   core: ADaM core (Expected, Required, Permissible)
 
-When we look back at our specification document we can see all this information is in the variable tab. The inputs for the `spec_type_to_ds_vars` function are the same as before, but with slightly different defaults. By default ds_vars only checks sheets labeled "Variable" (this is because all the settings are defaulted to read in P21 formatted specs). But, those default work for our specifications cause all the information is in the variable tab; so we can try with just the defaults again .
+-   supp_flag: boolean to determine if the variable is in the supplementals
+
+When we look back at our specification document we can see all this information is in the variable tab. The inputs for the `spec_type_to_ds_vars` function are the same as before, but with slightly different defaults. By default ds_vars only checks sheets labeled "Variable" (this is because all the settings are defaulted to read in P21 formatted specs). But, those default work for our specifications cause all the information is in the variable tab; so we can try with just the defaults again.
 
 ```{r, error=TRUE}
 spec_type_to_ds_vars(doc)
@@ -125,7 +127,8 @@ ds_vars<- spec_type_to_ds_vars(doc, cols = c("dataset" = "Domain",
                                                "keep" = "[M|m]andatory"),
                                key_seq_cols = c("dataset" = "Domain Name",
                                                 "key_seq" = "Key"),
-                               sheet = "[V|v]ar|Domains")
+                               sheet = "[V|v]ar|Domains") 
+   
 head(ds_vars)
 ```
 

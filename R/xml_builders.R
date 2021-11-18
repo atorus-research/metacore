@@ -77,7 +77,8 @@ xml_to_ds_vars <- function(doc) {
       mutate(
          variable = id_to_var(.data$variable),
          keep = .data$mandatory == "Yes",
-         core = NA_character_
+         core = NA_character_,
+         supp_flag = NA
       ) %>%
       select(-.data$mandatory)
 }

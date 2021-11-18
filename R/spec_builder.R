@@ -140,7 +140,7 @@ spec_type_to_ds_vars <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]oma
                                                 "key_seq" = "Key Variables"),
                                  sheet = "[V|v]ar|Datasets"){
    name_check <- names(cols) %in% c("variable", "dataset", "order",
-                                    "keep", "key_seq", "core") %>%
+                                    "keep", "key_seq", "core", "supp_flag") %>%
       all()
 
    name_check_extra <- names(key_seq_cols) %in% c("dataset", "key_seq") %>%
@@ -150,7 +150,7 @@ spec_type_to_ds_vars <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]oma
    # Testing for names of vectors
    if(any(!name_check, !name_check_extra, is.null(names(cols)))){
       stop("Supplied column vector must be named using the following names:
-              'variable', 'dataset', 'order', 'keep', 'core', 'key_seq'")
+              'variable', 'dataset', 'order', 'keep', 'core', 'key_seq', 'supp_flag'")
    }
    # Subsetting sheets
    if(!is.null(sheet)){

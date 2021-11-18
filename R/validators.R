@@ -148,7 +148,7 @@ codelist_check <- function(value_spec, codelist){
 #' @noRd
 col_vars <- function(){
    list(.ds_spec = c("dataset", "structure", "label"),
-        .ds_vars = c("dataset", "variable", "key_seq", "order","keep", "core"),
+        .ds_vars = c("dataset", "variable", "key_seq", "order","keep", "core", "supp_flag"),
         .var_spec = c("variable", "length", "label", "type", "common", "format"),
         .value_spec = c("type", "origin", "code_id", "dataset", "variable", "where", "derivation_id"),
         .derivations = c("derivation_id", "derivation"),
@@ -214,6 +214,7 @@ all_message <- function() {
    "ds_vars",     "key_seq",       is.numeric,                  TRUE,
    "ds_vars",     "order",         is.numeric,                  TRUE,
    "ds_vars",     "core",          check_words("Expected", "Required", "Permissible", "Conditionally Required", "Conditionally Expected"), TRUE,
+   "ds_vars",     "supp_flag",     is.logical,                  TRUE,
    "var_spec",    "variable",      is.character,                FALSE,
    "var_spec",    "type",          is.character,                TRUE,
    "var_spec",    "length",        is.numeric,                  TRUE,
