@@ -19,7 +19,6 @@ library(metacore)
 library(dplyr)
 library(purrr)
 library(stringr)
-library(gt)
 ```
 
 The first thing to do when trying to build a specification reader is to try the default. By default metacore can read in specification that are in the Pinnacle 21 specification format. If your document isn't in that format, it is still worth trying the default readers, as the error messages can be helpful.

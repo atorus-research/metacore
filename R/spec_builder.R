@@ -291,12 +291,12 @@ spec_type_to_var_spec <- function(doc, cols = c("variable" = "[N|n]ame|[V|v]aria
 #' @param where_sep_sheet Boolean value to control if the where information in a
 #'   separate dataset. If the where information is on a separate sheet, set to
 #'   true and provide the column information with the `where_cols` inputs.
-#' @param where_cols Named list with an id and where field. All coumns in the
+#' @param where_cols Named list with an id and where field. All columns in the
 #'   where field will be collapsed together
 #' @param var_sheet Name of sheet with the Variable information on it. Metacore
 #'   expects each variable will have a row in the value_spec. Because many
 #'   specification only have information in the value tab this is added. If the
-#'   information already exsists in the value tab of your specification set to
+#'   information already exists in the value tab of your specification set to
 #'   NULL
 #'
 #' @return a dataset formatted for the metacore object
@@ -369,8 +369,17 @@ spec_type_to_value_spec <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]
 
    if(where_sep_sheet & "where" %in% names(out)){
       where_df <- create_tbl(doc, where_cols) %>%
-         rowwise() %>%
-         mutate(where_new = paste(c_across(matches("where")), collapse = " ")) %>%
+         mutate(
+            where_new = pmap_chr(., function(...) {
+               # Without c_across this gets a little weird
+               # Use pmap and steal out the arg names
+               vars <- list(...)
+               # Filter down to only args that start with where
+               wheres <- as.character(vars[which(str_starts(names(vars), 'where'))])
+               # collapse it together
+               paste(wheres, collapse=" ")
+            })
+         ) %>%
          select(id, where_new)
       out <- out %>%
          left_join(where_df, by = c("where" = "id")) %>%
