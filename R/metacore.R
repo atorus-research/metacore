@@ -228,8 +228,8 @@ metacore <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, codeli
       # Adding empty datasets
       to_replace <- all_message() %>%
          #get the type each variable needs to be
-         mutate(convert=
-                   map(test, function(x){
+         mutate(convert =
+                   map(.data$test, function(x){
                       if(identical(x, .Primitive("is.numeric"))){
                          numeric()
                       } else if(identical(x, .Primitive("is.logical"))){
@@ -243,7 +243,8 @@ metacore <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, codeli
          group_split()
       replaced <- to_replace %>%
          map(function(df){
-            setNames(df$convert, df$var) %>%
+            names(df$convert) <- df$var
+            df$convert %>%
                as_tibble()
          })
       names(replaced) <- to_replace %>% map_chr(~unique(.$dataset))
