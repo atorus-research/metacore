@@ -527,5 +527,3 @@ test_that("Specification Reader's errors and warnings", {
    expect_error(spec_type_to_codelist(spec, cols = c("foo" = "foo")))
 
 })
-
-
