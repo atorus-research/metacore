@@ -507,8 +507,6 @@ test_that("codelist reader tests", {
       select(code_id, name, codes, type)
 
    # Tests
-   print(head(def_codelist$codes))
-   print(head(ref_codelist$codes))
    expect_equal(def_codelist, ref_codelist)
    expect_equal(spec_codelist, ref_codelist)
 })

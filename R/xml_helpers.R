@@ -161,7 +161,7 @@ get_codes <- function(cl_nodes) {
          # Gets each code value node in the overall code group node
          cl_vals <- node %>% xmlElementsByTagName("CodeListItem")
          cl_vals %>%
-            xmlToDataFrame() %>% #converting to data frames gets the decodes
+            xmlToDataFrame(stringsAsFactors = FALSE) %>% #converting to data frames gets the decodes
             #gets the codes from the list attributes
             mutate(code = cl_vals %>% get_node_attr("CodedValue")) %>%
             select(.data$code, decode = .data$Decode) %>%
