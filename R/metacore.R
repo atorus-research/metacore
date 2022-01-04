@@ -28,7 +28,8 @@ MetaCore_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivati
                  key_seq = "Sequence Key",
                  order = "Variable Order",
                  keep = "Keep (Boolean)",
-                 core = "ADaM core (Expected, Required, Permissible)")
+                 core = "ADaM core (Expected, Required, Permissible)",
+                 supp_flag = "Supplemental Flag")
 
    private$.var_spec <- var_spec %>%
       add_labels(variable = "Variable Name",
@@ -179,7 +180,8 @@ MetaCore <- R6::R6Class("Metacore",
                        private = list(
                           .ds_spec = tibble(dataset = character(), label = character()),
                           .ds_vars = tibble(dataset = character(), variable = character(), keep = logical(),
-                                            key_seq = integer(), order = integer(), core = character()),
+                                            key_seq = integer(), order = integer(), core = character(),
+                                            supp_flag = logical()),
                           .var_spec = tibble(variable = character(), label = character(), length = integer()),
                           .value_spec = tibble(dataset = character(),
                                                variable = character(),
@@ -219,6 +221,35 @@ MetaCore <- R6::R6Class("Metacore",
 #' @export
 #'
 metacore <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist) {
+   # Check if there are any empty datasets that need adding
+   is_empty_df <- as.list(environment()) %>%
+      keep(is.null)
+   if(length(is_empty_df) > 0) {
+      # Adding empty datasets
+      to_replace <- all_message() %>%
+         #get the type each variable needs to be
+         mutate(convert =
+                   map(.data$test, function(x){
+                      if(identical(x, .Primitive("is.numeric"))){
+                         numeric()
+                      } else if(identical(x, .Primitive("is.logical"))){
+                         logical()
+                      } else {
+                         character()
+                      }
+                   })) %>%
+         filter(dataset %in% names(is_empty_df)) %>%
+         group_by(dataset) %>%
+         group_split()
+      replaced <- to_replace %>%
+         map(function(df){
+            names(df$convert) <- df$var
+            df$convert %>%
+               as_tibble()
+         })
+      names(replaced) <- to_replace %>% map_chr(~unique(.$dataset))
+      list2env(replaced, environment())
+      }
    MetaCore$new(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist)
 }
 

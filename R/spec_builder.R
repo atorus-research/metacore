@@ -119,9 +119,12 @@ spec_type_to_ds_spec <- function(doc, cols = c("dataset" = "[N|n]ame|[D|d]ataset
 #' @param doc Named list of datasets @seealso [read_all_sheets()] for exact
 #'   format
 #' @param cols Named vector of column names. The column names can be regular
-#'   expressions for more flexibility. But, the names must follow the given pattern
+#'   expressions for more flexibility. But, the names must follow the given
+#'   pattern
 #' @param sheet Regular expression for the sheet names
-#' @param key_seq_sep_sheet A boolean to indicate if the key sequence is on a separate sheet
+#' @param key_seq_sep_sheet A boolean to indicate if the key sequence is on a
+#'   separate sheet. If set to false add the key_seq column name to the `cols`
+#'   vector.
 #' @param key_seq_cols names vector to get the key_sequence for each dataset
 #'
 #' @return a dataset formatted for the metacore object
@@ -137,7 +140,7 @@ spec_type_to_ds_vars <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]oma
                                                 "key_seq" = "Key Variables"),
                                  sheet = "[V|v]ar|Datasets"){
    name_check <- names(cols) %in% c("variable", "dataset", "order",
-                                    "keep", "key_seq", "core") %>%
+                                    "keep", "key_seq", "core", "supp_flag") %>%
       all()
 
    name_check_extra <- names(key_seq_cols) %in% c("dataset", "key_seq") %>%
@@ -147,7 +150,7 @@ spec_type_to_ds_vars <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]oma
    # Testing for names of vectors
    if(any(!name_check, !name_check_extra, is.null(names(cols)))){
       stop("Supplied column vector must be named using the following names:
-              'variable', 'dataset', 'order', 'keep', 'core', 'key_seq'")
+              'variable', 'dataset', 'order', 'keep', 'core', 'key_seq', 'supp_flag'")
    }
    # Subsetting sheets
    if(!is.null(sheet)){
@@ -205,7 +208,7 @@ spec_type_to_var_spec <- function(doc, cols = c("variable" = "[N|n]ame|[V|v]aria
                                                 "label" = "[L|l]abel",
                                                 "type" = "[T|t]ype",
                                                 "dataset" = "[D|d]ataset|[D|d]omain",
-                                                "format" = "Format"),
+                                                "format" = "[F|f]ormat"),
                                   sheet = NULL){
    # Check the names
    name_check <- names(cols) %in% c("variable", "length", "label",
@@ -306,7 +309,7 @@ spec_type_to_value_spec <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]
                                                   "type" = "[T|t]ype",
                                                   "code_id" = "[C|c]odelist|Controlled Term",
                                                   "where" = "[W|w]here",
-                                                  "derivation_id" = "Method"),
+                                                  "derivation_id" = "[M|m]ethod"),
                                     sheet = NULL,
                                     where_sep_sheet = TRUE,
                                     where_cols = c("id" = "ID",
@@ -554,12 +557,12 @@ spec_type_to_derivations <- function(doc, cols = c("derivation_id" = "ID",
 }
 ### Helper Functions
 
-#' Select sheet
+#' Create table
 #'
-#' Helper function to select a sheet when building a spec reader. Creates a tbl based on
-#' a provided excel document and specified column names.
-#'
-#' @param doc list of sheets from a excel dos
+#' This function creates a table from excel sheets. This is mainly used
+#' internally for building spec readers, but is exported so others who need to
+#' build spec readers can use it.
+#' @param doc list of sheets from a excel doc
 #' @param cols vector of regex to get a datasets base on which columns it has.
 #'   If the vector is named it will also rename the columns
 #'
@@ -608,11 +611,21 @@ create_tbl <- function(doc, cols){
          map_int(~sum(str_detect(ds_nm, .))) %>%
          keep(~ . != 1)
       if(length(nm_test) > 0) {
-         str_c(names(nm_test),  " matches ",nm_test, " columns") %>%
-            str_c(collapse = "\n ") %>%
-            paste0("Unable to rename the following columns in ", names(matches[1]), ":\n ", .,
-                  "\nPlease check your regular expression ") %>%
-            stop(call. = FALSE)
+         # See if an exact match will
+         test_exact <- cols[names(nm_test)] %>%
+            paste0("^", ., "$") %>%
+            map_int(~sum(str_detect(ds_nm, .))) %>%
+            keep(~ . != 1)
+         if(length(test_exact) == 0){
+            cols[names(nm_test)] <- cols[names(nm_test)] %>%
+               paste0("^", ., "$")
+         } else {
+            str_c(names(nm_test),  " matches ",nm_test, " columns") %>%
+               str_c(collapse = "\n ") %>%
+               paste0("Unable to rename the following columns in ", names(matches[1]), ":\n ", .,
+                      "\nPlease check your regular expression ") %>%
+               stop(call. = FALSE)
+         }
       }
       matches[[1]] %>%
          select(matches(cols, ignore.case = FALSE))
@@ -643,6 +656,8 @@ yn_to_tf <- function(x){
       case_when(str_detect(x, "[Y|y]es") ~ TRUE,
                 str_detect(x, "[N|n]o") ~ FALSE,
                 is.na(x) ~ NA)
+   } else if(is.logical(x)){
+      x
    } else {
       warning("Keep column needs to be True or False, please correct before converting to a Metacore object",
               call. = FALSE)

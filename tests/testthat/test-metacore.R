@@ -62,6 +62,22 @@ test_that("metacore wrapper function works", {
    expect_equal(wrapper, r6)
 })
 
+
+test_that("Can pass metacore NULL df's", {
+   wrapper <- suppressWarnings(metacore(dfs$ds_spec, NULL, dfs$var_spec,
+                       dfs$value_spec, dfs$derivations, dfs$codelist))
+   dummy <- list(character(), character(), numeric(), numeric(),
+                 logical(), character(), logical())
+   names(dummy) <- c("dataset", "variable", "key_seq", "order",
+                     "keep", "core", "supp_flag")
+   dummy <- as_tibble(dummy)
+   #Because of the labels the dfs are slightly different so checking
+   # the insides match
+   expect_equal(names(wrapper$ds_vars), names(dummy))
+   expect_equal(map_chr(wrapper$ds_vars, mode),
+                map_chr(dummy, mode))
+})
+
 test_that("subsetting works", {
    test <- suppressWarnings(
       spec_to_metacore(metacore_example("p21_mock.xlsx"))

@@ -60,3 +60,37 @@ test_that("all_message dataframe contains 6 datasets", {
                    distinct(dataset) %>%
                    nrow(), 6)
 })
+
+test_that("check cross-reference tests", {
+   dfs <- purrr::map(col_vars(), ~ empty_df(.x, fill = "A")) %>%
+      setNames(c("ds_spec",
+                 "ds_vars",
+                 "var_spec",
+                 "value_spec",
+                 "derivations",
+                 "codelist",
+                 "changelog"))
+
+   dfs$var_spec <- dfs$var_spec %>%
+      mutate(variable = "B")
+   dfs$derivations <- dfs$derivations %>%
+      mutate(derivation_id = "C")
+   dfs$codelist <- dfs$codelist %>%
+      mutate(code_id = "D")
+   expect_warning(do.call(metacore, dfs[1:6]))
+})
+
+test_that("test for incorrect column names", {
+   dfs <- purrr::map(col_vars(), ~ empty_df(.x, fill = NA)) %>%
+      setNames(c("ds_spec",
+                 "ds_vars",
+                 "var_spec",
+                 "value_spec",
+                 "derivations",
+                 "codelist",
+                 "changelog"))
+
+   dfs$codelist <- dfs$codelist %>%
+      mutate(codelist2 = "A")
+   expect_warning(do.call(metacore, dfs[1:6]))
+})

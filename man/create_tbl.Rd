@@ -2,12 +2,12 @@
 % Please edit documentation in R/spec_builder.R
 \name{create_tbl}
 \alias{create_tbl}
-\title{Select sheet}
+\title{Create table}
 \usage{
 create_tbl(doc, cols)
 }
 \arguments{
-\item{doc}{list of sheets from a excel dos}
+\item{doc}{list of sheets from a excel doc}
 
 \item{cols}{vector of regex to get a datasets base on which columns it has.
 If the vector is named it will also rename the columns}
@@ -16,6 +16,7 @@ If the vector is named it will also rename the columns}
 dataset (or list of datasets if not specific enough)
 }
 \description{
-Helper function to select a sheet when building a spec reader. Creates a tbl based on
-a provided excel document and specified column names.
+This function creates a table from excel sheets. This is mainly used
+internally for building spec readers, but is exported so others who need to
+build spec readers can use it.
 }
