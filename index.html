@@ -21,6 +21,8 @@
 <![endif]-->
 </head>
 <body data-spy="scroll" data-target="#toc">
+    
+
     <div class="container template-home">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -33,18 +35,12 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">metacore</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.0.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.0.1.0000</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
-<li>
-  <a href="index.html">
-    <span class="fas fa-home fa-lg"></span>
-     
-  </a>
-</li>
 <li>
   <a href="reference/index.html">Reference</a>
 </li>
@@ -63,6 +59,9 @@
     </li>
   </ul>
 </li>
+<li>
+  <a href="news/index.html">Changelog</a>
+</li>
       </ul>
 <ul class="nav navbar-nav navbar-right"></ul>
 </div>
@@ -76,24 +75,24 @@
 
       </header><div class="row">
   <div class="contents col-md-9">
-<div id="metacore-" class="section level1">
-<div class="page-header"><h1 class="hasAnchor">
-<a href="#metacore-" class="anchor"></a>metacore <a href="https://github.com/atorus-research/metacore"><img src="reference/figures/metacore.PNG" align="right" height="139"></a>
+<div class="section level1">
+<div class="page-header"><h1 id="metacore-">metacore <a href="https://github.com/atorus-research/metacore" class="external-link"><img src="reference/figures/metacore.PNG" align="right" height="139"></a>
+<a class="anchor" aria-label="anchor" href="#metacore-"></a>
 </h1></div>
 <!-- badges: start -->
 
-<p>Programming for clinical trial data analysis tends to be very standardized. With data standards such as <a href="https://www.cdisc.org/">CDISC</a>, expectations tend to be very clearly defined. Within these programming activities, there’s ample room for the use of metadata. Metadata can be used for several different purposes, such as applying dataset attributes, establishing sort sequences, working with controlled terminology, and more. Despite CDISC standards, organizations tend to have their own means of storing metadata, be it in excel spreadsheets, databases, and more.</p>
+<p>Programming for clinical trial data analysis tends to be very standardized. With data standards such as <a href="https://www.cdisc.org/" class="external-link">CDISC</a>, expectations tend to be very clearly defined. Within these programming activities, there’s ample room for the use of metadata. Metadata can be used for several different purposes, such as applying dataset attributes, establishing sort sequences, working with controlled terminology, and more. Despite CDISC standards, organizations tend to have their own means of storing metadata, be it in excel spreadsheets, databases, and more.</p>
 <p>The purpose of metacore is to establish a common foundation for the use of metadata within an R session. This is done by creating an R object that can hold the necessary data in a standardized, immutable structure (using R6) that makes it easy to extract out necessary information when needed. Users can read in their metadata from their various sources. To make this easy, we’ve provided some helper functions - and even have readers that can read directly from Define.xml 2.0. By establishing a common and consistent object in memory, further packages that support these work flows can have a common foundation upon which tools can be built that leverage metadata in the future. This reduces the need to hold different data structures containing metadata and instead allows programs to pull this information from a centralized source.</p>
-<div id="installation" class="section level2">
-<h2 class="hasAnchor">
-<a href="#installation" class="anchor"></a>Installation</h2>
-<p>You can install the current development version of metacore from <a href="https://github.com/atorus-research/metacore">github</a> with:</p>
+<div class="section level2">
+<h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
+</h2>
+<p>You can install the current development version of metacore from <a href="https://github.com/atorus-research/metacore" class="external-link">github</a> with:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"atorus-research/metacore"</span><span class="op">)</span></code></pre></div>
 </div>
-<div id="structure" class="section level2">
-<h2 class="hasAnchor">
-<a href="#structure" class="anchor"></a>Structure</h2>
+<div class="section level2">
+<h2 id="structure">Structure<a class="anchor" aria-label="anchor" href="#structure"></a>
+</h2>
 <p>A metacore object is made-up of 6 different tables, which are connected with a series of identifying columns. The goal of these tables is to normalize the information as much as possible, while keeping together like information. Each table has a basic theme to make them easier to remember. They are as follows:</p>
 <ul>
 <li><p><strong>ds_spec</strong>: Contains dataset level information</p></li>
@@ -105,9 +104,8 @@
 </ul>
 <p>Here is a schema of how all this fits together:</p>
 <p><img src="reference/figures/schema-colors.png" title="man/figures/Metacore Schema"></p>
-<div id="ds_spec-" class="section level3">
-<h3 class="hasAnchor">
-<a href="#ds_spec-" class="anchor"></a>ds_spec <img src="reference/figures/labeled-ds_spec.png" align="right" height="150">
+<div class="section level3">
+<h3 id="ds_spec-">ds_spec <img src="reference/figures/labeled-ds_spec.png" align="right" height="150"><a class="anchor" aria-label="anchor" href="#ds_spec-"></a>
 </h3>
 <p>This table covers the basic information about each dataset. There is only a single row per dataset, with the following information:</p>
 <ul>
@@ -116,9 +114,8 @@
 <li><p><em>label</em>: Dataset label</p></li>
 </ul>
 </div>
-<div id="ds_vars-" class="section level3">
-<h3 class="hasAnchor">
-<a href="#ds_vars-" class="anchor"></a>ds_vars <img src="reference/figures/labeled-ds_vars.png" align="right" height="150">
+<div class="section level3">
+<h3 id="ds_vars-">ds_vars <img src="reference/figures/labeled-ds_vars.png" align="right" height="150"><a class="anchor" aria-label="anchor" href="#ds_vars-"></a>
 </h3>
 <p>This table contains the information that bridges between purely dataset level and purely variable level. There is one row per dataset per variable:</p>
 <ul>
@@ -127,12 +124,11 @@
 <li><p><em>key_seq</em>: Sequence key, which are the variables used to order a dataset. This is a column of integers, where 1 is the first sorting variable and 2 is the second etc. If the variable is not used in sorting it will be left <code>NA</code></p></li>
 <li><p><em>order</em>: Order sets the order of the columns to appear in the dataset. This is also a numeric value</p></li>
 <li><p><em>keep</em>: Logical value about if the variable needs to be kept</p></li>
-<li><p><em>core</em>: ADaM core, which should be one of the following values: “Expected”, “Required”, “Permissible”, “Conditionally Required”, “Conditionally Expected”, or NA. For more information about core see <a href="https://www.cdisc.org/standards/foundational/adam">CDISC</a></p></li>
+<li><p><em>core</em>: ADaM core, which should be one of the following values: “Expected”, “Required”, “Permissible”, “Conditionally Required”, “Conditionally Expected”, or NA. For more information about core see <a href="https://www.cdisc.org/standards/foundational/adam" class="external-link">CDISC</a></p></li>
 </ul>
 </div>
-<div id="var_spec-" class="section level3">
-<h3 class="hasAnchor">
-<a href="#var_spec-" class="anchor"></a>var_spec <img src="reference/figures/labeled-var_spec.png" align="right" height="150">
+<div class="section level3">
+<h3 id="var_spec-">var_spec <img src="reference/figures/labeled-var_spec.png" align="right" height="150"><a class="anchor" aria-label="anchor" href="#var_spec-"></a>
 </h3>
 <p>This table contains the information the purely variable level information. The goal is there is a single row per variable, which is common across all datasets. This helps ensure variables follow the CDISC standard. But, this isn’t always possible, so if information for a given variable differs across datasets, the variable will be recorded as dataset.variable in the variable column.</p>
 <ul>
@@ -144,9 +140,8 @@
 <li><p><em>format</em>: Variable format</p></li>
 </ul>
 </div>
-<div id="value_spec-" class="section level3">
-<h3 class="hasAnchor">
-<a href="#value_spec-" class="anchor"></a>value_spec <img src="reference/figures/labeled-value_spec.png" align="right" height="150">
+<div class="section level3">
+<h3 id="value_spec-">value_spec <img src="reference/figures/labeled-value_spec.png" align="right" height="150"><a class="anchor" aria-label="anchor" href="#value_spec-"></a>
 </h3>
 <p>This table contains the information the information at the value level. There will be at least one row per dataset/variable combination. There is more than one row per dataset/variable combination if the combination has values which have differing metadata. For instance LBORRES that are different data types depending on the value. The information contained are as follows:</p>
 <ul>
@@ -159,9 +154,8 @@
 <li><p><em>derivation_id</em>: ID for the derivation to match with the <strong>derivation</strong> table</p></li>
 </ul>
 </div>
-<div id="derivation-" class="section level3">
-<h3 class="hasAnchor">
-<a href="#derivation-" class="anchor"></a>derivation <img src="reference/figures/labeled-derivation.png" align="right" height="150">
+<div class="section level3">
+<h3 id="derivation-">derivation <img src="reference/figures/labeled-derivation.png" align="right" height="150"><a class="anchor" aria-label="anchor" href="#derivation-"></a>
 </h3>
 <p>This table has all the derivation information, with one row per derivation ID and the following information:</p>
 <ul>
@@ -169,9 +163,8 @@
 <li><p><em>derivation</em>: Text describing the derivation</p></li>
 </ul>
 </div>
-<div id="codelist-" class="section level3">
-<h3 class="hasAnchor">
-<a href="#codelist-" class="anchor"></a>codelist <img src="reference/figures/labeled-code_list.png" align="right" height="150">
+<div class="section level3">
+<h3 id="codelist-">codelist <img src="reference/figures/labeled-code_list.png" align="right" height="150"><a class="anchor" aria-label="anchor" href="#codelist-"></a>
 </h3>
 <p>This table contains the code lists, permitted value lists, and external libraries nested within a tibble. There is only a single row per list/library, with the following information:</p>
 <ul>
@@ -184,9 +177,9 @@
 <p><img src="reference/figures/labeled-schema.png" title="man/figures/Metacore Schema"></p>
 </div>
 </div>
-<div id="future-development" class="section level2">
-<h2 class="hasAnchor">
-<a href="#future-development" class="anchor"></a>Future Development</h2>
+<div class="section level2">
+<h2 id="future-development">Future Development<a class="anchor" aria-label="anchor" href="#future-development"></a>
+</h2>
 <p>This is an alpha release of this package, so if you have ideas on future improvements please add them to the issue log. Additionally we are looking into creating an additional <strong>changelog</strong> table to track any changes to metacore objects. This would provide a robust and traceable solution to changing data requirements.</p>
 </div>
 </div>
@@ -194,43 +187,55 @@
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <div class="license">
-<h2>License</h2>
+<h2 data-toc-skip>License</h2>
 <ul class="list-unstyled">
 <li><a href="LICENSE.html">Full license</a></li>
-<li><small><a href="https://opensource.org/licenses/mit-license.php">MIT</a> + file <a href="LICENSE-text.html">LICENSE</a></small></li>
+<li><small><a href="https://opensource.org/licenses/mit-license.php" class="external-link">MIT</a> + file <a href="LICENSE-text.html">LICENSE</a></small></li>
 </ul>
 </div>
-<div class="developers">
-<h2>Developers</h2>
+
+
+<div class="citation">
+<h2 data-toc-skip>Citation</h2>
 <ul class="list-unstyled">
-<li>Christina Fillmore <br><small class="roles"> Author, maintainer </small> <a href="https://orcid.org/TODO" target="orcid.widget" aria-label="ORCID"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
-<li>Maya Gans <br><small class="roles"> Author </small> <a href="https://orcid.org/0000-0002-5452-6089" target="orcid.widget" aria-label="ORCID"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
-<li>Ashley Tarasiewicz <br><small class="roles"> Author </small> <a href="https://orcid.org/TODO" target="orcid.widget" aria-label="ORCID"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
-<li>Mike Stackhouse <br><small class="roles"> Author </small> <a href="https://orcid.org/0000-0001-6030-723X" target="orcid.widget" aria-label="ORCID"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
+<li><a href="authors.html#citation">Citing metacore</a></li>
+</ul>
+</div>
+
+<div class="developers">
+<h2 data-toc-skip>Developers</h2>
+<ul class="list-unstyled">
+<li>Christina Fillmore <br><small class="roles"> Author, maintainer </small> <a href="https://orcid.org/0000-0003-0595-2302" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
+<li>Maya Gans <br><small class="roles"> Author </small> <a href="https://orcid.org/0000-0002-5452-6089" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
+<li>Ashley Tarasiewicz <br><small class="roles"> Author </small> <a href="https://orcid.org/TODO" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
+<li>Mike Stackhouse <br><small class="roles"> Author </small> <a href="https://orcid.org/0000-0001-6030-723X" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
 <li>GSK/Atorus JPT <br><small class="roles"> Copyright holder, funder </small>  </li>
 </ul>
 </div>
 
-  <div class="dev-status">
-<h2>Dev status</h2>
+<div class="dev-status">
+<h2 data-toc-skip>Dev status</h2>
 <ul class="list-unstyled">
-<li><a href="https://RValidationHub.slack.com"><img src="https://img.shields.io/badge/Slack-RValidationHub-blue?style=flat&amp;logo=slack"></a></li>
-<li><a href="https://github.com/atorus-research/xportr/actions?workflow=R-CMD-check"><img src="https://github.com/atorus-research/metacore/workflows/R-CMD-check/badge.svg" alt="R build status"></a></li>
-<li><a href="https://codecov.io/gh/atorus-research/metacore"><img src="https://img.shields.io/codecov/c/github/atorus-research/metacore"></a></li>
-<li><a href="https://github.com/atorus-research/metacore/blob/master/LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg"></a></li>
-<li><a href="https://lifecycle.r-lib.org/articles/stages.html#experimental-1"><img src="https://img.shields.io/badge/lifecycle-experimental-orange.svg" alt="Lifecycle: experimental"></a></li>
+<li><a href="https://RValidationHub.slack.com" class="external-link"><img src="https://img.shields.io/badge/Slack-RValidationHub-blue?style=flat&amp;logo=slack"></a></li>
+<li><a href="https://github.com/atorus-research/xportr/actions?workflow=R-CMD-check" class="external-link"><img src="https://github.com/atorus-research/metacore/workflows/R-CMD-check/badge.svg" alt="R build status"></a></li>
+<li><a href="https://codecov.io/gh/atorus-research/metacore" class="external-link"><img src="https://img.shields.io/codecov/c/github/atorus-research/metacore"></a></li>
+<li><a href="https://github.com/atorus-research/metacore/blob/master/LICENSE" class="external-link"><img src="https://img.shields.io/badge/License-MIT-blue.svg"></a></li>
+<li><a href="https://lifecycle.r-lib.org/articles/stages.html#experimental-1" class="external-link"><img src="https://img.shields.io/badge/lifecycle-experimental-orange.svg" alt="Lifecycle: experimental"></a></li>
 </ul>
 </div>
-</div>
+
+  </div>
 </div>
 
 
       <footer><div class="copyright">
-  <p>Developed by Christina Fillmore, Maya Gans, Ashley Tarasiewicz, Mike Stackhouse, GSK/Atorus JPT.</p>
+  <p></p>
+<p>Developed by Christina Fillmore, Maya Gans, Ashley Tarasiewicz, Mike Stackhouse, GSK/Atorus JPT.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
+  <p></p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.1.</p>
 </div>
 
       </footer>
@@ -238,6 +243,8 @@
 
   
 
+
+  
 
   </body>
 </html>

@@ -1,8 +1,8 @@
 pandoc: 2.7.3
-pkgdown: 1.6.1
+pkgdown: 2.0.1
 pkgdown_sha: ~
 articles:
   Building_Specification_Readers: Building_Specification_Readers.html
   Example: Example.html
-last_built: 2021-09-29T13:41Z
+last_built: 2022-01-04T15:58Z
 

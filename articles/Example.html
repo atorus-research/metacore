@@ -21,6 +21,8 @@
 <![endif]-->
 </head>
 <body data-spy="scroll" data-target="#toc">
+    
+
     <div class="container template-article">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -33,18 +35,12 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">metacore</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.0.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.0.1.0000</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
-<li>
-  <a href="../index.html">
-    <span class="fas fa-home fa-lg"></span>
-     
-  </a>
-</li>
 <li>
   <a href="../reference/index.html">Reference</a>
 </li>
@@ -62,6 +58,9 @@
       <a href="../articles/Example.html">Example</a>
     </li>
   </ul>
+</li>
+<li>
+  <a href="../news/index.html">Changelog</a>
 </li>
       </ul>
 <ul class="nav navbar-nav navbar-right"></ul>
@@ -88,13 +87,13 @@
     
     
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">metacore</span><span class="op">)</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://www.omegahat.net/RSXML">XML</a></span><span class="op">)</span></code></pre></div>
-<p><a href="https://www.cdisc.org/">CDISC</a> standards provide a standard for submission of data set metadata through a document known as define.xml. The define provides a great deal of useful information that is both machine readable and can be viewed through your web browser. While many organizations wait to produce a define until the datasets are finalized, it can still be advantageous to be able to read metadata directly from a define. For this purpose, we developed readers that can go directly from a define.xml to a metacore object.</p>
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">metacore</span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://www.omegahat.net/RSXML" class="external-link">XML</a></span><span class="op">)</span></code></pre></div>
+<p><a href="https://www.cdisc.org/" class="external-link">CDISC</a> standards provide a standard for submission of data set metadata through a document known as define.xml. The define provides a great deal of useful information that is both machine readable and can be viewed through your web browser. While many organizations wait to produce a define until the datasets are finalized, it can still be advantageous to be able to read metadata directly from a define. For this purpose, we developed readers that can go directly from a define.xml to a metacore object.</p>
 <p>To do this, we’ve built separate reader function for each of the metacore tables. For more information on the structure of the metacore tables, check out the README.</p>
-<p>We start by reading the define from disk using the <code><a href="https://rdrr.io/pkg/XML/man/xmlTreeParse.html">xmlTreeParse()</a></code> function from the <code>XML</code> package.</p>
+<p>We start by reading the define from disk using the <code><a href="https://rdrr.io/pkg/XML/man/xmlTreeParse.html" class="external-link">xmlTreeParse()</a></code> function from the <code>XML</code> package.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">doc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/XML/man/xmlTreeParse.html">xmlTreeParse</a></span><span class="op">(</span><span class="fu"><a href="../reference/metacore_example.html">metacore_example</a></span><span class="op">(</span><span class="st">"define.xml"</span><span class="op">)</span>, useInternalNodes <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="va">doc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/XML/man/xmlTreeParse.html" class="external-link">xmlTreeParse</a></span><span class="op">(</span><span class="fu"><a href="../reference/metacore_example.html">metacore_example</a></span><span class="op">(</span><span class="st">"define.xml"</span><span class="op">)</span>, useInternalNodes <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
 <p>Next, we use the metacore readers for each of the separate tables necessary for a metacore object.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">ds_spec2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/xml_to_ds_spec.html">xml_to_ds_spec</a></span><span class="op">(</span><span class="va">doc</span><span class="op">)</span>
@@ -108,6 +107,8 @@
 <code class="sourceCode R"><span class="va">test</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/metacore.html">metacore</a></span><span class="op">(</span><span class="va">ds_spec2</span>, <span class="va">ds_vars</span>, <span class="va">var_spec</span>, <span class="va">value_spec</span>, <span class="va">derivations</span>, <span class="va">code_list</span><span class="op">)</span>
 <span class="co">#&gt; Warning: core from the ds_vars table only contain missing values.</span>
 <span class="co">#&gt; </span>
+<span class="co">#&gt; supp_flag from the ds_vars table only contain missing values.</span>
+<span class="co">#&gt; </span>
 <span class="co">#&gt; common from the var_spec table only contain missing values.</span>
 <span class="co">#&gt; Warning: The following derivations are never used:</span>
 <span class="co">#&gt;  MT.SUPPAE.QVAL: see value level metadata</span>
@@ -120,34 +121,34 @@
 <p>Something to note about a metacore object is that it inherently holds all data from your source of metadata, be it your specification, define.xml, database, etc. So that means you have <em>all</em> the metadata. In your program, it’s likely that you’ll just want to keep metadata relevant to the dataset you’re currently programming. We’ve made process easily, with functions that filter metadata down to information only relevant to a specific dataset.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># a metacore object with all your dataframes</span>
-<span class="va">subset</span> <span class="op">&lt;-</span> <span class="va">test</span> <span class="op">%&gt;%</span> <span class="fu"><a href="../reference/select_dataset.html">select_dataset</a></span><span class="op">(</span><span class="st">"DM"</span><span class="op">)</span>
+<span class="va">subset</span> <span class="op">&lt;-</span> <span class="va">test</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/select_dataset.html">select_dataset</a></span><span class="op">(</span><span class="st">"DM"</span><span class="op">)</span>
 <span class="va">subset</span><span class="op">$</span><span class="va">ds_spec</span>
-<span class="co">#&gt; # A tibble: 1 × 3</span>
+<span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 3</span></span>
 <span class="co">#&gt;   dataset structure              label       </span>
-<span class="co">#&gt;   &lt;chr&gt;   &lt;chr&gt;                  &lt;chr&gt;       </span>
-<span class="co">#&gt; 1 DM      One record per subject Demographics</span>
+<span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       </span>
+<span class="co">#&gt; <span style="color: #BCBCBC;">1</span> DM      One record per subject Demographics</span>
 
 <span class="co"># a simplified dataframe </span>
-<span class="va">subset_t</span> <span class="op">&lt;-</span> <span class="va">test</span> <span class="op">%&gt;%</span> <span class="fu"><a href="../reference/select_dataset.html">select_dataset</a></span><span class="op">(</span><span class="st">"DM"</span>, simplify <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
+<span class="va">subset_t</span> <span class="op">&lt;-</span> <span class="va">test</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/select_dataset.html">select_dataset</a></span><span class="op">(</span><span class="st">"DM"</span>, simplify <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
 <p>As can be seen above, the metacore object can be filtered directly, or by using the <code>simplify = TRUE</code> argument, a simplified data frame can be returned.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">subset_t</span>
-<span class="co">#&gt; # A tibble: 25 × 18</span>
-<span class="co">#&gt;    dataset variable key_seq order keep  core  type     length label format common</span>
-<span class="co">#&gt;    &lt;chr&gt;   &lt;chr&gt;      &lt;int&gt; &lt;int&gt; &lt;lgl&gt; &lt;chr&gt; &lt;chr&gt;     &lt;int&gt; &lt;chr&gt; &lt;chr&gt;  &lt;lgl&gt; </span>
-<span class="co">#&gt;  1 DM      STUDYID        1     1 TRUE  &lt;NA&gt;  text         12 Stud… &lt;NA&gt;   NA    </span>
-<span class="co">#&gt;  2 DM      DOMAIN        NA     2 TRUE  &lt;NA&gt;  text          2 Doma… &lt;NA&gt;   NA    </span>
-<span class="co">#&gt;  3 DM      USUBJID        2     3 TRUE  &lt;NA&gt;  text         11 Uniq… &lt;NA&gt;   NA    </span>
-<span class="co">#&gt;  4 DM      SUBJID        NA     4 TRUE  &lt;NA&gt;  text          4 Subj… &lt;NA&gt;   NA    </span>
-<span class="co">#&gt;  5 DM      RFSTDTC       NA     5 FALSE &lt;NA&gt;  date         10 Subj… &lt;NA&gt;   NA    </span>
-<span class="co">#&gt;  6 DM      RFENDTC       NA     6 FALSE &lt;NA&gt;  date         10 Subj… &lt;NA&gt;   NA    </span>
-<span class="co">#&gt;  7 DM      RFXSTDTC      NA     7 FALSE &lt;NA&gt;  datetime     20 Date… &lt;NA&gt;   NA    </span>
-<span class="co">#&gt;  8 DM      RFXENDTC      NA     8 FALSE &lt;NA&gt;  datetime     20 Date… &lt;NA&gt;   NA    </span>
-<span class="co">#&gt;  9 DM      RFICDTC       NA     9 FALSE &lt;NA&gt;  datetime     20 Date… &lt;NA&gt;   NA    </span>
-<span class="co">#&gt; 10 DM      RFPENDTC      NA    10 FALSE &lt;NA&gt;  datetime     20 Date… &lt;NA&gt;   NA    </span>
-<span class="co">#&gt; # … with 15 more rows, and 7 more variables: origin &lt;chr&gt;, code_id &lt;chr&gt;,</span>
-<span class="co">#&gt; #   where &lt;chr&gt;, derivation_id &lt;chr&gt;, derivation &lt;chr&gt;, name &lt;chr&gt;,</span>
-<span class="co">#&gt; #   codes &lt;list&gt;</span></code></pre></div>
+<span class="co">#&gt; <span style="color: #949494;"># A tibble: 25 × 19</span></span>
+<span class="co">#&gt;    dataset variable key_seq order keep  core  supp_flag type     length label   </span>
+<span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   </span>
+<span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> DM      STUDYID        1     1 TRUE  <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>        text         12 Study I…</span>
+<span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> DM      DOMAIN        <span style="color: #BB0000;">NA</span>     2 TRUE  <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>        text          2 Domain …</span>
+<span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> DM      USUBJID        2     3 TRUE  <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>        text         11 Unique …</span>
+<span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> DM      SUBJID        <span style="color: #BB0000;">NA</span>     4 TRUE  <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>        text          4 Subject…</span>
+<span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> DM      RFSTDTC       <span style="color: #BB0000;">NA</span>     5 FALSE <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>        date         10 Subject…</span>
+<span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> DM      RFENDTC       <span style="color: #BB0000;">NA</span>     6 FALSE <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>        date         10 Subject…</span>
+<span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> DM      RFXSTDTC      <span style="color: #BB0000;">NA</span>     7 FALSE <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>        datetime     20 Date/Ti…</span>
+<span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> DM      RFXENDTC      <span style="color: #BB0000;">NA</span>     8 FALSE <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>        datetime     20 Date/Ti…</span>
+<span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> DM      RFICDTC       <span style="color: #BB0000;">NA</span>     9 FALSE <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>        datetime     20 Date/Ti…</span>
+<span class="co">#&gt; <span style="color: #BCBCBC;">10</span> DM      RFPENDTC      <span style="color: #BB0000;">NA</span>    10 FALSE <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>        datetime     20 Date/Ti…</span>
+<span class="co">#&gt; <span style="color: #949494;"># … with 15 more rows, and 9 more variables: format &lt;chr&gt;, common &lt;lgl&gt;,</span></span>
+<span class="co">#&gt; <span style="color: #949494;">#   origin &lt;chr&gt;, code_id &lt;chr&gt;, where &lt;chr&gt;, derivation_id &lt;chr&gt;,</span></span>
+<span class="co">#&gt; <span style="color: #949494;">#   derivation &lt;chr&gt;, name &lt;chr&gt;, codes &lt;list&gt;</span></span></code></pre></div>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
@@ -159,11 +160,13 @@
 
 
       <footer><div class="copyright">
-  <p>Developed by Christina Fillmore, Maya Gans, Ashley Tarasiewicz, Mike Stackhouse, GSK/Atorus JPT.</p>
+  <p></p>
+<p>Developed by Christina Fillmore, Maya Gans, Ashley Tarasiewicz, Mike Stackhouse, GSK/Atorus JPT.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
+  <p></p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.1.</p>
 </div>
 
       </footer>
@@ -171,6 +174,8 @@
 
   
 
+
+  
 
   </body>
 </html>
