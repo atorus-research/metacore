@@ -132,3 +132,20 @@ test_that("load metacore fails with no path and rdss in wd", {
    )
    unlink(my_temp_dir)
 })
+
+test_that("pulling out control terminology works", {
+   test <- suppressWarnings(
+      spec_to_metacore(metacore_example("p21_mock.xlsx"))
+   )
+   expect_error(get_control_term(test, QVAL))
+   expect_error(get_control_term(test, QVAL, LB))
+   expect_equal(
+      get_control_term(test, QVAL, SUPPAE),
+      tibble(code = c("N", "Y"), decode = c("No", "Yes"))
+   )
+   expect_equal(
+      get_control_term(test, "QVAL", "SUPPAE"),
+      tibble(code = c("N", "Y"), decode = c("No", "Yes"))
+   )
+   })
+

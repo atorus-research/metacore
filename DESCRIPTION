@@ -1,6 +1,6 @@
 Package: metacore
 Title: A Centralized Metadata Object Focus on Clinical Trial Data Programming Workflows
-Version: 0.0.1.0000
+Version: 0.0.1.1000
 Authors@R: 
     c(person(given = "Christina",
              family = "Fillmore",
