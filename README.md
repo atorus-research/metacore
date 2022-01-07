@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# metacore <a href='https://github.com/atorus-research/metacore'><img src="man/figures/metacore.PNG" align="right" height="139"/></a>
+# metacore <a href='https://github.com/atorus-research/metacore'><img src="man/figures/metacore.PNG" align="right" style="height:139px;"/></a>
 
 <!-- badges: start -->
 
@@ -54,13 +54,13 @@ normalize the information as much as possible, while keeping together
 like information. Each table has a basic theme to make them easier to
 remember. They are as follows:
 
--   **ds\_spec**: Contains dataset level information
+-   **ds_spec**: Contains dataset level information
 
--   **ds\_vars**: Bridges the dataset and variable level information
+-   **ds_vars**: Bridges the dataset and variable level information
 
--   **var\_spec**: Contains variable level information
+-   **var_spec**: Contains variable level information
 
--   **value\_spec**: Contains value level information
+-   **value_spec**: Contains value level information
 
 -   **derivations**: Contains all derivations
 
@@ -71,29 +71,29 @@ Here is a schema of how all this fits together:
 
 ![](man/figures/schema-colors.png "man/figures/Metacore Schema")
 
-### ds\_spec <img src="man/figures/labeled-ds_spec.png" align="right" height="150"/>
+### ds_spec <img src="man/figures/labeled-ds_spec.png" align="right" style="height:150px;"/>
 
 This table covers the basic information about each dataset. There is
 only a single row per dataset, with the following information:
 
 -   *dataset*: The abbreviated name of the dataset (e.g. AE)
 
--   *structure*: Value structure of the dataset as a sting
+-   *Structure*: Value structure of the dataset as a sting
 
--   *label*: Dataset label
+-   *Label*: Dataset label
 
-### ds\_vars <img src="man/figures/labeled-ds_vars.png" align="right" height="150"/>
+### ds_vars <img src="man/figures/labeled-ds_vars.png" align="right" style="height:150px;"/>
 
 This table contains the information that bridges between purely dataset
 level and purely variable level. There is one row per dataset per
 variable:
 
 -   *dataset*: The abbreviated name of the dataset. This will match to
-    the name in **ds\_spec**
+    the name in **ds_spec**
 
 -   *variable*: Variable name
 
--   *key\_seq*: Sequence key, which are the variables used to order a
+-   *key_seq*: Sequence key, which are the variables used to order a
     dataset. This is a column of integers, where 1 is the first sorting
     variable and 2 is the second etc. If the variable is not used in
     sorting it will be left `NA`
@@ -108,7 +108,10 @@ variable:
     “Conditionally Expected”, or NA. For more information about core see
     [CDISC](https://www.cdisc.org/standards/foundational/adam)
 
-### var\_spec <img src="man/figures/labeled-var_spec.png" align="right" height="150"/>
+-   *supp_flag*: Logical to determine if the variable is in the
+    supplementals
+
+### var_spec <img src="man/figures/labeled-var_spec.png" align="right" style="height:150px;"/>
 
 This table contains the information the purely variable level
 information. The goal is there is a single row per variable, which is
@@ -118,9 +121,9 @@ variable differs across datasets, the variable will be recorded as
 dataset.variable in the variable column.
 
 -   *variable*: Variable name, which should match the name in
-    **ds\_spec**. Unless the variable needs to be duplicated, then the
+    **ds_spec**. Unless the variable needs to be duplicated, then the
     name will be a combination of the the dataset name and variable name
-    from **ds\_spec** (dataset.variable)
+    from **ds_spec** (dataset.variable)
 
 -   *type*: Variable class
 
@@ -133,7 +136,7 @@ dataset.variable in the variable column.
 
 -   *format*: Variable format
 
-### value\_spec <img src="man/figures/labeled-value_spec.png" align="right" height="150"/>
+### value_spec <img src="man/figures/labeled-value_spec.png" align="right" style="height:150px;"/>
 
 This table contains the information the information at the value level.
 There will be at least one row per dataset/variable combination. There
@@ -143,40 +146,40 @@ different data types depending on the value. The information contained
 are as follows:
 
 -   *dataset*: The abbreviated name of the dataset. This will match to
-    the name in **ds\_spec**
+    the name in **ds_spec**
 
 -   *variable*: Variable name. This will match to the name in
-    **ds\_spec**
+    **ds_spec**
 
 -   *type*: String of the value type
 
 -   *origin*: Origin of the value
 
--   *code\_id*: ID for the code list to match the id in the **codelist**
+-   *code_id*: ID for the code list to match the id in the **codelist**
     table
 
 -   *where*: Value of the variable
 
--   *derivation\_id*: ID for the derivation to match with the
+-   *derivation_id*: ID for the derivation to match with the
     **derivation** table
 
-### derivation <img src="man/figures/labeled-derivation.png" align="right" height="150"/>
+### derivation <img src="man/figures/labeled-derivation.png" align="right" style="height:150px;"/>
 
 This table has all the derivation information, with one row per
 derivation ID and the following information:
 
--   *derivation\_id*: The ID, which should match to **value\_spec**
+-   *derivation_id*: The ID, which should match to **value_spec**
 
 -   *derivation*: Text describing the derivation
 
-### codelist <img src="man/figures/labeled-code_list.png" align="right" height="150"/>
+### codelist <img src="man/figures/labeled-code_list.png" align="right" style="height:150px;"/>
 
 This table contains the code lists, permitted value lists, and external
 libraries nested within a tibble. There is only a single row per
 list/library, with the following information:
 
--   *code\_id*: the ID used to identify the code list. This should be
-    the same as the *code\_id* in **val\_spec**
+-   *code_id*: the ID used to identify the code list. This should be the
+    same as the *code_id* in **val_spec**
 
 -   *name*: Name of the code list
 

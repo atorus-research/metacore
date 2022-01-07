@@ -8,12 +8,11 @@ output: github_document
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  fig.path = "man/figures/README-",
-  out.width = "100%"
+  fig.path = "man/figures/README-"
 )
 ```
 
-# metacore <a href='https://github.com/atorus-research/metacore'><img src="man/figures/metacore.PNG" align="right" height="139"/></a>
+# metacore <a href='https://github.com/atorus-research/metacore'><img src="man/figures/metacore.PNG" align="right" style="height:139px;"/></a>
 
 <!-- badges: start -->
 [<img src="https://img.shields.io/badge/Slack-RValidationHub-blue?style=flat&logo=slack">](https://RValidationHub.slack.com)
@@ -55,7 +54,7 @@ Here is a schema of how all this fits together:
 
 ![](man/figures/schema-colors.png "man/figures/Metacore Schema")
 
-### ds_spec <img src="man/figures/labeled-ds_spec.png" align="right" height="150"/>
+### ds_spec <img src="man/figures/labeled-ds_spec.png" align="right" style="height:150px;"/>
 
 This table covers the basic information about each dataset. There is only a single row per dataset, with the following information:
 
@@ -65,7 +64,7 @@ This table covers the basic information about each dataset. There is only a sing
 
 -   *Label*: Dataset label
 
-### ds_vars <img src="man/figures/labeled-ds_vars.png" align="right" height="150"/>
+### ds_vars <img src="man/figures/labeled-ds_vars.png" align="right" style="height:150px;"/>
 
 This table contains the information that bridges between purely dataset level and purely variable level. There is one row per dataset per variable:
 
@@ -83,7 +82,7 @@ This table contains the information that bridges between purely dataset level an
 
 -   *supp_flag*: Logical to determine if the variable is in the supplementals
 
-### var_spec <img src="man/figures/labeled-var_spec.png" align="right" height="150"/>
+### var_spec <img src="man/figures/labeled-var_spec.png" align="right" style="height:150px;"/>
 
 This table contains the information the purely variable level information. The goal is there is a single row per variable, which is common across all datasets. This helps ensure variables follow the CDISC standard. But, this isn't always possible, so if information for a given variable differs across datasets, the variable will be recorded as dataset.variable in the variable column.
 
@@ -99,7 +98,7 @@ This table contains the information the purely variable level information. The g
 
 -   *format*: Variable format
 
-### value_spec <img src="man/figures/labeled-value_spec.png" align="right" height="150"/>
+### value_spec <img src="man/figures/labeled-value_spec.png" align="right" style="height:150px;"/>
 
 This table contains the information the information at the value level. There will be at least one row per dataset/variable combination. There is more than one row per dataset/variable combination if the combination has values which have differing metadata. For instance LBORRES that are different data types depending on the value. The information contained are as follows:
 
@@ -117,7 +116,7 @@ This table contains the information the information at the value level. There wi
 
 -   *derivation_id*: ID for the derivation to match with the **derivation** table
 
-### derivation <img src="man/figures/labeled-derivation.png" align="right" height="150"/>
+### derivation <img src="man/figures/labeled-derivation.png" align="right" style="height:150px;"/>
 
 This table has all the derivation information, with one row per derivation ID and the following information:
 
@@ -125,7 +124,7 @@ This table has all the derivation information, with one row per derivation ID an
 
 -   *derivation*: Text describing the derivation
 
-### codelist <img src="man/figures/labeled-code_list.png" align="right" height="150"/>
+### codelist <img src="man/figures/labeled-code_list.png" align="right" style="height:150px;"/>
 
 This table contains the code lists, permitted value lists, and external libraries nested within a tibble. There is only a single row per list/library, with the following information:
 
