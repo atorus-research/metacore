@@ -35,7 +35,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">metacore</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.0.1.0000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.0.1.1000</span>
       </span>
     </div>
 
@@ -76,7 +76,7 @@
       </header><div class="row">
   <div class="contents col-md-9">
 <div class="section level1">
-<div class="page-header"><h1 id="metacore-">metacore <a href="https://github.com/atorus-research/metacore" class="external-link"><img src="reference/figures/metacore.PNG" align="right" height="139"></a>
+<div class="page-header"><h1 id="metacore-">metacore <a href="https://github.com/atorus-research/metacore" class="external-link"><img src="reference/figures/metacore.PNG" align="right" style="height:139px;"></a>
 <a class="anchor" aria-label="anchor" href="#metacore-"></a>
 </h1></div>
 <!-- badges: start -->
@@ -105,17 +105,17 @@
 <p>Here is a schema of how all this fits together:</p>
 <p><img src="reference/figures/schema-colors.png" title="man/figures/Metacore Schema"></p>
 <div class="section level3">
-<h3 id="ds_spec-">ds_spec <img src="reference/figures/labeled-ds_spec.png" align="right" height="150"><a class="anchor" aria-label="anchor" href="#ds_spec-"></a>
+<h3 id="ds_spec-">ds_spec <img src="reference/figures/labeled-ds_spec.png" align="right" style="height:150px;"><a class="anchor" aria-label="anchor" href="#ds_spec-"></a>
 </h3>
 <p>This table covers the basic information about each dataset. There is only a single row per dataset, with the following information:</p>
 <ul>
 <li><p><em>dataset</em>: The abbreviated name of the dataset (e.g. AE)</p></li>
-<li><p><em>structure</em>: Value structure of the dataset as a sting</p></li>
-<li><p><em>label</em>: Dataset label</p></li>
+<li><p><em>Structure</em>: Value structure of the dataset as a sting</p></li>
+<li><p><em>Label</em>: Dataset label</p></li>
 </ul>
 </div>
 <div class="section level3">
-<h3 id="ds_vars-">ds_vars <img src="reference/figures/labeled-ds_vars.png" align="right" height="150"><a class="anchor" aria-label="anchor" href="#ds_vars-"></a>
+<h3 id="ds_vars-">ds_vars <img src="reference/figures/labeled-ds_vars.png" align="right" style="height:150px;"><a class="anchor" aria-label="anchor" href="#ds_vars-"></a>
 </h3>
 <p>This table contains the information that bridges between purely dataset level and purely variable level. There is one row per dataset per variable:</p>
 <ul>
@@ -125,10 +125,11 @@
 <li><p><em>order</em>: Order sets the order of the columns to appear in the dataset. This is also a numeric value</p></li>
 <li><p><em>keep</em>: Logical value about if the variable needs to be kept</p></li>
 <li><p><em>core</em>: ADaM core, which should be one of the following values: “Expected”, “Required”, “Permissible”, “Conditionally Required”, “Conditionally Expected”, or NA. For more information about core see <a href="https://www.cdisc.org/standards/foundational/adam" class="external-link">CDISC</a></p></li>
+<li><p><em>supp_flag</em>: Logical to determine if the variable is in the supplementals</p></li>
 </ul>
 </div>
 <div class="section level3">
-<h3 id="var_spec-">var_spec <img src="reference/figures/labeled-var_spec.png" align="right" height="150"><a class="anchor" aria-label="anchor" href="#var_spec-"></a>
+<h3 id="var_spec-">var_spec <img src="reference/figures/labeled-var_spec.png" align="right" style="height:150px;"><a class="anchor" aria-label="anchor" href="#var_spec-"></a>
 </h3>
 <p>This table contains the information the purely variable level information. The goal is there is a single row per variable, which is common across all datasets. This helps ensure variables follow the CDISC standard. But, this isn’t always possible, so if information for a given variable differs across datasets, the variable will be recorded as dataset.variable in the variable column.</p>
 <ul>
@@ -141,7 +142,7 @@
 </ul>
 </div>
 <div class="section level3">
-<h3 id="value_spec-">value_spec <img src="reference/figures/labeled-value_spec.png" align="right" height="150"><a class="anchor" aria-label="anchor" href="#value_spec-"></a>
+<h3 id="value_spec-">value_spec <img src="reference/figures/labeled-value_spec.png" align="right" style="height:150px;"><a class="anchor" aria-label="anchor" href="#value_spec-"></a>
 </h3>
 <p>This table contains the information the information at the value level. There will be at least one row per dataset/variable combination. There is more than one row per dataset/variable combination if the combination has values which have differing metadata. For instance LBORRES that are different data types depending on the value. The information contained are as follows:</p>
 <ul>
@@ -155,7 +156,7 @@
 </ul>
 </div>
 <div class="section level3">
-<h3 id="derivation-">derivation <img src="reference/figures/labeled-derivation.png" align="right" height="150"><a class="anchor" aria-label="anchor" href="#derivation-"></a>
+<h3 id="derivation-">derivation <img src="reference/figures/labeled-derivation.png" align="right" style="height:150px;"><a class="anchor" aria-label="anchor" href="#derivation-"></a>
 </h3>
 <p>This table has all the derivation information, with one row per derivation ID and the following information:</p>
 <ul>
@@ -164,7 +165,7 @@
 </ul>
 </div>
 <div class="section level3">
-<h3 id="codelist-">codelist <img src="reference/figures/labeled-code_list.png" align="right" height="150"><a class="anchor" aria-label="anchor" href="#codelist-"></a>
+<h3 id="codelist-">codelist <img src="reference/figures/labeled-code_list.png" align="right" style="height:150px;"><a class="anchor" aria-label="anchor" href="#codelist-"></a>
 </h3>
 <p>This table contains the code lists, permitted value lists, and external libraries nested within a tibble. There is only a single row per list/library, with the following information:</p>
 <ul>
