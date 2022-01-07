@@ -288,6 +288,61 @@ select_dataset <- function(.data, dataset, simplify = FALSE) {
 }
 
 
+
+#' Get Control Term
+#'
+#' Returns the control term (a vector for permitted values and a tibble for code
+#' lists) for a given variable. The dataset can be optionally specified if there
+#' is different control terminology for different datasets
+#'
+#' @param metacode metacore object
+#' @param variable A variable name to get the controlled terms for. This can
+#'   either be a string or just the name of the variable
+#' @param dataset A dataset name. This is not required if there is only one set
+#'   of control terminology across all datasets
+#'
+#' @return a vector for permitted values and a 2-column tibble for codelists
+#' @export
+#'
+#' @importFrom rlang as_label enexpr
+#'
+#' @examples
+#' meta_ex <- spec_to_metacore(metacore_example("p21_mock.xlsx"))
+#' get_control_term(meta_ex, QVAL, SUPPAE)
+#' get_control_term(meta_ex, "QVAL", "SUPPAE")
+get_control_term <- function(metacode, variable, dataset = NULL){
+   var_str <- ifelse(mode(enexpr(variable)) == "character",
+                      variable, as_label(enexpr(variable)))
+   dataset_val <- ifelse(mode(enexpr(dataset)) == "character",
+                          dataset, as_label(enexpr(dataset))) # to make the filter more explicit
+   if(dataset_val == "NULL"){
+      var_code_id <- metacode$value_spec %>%
+         filter(variable == var_str) %>%
+         pull(code_id) %>%
+         unique()
+   } else {
+      subset_data <- metacode$value_spec %>%
+         filter(dataset == dataset_val)
+      if(nrow(subset_data) == 0){
+         stop(paste0(dataset_val, " not found in the value_spec table. Please check the dataset name"))
+      }
+      var_code_id <- subset_data %>%
+         filter(variable == var_str) %>%
+         pull(code_id) %>%
+         unique()
+   }
+   if(length(var_code_id) > 1){
+      stop(paste0(var_str, " does not have a unique control term, consider spcificing a dataset"))
+   }
+
+   metacode$codelist %>%
+      filter(code_id == var_code_id) %>%
+      pull(codes) %>%
+      .[[1]]
+}
+
+
+
 #' save metacore object
 #'
 #' @param metacore_object the metacore object in memory to save to disc
