@@ -7,7 +7,7 @@
 define_to_MetaCore(path)
 }
 \arguments{
-\item{path}{loaction of the define xml as a string}
+\item{path}{location of the define xml as a string}
 }
 \value{
 DataDef Object

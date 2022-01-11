@@ -101,7 +101,7 @@ The ds_vars table has 5 columns:
 
 -   key_seq: integers controlling the sort order of each dataset
 
--   order: integer controling the column order of each dataset
+-   order: integer controlling the column order of each dataset
 
 -   keep: boolean to determine if the variable is needed
 

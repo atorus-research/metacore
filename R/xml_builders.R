@@ -2,7 +2,7 @@
 #'
 #' Given a path, this function converts the define xml to a DataDef Object
 #'
-#' @param path loaction of the define xml as a string
+#' @param path location of the define xml as a string
 #'
 #' @return DataDef Object
 #' @export
@@ -151,8 +151,8 @@ xml_to_var_spec <- function(doc) {
 #' xml to value spec
 #'
 #' Takes a define xml and pulls out the value level metadata including codelist_id's,
-#' defines_id's, and where claus. There is one row per variable expect when there
-#' is a where, at which point there is one row per value. {this is bad english please help}
+#' defines_id's, and where clause. There is one row per variable expect when there
+#' is a where clause, at which point there is one row per value.
 #' @param doc ?
 #'
 #' @return tibble with the value level information

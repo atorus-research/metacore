@@ -80,7 +80,7 @@ This table contains the information that bridges between purely dataset level an
 
 -   *core*: ADaM core, which should be one of the following values: "Expected", "Required", "Permissible", "Conditionally Required", "Conditionally Expected", or NA. For more information about core see [CDISC](https://www.cdisc.org/standards/foundational/adam)
 
--   *supp_flag*: Logical to determine if the variable is in the supplementals
+-   *supp_flag*: Logical to determine if the variable is in the supplemental datasets
 
 ### var_spec <img src="man/figures/labeled-var_spec.png" align="right" style="height:150px;"/>
 

@@ -10,7 +10,7 @@ add_labels(.data, ...)
 \item{.data}{Dataframe that you want to add labels to}
 
 \item{...}{Labeled vector of labels, with the name of the element equal to
-the name of the column and the element equaling the label, or comma-seperated name-value pair}
+the name of the column and the element equaling the label, or comma-separated name-value pair}
 }
 \value{
 Dataframe with labels

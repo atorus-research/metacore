@@ -15,7 +15,7 @@ add_label <- function(x, label) {
 #' Add Labels to Dataframe
 #' @param .data Dataframe that you want to add labels to
 #' @param ... Labeled vector of labels, with the name of the element equal to
-#' the name of the column and the element equaling the label, or comma-seperated name-value pair
+#' the name of the column and the element equaling the label, or comma-separated name-value pair
 #' @importFrom purrr map2
 #' @importFrom tibble tibble as_tibble
 #' @importFrom dplyr filter pull
@@ -90,7 +90,7 @@ check_structure <- function(.data, col, func, any_na_acceptable, nm) {
 
 #' Check Words in Column
 #'
-#' @param ... permissable words in the column
+#' @param ... permissible words in the column
 #' @param col the column to check for specific words
 check_words <- function(..., col) {
    accepted_words <- unlist(c(...))
