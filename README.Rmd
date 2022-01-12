@@ -104,7 +104,7 @@ This table contains the information the information at the value level. There wi
 
 -   *dataset*: The abbreviated name of the dataset. This will match to the name in **ds_spec**
 
--   *variable*: Variable name. This will match to the name in **ds_spec**
+-   *variable*: Variable name. This will match to the name in **ds_vars**
 
 -   *type*: String of the value type
 
