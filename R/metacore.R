@@ -311,10 +311,10 @@ select_dataset <- function(.data, dataset, simplify = FALSE) {
 #' get_control_term(meta_ex, QVAL, SUPPAE)
 #' get_control_term(meta_ex, "QVAL", "SUPPAE")
 get_control_term <- function(metacode, variable, dataset = NULL){
-   var_str <- ifelse(mode(enexpr(variable)) == "character",
-                      variable, as_label(enexpr(variable)))
-   dataset_val <- ifelse(mode(enexpr(dataset)) == "character",
-                          dataset, as_label(enexpr(dataset))) # to make the filter more explicit
+   var_str <- ifelse(str_detect(as_label(enexpr(variable)), "\""),
+                     enexpr(variable), as_label(enexpr(variable)))
+   dataset_val <- ifelse(str_detect(as_label(enexpr(dataset)), "\""),
+                         enexpr(dataset), as_label(enexpr(dataset))) # to make the filter more explicit
    if(dataset_val == "NULL"){
       var_code_id <- metacode$value_spec %>%
          filter(variable == var_str) %>%
