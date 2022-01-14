@@ -304,7 +304,7 @@ select_dataset <- function(.data, dataset, simplify = FALSE) {
 #' @return a vector for permitted values and a 2-column tibble for codelists
 #' @export
 #'
-#' @importFrom rlang as_label enexpr
+#' @importFrom rlang as_label enexpr as_name
 #'
 #' @examples
 #' meta_ex <- spec_to_metacore(metacore_example("p21_mock.xlsx"))
@@ -312,9 +312,9 @@ select_dataset <- function(.data, dataset, simplify = FALSE) {
 #' get_control_term(meta_ex, "QVAL", "SUPPAE")
 get_control_term <- function(metacode, variable, dataset = NULL){
    var_str <- ifelse(str_detect(as_label(enexpr(variable)), "\""),
-                     enexpr(variable), as_label(enexpr(variable)))
+                     as_name(variable), as_label(enexpr(variable)))
    dataset_val <- ifelse(str_detect(as_label(enexpr(dataset)), "\""),
-                         enexpr(dataset), as_label(enexpr(dataset))) # to make the filter more explicit
+                         as_name(dataset), as_label(enexpr(dataset))) # to make the filter more explicit
    if(dataset_val == "NULL"){
       var_code_id <- metacode$value_spec %>%
          filter(variable == var_str) %>%
