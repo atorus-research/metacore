@@ -331,7 +331,7 @@ get_control_term <- function(metacode, variable, dataset = NULL){
          pull(code_id) %>%
          unique()
    }
-   if(length(var_code_id) > 1){
+   if(length(var_code_id) < 1){
       stop(paste0(var_str, " does not have a unique control term, consider spcificing a dataset"))
    }
 
