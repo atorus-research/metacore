@@ -60,6 +60,9 @@ test_that("metacore wrapper function works", {
    )
 
    expect_equal(wrapper, r6)
+
+   expect_warning(define_to_metacore(metacore_example("ADaM_define.xml")))
+   expect_warning(spec_to_metacore(metacore_example("p21_mock.xlsx")))
 })
 
 
@@ -79,9 +82,7 @@ test_that("Can pass metacore NULL df's", {
 })
 
 test_that("subsetting works", {
-   test <- suppressWarnings(
-      spec_to_metacore(metacore_example("p21_mock.xlsx"))
-   )
+   test <- spec_to_metacore(metacore_example("p21_mock.xlsx"), quiet = TRUE)
    subset <- test %>% select_dataset("DM")
    expect_equal(unique(subset$ds_spec$dataset), "DM")
 })
@@ -134,9 +135,7 @@ test_that("load metacore fails with no path and rdss in wd", {
 })
 
 test_that("pulling out control terminology works", {
-   test <- suppressWarnings(
-      spec_to_metacore(metacore_example("p21_mock.xlsx"))
-   )
+   test <- spec_to_metacore(metacore_example("p21_mock.xlsx"), quiet = TRUE)
    expect_error(get_control_term(test, QVAL))
    expect_error(get_control_term(test, QVAL, LB))
    expect_equal(

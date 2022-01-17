@@ -20,15 +20,16 @@ spec_to_metacore <- function(path, quiet = FALSE){
       derivations <- spec_type_to_derivations(doc)
       code_list <- spec_type_to_codelist(doc)
       if(!quiet){
-         metacore(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist = code_list)
+         out <- metacore(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist = code_list)
       } else{
-         suppressWarnings(metacore(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist = code_list))
-         message("Loading in metacore object without warnings")
+         out<- suppressWarnings(metacore(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist = code_list))
+         message("Loading in metacore object with suppressed warnings")
       }
    } else {
       stop("This specification format is not currently supported. You will need to write your own reader",
            call. = FALSE)
    }
+   out
 }
 
 

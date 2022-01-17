@@ -18,12 +18,12 @@ define_to_metacore <- function(path, quiet = FALSE){
    code_list <- xml_to_codelist(doc)
    derivations <- xml_to_derivations(doc)
    if(!quiet){
-      metacore(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist = code_list)
+      out <- metacore(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist = code_list)
    } else{
-      suppressWarnings(metacore(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist = code_list))
-      message("Loading in metacore object without warnings")
+      out<- suppressWarnings(metacore(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist = code_list))
+      message("Loading in metacore object with suppressed warnings")
    }
-
+   out
 }
 
 
@@ -143,7 +143,7 @@ xml_to_var_spec <- function(doc) {
       inner_join(var_info, by = "variable")  %>%
       mutate(variable = str_remove(.data$var_full, "^IT\\."),
              variable = if_else(str_count(variable, "\\.") > 0,
-             str_extract(variable, "(?<=\\.)\\w*"), variable)) %>%
+                                str_extract(variable, "(?<=\\.)\\w*"), variable)) %>%
       distinct()
 
    # Combine the variables that need full names with the variables that don't
