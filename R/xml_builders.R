@@ -3,11 +3,12 @@
 #' Given a path, this function converts the define xml to a DataDef Object
 #'
 #' @param path location of the define xml as a string
+#' @param quiet Option to quietly load in, this will supress warnings, but not errors
 #'
 #' @return DataDef Object
 #' @export
 #'
-define_to_MetaCore <- function(path){
+define_to_metacore <- function(path, quiet = FALSE){
    doc <- xmlTreeParse(path, useInternalNodes = TRUE)
 
    ds_spec <- xml_to_ds_spec(doc)
@@ -16,8 +17,13 @@ define_to_MetaCore <- function(path){
    value_spec <- xml_to_value_spec(doc)
    code_list <- xml_to_codelist(doc)
    derivations <- xml_to_derivations(doc)
+   if(!quiet){
+      metacore(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist = code_list)
+   } else{
+      suppressWarnings(metacore(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist = code_list))
+      message("Loading in metacore object without warnings")
+   }
 
-   metacore(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist = code_list)
 }
 
 
