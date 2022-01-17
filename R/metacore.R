@@ -304,17 +304,17 @@ select_dataset <- function(.data, dataset, simplify = FALSE) {
 #' @return a vector for permitted values and a 2-column tibble for codelists
 #' @export
 #'
-#' @importFrom rlang as_label enexpr
+#' @importFrom rlang as_label enexpr as_name
 #'
 #' @examples
 #' meta_ex <- spec_to_metacore(metacore_example("p21_mock.xlsx"))
 #' get_control_term(meta_ex, QVAL, SUPPAE)
 #' get_control_term(meta_ex, "QVAL", "SUPPAE")
 get_control_term <- function(metacode, variable, dataset = NULL){
-   var_str <- ifelse(mode(enexpr(variable)) == "character",
-                      variable, as_label(enexpr(variable)))
-   dataset_val <- ifelse(mode(enexpr(dataset)) == "character",
-                          dataset, as_label(enexpr(dataset))) # to make the filter more explicit
+   var_str <- ifelse(str_detect(as_label(enexpr(variable)), "\""),
+                     as_name(variable), as_label(enexpr(variable)))
+   dataset_val <- ifelse(str_detect(as_label(enexpr(dataset)), "\""),
+                         as_name(dataset), as_label(enexpr(dataset))) # to make the filter more explicit
    if(dataset_val == "NULL"){
       var_code_id <- metacode$value_spec %>%
          filter(variable == var_str) %>%
@@ -331,7 +331,7 @@ get_control_term <- function(metacode, variable, dataset = NULL){
          pull(code_id) %>%
          unique()
    }
-   if(length(var_code_id) > 1){
+   if(length(var_code_id) < 1){
       stop(paste0(var_str, " does not have a unique control term, consider spcificing a dataset"))
    }
 

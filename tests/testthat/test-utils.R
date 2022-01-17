@@ -48,5 +48,5 @@ test_that("add labels adds NULL to missing labels", {
 
 test_that("metacore example returns file options", {
   expect_equal(sort(metacore_example()),
-               sort(c("define.xml", "mock_spec.xlsx", "p21_mock.xlsx",  "SDTM_spec_CDISC_pilot.xlsx")))
+               sort(c("ADaM_define.xml", "mock_spec.xlsx", "p21_mock.xlsx", "SDTM_define.xml", "SDTM_spec_CDISC_pilot.xlsx")))
 })

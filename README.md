@@ -109,7 +109,7 @@ variable:
     [CDISC](https://www.cdisc.org/standards/foundational/adam)
 
 -   *supp_flag*: Logical to determine if the variable is in the
-    supplementals
+    supplemental datasets
 
 ### var_spec <img src="man/figures/labeled-var_spec.png" align="right" style="height:150px;"/>
 
@@ -149,7 +149,7 @@ are as follows:
     the name in **ds_spec**
 
 -   *variable*: Variable name. This will match to the name in
-    **ds_spec**
+    **ds_vars**
 
 -   *type*: String of the value type
 
