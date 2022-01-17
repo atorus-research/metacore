@@ -3,11 +3,12 @@
 #' Given a path, this function converts the define xml to a DataDef Object
 #'
 #' @param path location of the define xml as a string
+#' @param quiet Option to quietly load in, this will supress warnings, but not errors
 #'
 #' @return DataDef Object
 #' @export
 #'
-define_to_MetaCore <- function(path){
+define_to_metacore <- function(path, quiet = FALSE){
    doc <- xmlTreeParse(path, useInternalNodes = TRUE)
 
    ds_spec <- xml_to_ds_spec(doc)
@@ -16,8 +17,13 @@ define_to_MetaCore <- function(path){
    value_spec <- xml_to_value_spec(doc)
    code_list <- xml_to_codelist(doc)
    derivations <- xml_to_derivations(doc)
-
-   metacore(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist = code_list)
+   if(!quiet){
+      out <- metacore(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist = code_list)
+   } else{
+      out<- suppressWarnings(metacore(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist = code_list))
+      message("Loading in metacore object with suppressed warnings")
+   }
+   out
 }
 
 
@@ -137,7 +143,7 @@ xml_to_var_spec <- function(doc) {
       inner_join(var_info, by = "variable")  %>%
       mutate(variable = str_remove(.data$var_full, "^IT\\."),
              variable = if_else(str_count(variable, "\\.") > 0,
-             str_extract(variable, "(?<=\\.)\\w*"), variable)) %>%
+                                str_extract(variable, "(?<=\\.)\\w*"), variable)) %>%
       distinct()
 
    # Combine the variables that need full names with the variables that don't

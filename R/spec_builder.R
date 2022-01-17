@@ -6,10 +6,11 @@
 #' be used as building blocks for bespoke specification documents
 #'
 #' @param path string of file location
+#' @param quiet Option to quietly load in, this will supress warnings, but not errors
 #'
 #' @return given a spec document it returns a metacore object
 #' @export
-spec_to_metacore <- function(path){
+spec_to_metacore <- function(path, quiet = FALSE){
    doc <- read_all_sheets(path)
    if(spec_type(path) == "by_type"){
       ds_spec <- spec_type_to_ds_spec(doc)
@@ -18,12 +19,17 @@ spec_to_metacore <- function(path){
       value_spec <- spec_type_to_value_spec(doc)
       derivations <- spec_type_to_derivations(doc)
       code_list <- spec_type_to_codelist(doc)
-      metacore(ds_spec, ds_vars, var_spec, value_spec,
-               derivations, code_list)
+      if(!quiet){
+         out <- metacore(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist = code_list)
+      } else{
+         out<- suppressWarnings(metacore(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist = code_list))
+         message("Loading in metacore object with suppressed warnings")
+      }
    } else {
       stop("This specification format is not currently supported. You will need to write your own reader",
            call. = FALSE)
    }
+   out
 }
 
 

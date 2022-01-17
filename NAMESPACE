@@ -2,7 +2,7 @@
 
 export("%>%")
 export(create_tbl)
-export(define_to_MetaCore)
+export(define_to_metacore)
 export(get_control_term)
 export(load_metacore)
 export(metacore)
