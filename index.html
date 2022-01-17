@@ -125,7 +125,7 @@
 <li><p><em>order</em>: Order sets the order of the columns to appear in the dataset. This is also a numeric value</p></li>
 <li><p><em>keep</em>: Logical value about if the variable needs to be kept</p></li>
 <li><p><em>core</em>: ADaM core, which should be one of the following values: “Expected”, “Required”, “Permissible”, “Conditionally Required”, “Conditionally Expected”, or NA. For more information about core see <a href="https://www.cdisc.org/standards/foundational/adam" class="external-link">CDISC</a></p></li>
-<li><p><em>supp_flag</em>: Logical to determine if the variable is in the supplementals</p></li>
+<li><p><em>supp_flag</em>: Logical to determine if the variable is in the supplemental datasets</p></li>
 </ul>
 </div>
 <div class="section level3">
@@ -147,7 +147,7 @@
 <p>This table contains the information the information at the value level. There will be at least one row per dataset/variable combination. There is more than one row per dataset/variable combination if the combination has values which have differing metadata. For instance LBORRES that are different data types depending on the value. The information contained are as follows:</p>
 <ul>
 <li><p><em>dataset</em>: The abbreviated name of the dataset. This will match to the name in <strong>ds_spec</strong></p></li>
-<li><p><em>variable</em>: Variable name. This will match to the name in <strong>ds_spec</strong></p></li>
+<li><p><em>variable</em>: Variable name. This will match to the name in <strong>ds_vars</strong></p></li>
 <li><p><em>type</em>: String of the value type</p></li>
 <li><p><em>origin</em>: Origin of the value</p></li>
 <li><p><em>code_id</em>: ID for the code list to match the id in the <strong>codelist</strong> table</p></li>
@@ -236,7 +236,7 @@
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.1.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
 </div>
 
       </footer>
