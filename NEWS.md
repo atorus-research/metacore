@@ -1,3 +1,8 @@
+
+# Metaccore 0.0.3
+- Fixes bugs found in the `get_control_term` function and improves error messages for `get_control_term`
+- Improves internal naming consistency by renaming `define_to_MetaCore` to `define_to_metacore`
+- Adds quiet option to readers, to allow users to optionally ignore the reader warnings 
 # Metacore 0.0.1
 
 This fixes the following issues:
