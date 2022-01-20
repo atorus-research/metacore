@@ -315,6 +315,9 @@ get_control_term <- function(metacode, variable, dataset = NULL){
                      as_name(variable), as_label(enexpr(variable)))
    dataset_val <- ifelse(str_detect(as_label(enexpr(dataset)), "\""),
                          as_name(dataset), as_label(enexpr(dataset))) # to make the filter more explicit
+   if(!var_str %in% metacode$value_spec$variable){
+      stop(paste0(var_str, " not found in the value_spec table. Please check the variable name"))
+   }
    if(dataset_val == "NULL"){
       var_code_id <- metacode$value_spec %>%
          filter(variable == var_str) %>%

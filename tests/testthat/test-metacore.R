@@ -136,8 +136,13 @@ test_that("load metacore fails with no path and rdss in wd", {
 
 test_that("pulling out control terminology works", {
    test <- spec_to_metacore(metacore_example("p21_mock.xlsx"), quiet = TRUE)
+   #Testing Errors
+   ## Not specific enough
    expect_error(get_control_term(test, QVAL))
+   ## Wrong Dataset name
    expect_error(get_control_term(test, QVAL, LB))
+   ## Wrong variable name
+   expect_error(get_control_term(test, QVA))
    expect_equal(
       get_control_term(test, QVAL, SUPPAE),
       tibble(code = c("N", "Y"), decode = c("No", "Yes"))
