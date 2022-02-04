@@ -3,8 +3,9 @@
 #' @param x Vector to add label to
 #' @param label Label to add to vector
 #' @return Labeled vector
+#' @noRd
 
-add_label <- function(x, label) {
+add_lab <- function(x, label) {
    if (length(label) == 0) {
       label  <- NULL
    }
@@ -20,8 +21,8 @@ add_label <- function(x, label) {
 #' @importFrom tibble tibble as_tibble
 #' @importFrom dplyr filter pull
 #' @return Dataframe with labels
-
-add_labels <- function(.data,...) {
+#' @noRd
+add_labs <- function(.data,...) {
    name_list <- c(...)
    df <- tibble(col = names(name_list), lab = name_list)
    .data %>%
@@ -31,7 +32,7 @@ add_labels <- function(.data,...) {
             pull(lab) %>%
             unname()
          if(length(label) > 0) {
-            add_label(x, label)
+            add_lab(x, label)
          } else {
             x
          }
