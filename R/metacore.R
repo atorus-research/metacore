@@ -18,12 +18,12 @@
 MetaCore_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist){
 
    private$.ds_spec <- ds_spec %>%
-      add_labels(dataset = "Dataset Name",
+      add_labs(dataset = "Dataset Name",
                  structure = "Value Structure",
                  label = "Dataset Label")
 
    private$.ds_vars <- ds_vars %>%
-      add_labels(dataset = "Dataset Name",
+      add_labs(dataset = "Dataset Name",
                  variable = "Variable Name",
                  key_seq = "Sequence Key",
                  order = "Variable Order",
@@ -32,7 +32,7 @@ MetaCore_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivati
                  supp_flag = "Supplemental Flag")
 
    private$.var_spec <- var_spec %>%
-      add_labels(variable = "Variable Name",
+      add_labs(variable = "Variable Name",
                  length = "Variable Length",
                  label = "Variable Label",
                  type = "Variable Class",
@@ -40,7 +40,7 @@ MetaCore_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivati
                  format = "Variable Format")
 
    private$.value_spec <- value_spec %>%
-      add_labels(type = "Value Type",
+      add_labs(type = "Value Type",
                  orgin = "Origin of Value",
                  code_id = "ID of the Code List",
                  dataset = "Dataset Name",
@@ -49,11 +49,11 @@ MetaCore_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivati
                  derivation_id = "ID of Derivation")
 
    private$.derivations <- derivations %>%
-      add_labels(derivation_id = "ID of Derivation",
+      add_labs(derivation_id = "ID of Derivation",
                  derivation = "Derivation")
 
    private$.codelist <- codelist %>%
-      add_labels(code_id = "ID of the Code List",
+      add_labs(code_id = "ID of the Code List",
                  names = "Name of the Code List",
                  type = "Code List/Permitted Values/External Library",
                  codes = "List of Codes")
