@@ -141,9 +141,7 @@ xml_to_var_spec <- function(doc) {
       filter(n > 1) %>%
       select(.data$variable) %>%
       inner_join(var_info, by = "variable")  %>%
-      mutate(variable = str_remove(.data$var_full, "^IT\\."),
-             variable = if_else(str_count(variable, "\\.") > 0,
-                                str_extract(variable, "(?<=\\.)\\w*"), variable)) %>%
+      mutate(variable = str_remove(.data$var_full, "^IT\\.")) %>%
       distinct()
 
    # Combine the variables that need full names with the variables that don't
