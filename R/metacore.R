@@ -134,10 +134,11 @@ readonly <- function(name) {
 #' @param value the dataframe to subset by
 #'
 MetaCore_filter <- function(value) {
-   # should we do a check of available filtering options?
-   # like check DM, AE whatever?
 
    private$.ds_spec <- private$.ds_spec %>% filter(dataset == value)
+   if(nrow(private$.ds_spec) == 0){
+      stop(paste0(value, " is not a dataset in the metacore object", call. = FALSE))
+   }
    private$.ds_vars <- private$.ds_vars %>% filter(dataset == value)
    private$.value_spec <- private$.value_spec %>% filter(dataset == value)
 
@@ -153,7 +154,8 @@ MetaCore_filter <- function(value) {
       # remove the temporary column
       select(-dataset) %>%
       # right join
-      right_join(private$.ds_vars %>% select(variable), by="variable")
+      right_join(private$.ds_vars %>% select(variable), by="variable") %>%
+      distinct(variable, .keep_all = TRUE) # for when duplicates gett through and have different lables but the same name
 
    private$.derivations <- private$.derivations %>%
       right_join(private$.value_spec %>% select(derivation_id) %>% na.omit(), by = "derivation_id")

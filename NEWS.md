@@ -3,8 +3,11 @@
 - Fixes bugs found in the `get_control_term` function and improves error messages for `get_control_term`
 - Improves internal naming consistency by renaming `define_to_MetaCore` to `define_to_metacore`
 - Adds quiet option to readers, to allow users to optionally ignore the reader warnings 
-# Metacore 0.0.1
+- Creates new example metacore object that is an .rda so much faster to read in 
+- Fixes issue with select dataset when variables are duplicated 
 
+
+# Metacore 0.0.1
 This fixes the following issues:
 
 - [#16](https://github.com/atorus-research/metacore/issues/16) the metacore function now accepts any empty datasets and creates an empty dataset with the correct column names and types
