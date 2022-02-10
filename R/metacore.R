@@ -334,14 +334,17 @@ get_control_term <- function(metacode, variable, dataset = NULL){
          pull(code_id) %>%
          unique()
    }
-   if(length(var_code_id) < 1){
+   if(length(var_code_id) > 1){
       stop(paste0(var_str, " does not have a unique control term, consider spcificing a dataset"))
    }
-
-   metacode$codelist %>%
+   ct <- metacode$codelist %>%
       filter(code_id == var_code_id) %>%
-      pull(codes) %>%
-      .[[1]]
+      pull(codes)
+   if(length(ct) == 0){
+      message(paste0(var_str, " has no control terminology"))
+   } else {
+      return(ct[[1]])
+   }
 }
 
 
