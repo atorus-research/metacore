@@ -54,6 +54,23 @@
       
     </div>
 
+    <div class="section level2">
+<h2 class="page-header" data-toc-text="0.0.1" id="metacore-001">Metacore 0.0.1<a class="anchor" aria-label="anchor" href="#metacore-001"></a></h2>
+<p>This fixes the following issues:</p>
+<ul><li>
+<a href="https://github.com/atorus-research/metacore/issues/16" class="external-link">#16</a> the metacore function now accepts any empty datasets and creates an empty dataset with the correct column names and types</li>
+<li>
+<a href="https://github.com/atorus-research/metacore/issues/10" class="external-link">#10</a> yn function checks for logicals and returns them</li>
+<li>
+<a href="https://github.com/atorus-research/metacore/issues/11" class="external-link">#11</a> updated function description to make this clearer</li>
+<li>
+<a href="https://github.com/atorus-research/metacore/issues/12" class="external-link">#12</a> updated regex so to “[F|f]ormat” so it can accept lower case</li>
+<li>
+<a href="https://github.com/atorus-research/metacore/issues/14" class="external-link">#14</a> added supp_flag to ds_vars (on a side note we did a really good job with this it was super easy to change and only required a few edits)</li>
+<li>
+<a href="https://github.com/atorus-research/metacore/issues/15" class="external-link">#15</a> modified create_tbl so if there are two potential matches in the same dataset and one is an exact match it uses that</li>
+</ul><p>Additionally, it adds the <code>get_control_term</code> function to get pull out the control term for a given variable.</p>
+</div>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
