@@ -107,8 +107,9 @@ make_function <- function(args = pairlist(), body, env = parent.frame())  {
 #' Get path to metacore example
 #'
 #' metacore comes bundled with a number of sample files in its `inst/extdata`
-#' directory. This function make them easy to access
-#'
+#' directory. This function make them easy to access. When testing or writing
+#' examples in other packages, it is best to use the 'pilot_ADaM.rda' example as
+#' it loads fastest.
 #' @param file Name of file. If `NULL`, the example files will be listed.
 #' @export
 #' @examples
