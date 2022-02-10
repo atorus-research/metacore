@@ -11,7 +11,9 @@ metacore_example(file = NULL)
 }
 \description{
 metacore comes bundled with a number of sample files in its \code{inst/extdata}
-directory. This function make them easy to access
+directory. This function make them easy to access. When testing or writing
+examples in other packages, it is best to use the 'pilot_ADaM.rda' example as
+it loads fastest.
 }
 \examples{
 metacore_example()
