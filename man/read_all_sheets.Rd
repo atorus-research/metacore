@@ -13,5 +13,5 @@ read_all_sheets(path)
 a list of datasets
 }
 \description{
-Given a path to a file, this function reads in all sheets of an excle file
+Given a path to a file, this function reads in all sheets of an excel file
 }

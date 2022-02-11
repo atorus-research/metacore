@@ -9,3 +9,5 @@
 ^pkgdown$
 ^\.github$
 cran-comments.md
+^doc$
+^Meta$

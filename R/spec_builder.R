@@ -6,7 +6,7 @@
 #' be used as building blocks for bespoke specification documents
 #'
 #' @param path string of file location
-#' @param quiet Option to quietly load in, this will supress warnings, but not errors
+#' @param quiet Option to quietly load in, this will suppress warnings, but not errors
 #'
 #' @return given a spec document it returns a metacore object
 #' @export
@@ -63,7 +63,7 @@ spec_type <- function(path){
 
 #' Read in all Sheets
 #'
-#' Given a path to a file, this function reads in all sheets of an excle file
+#' Given a path to a file, this function reads in all sheets of an excel file
 #'
 #' @param path string of the file path
 #' @export

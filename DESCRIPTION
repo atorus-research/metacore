@@ -26,14 +26,12 @@ Authors@R:
 Description: Create an immutable container holding metadata for the purpose of better enabling programming activities and functionality of other packages within the clinical programming workflow.
 License: MIT + file LICENSE
 Encoding: UTF-8
-LazyData: true
 Roxygen: list(markdown = TRUE, r6 = FALSE)
 RoxygenNote: 7.1.2
 Suggests: 
     testthat,
     knitr,
     rmarkdown,
-    gt,
     covr
 Imports: 
     R6,

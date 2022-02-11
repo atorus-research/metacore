@@ -3,7 +3,7 @@
 #' Given a path, this function converts the define xml to a DataDef Object
 #'
 #' @param path location of the define xml as a string
-#' @param quiet Option to quietly load in, this will supress warnings, but not errors
+#' @param quiet Option to quietly load in, this will suppress warnings, but not errors
 #'
 #' @return DataDef Object
 #' @export
