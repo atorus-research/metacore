@@ -12,7 +12,9 @@ dfs <- purrr::map(col_vars(), ~ empty_df(.x, fill = "A")) %>%
               "value_spec",
               "derivations",
               "codelist",
-              "changelog"))
+              "supp"))
+dfs$ds_vars <- dfs$ds_vars %>%
+   mutate(supp_flag = FALSE)
 
 # function from the withr package
 with_dir <- function (new, code) {
@@ -48,7 +50,7 @@ test_that("readonly function factory", {
 })
 
 test_that("metacore wrapper function works", {
-   wrapper <- suppressWarnings(do.call(metacore, dfs[1:6]))
+   wrapper <- suppressWarnings(do.call(metacore, dfs[1:7]))
 
    r6 <- suppressWarnings(
       MetaCore$new(dfs$ds_spec,
@@ -56,7 +58,8 @@ test_that("metacore wrapper function works", {
                    dfs$var_spec,
                    dfs$value_spec,
                    dfs$derivations,
-                   dfs$codelist)
+                   dfs$codelist,
+                   dfs$supp)
    )
 
    expect_equal(wrapper, r6)
@@ -68,7 +71,7 @@ test_that("metacore wrapper function works", {
 
 test_that("Can pass metacore NULL df's", {
    wrapper <- suppressWarnings(metacore(dfs$ds_spec, NULL, dfs$var_spec,
-                       dfs$value_spec, dfs$derivations, dfs$codelist))
+                       dfs$value_spec, dfs$derivations, dfs$codelist, dfs$supp))
    dummy <- list(character(), character(), numeric(), numeric(),
                  logical(), character(), logical())
    names(dummy) <- c("dataset", "variable", "key_seq", "order",
@@ -88,7 +91,7 @@ test_that("subsetting works", {
 })
 
 test_that("save_metacore creates .rds with no file path", {
-   wrapper <- suppressWarnings(do.call(metacore, dfs[1:6]))
+   wrapper <- suppressWarnings(do.call(metacore, dfs[1:7]))
    my_temp_dir <- tempdir()
    with_dir(my_temp_dir, save_metacore(wrapper))
    expect_true("wrapper.rds" %in% list.files(my_temp_dir))
@@ -96,7 +99,7 @@ test_that("save_metacore creates .rds with no file path", {
 })
 
 test_that("save_metacore replaces file path", {
-   wrapper <- suppressWarnings(do.call(metacore, dfs[1:6]))
+   wrapper <- suppressWarnings(do.call(metacore, dfs[1:7]))
    my_temp_dir <- tempdir()
    save_metacore(wrapper, file.path(my_temp_dir, "wrapper.csv"))
    expect_true("wrapper.rds" %in% list.files(my_temp_dir))
@@ -104,7 +107,7 @@ test_that("save_metacore replaces file path", {
 })
 
 test_that("save_metacore uses file path", {
-   wrapper <- suppressWarnings(do.call(metacore, dfs[1:6]))
+   wrapper <- suppressWarnings(do.call(metacore, dfs[1:7]))
    my_temp_dir <- tempdir()
    save_metacore(wrapper, file.path(my_temp_dir, "wrapper.rds"))
    expect_true("wrapper.rds" %in% list.files(my_temp_dir))
@@ -112,7 +115,7 @@ test_that("save_metacore uses file path", {
 })
 
 test_that("load_metacore loads .rds", {
-   wrapper <- suppressWarnings(do.call(metacore, dfs[1:6]))
+   wrapper <- suppressWarnings(do.call(metacore, dfs[1:7]))
    my_temp_dir <- tempdir()
    save_metacore(wrapper, file.path(my_temp_dir, "wrapper.rds"))
    wrapper <- load_metacore(file.path(my_temp_dir, "wrapper.rds"))
@@ -125,7 +128,7 @@ test_that("load metacore fails with no path", {
 })
 
 test_that("load metacore fails with no path and rdss in wd", {
-   wrapper <- suppressWarnings(do.call(metacore, dfs[1:6]))
+   wrapper <- suppressWarnings(do.call(metacore, dfs[1:7]))
    my_temp_dir <- tempdir()
    save_metacore(wrapper, file.path(my_temp_dir, "wrapper.rds"))
    expect_error(

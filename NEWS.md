@@ -1,4 +1,8 @@
 
+# Metacore 0.0.4
+- Adds a supp table to store the `idvar` and `qeval` information 
+
+
 # Metacore 0.0.3
 - Fixes bugs found in the `get_control_term` function and improves error messages for `get_control_term`
 - Improves internal naming consistency by renaming `define_to_MetaCore` to `define_to_metacore`
