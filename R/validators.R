@@ -84,6 +84,16 @@ derivation_check <- function(value_spec, derivations){
       filter(!is.na(.data$derivation_id)) %>%
       distinct(.data$variable,.data$ derivation_id)
 
+   #Check the variables that don't have derivations in derivations
+   not_in_val <- anti_join(deriv_vars, derivations, by = c("derivation_id"))
+   if(nrow(not_in_val) != 0){
+      variables <- not_in_val %>%
+         pull(.data$variable) %>%
+         str_c(collapse = "\n ")
+      message <- paste("The following variables have derivation ids not found in the derivations table:\n",
+                       variables, "\n\n")
+      warning(message, call. = FALSE)
+   }
    # Check the derivations in deriavtion that aren't  in value spec
    not_in_deriv <- anti_join(derivations, deriv_vars, by = c("derivation_id"))
    if(nrow(not_in_deriv) != 0){
@@ -116,7 +126,7 @@ codelist_check <- function(value_spec, codelist){
       variables <- not_in_val %>%
          pull(.data$variable) %>%
          str_c(collapse = "\n ")
-      message <- paste("The following variables are missing codelist(s):\n",
+      message <- paste("The following variables hace code ids not found in the codelist(s):\n",
                        variables, "\n")
       warning(message, call. = FALSE)
    }
@@ -274,7 +284,7 @@ all_message <- function() {
    "supp",        "dataset",       is.character,                FALSE,
    "supp",        "variable",      is.character,                FALSE,
    "supp",        "idvar",        is.character,                TRUE,
-   "supp",        "qeval",        is.character,                FALSE,
+   "supp",        "qeval",        is.character,                TRUE,
 )
 }
 
