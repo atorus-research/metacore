@@ -50,6 +50,8 @@ A metacore object is made-up of 6 different tables, which are connected with a s
 
 -   **codelist**: Contains information about code/decodes, permitted values and external libraries
 
+-   **supp**: Contains information specific to supplemental variables 
+
 Here is a schema of how all this fits together:
 
 ![](man/figures/schema-colors.png "man/figures/Metacore Schema")
@@ -140,6 +142,20 @@ To see a metacore object in about please see our vignettes
 
 ![](man/figures/labeled-schema.png "man/figures/Metacore Schema")
 
+### supp 
+
+This table contains the information needed to create supplemental tables. If you want to add a variable which will go into a supplemental qualifier then you can create as normal (i.e. label information going to the **var_spec** table and derivation and origin going into the **value_spec** table), but you need to flag it as supplemental in the **ds_vars** table and add a row to the **supp** table. There is only a single row per dataset/variable, with the following information:
+
+-   *dataset*: The abbreviated name of the dataset. This will match to the name in **ds_spec**
+
+-   *variable*: Variable name. This will match to the name in **ds_spec**
+
+-   *idvar*: ID variable used for the supplemental variable. Can be left missing if not needed
+
+-   *qeval*: Evaluator for the supplemental variable
+
+To see a metacore object in about please see our vignettes
+
 ## Future Development
 
-This is an alpha release of this package, so if you have ideas on future improvements please add them to the issue log. Additionally we are looking into creating an additional **changelog** table to track any changes to metacore objects. This would provide a robust and traceable solution to changing data requirements.
+This is an alpha release of this package, so if you have ideas on future improvements please add them to the issue log. 
