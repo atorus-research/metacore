@@ -197,7 +197,7 @@ col_vars <- function(){
    list(.ds_spec = c("dataset", "structure", "label"),
         .ds_vars = c("dataset", "variable", "key_seq", "order","keep", "core", "supp_flag"),
         .var_spec = c("variable", "length", "label", "type", "common", "format"),
-        .value_spec = c("dataset", "variable", "type", "origin", "code_id", "where", "derivation_id"),
+        .value_spec = c("dataset", "variable", "type", "origin","sig_dig", "code_id", "where", "derivation_id"),
         .derivations = c("derivation_id", "derivation"),
         .codelist= c("code_id", "name","type", "codes"),
         .supp = c("dataset", "variable", "idvar", "qeval"))
@@ -270,6 +270,7 @@ all_message <- function() {
    "var_spec",    "format",        is.character,                TRUE,
    "var_spec",    "common",        is.logical,                  TRUE,
    "value_spec",  "type",          is.character,                TRUE,
+   "value_spec",  "sig_dig",       is.integer,                  TRUE,
    "value_spec",  "origin",        is.character,                TRUE,
    "value_spec",  "code_id",       is.character,                TRUE,
    "value_spec",  "dataset",       is.character,                FALSE,

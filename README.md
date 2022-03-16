@@ -157,6 +157,8 @@ are as follows:
 
 -   *origin*: Origin of the value
 
+-   *sig_dig*: Significant digits of the value
+
 -   *code_id*: ID for the code list to match the id in the **codelist**
     table
 

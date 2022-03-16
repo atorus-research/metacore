@@ -12,6 +12,9 @@ value_spec <- xml_to_value_spec(doc)
 code_list <- xml_to_codelist(doc)
 derivations <- xml_to_derivations(doc)
 
+metacore<- metacore(ds_spec= ds_spec, ds_vars = ds_vars, var_spec = var_spec,
+                    value_spec = value_spec, codelist = code_list, derivations = derivations) %>%
+   select_dataset("ADSL")
 
 adsl_preds <- build_from_derived(metacore, list("dm" = sdtm_dm), predecessor_only = FALSE, keep = TRUE, "ADSL")
 # Pulling ct for DISCREAS from the cdisc pilot data
