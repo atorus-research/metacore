@@ -8,7 +8,7 @@ spec_type_to_value_spec(
   doc,
   cols = c(dataset = "[D|d]ataset|[D|d]omain", variable = "[N|n]ame|[V|v]ariables?",
     origin = "[O|o]rigin", type = "[T|t]ype", code_id = "[C|c]odelist|Controlled Term",
-    where = "[W|w]here", derivation_id = "[M|m]ethod"),
+    sig_dig = "[S|s]ignificant", where = "[W|w]here", derivation_id = "[M|m]ethod"),
   sheet = NULL,
   where_sep_sheet = TRUE,
   where_cols = c(id = "ID", where = c("Variable", "Comparator", "Value")),
