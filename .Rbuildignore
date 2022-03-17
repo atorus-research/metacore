@@ -8,3 +8,7 @@
 ^docs$
 ^pkgdown$
 ^\.github$
+cran-comments.md
+^doc$
+^Meta$
+^CRAN-RELEASE$

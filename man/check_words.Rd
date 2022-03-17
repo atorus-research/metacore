@@ -7,7 +7,7 @@
 check_words(..., col)
 }
 \arguments{
-\item{...}{permissable words in the column}
+\item{...}{permissible words in the column}
 
 \item{col}{the column to check for specific words}
 }

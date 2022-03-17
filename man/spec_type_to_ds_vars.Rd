@@ -19,9 +19,12 @@ spec_type_to_ds_vars(
 format}
 
 \item{cols}{Named vector of column names. The column names can be regular
-expressions for more flexibility. But, the names must follow the given pattern}
+expressions for more flexibility. But, the names must follow the given
+pattern}
 
-\item{key_seq_sep_sheet}{A boolean to indicate if the key sequence is on a separate sheet}
+\item{key_seq_sep_sheet}{A boolean to indicate if the key sequence is on a
+separate sheet. If set to false add the key_seq column name to the \code{cols}
+vector.}
 
 \item{key_seq_cols}{names vector to get the key_sequence for each dataset}
 

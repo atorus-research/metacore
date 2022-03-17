@@ -14,8 +14,8 @@ tibble with the value level information
 }
 \description{
 Takes a define xml and pulls out the value level metadata including codelist_id's,
-defines_id's, and where claus. There is one row per variable expect when there
-is a where, at which point there is one row per value. {this is bad english please help}
+defines_id's, and where clause. There is one row per variable expect when there
+is a where clause, at which point there is one row per value.
 }
 \seealso{
 Other xml builder: 

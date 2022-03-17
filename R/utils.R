@@ -3,8 +3,9 @@
 #' @param x Vector to add label to
 #' @param label Label to add to vector
 #' @return Labeled vector
+#' @noRd
 
-add_label <- function(x, label) {
+add_lab <- function(x, label) {
    if (length(label) == 0) {
       label  <- NULL
    }
@@ -15,13 +16,13 @@ add_label <- function(x, label) {
 #' Add Labels to Dataframe
 #' @param .data Dataframe that you want to add labels to
 #' @param ... Labeled vector of labels, with the name of the element equal to
-#' the name of the column and the element equaling the label, or comma-seperated name-value pair
+#' the name of the column and the element equaling the label, or comma-separated name-value pair
 #' @importFrom purrr map2
 #' @importFrom tibble tibble as_tibble
 #' @importFrom dplyr filter pull
 #' @return Dataframe with labels
-
-add_labels <- function(.data,...) {
+#' @noRd
+add_labs <- function(.data,...) {
    name_list <- c(...)
    df <- tibble(col = names(name_list), lab = name_list)
    .data %>%
@@ -31,7 +32,7 @@ add_labels <- function(.data,...) {
             pull(lab) %>%
             unname()
          if(length(label) > 0) {
-            add_label(x, label)
+            add_lab(x, label)
          } else {
             x
          }
@@ -90,7 +91,7 @@ check_structure <- function(.data, col, func, any_na_acceptable, nm) {
 
 #' Check Words in Column
 #'
-#' @param ... permissable words in the column
+#' @param ... permissible words in the column
 #' @param col the column to check for specific words
 check_words <- function(..., col) {
    accepted_words <- unlist(c(...))
@@ -106,8 +107,9 @@ make_function <- function(args = pairlist(), body, env = parent.frame())  {
 #' Get path to metacore example
 #'
 #' metacore comes bundled with a number of sample files in its `inst/extdata`
-#' directory. This function make them easy to access
-#'
+#' directory. This function make them easy to access. When testing or writing
+#' examples in other packages, it is best to use the 'pilot_ADaM.rda' example as
+#' it loads fastest.
 #' @param file Name of file. If `NULL`, the example files will be listed.
 #' @export
 #' @examples

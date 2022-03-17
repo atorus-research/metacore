@@ -2,12 +2,13 @@
 #'
 #' Given a path, this function converts the define xml to a DataDef Object
 #'
-#' @param path loaction of the define xml as a string
+#' @param path location of the define xml as a string
+#' @param quiet Option to quietly load in, this will suppress warnings, but not errors
 #'
 #' @return DataDef Object
 #' @export
 #'
-define_to_MetaCore <- function(path){
+define_to_metacore <- function(path, quiet = FALSE){
    doc <- xmlTreeParse(path, useInternalNodes = TRUE)
 
    ds_spec <- xml_to_ds_spec(doc)
@@ -16,8 +17,13 @@ define_to_MetaCore <- function(path){
    value_spec <- xml_to_value_spec(doc)
    code_list <- xml_to_codelist(doc)
    derivations <- xml_to_derivations(doc)
-
-   metacore(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist = code_list)
+   if(!quiet){
+      out <- metacore(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist = code_list)
+   } else{
+      out<- suppressWarnings(metacore(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist = code_list))
+      message("Loading in metacore object with suppressed warnings")
+   }
+   out
 }
 
 
@@ -77,7 +83,8 @@ xml_to_ds_vars <- function(doc) {
       mutate(
          variable = id_to_var(.data$variable),
          keep = .data$mandatory == "Yes",
-         core = NA_character_
+         core = NA_character_,
+         supp_flag = NA
       ) %>%
       select(-.data$mandatory)
 }
@@ -134,9 +141,7 @@ xml_to_var_spec <- function(doc) {
       filter(n > 1) %>%
       select(.data$variable) %>%
       inner_join(var_info, by = "variable")  %>%
-      mutate(variable = str_remove(.data$var_full, "^IT\\."),
-             variable = if_else(str_count(variable, "\\.") > 0,
-             str_extract(variable, "(?<=\\.)\\w*"), variable)) %>%
+      mutate(variable = str_remove(.data$var_full, "^IT\\.")) %>%
       distinct()
 
    # Combine the variables that need full names with the variables that don't
@@ -150,8 +155,8 @@ xml_to_var_spec <- function(doc) {
 #' xml to value spec
 #'
 #' Takes a define xml and pulls out the value level metadata including codelist_id's,
-#' defines_id's, and where claus. There is one row per variable expect when there
-#' is a where, at which point there is one row per value. {this is bad english please help}
+#' defines_id's, and where clause. There is one row per variable expect when there
+#' is a where clause, at which point there is one row per value.
 #' @param doc ?
 #'
 #' @return tibble with the value level information
@@ -186,6 +191,8 @@ xml_to_value_spec <- function(doc) {
    var_info <- tibble(
       id = var_nodes %>% get_node_attr("OID"),
       type = var_nodes %>% get_node_attr("DataType"),
+      sig_dig = var_nodes %>% get_node_attr("SignificantDigits") %>%
+         as.integer(),
       origin = or_vec,
       code_id = code_id_vec
    ) %>%

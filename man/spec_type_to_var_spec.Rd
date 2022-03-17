@@ -8,7 +8,7 @@ spec_type_to_var_spec(
   doc,
   cols = c(variable = "[N|n]ame|[V|v]ariables?", length = "[L|l]ength", label =
     "[L|l]abel", type = "[T|t]ype", dataset = "[D|d]ataset|[D|d]omain", format =
-    "Format"),
+    "[F|f]ormat"),
   sheet = NULL
 )
 }

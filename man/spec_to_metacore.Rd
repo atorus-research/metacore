@@ -4,10 +4,12 @@
 \alias{spec_to_metacore}
 \title{Specification document to metacore object}
 \usage{
-spec_to_metacore(path)
+spec_to_metacore(path, quiet = FALSE)
 }
 \arguments{
 \item{path}{string of file location}
+
+\item{quiet}{Option to quietly load in, this will suppress warnings, but not errors}
 }
 \value{
 given a spec document it returns a metacore object

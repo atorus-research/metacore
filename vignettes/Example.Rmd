@@ -26,7 +26,7 @@ To do this, we've built separate reader function for each of the metacore tables
 We start by reading the define from disk using the `xmlTreeParse()` function from the `XML` package.
 
 ```{r}
-doc <- xmlTreeParse(metacore_example("define.xml"), useInternalNodes = TRUE)
+doc <- xmlTreeParse(metacore_example("SDTM_define.xml"), useInternalNodes = TRUE)
 ```
 
 
