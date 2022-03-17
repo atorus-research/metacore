@@ -78,9 +78,9 @@ only a single row per dataset, with the following information:
 
 -   *dataset*: The abbreviated name of the dataset (e.g. AE)
 
--   *structure*: Value structure of the dataset as a sting
+-   *Structure*: Value structure of the dataset as a sting
 
--   *label*: Dataset label
+-   *Label*: Dataset label
 
 ### ds\_vars <img src="man/figures/labeled-ds_vars.png" align="right" height="150"/>
 
@@ -189,7 +189,7 @@ list/library, with the following information:
 
 To see a metacore object in about please see our vignettes
 
-![](man/figures/labeled-schema.png "man/figures/Metacore Schema")
+![](man/figures/labeled_schema.png "man/figures/Metacore Schema")
 
 ## Future Development
 

@@ -137,7 +137,8 @@ This table contains the code lists, permitted value lists, and external librarie
 
 To see a metacore object in about please see our vignettes
 
-![](man/figures/labeled-schema.png "man/figures/Metacore Schema")
+
+![](man/figures/labeled_schema.png "man/figures/Metacore Schema")
 
 ## Future Development
 
