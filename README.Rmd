@@ -142,9 +142,10 @@ This table contains the code lists, permitted value lists, and external librarie
 
 To see a metacore object in about please see our vignettes
 
-![](man/figures/labeled-schema.png "man/figures/Metacore Schema")
 
-### supp 
+![](man/figures/labeled_schema.png "man/figures/Metacore Schema")
+
+### supp <img src="man/figures/labeled-supp.png" align="right" style="height:150px;"/>
 
 This table contains the information needed to create supplemental tables. If you want to add a variable which will go into a supplemental qualifier then you can create as normal (i.e. label information going to the **var_spec** table and derivation and origin going into the **value_spec** table), but you need to flag it as supplemental in the **ds_vars** table and add a row to the **supp** table. There is only a single row per dataset/variable, with the following information:
 

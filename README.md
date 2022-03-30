@@ -54,13 +54,13 @@ normalize the information as much as possible, while keeping together
 like information. Each table has a basic theme to make them easier to
 remember. They are as follows:
 
--   **ds_spec**: Contains dataset level information
+-   **ds\_spec**: Contains dataset level information
 
--   **ds_vars**: Bridges the dataset and variable level information
+-   **ds\_vars**: Bridges the dataset and variable level information
 
--   **var_spec**: Contains variable level information
+-   **var\_spec**: Contains variable level information
 
--   **value_spec**: Contains value level information
+-   **value\_spec**: Contains value level information
 
 -   **derivations**: Contains all derivations
 
@@ -73,7 +73,7 @@ Here is a schema of how all this fits together:
 
 ![](man/figures/schema-colors.png "man/figures/Metacore Schema")
 
-### ds_spec <img src="man/figures/labeled-ds_spec.png" align="right" style="height:150px;"/>
+### ds\_spec <img src="man/figures/labeled-ds_spec.png" align="right" style="height:150px;"/>
 
 This table covers the basic information about each dataset. There is
 only a single row per dataset, with the following information:
@@ -84,18 +84,18 @@ only a single row per dataset, with the following information:
 
 -   *Label*: Dataset label
 
-### ds_vars <img src="man/figures/labeled-ds_vars.png" align="right" style="height:150px;"/>
+### ds\_vars <img src="man/figures/labeled-ds_vars.png" align="right" style="height:150px;"/>
 
 This table contains the information that bridges between purely dataset
 level and purely variable level. There is one row per dataset per
 variable:
 
 -   *dataset*: The abbreviated name of the dataset. This will match to
-    the name in **ds_spec**
+    the name in **ds\_spec**
 
 -   *variable*: Variable name
 
--   *key_seq*: Sequence key, which are the variables used to order a
+-   *key\_seq*: Sequence key, which are the variables used to order a
     dataset. This is a column of integers, where 1 is the first sorting
     variable and 2 is the second etc. If the variable is not used in
     sorting it will be left `NA`
@@ -110,10 +110,10 @@ variable:
     “Conditionally Expected”, or NA. For more information about core see
     [CDISC](https://www.cdisc.org/standards/foundational/adam)
 
--   *supp_flag*: Logical to determine if the variable is in the
+-   *supp\_flag*: Logical to determine if the variable is in the
     supplemental datasets
 
-### var_spec <img src="man/figures/labeled-var_spec.png" align="right" style="height:150px;"/>
+### var\_spec <img src="man/figures/labeled-var_spec.png" align="right" style="height:150px;"/>
 
 This table contains the information the purely variable level
 information. The goal is there is a single row per variable, which is
@@ -123,9 +123,9 @@ variable differs across datasets, the variable will be recorded as
 dataset.variable in the variable column.
 
 -   *variable*: Variable name, which should match the name in
-    **ds_spec**. Unless the variable needs to be duplicated, then the
+    **ds\_spec**. Unless the variable needs to be duplicated, then the
     name will be a combination of the the dataset name and variable name
-    from **ds_spec** (dataset.variable)
+    from **ds\_spec** (dataset.variable)
 
 -   *type*: Variable class
 
@@ -138,7 +138,7 @@ dataset.variable in the variable column.
 
 -   *format*: Variable format
 
-### value_spec <img src="man/figures/labeled-value_spec.png" align="right" style="height:150px;"/>
+### value\_spec <img src="man/figures/labeled-value_spec.png" align="right" style="height:150px;"/>
 
 This table contains the information the information at the value level.
 There will be at least one row per dataset/variable combination. There
@@ -148,23 +148,23 @@ different data types depending on the value. The information contained
 are as follows:
 
 -   *dataset*: The abbreviated name of the dataset. This will match to
-    the name in **ds_spec**
+    the name in **ds\_spec**
 
 -   *variable*: Variable name. This will match to the name in
-    **ds_vars**
+    **ds\_vars**
 
 -   *type*: String of the value type
 
 -   *origin*: Origin of the value
 
--   *sig_dig*: Significant digits of the value
+-   *sig\_dig*: Significant digits of the value
 
--   *code_id*: ID for the code list to match the id in the **codelist**
+-   *code\_id*: ID for the code list to match the id in the **codelist**
     table
 
 -   *where*: Value of the variable
 
--   *derivation_id*: ID for the derivation to match with the
+-   *derivation\_id*: ID for the derivation to match with the
     **derivation** table
 
 ### derivation <img src="man/figures/labeled-derivation.png" align="right" style="height:150px;"/>
@@ -172,7 +172,7 @@ are as follows:
 This table has all the derivation information, with one row per
 derivation ID and the following information:
 
--   *derivation_id*: The ID, which should match to **value_spec**
+-   *derivation\_id*: The ID, which should match to **value\_spec**
 
 -   *derivation*: Text describing the derivation
 
@@ -182,8 +182,8 @@ This table contains the code lists, permitted value lists, and external
 libraries nested within a tibble. There is only a single row per
 list/library, with the following information:
 
--   *code_id*: the ID used to identify the code list. This should be the
-    same as the *code_id* in **val_spec**
+-   *code\_id*: the ID used to identify the code list. This should be
+    the same as the *code\_id* in **val\_spec**
 
 -   *name*: Name of the code list
 
@@ -196,23 +196,23 @@ list/library, with the following information:
 
 To see a metacore object in about please see our vignettes
 
-![](man/figures/labeled-schema.png "man/figures/Metacore Schema")
+![](man/figures/labeled_schema.png "man/figures/Metacore Schema")
 
-### supp
+### supp <img src="man/figures/labeled-supp.png" align="right" style="height:150px;"/>
 
 This table contains the information needed to create supplemental
 tables. If you want to add a variable which will go into a supplemental
 qualifier then you can create as normal (i.e. label information going to
-the **var_spec** table and derivation and origin going into the
-**value_spec** table), but you need to flag it as supplemental in the
-**ds_vars** table and add a row to the **supp** table. There is only a
+the **var\_spec** table and derivation and origin going into the
+**value\_spec** table), but you need to flag it as supplemental in the
+**ds\_vars** table and add a row to the **supp** table. There is only a
 single row per dataset/variable, with the following information:
 
 -   *dataset*: The abbreviated name of the dataset. This will match to
-    the name in **ds_spec**
+    the name in **ds\_spec**
 
 -   *variable*: Variable name. This will match to the name in
-    **ds_spec**
+    **ds\_spec**
 
 -   *idvar*: ID variable used for the supplemental variable. Can be left
     missing if not needed
