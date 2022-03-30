@@ -43,7 +43,7 @@ As we can see, the mock spec we are using here doesn't match the format. Therefo
 
 Here is a schema of how all this fits together
 
-![](../man/figures/labeled-schema.png "Metacore Schema")
+![](../man/figures/labeled_schema.png "Metacore Schema")
 
 ds_spec is connected to ds_vars by the 'dataset' variable and ds_vars is connected to var_spec by the 'variable' variable, etc. For more information on the make-up of metacore objects please see the README. 
 
