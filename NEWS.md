@@ -1,6 +1,7 @@
 
 # Metacore 0.0.4
 - Adds a supp table to store the `idvar` and `qeval` information 
+- Adds `sig_dig`column to the `value_spec` table
 
 
 # Metacore 0.0.3
