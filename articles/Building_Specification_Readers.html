@@ -35,7 +35,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">metacore</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.0.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.0.4</span>
       </span>
     </div>
 
@@ -45,7 +45,7 @@
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -115,7 +115,7 @@
 <li><p><strong>codelist</strong>: Contains information about code/decodes, permitted values and external libraries</p></li>
 </ul>
 <p>Here is a schema of how all this fits together</p>
-<p><img src="../reference/figures/labeled-schema.png" title="Metacore Schema"></p>
+<p><img src="../reference/figures/labeled_schema.png" title="Metacore Schema"></p>
 <p>ds_spec is connected to ds_vars by the ‘dataset’ variable and ds_vars is connected to var_spec by the ‘variable’ variable, etc. For more information on the make-up of metacore objects please see the README.</p>
 <p>Now that we understand what makes a metacore object, we can start to develop the reader.</p>
 <p>First, we need to identify what type of specification format you have. At the moment we support a specification where each tab contains information relevant to a different table, such as a domain tab, a variable tab, etc. To test this you can use the <code>spec_type</code> function.</p>
@@ -318,15 +318,15 @@
                                                   <span class="st">"derivation_id"</span> <span class="op">=</span> <span class="st">"Method"</span><span class="op">)</span>,
                                     where_sep_sheet <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">value_spec</span><span class="op">)</span>
-<span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 7</span></span>
-<span class="co">#&gt;   dataset variable origin      type    code_id derivation_id where</span>
-<span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span></span>
-<span class="co">#&gt; <span style="color: #BCBCBC;">1</span> ADAE    STUDYID  Predecessor Text    <span style="color: #BB0000;">NA</span>      <span style="color: #BB0000;">NA</span>            TRUE </span>
-<span class="co">#&gt; <span style="color: #BCBCBC;">2</span> ADAE    USUBJID  Predecessor Text    <span style="color: #BB0000;">NA</span>      <span style="color: #BB0000;">NA</span>            TRUE </span>
-<span class="co">#&gt; <span style="color: #BCBCBC;">3</span> ADAE    SUBJID   Predecessor Text    <span style="color: #BB0000;">NA</span>      <span style="color: #BB0000;">NA</span>            TRUE </span>
-<span class="co">#&gt; <span style="color: #BCBCBC;">4</span> ADAE    SITEID   Predecessor Text    <span style="color: #BB0000;">NA</span>      <span style="color: #BB0000;">NA</span>            TRUE </span>
-<span class="co">#&gt; <span style="color: #BCBCBC;">5</span> ADAE    AGE      Predecessor Integer <span style="color: #BB0000;">NA</span>      <span style="color: #BB0000;">NA</span>            TRUE </span>
-<span class="co">#&gt; <span style="color: #BCBCBC;">6</span> ADAE    SEX      Predecessor Text    SEX     <span style="color: #BB0000;">NA</span>            TRUE</span></code></pre></div>
+<span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 8</span></span>
+<span class="co">#&gt;   dataset variable origin      type    code_id derivation_id where sig_dig</span>
+<span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span>
+<span class="co">#&gt; <span style="color: #BCBCBC;">1</span> ADAE    STUDYID  Predecessor Text    <span style="color: #BB0000;">NA</span>      <span style="color: #BB0000;">NA</span>            TRUE       <span style="color: #BB0000;">NA</span></span>
+<span class="co">#&gt; <span style="color: #BCBCBC;">2</span> ADAE    USUBJID  Predecessor Text    <span style="color: #BB0000;">NA</span>      <span style="color: #BB0000;">NA</span>            TRUE       <span style="color: #BB0000;">NA</span></span>
+<span class="co">#&gt; <span style="color: #BCBCBC;">3</span> ADAE    SUBJID   Predecessor Text    <span style="color: #BB0000;">NA</span>      <span style="color: #BB0000;">NA</span>            TRUE       <span style="color: #BB0000;">NA</span></span>
+<span class="co">#&gt; <span style="color: #BCBCBC;">4</span> ADAE    SITEID   Predecessor Text    <span style="color: #BB0000;">NA</span>      <span style="color: #BB0000;">NA</span>            TRUE       <span style="color: #BB0000;">NA</span></span>
+<span class="co">#&gt; <span style="color: #BCBCBC;">5</span> ADAE    AGE      Predecessor Integer <span style="color: #BB0000;">NA</span>      <span style="color: #BB0000;">NA</span>            TRUE       <span style="color: #BB0000;">NA</span></span>
+<span class="co">#&gt; <span style="color: #BCBCBC;">6</span> ADAE    SEX      Predecessor Text    SEX     <span style="color: #BB0000;">NA</span>            TRUE       <span style="color: #BB0000;">NA</span></span></code></pre></div>
 <p>The derivation table is relatively simple by comparison. It just has two columns, the derivation id and the derivation. The derivation id should match the derivation id in the the value spec table.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">derivation</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spec_type_to_derivations.html">spec_type_to_derivations</a></span><span class="op">(</span><span class="va">doc</span>, cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"derivation_id"</span> <span class="op">=</span> <span class="st">"Name"</span>,
@@ -368,7 +368,17 @@
 <span class="co">#&gt; core from the ds_vars table only contain missing values.</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; supp_flag from the ds_vars table only contain missing values.</span>
-<span class="co">#&gt; Warning: The following variables are missing derivations:</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; sig_dig from the value_spec table only contain missing values.</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; dataset from the supp table only contain missing values.</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; variable from the supp table only contain missing values.</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; idvar from the supp table only contain missing values.</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; qeval from the supp table only contain missing values.</span>
+<span class="co">#&gt; Warning: The following variables have derivation ids not found in the derivations table:</span>
 <span class="co">#&gt;  ASTDT</span>
 <span class="co">#&gt;  ASTTM</span>
 <span class="co">#&gt;  ASTDTM</span>
@@ -406,7 +416,7 @@
 <span class="co">#&gt;  ADT</span>
 <span class="co">#&gt;  ATM</span>
 <span class="co">#&gt;  ADTM</span>
-<span class="co">#&gt; Warning: The following variables are missing codelist(s):</span>
+<span class="co">#&gt; Warning: The following variables hace code ids not found in the codelist(s):</span>
 <span class="co">#&gt;  ASTDT</span>
 <span class="co">#&gt;  ASTTM</span>
 <span class="co">#&gt;  ASTDTM</span>

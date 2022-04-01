@@ -35,7 +35,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">metacore</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.0.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.0.4</span>
       </span>
     </div>
 
@@ -45,7 +45,7 @@
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -88,7 +88,7 @@
     
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">metacore</span><span class="op">)</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://www.omegahat.net/RSXML" class="external-link">XML</a></span><span class="op">)</span></code></pre></div>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://www.omegahat.net/RSXML/" class="external-link">XML</a></span><span class="op">)</span></code></pre></div>
 <p><a href="https://www.cdisc.org/" class="external-link">CDISC</a> standards provide a standard for submission of data set metadata through a document known as define.xml. The define provides a great deal of useful information that is both machine readable and can be viewed through your web browser. While many organizations wait to produce a define until the datasets are finalized, it can still be advantageous to be able to read metadata directly from a define. For this purpose, we developed readers that can go directly from a define.xml to a metacore object.</p>
 <p>To do this, we’ve built separate reader function for each of the metacore tables. For more information on the structure of the metacore tables, check out the README.</p>
 <p>We start by reading the define from disk using the <code><a href="https://rdrr.io/pkg/XML/man/xmlTreeParse.html" class="external-link">xmlTreeParse()</a></code> function from the <code>XML</code> package.</p>
@@ -110,6 +110,14 @@
 <span class="co">#&gt; supp_flag from the ds_vars table only contain missing values.</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; common from the var_spec table only contain missing values.</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; dataset from the supp table only contain missing values.</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; variable from the supp table only contain missing values.</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; idvar from the supp table only contain missing values.</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; qeval from the supp table only contain missing values.</span>
 <span class="co">#&gt; Warning: The following derivations are never used:</span>
 <span class="co">#&gt;  MT.SUPPAE.QVAL: see value level metadata</span>
 <span class="co">#&gt;  MT.SUPPDM.QVAL: see value level metadata</span>
@@ -133,7 +141,7 @@
 <p>As can be seen above, the metacore object can be filtered directly, or by using the <code>simplify = TRUE</code> argument, a simplified data frame can be returned.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">subset_t</span>
-<span class="co">#&gt; <span style="color: #949494;"># A tibble: 25 × 19</span></span>
+<span class="co">#&gt; <span style="color: #949494;"># A tibble: 25 × 22</span></span>
 <span class="co">#&gt;    dataset variable key_seq order keep  core  supp_flag type     length label   </span>
 <span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   </span>
 <span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> DM      STUDYID        1     1 TRUE  <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>        text         12 Study I…</span>
@@ -146,9 +154,10 @@
 <span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> DM      RFXENDTC      <span style="color: #BB0000;">NA</span>     8 FALSE <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>        datetime     20 Date/Ti…</span>
 <span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> DM      RFICDTC       <span style="color: #BB0000;">NA</span>     9 FALSE <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>        datetime     20 Date/Ti…</span>
 <span class="co">#&gt; <span style="color: #BCBCBC;">10</span> DM      RFPENDTC      <span style="color: #BB0000;">NA</span>    10 FALSE <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>        datetime     20 Date/Ti…</span>
-<span class="co">#&gt; <span style="color: #949494;"># … with 15 more rows, and 9 more variables: format &lt;chr&gt;, common &lt;lgl&gt;,</span></span>
-<span class="co">#&gt; <span style="color: #949494;">#   origin &lt;chr&gt;, code_id &lt;chr&gt;, where &lt;chr&gt;, derivation_id &lt;chr&gt;,</span></span>
-<span class="co">#&gt; <span style="color: #949494;">#   derivation &lt;chr&gt;, name &lt;chr&gt;, codes &lt;list&gt;</span></span></code></pre></div>
+<span class="co">#&gt; <span style="color: #949494;"># … with 15 more rows, and 12 more variables: format &lt;chr&gt;, common &lt;lgl&gt;,</span></span>
+<span class="co">#&gt; <span style="color: #949494;">#   sig_dig &lt;int&gt;, origin &lt;chr&gt;, code_id &lt;chr&gt;, where &lt;chr&gt;,</span></span>
+<span class="co">#&gt; <span style="color: #949494;">#   derivation_id &lt;chr&gt;, derivation &lt;chr&gt;, name &lt;chr&gt;, codes &lt;list&gt;,</span></span>
+<span class="co">#&gt; <span style="color: #949494;">#   idvar &lt;chr&gt;, qeval &lt;chr&gt;</span></span></code></pre></div>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
