@@ -54,18 +54,20 @@ normalize the information as much as possible, while keeping together
 like information. Each table has a basic theme to make them easier to
 remember. They are as follows:
 
-  - **ds\_spec**: Contains dataset level information
+-   **ds\_spec**: Contains dataset level information
 
-  - **ds\_vars**: Bridges the dataset and variable level information
+-   **ds\_vars**: Bridges the dataset and variable level information
 
-  - **var\_spec**: Contains variable level information
+-   **var\_spec**: Contains variable level information
 
-  - **value\_spec**: Contains value level information
+-   **value\_spec**: Contains value level information
 
-  - **derivations**: Contains all derivations
+-   **derivations**: Contains all derivations
 
-  - **codelist**: Contains information about code/decodes, permitted
+-   **codelist**: Contains information about code/decodes, permitted
     values and external libraries
+
+-   **supp**: Contains information specific to supplemental variables
 
 Here is a schema of how all this fits together:
 
@@ -76,11 +78,11 @@ Here is a schema of how all this fits together:
 This table covers the basic information about each dataset. There is
 only a single row per dataset, with the following information:
 
-  - *dataset*: The abbreviated name of the dataset (e.g. AE)
+-   *dataset*: The abbreviated name of the dataset (e.g. AE)
 
-  - *Structure*: Value structure of the dataset as a sting
+-   *Structure*: Value structure of the dataset as a sting
 
-  - *Label*: Dataset label
+-   *Label*: Dataset label
 
 ### ds\_vars <img src="man/figures/labeled-ds_vars.png" align="right" style="height:150px;"/>
 
@@ -88,27 +90,27 @@ This table contains the information that bridges between purely dataset
 level and purely variable level. There is one row per dataset per
 variable:
 
-  - *dataset*: The abbreviated name of the dataset. This will match to
+-   *dataset*: The abbreviated name of the dataset. This will match to
     the name in **ds\_spec**
 
-  - *variable*: Variable name
+-   *variable*: Variable name
 
-  - *key\_seq*: Sequence key, which are the variables used to order a
+-   *key\_seq*: Sequence key, which are the variables used to order a
     dataset. This is a column of integers, where 1 is the first sorting
     variable and 2 is the second etc. If the variable is not used in
     sorting it will be left `NA`
 
-  - *order*: Order sets the order of the columns to appear in the
+-   *order*: Order sets the order of the columns to appear in the
     dataset. This is also a numeric value
 
-  - *keep*: Logical value about if the variable needs to be kept
+-   *keep*: Logical value about if the variable needs to be kept
 
-  - *core*: ADaM core, which should be one of the following values:
+-   *core*: ADaM core, which should be one of the following values:
     “Expected”, “Required”, “Permissible”, “Conditionally Required”,
-    “Conditionally Expected”, or NA. For more information about core
-    see [CDISC](https://www.cdisc.org/standards/foundational/adam)
+    “Conditionally Expected”, or NA. For more information about core see
+    [CDISC](https://www.cdisc.org/standards/foundational/adam)
 
-  - *supp\_flag*: Logical to determine if the variable is in the
+-   *supp\_flag*: Logical to determine if the variable is in the
     supplemental datasets
 
 ### var\_spec <img src="man/figures/labeled-var_spec.png" align="right" style="height:150px;"/>
@@ -120,21 +122,21 @@ standard. But, this isn’t always possible, so if information for a given
 variable differs across datasets, the variable will be recorded as
 dataset.variable in the variable column.
 
-  - *variable*: Variable name, which should match the name in
+-   *variable*: Variable name, which should match the name in
     **ds\_spec**. Unless the variable needs to be duplicated, then the
     name will be a combination of the the dataset name and variable name
     from **ds\_spec** (dataset.variable)
 
-  - *type*: Variable class
+-   *type*: Variable class
 
-  - *length*: Variable length (while not relevant to R datasets, this is
+-   *length*: Variable length (while not relevant to R datasets, this is
     important for when creating XPT files)
 
-  - *label*: Variable label
+-   *label*: Variable label
 
-  - *common*: Common across ADaM datasets
+-   *common*: Common across ADaM datasets
 
-  - *format*: Variable format
+-   *format*: Variable format
 
 ### value\_spec <img src="man/figures/labeled-value_spec.png" align="right" style="height:150px;"/>
 
@@ -145,22 +147,24 @@ has values which have differing metadata. For instance LBORRES that are
 different data types depending on the value. The information contained
 are as follows:
 
-  - *dataset*: The abbreviated name of the dataset. This will match to
+-   *dataset*: The abbreviated name of the dataset. This will match to
     the name in **ds\_spec**
 
-  - *variable*: Variable name. This will match to the name in
+-   *variable*: Variable name. This will match to the name in
     **ds\_vars**
 
-  - *type*: String of the value type
+-   *type*: String of the value type
 
-  - *origin*: Origin of the value
+-   *origin*: Origin of the value
 
-  - *code\_id*: ID for the code list to match the id in the **codelist**
+-   *sig\_dig*: Significant digits of the value
+
+-   *code\_id*: ID for the code list to match the id in the **codelist**
     table
 
-  - *where*: Value of the variable
+-   *where*: Value of the variable
 
-  - *derivation\_id*: ID for the derivation to match with the
+-   *derivation\_id*: ID for the derivation to match with the
     **derivation** table
 
 ### derivation <img src="man/figures/labeled-derivation.png" align="right" style="height:150px;"/>
@@ -168,9 +172,9 @@ are as follows:
 This table has all the derivation information, with one row per
 derivation ID and the following information:
 
-  - *derivation\_id*: The ID, which should match to **value\_spec**
+-   *derivation\_id*: The ID, which should match to **value\_spec**
 
-  - *derivation*: Text describing the derivation
+-   *derivation*: Text describing the derivation
 
 ### codelist <img src="man/figures/labeled-code_list.png" align="right" style="height:150px;"/>
 
@@ -178,26 +182,46 @@ This table contains the code lists, permitted value lists, and external
 libraries nested within a tibble. There is only a single row per
 list/library, with the following information:
 
-  - *code\_id*: the ID used to identify the code list. This should be
+-   *code\_id*: the ID used to identify the code list. This should be
     the same as the *code\_id* in **val\_spec**
 
-  - *name*: Name of the code list
+-   *name*: Name of the code list
 
-  - *code*: A list of tibbles (for code / decode combinations) and
+-   *code*: A list of tibbles (for code / decode combinations) and
     vectors (for permitted values and libraries), which contain all the
     codes
 
-  - *type*: An indicator of if the information in the code column is a
+-   *type*: An indicator of if the information in the code column is a
     code/decode table, permitted value, or external library
 
 To see a metacore object in about please see our vignettes
 
-![](man/figures/labeled-schema.png "man/figures/Metacore Schema")
+![](man/figures/labeled_schema.png "man/figures/Metacore Schema")
+
+### supp <img src="man/figures/labeled-supp.png" align="right" style="height:150px;"/>
+
+This table contains the information needed to create supplemental
+tables. If you want to add a variable which will go into a supplemental
+qualifier then you can create as normal (i.e. label information going to
+the **var\_spec** table and derivation and origin going into the
+**value\_spec** table), but you need to flag it as supplemental in the
+**ds\_vars** table and add a row to the **supp** table. There is only a
+single row per dataset/variable, with the following information:
+
+-   *dataset*: The abbreviated name of the dataset. This will match to
+    the name in **ds\_spec**
+
+-   *variable*: Variable name. This will match to the name in
+    **ds\_spec**
+
+-   *idvar*: ID variable used for the supplemental variable. Can be left
+    missing if not needed
+
+-   *qeval*: Evaluator for the supplemental variable
+
+To see a metacore object in about please see our vignettes
 
 ## Future Development
 
 This is an alpha release of this package, so if you have ideas on future
-improvements please add them to the issue log. Additionally we are
-looking into creating an additional **changelog** table to track any
-changes to metacore objects. This would provide a robust and traceable
-solution to changing data requirements.
+improvements please add them to the issue log.

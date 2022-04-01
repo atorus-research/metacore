@@ -90,7 +90,7 @@ derivation_check <- function(value_spec, derivations){
       variables <- not_in_val %>%
          pull(.data$variable) %>%
          str_c(collapse = "\n ")
-      message <- paste("The following variables are missing derivations:\n",
+      message <- paste("The following variables have derivation ids not found in the derivations table:\n",
                        variables, "\n\n")
       warning(message, call. = FALSE)
    }
@@ -126,7 +126,7 @@ codelist_check <- function(value_spec, codelist){
       variables <- not_in_val %>%
          pull(.data$variable) %>%
          str_c(collapse = "\n ")
-      message <- paste("The following variables are missing codelist(s):\n",
+      message <- paste("The following variables hace code ids not found in the codelist(s):\n",
                        variables, "\n")
       warning(message, call. = FALSE)
    }
@@ -142,6 +142,53 @@ codelist_check <- function(value_spec, codelist){
    }
 }
 
+
+#' Check Supp
+#'
+#'
+#' Check the supp table works with the ds_var tables. All variables in the
+#' ds_var  with a TRUE supp flag should be in the supp and all variables in supp
+#' should be in ds_vars
+#' @param ds_vars ds_vars table
+#' @param supp supp table
+#'
+#' @return writes warning to console if there is an issue
+#' @noRd
+supp_check <- function(ds_vars, supp){
+   dist_test <- supp %>%
+      distinct(.data$dataset, .data$variable) %>%
+      nrow() == nrow(supp)
+   if(!dist_test){
+      warning("Supp table contains non-unique dataset/variable combinations")
+   }
+
+   ds_vars <- ds_vars %>%
+      filter(.data$supp_flag)
+
+   #Check the variables in ds_vars that don't have value specs
+   not_in_supp <- anti_join(ds_vars, supp, by = c("dataset", "variable"))
+   if(nrow(not_in_supp) != 0){
+      variables <- not_in_supp %>%
+         mutate(full = str_c(.data$dataset, .data$variable, sep = ".")) %>%
+         pull(.data$full) %>%
+         str_c(collapse = ", ")
+      message <- paste("The following variables are in the ds_vars table and tagged as supplement, but don't have supp specs:\n",
+                       variables, "\n\n")
+      warning(message, call. = FALSE)
+   }
+   # Check the variables in value spec that aren't in ds_vars
+   not_in_ds <- anti_join(supp, ds_vars, by = c("dataset", "variable"))
+   if(nrow(not_in_ds) != 0){
+      variables <- not_in_ds %>%
+         pull(.data$variable) %>%
+         str_c(collapse = ", ")
+      message <- paste("The following variables are have supp specifications, but aren't in the ds_vars table:\n",
+                       variables, "\n\n")
+      warning(message, call. = FALSE)
+   }
+}
+
+
 #' Column Names by dataset
 #'
 #' @return list of column names by dataset
@@ -150,10 +197,10 @@ col_vars <- function(){
    list(.ds_spec = c("dataset", "structure", "label"),
         .ds_vars = c("dataset", "variable", "key_seq", "order","keep", "core", "supp_flag"),
         .var_spec = c("variable", "length", "label", "type", "common", "format"),
-        .value_spec = c("type", "origin", "code_id", "dataset", "variable", "where", "derivation_id"),
+        .value_spec = c("dataset", "variable", "type", "origin","sig_dig", "code_id", "where", "derivation_id"),
         .derivations = c("derivation_id", "derivation"),
         .codelist= c("code_id", "name","type", "codes"),
-        .change_log = c("table_chg", "column_chg", "what_chg"))
+        .supp = c("dataset", "variable", "idvar", "qeval"))
 }
 
 
@@ -223,6 +270,7 @@ all_message <- function() {
    "var_spec",    "format",        is.character,                TRUE,
    "var_spec",    "common",        is.logical,                  TRUE,
    "value_spec",  "type",          is.character,                TRUE,
+   "value_spec",  "sig_dig",       is.integer,                  TRUE,
    "value_spec",  "origin",        is.character,                TRUE,
    "value_spec",  "code_id",       is.character,                TRUE,
    "value_spec",  "dataset",       is.character,                FALSE,
@@ -234,6 +282,10 @@ all_message <- function() {
    "codelist",    "name",        is.character,                TRUE,
    "codelist",    "codes",        function(x){!is.null(x)},    TRUE,
    "codelist",    "type",         is.character,                TRUE,
+   "supp",        "dataset",       is.character,                FALSE,
+   "supp",        "variable",      is.character,                FALSE,
+   "supp",        "idvar",        is.character,                TRUE,
+   "supp",        "qeval",        is.character,                TRUE,
 )
 }
 
@@ -248,8 +300,9 @@ all_message <- function() {
 #' @param value_spec value specification
 #' @param derivations derivation information
 #' @param codelist codelist information
+#' @param supp supp information
 #'
-check_columns <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist) {
+check_columns <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist, supp) {
 
 
    messages <- purrr::pmap(all_message(),

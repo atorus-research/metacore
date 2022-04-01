@@ -314,6 +314,7 @@ spec_type_to_value_spec <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]
                                                   "origin" = "[O|o]rigin",
                                                   "type" = "[T|t]ype",
                                                   "code_id" = "[C|c]odelist|Controlled Term",
+                                                  "sig_dig" = "[S|s]ignificant",
                                                   "where" = "[W|w]here",
                                                   "derivation_id" = "[M|m]ethod"),
                                     sheet = NULL,
@@ -321,17 +322,18 @@ spec_type_to_value_spec <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]
                                     where_cols = c("id" = "ID",
                                                    "where" = c("Variable", "Comparator", "Value")),
                                     var_sheet = "[V|v]ar"){
-   name_check <- names(cols) %in% c("variable", "origin", "code_id",
+   name_check <- names(cols) %in% c("variable", "origin", "code_id", "sig_dig",
                                     "type", "dataset", "where", "derivation_id") %>%
       all()
 
    if(!name_check| is.null(names(cols))){
       stop("Supplied column vector must be named using the following names:
-              'dataset', 'variable', 'origin', 'code_id', 'type', 'where', 'derivation_id'
+              'dataset', 'variable', 'origin', 'code_id', 'type', 'where', 'sig_dig', 'derivation_id'
               If derivation_id is not avaliable it can be excluded and dataset.variable will be used.
 
               If the where information is on a seperate sheet, put the column with cross ref as where.")
    }
+
    # Select a subset of sheets if specified
    if(!is.null(sheet)){
       sheet_ls <- str_subset(names(doc), sheet)
@@ -405,7 +407,8 @@ spec_type_to_value_spec <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]
       discard(~. %in% names(out))
    out %>%
       `is.na<-`(missing) %>%
-      distinct()
+      distinct() %>%
+      mutate(sig_dig = as.integer(.data$sig_dig))
 
 }
 

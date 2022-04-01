@@ -4,7 +4,15 @@
 \alias{check_columns}
 \title{Check all data frames include the correct types of columns}
 \usage{
-check_columns(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist)
+check_columns(
+  ds_spec,
+  ds_vars,
+  var_spec,
+  value_spec,
+  derivations,
+  codelist,
+  supp
+)
 }
 \arguments{
 \item{ds_spec}{dataset specification}
@@ -18,6 +26,8 @@ check_columns(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist)
 \item{derivations}{derivation information}
 
 \item{codelist}{codelist information}
+
+\item{supp}{supp information}
 }
 \description{
 This function checks for vector types and accepted words

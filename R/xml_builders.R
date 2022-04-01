@@ -191,6 +191,8 @@ xml_to_value_spec <- function(doc) {
    var_info <- tibble(
       id = var_nodes %>% get_node_attr("OID"),
       type = var_nodes %>% get_node_attr("DataType"),
+      sig_dig = var_nodes %>% get_node_attr("SignificantDigits") %>%
+         as.integer(),
       origin = or_vec,
       code_id = code_id_vec
    ) %>%
