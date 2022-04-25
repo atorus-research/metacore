@@ -126,7 +126,7 @@ codelist_check <- function(value_spec, codelist){
       variables <- not_in_val %>%
          pull(.data$variable) %>%
          str_c(collapse = "\n ")
-      message <- paste("The following variables hace code ids not found in the codelist(s):\n",
+      message <- paste("The following variables have code ids not found in the codelist(s):\n",
                        variables, "\n")
       warning(message, call. = FALSE)
    }
