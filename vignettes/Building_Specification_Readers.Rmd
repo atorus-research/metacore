@@ -21,15 +21,15 @@ library(purrr)
 library(stringr)
 ```
 
-The first thing to do when trying to build a specification reader is to try the default. By default metacore can read in specification that are in the Pinnacle 21 specification format. If your document isn't in that format, it is still worth trying the default readers, as the error messages can be helpful.
+The first thing to do when trying to build a specification reader is to try the default. By default metacore can read in specifications that are in the Pinnacle 21 specification format. If your document isn't in that format, it is still worth trying the default readers, as the error messages can be helpful.
 
 ```{r, error=TRUE}
 spec_to_metacore(metacore_example("mock_spec.xlsx"))
 ```
 
-As we can see, the mock spec we are using here doesn't match the format. Therefore we will have to build bespoke reader. Before we start, it is important to understand the structure of the metacore object. Each object acts as its own database for all dataset related metadata. The object has 7 tables, 6 tables holding metadata and 1 change log. The 6 tables and their general purpose are as follows:
+As we can see, the mock spec we are using here doesn't match the format. Therefore we will have to build a bespoke reader. Before we start, it is important to understand the structure of the metacore object. Each object acts as its own database for all dataset related metadata. The object has 7 tables and their general purpose are as follows:
 
--   **ds_sep**: Contains dataset level information
+-   **ds_spec**: Contains dataset level information
 
 -   **ds_vars**: Bridges the dataset and variable level information
 
@@ -40,6 +40,8 @@ As we can see, the mock spec we are using here doesn't match the format. Therefo
 -   **derivations**: Contains all derivations
 
 -   **codelist**: Contains information about code/decodes, permitted values and external libraries
+
+-   **supp**: Contains information specific to supplemental variables 
 
 Here is a schema of how all this fits together
 
@@ -65,7 +67,7 @@ doc %>% map(head)
 
 ```
 
-Let's start with making the ds_spec (dataset specification) table using `spec_type_to_ds_spec`. The ds_spec table is made of 3 columns: the dataset name, the dataset structure, and the dataset label. If we look at our specification document, it looks like all this information is in the Domains tab. Now we know what we need we can start building the table by trying the `spec_type_to_ds_spec` function.
+Let's start with making the ds_spec (dataset specification) table using `spec_type_to_ds_spec`. The ds_spec table is made of 3 columns: the dataset name, the dataset structure, and the dataset label. If we look at our specification document, it looks like all this information is in the Domains tab. Now we know what we need, we can start building the table by trying the `spec_type_to_ds_spec` function.
 
 This function takes in our named list of datasets (doc), a named vector of columns (cols) and a sheet name (sheet). But, only doc is needed, the other inputs have defaults. So we can try with just the default and see what we get.
 
@@ -93,7 +95,7 @@ head(ds_spec)
 
 Regular expressions are used to match the columns, so if you needed a more flexible input, you could do that. Now, we have the ds_spec table we can move on to the ds_vars table.
 
-The ds_vars table has 5 columns:
+The ds_vars table has 7 columns:
 
 -   dataset: dataset name
 
@@ -164,7 +166,7 @@ var_spec <- var_spec %>%
    mutate(format = if_else(str_detect(format, "\\."), format, ""))
 ```
 
-The next dataset is value_spec, which contains the value level metadata. It is made up of 7 columns:
+The next dataset is value_spec, which contains the value level metadata. It is made up of 8 columns:
 
 -   dataset: dataset name
 
@@ -174,13 +176,15 @@ The next dataset is value_spec, which contains the value level metadata. It is m
 
 -   type: value type
 
+-   sig_dig: significant digits of the value
+
 -   code_id: id used to cross-reference the code/decode
 
 -   where: value of the variable
 
 -   derivation_id: id used to cross-reference the derivation
 
-By default, `spec_type_to_value_spec` is set up to have the where information on different sheet because that is the format of a P21 spec, but in our spec we don't have that. In fact, we don't have any value level metadata in our spec. But, that is fine - the default builders will just pull what information it can from the variable tab.
+By default, `spec_type_to_value_spec` is set up to have the where information on a different sheet because that is the format of a P21 spec, but in our spec we don't have that. In fact, we don't have any value level metadata in our spec. But, that is fine - the default builders will just pull what information it can from the variable tab.
 
 ```{r}
 value_spec <- spec_type_to_value_spec(doc, cols = c("dataset" = "VLM Name|Domain",
