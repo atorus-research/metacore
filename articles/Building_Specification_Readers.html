@@ -63,7 +63,14 @@
   <a href="../news/index.html">Changelog</a>
 </li>
       </ul>
-<ul class="nav navbar-nav navbar-right"></ul>
+<ul class="nav navbar-nav navbar-right">
+<li>
+  <a href="https://github.com/atorus-research/metacore/" class="external-link">
+    <span class="fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul>
 </div>
 <!--/.nav-collapse -->
   </div>
@@ -79,7 +86,7 @@
       <h1 data-toc-skip>Building Specification Readers</h1>
             
       
-      
+      <small class="dont-index">Source: <a href="https://github.com/atorus-research/metacore/blob/HEAD/vignettes/Building_Specification_Readers.Rmd" class="external-link"><code>vignettes/Building_Specification_Readers.Rmd</code></a></small>
       <div class="hidden name"><code>Building_Specification_Readers.Rmd</code></div>
 
     </div>
@@ -87,7 +94,7 @@
     
     
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">metacore</span><span class="op">)</span>
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://atorus-research.github.io/metacore/" class="external-link">metacore</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; Attaching package: 'dplyr'</span>
@@ -99,20 +106,21 @@
 <span class="co">#&gt;     intersect, setdiff, setequal, union</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://purrr.tidyverse.org" class="external-link">purrr</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://stringr.tidyverse.org" class="external-link">stringr</a></span><span class="op">)</span></code></pre></div>
-<p>The first thing to do when trying to build a specification reader is to try the default. By default metacore can read in specification that are in the Pinnacle 21 specification format. If your document isn’t in that format, it is still worth trying the default readers, as the error messages can be helpful.</p>
+<p>The first thing to do when trying to build a specification reader is to try the default. By default metacore can read in specifications that are in the Pinnacle 21 specification format. If your document isn’t in that format, it is still worth trying the default readers, as the error messages can be helpful.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/spec_to_metacore.html">spec_to_metacore</a></span><span class="op">(</span><span class="fu"><a href="../reference/metacore_example.html">metacore_example</a></span><span class="op">(</span><span class="st">"mock_spec.xlsx"</span><span class="op">)</span><span class="op">)</span>
 <span class="co">#&gt; Error: Unable to rename the following columns in Domains:</span>
 <span class="co">#&gt;  label matches 2 columns</span>
 <span class="co">#&gt; Please check your regular expression</span></code></pre></div>
-<p>As we can see, the mock spec we are using here doesn’t match the format. Therefore we will have to build bespoke reader. Before we start, it is important to understand the structure of the metacore object. Each object acts as its own database for all dataset related metadata. The object has 7 tables, 6 tables holding metadata and 1 change log. The 6 tables and their general purpose are as follows:</p>
+<p>As we can see, the mock spec we are using here doesn’t match the format. Therefore we will have to build a bespoke reader. Before we start, it is important to understand the structure of the metacore object. Each object acts as its own database for all dataset related metadata. The object has 7 tables and their general purpose are as follows:</p>
 <ul>
-<li><p><strong>ds_sep</strong>: Contains dataset level information</p></li>
+<li><p><strong>ds_spec</strong>: Contains dataset level information</p></li>
 <li><p><strong>ds_vars</strong>: Bridges the dataset and variable level information</p></li>
 <li><p><strong>var_spec</strong>: Contains variable level information</p></li>
 <li><p><strong>value_spec</strong>: Contains value level information</p></li>
 <li><p><strong>derivations</strong>: Contains all derivations</p></li>
 <li><p><strong>codelist</strong>: Contains information about code/decodes, permitted values and external libraries</p></li>
+<li><p><strong>supp</strong>: Contains information specific to supplemental variables</p></li>
 </ul>
 <p>Here is a schema of how all this fits together</p>
 <p><img src="../reference/figures/labeled_schema.png" title="Metacore Schema"></p>
@@ -184,7 +192,7 @@
 <span class="co">#&gt; <span style="color: #BCBCBC;">4</span> TPERADY                     Contains the number of days from… <span style="color: #BB0000;">NA</span>              </span>
 <span class="co">#&gt; <span style="color: #BCBCBC;">5</span> TPERSTDY                    Contains the number of days from… <span style="color: #BB0000;">NA</span>              </span>
 <span class="co">#&gt; <span style="color: #BCBCBC;">6</span> TPERENDY                    Contains the number of days from… <span style="color: #BB0000;">NA</span></span></code></pre></div>
-<p>Let’s start with making the ds_spec (dataset specification) table using <code>spec_type_to_ds_spec</code>. The ds_spec table is made of 3 columns: the dataset name, the dataset structure, and the dataset label. If we look at our specification document, it looks like all this information is in the Domains tab. Now we know what we need we can start building the table by trying the <code>spec_type_to_ds_spec</code> function.</p>
+<p>Let’s start with making the ds_spec (dataset specification) table using <code>spec_type_to_ds_spec</code>. The ds_spec table is made of 3 columns: the dataset name, the dataset structure, and the dataset label. If we look at our specification document, it looks like all this information is in the Domains tab. Now we know what we need, we can start building the table by trying the <code>spec_type_to_ds_spec</code> function.</p>
 <p>This function takes in our named list of datasets (doc), a named vector of columns (cols) and a sheet name (sheet). But, only doc is needed, the other inputs have defaults. So we can try with just the default and see what we get.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/spec_type_to_ds_spec.html">spec_type_to_ds_spec</a></span><span class="op">(</span><span class="va">doc</span><span class="op">)</span>
@@ -213,7 +221,7 @@
 <span class="co">#&gt; <span style="color: #BCBCBC;">3</span> ADTRT   One record per subject per period                            Treatmen…</span>
 <span class="co">#&gt; <span style="color: #BCBCBC;">4</span> ADSL    One record per subject                                       Subject-…</span></code></pre></div>
 <p>Regular expressions are used to match the columns, so if you needed a more flexible input, you could do that. Now, we have the ds_spec table we can move on to the ds_vars table.</p>
-<p>The ds_vars table has 5 columns:</p>
+<p>The ds_vars table has 7 columns:</p>
 <ul>
 <li><p>dataset: dataset name</p></li>
 <li><p>variable: variable name</p></li>
@@ -297,17 +305,18 @@
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">var_spec</span> <span class="op">&lt;-</span> <span class="va">var_spec</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> 
    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>format <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/if_else.html" class="external-link">if_else</a></span><span class="op">(</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_detect.html" class="external-link">str_detect</a></span><span class="op">(</span><span class="va">format</span>, <span class="st">"\\."</span><span class="op">)</span>, <span class="va">format</span>, <span class="st">""</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<p>The next dataset is value_spec, which contains the value level metadata. It is made up of 7 columns:</p>
+<p>The next dataset is value_spec, which contains the value level metadata. It is made up of 8 columns:</p>
 <ul>
 <li><p>dataset: dataset name</p></li>
 <li><p>variable: variable name</p></li>
 <li><p>origin: origin of data</p></li>
 <li><p>type: value type</p></li>
+<li><p>sig_dig: significant digits of the value</p></li>
 <li><p>code_id: id used to cross-reference the code/decode</p></li>
 <li><p>where: value of the variable</p></li>
 <li><p>derivation_id: id used to cross-reference the derivation</p></li>
 </ul>
-<p>By default, <code>spec_type_to_value_spec</code> is set up to have the where information on different sheet because that is the format of a P21 spec, but in our spec we don’t have that. In fact, we don’t have any value level metadata in our spec. But, that is fine - the default builders will just pull what information it can from the variable tab.</p>
+<p>By default, <code>spec_type_to_value_spec</code> is set up to have the where information on a different sheet because that is the format of a P21 spec, but in our spec we don’t have that. In fact, we don’t have any value level metadata in our spec. But, that is fine - the default builders will just pull what information it can from the variable tab.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">value_spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spec_type_to_value_spec.html">spec_type_to_value_spec</a></span><span class="op">(</span><span class="va">doc</span>, cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"dataset"</span> <span class="op">=</span> <span class="st">"VLM Name|Domain"</span>,
                                                   <span class="st">"variable"</span> <span class="op">=</span> <span class="st">"VLM Name|Variable Name"</span>,
@@ -416,7 +425,7 @@
 <span class="co">#&gt;  ADT</span>
 <span class="co">#&gt;  ATM</span>
 <span class="co">#&gt;  ADTM</span>
-<span class="co">#&gt; Warning: The following variables hace code ids not found in the codelist(s):</span>
+<span class="co">#&gt; Warning: The following variables have code ids not found in the codelist(s):</span>
 <span class="co">#&gt;  ASTDT</span>
 <span class="co">#&gt;  ASTTM</span>
 <span class="co">#&gt;  ASTDTM</span>
