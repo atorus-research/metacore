@@ -46,3 +46,5 @@ Imports:
     tibble,
     tidyselect
 VignetteBuilder: knitr
+URL: https://atorus-research.github.io/metacore/, https://github.com/atorus-research/metacore
+BugReports: https://github.com/atorus-research/metacore/issues
