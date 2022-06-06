@@ -1,4 +1,7 @@
 
+# Metacore 0.0.5
+- [#47](https://github.com/atorus-research/metacore/issues/47) Improve `yn_to_tf()` to be more robust in parsing yes/no columns
+
 # Metacore 0.0.4
 - Adds a supp table to store the `idvar` and `qeval` information 
 - Adds `sig_dig`column to the `value_spec` table
