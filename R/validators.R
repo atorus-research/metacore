@@ -271,7 +271,7 @@ all_message <- function() {
    "var_spec",    "common",        is.logical,                  TRUE,
    "value_spec",  "type",          is.character,                TRUE,
    "value_spec",  "sig_dig",       is.integer,                  TRUE,
-   "value_spec",  "origin",        is.character,                TRUE,
+   "value_spec",  "origin",        function(x){str_detect(x, "collected|derived|assigned|protocol|predecessor|crf.*")||is.na(x)},                TRUE,
    "value_spec",  "code_id",       is.character,                TRUE,
    "value_spec",  "dataset",       is.character,                FALSE,
    "value_spec",  "where",         is.character,                TRUE,
