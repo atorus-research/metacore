@@ -1,6 +1,6 @@
 Package: metacore
 Title: A Centralized Metadata Object Focus on Clinical Trial Data Programming Workflows
-Version: 0.0.4
+Version: 0.0.4.9001
 Authors@R: 
     c(person(given = "Christina",
              family = "Fillmore",
@@ -46,3 +46,5 @@ Imports:
     tibble,
     tidyselect
 VignetteBuilder: knitr
+URL: https://atorus-research.github.io/metacore/, https://github.com/atorus-research/metacore
+BugReports: https://github.com/atorus-research/metacore/issues
