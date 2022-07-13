@@ -394,7 +394,9 @@ test_that("values_spec reader tests", {
    # Tests
    expect_equal(def_value_spec, ref_value_spec)
    expect_equal(spec_value_spec,
-                ref_value_spec)
+                ref_value_spec %>%
+                   mutate(derivation_id = if_else(origin == "Assigned", paste0("MT.", dataset, ".", variable),
+                                                  derivation_id)))
 
    })
 
@@ -447,17 +449,27 @@ test_that("derivation reader tests", {
       mutate(derivation = str_replace_all(derivation, '\\"', "\\'"))
 
    # Read from spec
+
+   ref_deriv <- spec$Methods %>%
+      select(derivation_id = ID,
+             derivation = Description) %>%
+      mutate(derivation_id = paste0("MT.", derivation_id))
+   ref_deriv <- spec$Variables %>%
+      filter(Origin %in% c("Assigned")) %>%
+      mutate(derivation_id = paste0("MT.", Dataset, ".", Variable),
+             derivation = Comment) %>%
+      select(starts_with("derivation")) %>%
+      bind_rows(ref_deriv, .) %>%
+      arrange(derivation_id) %>%
+      distinct()
+
    spec_derivation <- spec_type_to_derivations(spec) %>%
       arrange(derivation_id) %>%
-      mutate(derivation_id = paste0("MT.", derivation_id)) %>%
-      mutate(derivation = str_replace_all(derivation, '\\"', "\\'"),
-             derivation = derivation %>% str_remove_all("\\\r|\\\n$") %>%
-                str_trim()
-             )
+      mutate(derivation_id = paste0("MT.", derivation_id))
 
    # Tests
    expect_equal(def_derivation, ref_derivation)
-   expect_equal(spec_derivation, ref_derivation)
+   expect_equal(spec_derivation, ref_deriv)
 })
 
 test_that("codelist reader tests", {

@@ -12,6 +12,7 @@
 #' @export
 spec_to_metacore <- function(path, quiet = FALSE){
    doc <- read_all_sheets(path)
+
    if(spec_type(path) == "by_type"){
       ds_spec <- spec_type_to_ds_spec(doc)
       ds_vars <- spec_type_to_ds_vars(doc)
@@ -143,7 +144,7 @@ spec_type_to_ds_vars <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]oma
                                                "keep" = "[K|k]eep|[M|m]andatory"),
                                  key_seq_sep_sheet = TRUE,
                                  key_seq_cols = c("dataset" = "Dataset",
-                                                "key_seq" = "Key Variables"),
+                                                  "key_seq" = "Key Variables"),
                                  sheet = "[V|v]ar|Datasets"){
    name_check <- names(cols) %in% c("variable", "dataset", "order",
                                     "keep", "key_seq", "core", "supp_flag") %>%
@@ -316,19 +317,22 @@ spec_type_to_value_spec <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]
                                                   "code_id" = "[C|c]odelist|Controlled Term",
                                                   "sig_dig" = "[S|s]ignificant",
                                                   "where" = "[W|w]here",
-                                                  "derivation_id" = "[M|m]ethod"),
+                                                  "derivation_id" = "[M|m]ethod",
+                                                  "predecessor" = "[P|p]redecessor"),
                                     sheet = NULL,
                                     where_sep_sheet = TRUE,
                                     where_cols = c("id" = "ID",
                                                    "where" = c("Variable", "Comparator", "Value")),
                                     var_sheet = "[V|v]ar"){
    name_check <- names(cols) %in% c("variable", "origin", "code_id", "sig_dig",
-                                    "type", "dataset", "where", "derivation_id") %>%
+                                    "type", "dataset", "where", "derivation_id",
+                                    "predecessor") %>%
       all()
 
    if(!name_check| is.null(names(cols))){
       stop("Supplied column vector must be named using the following names:
-              'dataset', 'variable', 'origin', 'code_id', 'type', 'where', 'sig_dig', 'derivation_id'
+              'dataset', 'variable', 'origin', 'code_id', 'type', 'where', 'sig_dig', 'derivation_id',
+              'predecessor'
               If derivation_id is not avaliable it can be excluded and dataset.variable will be used.
 
               If the where information is on a seperate sheet, put the column with cross ref as where.")
@@ -405,10 +409,17 @@ spec_type_to_value_spec <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]
    # Get missing columns
    missing <- col_vars()$.value_spec %>%
       discard(~. %in% names(out))
+
    out %>%
       `is.na<-`(missing) %>%
       distinct() %>%
-      mutate(sig_dig = as.integer(.data$sig_dig))
+      mutate(sig_dig = as.integer(.data$sig_dig),
+             derivation_id = case_when(
+                !is.na(.data$derivation_id) ~ .data$derivation_id,
+                str_to_lower(.data$origin) == "predecessor" ~ as.character(.data$predecessor),
+                str_to_lower(.data$origin) == "assigned" ~ paste0(.data$dataset, ".", .data$variable))
+      ) %>%
+      select(-.data$predecessor)
 
 }
 
@@ -439,15 +450,15 @@ spec_type_to_value_spec <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]
 #'
 #' @family spec builder
 spec_type_to_codelist <- function(doc, codelist_cols = c("code_id" = "ID",
-                                                          "name" = "[N|n]ame",
-                                                          "code" = "^[C|c]ode|^[T|t]erm",
-                                                          "decode" = "[D|d]ecode"),
-                                   permitted_val_cols = NULL,
-                                   dict_cols = c("code_id" = "ID",
-                                                 "name" = "[N|n]ame",
-                                                 "dictionary" = "[D|d]ictionary",
-                                                 "version" = "[V|v]ersion"),
-                                   sheets = NULL, simplify = TRUE){
+                                                         "name" = "[N|n]ame",
+                                                         "code" = "^[C|c]ode|^[T|t]erm",
+                                                         "decode" = "[D|d]ecode"),
+                                  permitted_val_cols = NULL,
+                                  dict_cols = c("code_id" = "ID",
+                                                "name" = "[N|n]ame",
+                                                "dictionary" = "[D|d]ictionary",
+                                                "version" = "[V|v]ersion"),
+                                  sheets = NULL, simplify = TRUE){
    if(is.null(codelist_cols)){
       stop("Codelist column names must be provided", call. = FALSE)
    } else {
@@ -527,27 +538,65 @@ spec_type_to_codelist <- function(doc, codelist_cols = c("code_id" = "ID",
 #'
 #' Creates the derivation table from a list of datasets (optionally filtered by
 #' the sheet input). The named vector `cols` is used to determine which is the
-#' correct sheet and renames the columns
+#' correct sheet and renames the columns. The derivation will be used for
+#' "derived" origins, the comments for "assigned" origins, and predecessor for
+#' "predecessor" origins.
 #' @param doc Named list of datasets @seealso [read_all_sheets()] for exact
 #'   format
 #' @param cols Named vector of column names. The column names can be regular
 #'   expressions for more flexibility. But, the names must follow the given
 #'   pattern
+#' @param var_cols Named vector of the name(s) of the origin, predecessor and
+#'   comment columns. These do not have to be on the specified sheet.
 #' @param sheet Regular expression for the sheet name
 #'
 #' @return a dataset formatted for the metacore object
 #' @export
 #'
 #' @family spec builder
+#' @importFrom purrr quietly
 spec_type_to_derivations <- function(doc, cols = c("derivation_id" = "ID",
                                                    "derivation" = "[D|d]efinition|[D|d]escription"),
-                                     sheet = "Method|Derivations?"){
+                                     sheet = "Method|Derivations?",
+                                     var_cols = c("dataset" = "[D|d]ataset|[D|d]omain",
+                                                  "variable" = "[N|n]ame|[V|v]ariables?",
+                                        "origin" = "[O|o]rigin",
+                                        "predecessor" = "[P|p]redecessor",
+                                        "comment" = "[C|c]omment")){
    name_check <- names(cols) %in% c("derivation_id", "derivation") %>%
       all()
    if(!name_check| is.null(names(cols))){
-      stop("Supplied column vector must be names using the following names:
+      stop("Supplied column vector must be named using the following names:
               'derivation_id', 'derivation'")
    }
+
+   name_check <- names(var_cols) %in% c('dataset', 'variable', 'origin', 'predecessor', 'comment') %>%
+      all()
+   if(!name_check| is.null(names(var_cols))){
+      stop("Supplied variable column vector must be named using the following names:
+               'dataset', 'variable', 'origin', 'predecessor', 'comment'")
+   }
+   # Get the predecessor
+   ls_derivations <- quietly(create_tbl)(doc, var_cols)$result
+   if(class(ls_derivations)[1] == "list"){
+      ls_derivations <- ls_derivations %>%
+         reduce(bind_rows)
+   }
+   other_derivations <- ls_derivations %>%
+      mutate(
+         derivation_id = case_when(
+            str_to_lower(.data$origin) == "predecessor" ~ as.character(.data$predecessor),
+            str_to_lower(.data$origin) == "assigned" ~ paste0(.data$dataset, ".", .data$variable),
+            TRUE ~ NA_character_
+            ),
+         derivation = case_when(
+            str_to_lower(.data$origin) == "predecessor" ~ as.character(.data$predecessor),
+            str_to_lower(.data$origin) == "assigned" ~ .data$comment,
+            TRUE ~ NA_character_
+         )) %>%
+      filter(!is.na(.data$derivation_id)) %>%
+      select(.data$derivation, .data$derivation_id)
+
    # Select a subset of sheets if specified
    if(!is.null(sheet)){
       sheet_ls <- str_subset(names(doc), sheet)
@@ -559,8 +608,10 @@ spec_type_to_derivations <- function(doc, cols = c("derivation_id" = "ID",
    missing <- col_vars()$.derivations %>%
       discard(~. %in% names(out))
 
+
    out %>%
       `is.na<-`(missing) %>%
+      bind_rows(other_derivations) %>%
       distinct() %>%
       filter(!is.na(derivation_id))
 }
