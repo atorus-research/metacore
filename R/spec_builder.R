@@ -6,18 +6,21 @@
 #' be used as building blocks for bespoke specification documents
 #'
 #' @param path string of file location
-#' @param quiet Option to quietly load in, this will suppress warnings, but not errors
+#' @param quiet Option to quietly load in, this will suppress warnings, but not
+#'   errors
+#' @param where_sep_sheet Option to tell if the where is in a separate sheet,
+#'   like in older p21 specs or in a single sheet like newer p21 specs
 #'
 #' @return given a spec document it returns a metacore object
 #' @export
-spec_to_metacore <- function(path, quiet = FALSE){
+spec_to_metacore <- function(path, quiet = FALSE, where_sep_sheet = TRUE){
    doc <- read_all_sheets(path)
 
    if(spec_type(path) == "by_type"){
       ds_spec <- spec_type_to_ds_spec(doc)
       ds_vars <- spec_type_to_ds_vars(doc)
       var_spec <- spec_type_to_var_spec(doc)
-      value_spec <- spec_type_to_value_spec(doc)
+      value_spec <- spec_type_to_value_spec(doc, where_sep_sheet = where_sep_sheet)
       derivations <- spec_type_to_derivations(doc)
       code_list <- spec_type_to_codelist(doc)
       if(!quiet){
@@ -190,7 +193,8 @@ spec_type_to_ds_vars <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]oma
       `is.na<-`(missing) %>%
       mutate(key_seq = as.integer(key_seq),
              keep = yn_to_tf(keep),
-             core = as.character(core))
+             core = as.character(core),
+             order = as.numeric(order))
 }
 
 
@@ -216,7 +220,7 @@ spec_type_to_var_spec <- function(doc, cols = c("variable" = "[N|n]ame|[V|v]aria
                                                 "type" = "[T|t]ype",
                                                 "dataset" = "[D|d]ataset|[D|d]omain",
                                                 "format" = "[F|f]ormat"),
-                                  sheet = NULL){
+                                  sheet = "[V|v]ar"){
    # Check the names
    name_check <- names(cols) %in% c("variable", "length", "label",
                                     "type", "dataset", "common", "format") %>%
