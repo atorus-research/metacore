@@ -15,7 +15,7 @@
 #' @family Metacore
 #' @noRd
 #'
-#'
+#' @importFrom stringr str_to_lower
 MetaCore_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist, supp){
 
    private$.ds_spec <- ds_spec %>%
@@ -47,7 +47,9 @@ MetaCore_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivati
                  dataset = "Dataset Name",
                  variable = "Variable Name",
                  where = "Value of the Variable",
-                 derivation_id = "ID of Derivation")
+                 derivation_id = "ID of Derivation") %>%
+      mutate(origin = str_to_lower(.data$origin))
+
 
    private$.derivations <- derivations %>%
       add_labs(derivation_id = "ID of Derivation",

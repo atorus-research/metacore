@@ -2,7 +2,7 @@
 % Please edit documentation in R/xml_builders.R
 \name{xml_to_codelist}
 \alias{xml_to_codelist}
-\title{xml to code list}
+\title{XML to code list}
 \usage{
 xml_to_codelist(doc)
 }

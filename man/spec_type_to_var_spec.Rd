@@ -9,7 +9,7 @@ spec_type_to_var_spec(
   cols = c(variable = "[N|n]ame|[V|v]ariables?", length = "[L|l]ength", label =
     "[L|l]abel", type = "[T|t]ype", dataset = "[D|d]ataset|[D|d]omain", format =
     "[F|f]ormat"),
-  sheet = NULL
+  sheet = "[V|v]ar"
 )
 }
 \arguments{

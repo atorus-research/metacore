@@ -1,3 +1,9 @@
+# Metacore 0.0.6 
+- Correct typos
+- Limits origin value/make all origins lower case 
+
+# Metacore 0.0.5
+- [#47](https://github.com/atorus-research/metacore/issues/47) Improve `yn_to_tf()` to be more robust in parsing yes/no columns
 
 # Metacore 0.0.4
 - Adds a supp table to store the `idvar` and `qeval` information 

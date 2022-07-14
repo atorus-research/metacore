@@ -3,14 +3,16 @@ title: "Building Specification Readers"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Building Specification Readers}
-  %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>"
+   collapse = TRUE,
+   comment = "#>"
 )
 ```
 
@@ -123,13 +125,13 @@ This error means it is trying to match the sheet entitled Variable, the variable
 doc$Variables %>% head()
 
 ds_vars<- spec_type_to_ds_vars(doc, cols = c("dataset" = "Domain",
-                                               "variable" = "[V|v]ariable [N|n]ame",
-                                               "order" = "[V|v]ariable [O|o]rder",
-                                               "keep" = "[M|m]andatory"),
+                                             "variable" = "[V|v]ariable [N|n]ame",
+                                             "order" = "[V|v]ariable [O|o]rder",
+                                             "keep" = "[M|m]andatory"),
                                key_seq_cols = c("dataset" = "Domain Name",
                                                 "key_seq" = "Key"),
                                sheet = "[V|v]ar|Domains") 
-   
+
 head(ds_vars)
 ```
 
@@ -184,25 +186,31 @@ The next dataset is value_spec, which contains the value level metadata. It is m
 
 -   derivation_id: id used to cross-reference the derivation
 
-By default, `spec_type_to_value_spec` is set up to have the where information on a different sheet because that is the format of a P21 spec, but in our spec we don't have that. In fact, we don't have any value level metadata in our spec. But, that is fine - the default builders will just pull what information it can from the variable tab.
+By default, `spec_type_to_value_spec` is set up to have the where information on a different sheet because that is the format of a P21 spec, but in our spec we don't have that. In fact, we don't have any value level metadata in our spec. But, that is fine - the default builders will just pull what information it can from the variable tab. Additionally this spec doesn't have a predecessor column, so we can just use the method column. 
 
 ```{r}
 value_spec <- spec_type_to_value_spec(doc, cols = c("dataset" = "VLM Name|Domain",
-                                                  "variable" = "VLM Name|Variable Name",
-                                                  "origin" = "[O|o]rigin",
-                                                  "type" = "[T|t]ype",
-                                                  "code_id" = "Controlled Term",
-                                                  "where" = "Parameter Code",
-                                                  "derivation_id" = "Method"),
-                                    where_sep_sheet = FALSE)
+                                                    "variable" = "VLM Name|Variable Name",
+                                                    "origin" = "[O|o]rigin",
+                                                    "type" = "[T|t]ype",
+                                                    "code_id" = "Controlled Term",
+                                                    "where" = "Parameter Code",
+                                                    "derivation_id" = "Method",
+                                                    "predecessor" = "Method"),
+                                      where_sep_sheet = FALSE)
 head(value_spec)
 ```
 
-The derivation table is relatively simple by comparison. It just has two columns, the derivation id and the derivation. The derivation id should match the derivation id in the the value spec table.
+The derivation table is relatively simple by comparison. It just has two columns, the derivation id and the derivation. But, the derivation comes from the derivation, predecessor, or comment column depending on the origin. In this mock we don't have a predecessor column so we can set to comment as well.  
 
 ```{r}
 derivation <- spec_type_to_derivations(doc, cols = c("derivation_id" = "Name",
-                                                   "derivation" = "[D|d]efinition|[D|d]escription")) 
+                                                     "derivation" = "[D|d]efinition|[D|d]escription"), 
+                                       var_cols = c("dataset" = "Domain Name",
+                                                    "variable" = "Variable Name|VLM",
+                                                    "origin" = "[O|o]rigin",
+                                                    "predecessor" = "Comment",
+                                                    "comment" = "Comment")) 
 head(derivation)
 ```
 
@@ -212,10 +220,10 @@ By default the `spec_type_to_codelist` function expects codelists and external d
 
 ```{r}
 codelist <- spec_type_to_codelist(doc, codelist_cols = c("code_id" = "Codelist Code",
-                                                          "name" = "Codelist Name",
-                                                          "code" = "Coded Value",
-                                                          "decode" = "Decoded Value"),
-                      dict_cols = NULL)
+                                                         "name" = "Codelist Name",
+                                                         "code" = "Coded Value",
+                                                         "decode" = "Decoded Value"),
+                                  dict_cols = NULL)
 head(codelist)
 ```
 
@@ -223,7 +231,7 @@ Now we have all the tables we need we can make the metacore object
 
 ```{r}
 metacore(ds_spec, ds_vars, var_spec, value_spec,
-               derivation, codelist)
+         derivation, codelist)
 ```
 
 And we're good to go! 

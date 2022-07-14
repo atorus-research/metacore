@@ -4,12 +4,16 @@
 \alias{spec_to_metacore}
 \title{Specification document to metacore object}
 \usage{
-spec_to_metacore(path, quiet = FALSE)
+spec_to_metacore(path, quiet = FALSE, where_sep_sheet = TRUE)
 }
 \arguments{
 \item{path}{string of file location}
 
-\item{quiet}{Option to quietly load in, this will suppress warnings, but not errors}
+\item{quiet}{Option to quietly load in, this will suppress warnings, but not
+errors}
+
+\item{where_sep_sheet}{Option to tell if the where is in a separate sheet,
+like in older p21 specs or in a single sheet like newer p21 specs}
 }
 \value{
 given a spec document it returns a metacore object

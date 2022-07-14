@@ -152,7 +152,7 @@ xml_to_var_spec <- function(doc) {
 }
 
 
-#' xml to value spec
+#' XML to value spec
 #'
 #' Takes a define xml and pulls out the value level metadata including codelist_id's,
 #' defines_id's, and where clause. There is one row per variable expect when there
@@ -248,7 +248,7 @@ xml_to_value_spec <- function(doc) {
 }
 
 
-#' xml to code list
+#' XML to code list
 #'
 #' Reads in a define xml and creates a code_list table. The code_list table is a
 #' nested tibble where each row is a code list or permitted value list. The code
