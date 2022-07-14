@@ -167,18 +167,24 @@ xml_to_value_spec <- function(doc) {
    # Variable/value level node set
    var_nodes <- get_var_lvl_nodes(doc)
    # Gets the origin information for each node
-   or_vec <- var_nodes %>%
-      map_chr(function(node) {
+   or_df <- var_nodes %>%
+      map_dfr(function(node) {
          # gets the origin from the child
          origin <- get_child_attr(node, "Origin", "Type")
+         origin_df <- tibble(origin=origin)
          if (!is.na(origin) && origin == "CRF") {
             # gets the page number from the origin's child
             page_num <- get_child_attr(node, "PDFPageRef", "PageRefs", TRUE) %>%
                str_replace_all("\\s", ", ") %>%
                str_replace_na(replacement = "")
-            origin <- str_c(origin, page_num)
+            origin_df <- origin_df %>%
+               mutate(origin = str_c(origin, page_num))
+         } else if(!is.na(origin) && origin == "Predecessor"){
+            child_node <- xmlElementsByTagName(node, "Origin")[[1]]
+            pred_val <- get_node_description(child_node)
+            origin_df <- origin_df %>% mutate(pred = pred_val)
          }
-         origin
+         origin_df
       })
 
 
