@@ -716,9 +716,9 @@ create_tbl <- function(doc, cols){
 
 #ToDo add true false as string to logical
 yn_to_tf <- function(x){
-   if(all(is.na(x) | str_detect(x, regex("^y$|^n$|yes$|no$", ignore_case = T)))){
-      case_when(str_detect(x, regex("^y$|yes$", ignore_case = T)) ~ TRUE,
-                str_detect(x, regex("^n$|no$", ignore_case = T)) ~ FALSE,
+   if(all(is.na(x) | str_detect(x, regex("^y$|^n$|^yes$|^no$", ignore_case = T)))){
+      case_when(str_detect(x, regex("^y$|^yes$", ignore_case = T)) ~ TRUE,
+                str_detect(x, regex("^n$|^no$", ignore_case = T)) ~ FALSE,
                 is.na(x) ~ NA)
    } else if(is.logical(x)){
       x
