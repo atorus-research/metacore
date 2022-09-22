@@ -35,15 +35,16 @@ define_to_metacore <- function(path, quiet = FALSE){
 #' @return data frame with the data set specifications
 #' @family xml builder
 #' @export
+#' @importFrom xml2 xml_attr xml_find_first xml_text
 xml_to_ds_spec <- function(doc) {
    # Read in the dataset level nodes
-   ds_nodes <- get_ds_lvl_nodes(doc)
-   # Name and structure are attributes of the node, but description is a child
-   tibble(
-      dataset = ds_nodes %>% get_node_attr("Name"),
-      structure = ds_nodes %>% get_node_attr("Structure"),
-      label = ds_nodes %>% map_chr(get_node_description)
-   )
+   map_dfr(xml_find_all(doc, "//MetaDataVersion/ItemGroupDef[contains(@OID, 'IG')]"), function(nn){
+      tibble(
+         dataset = xml_attr(nn, "Name"),
+         structure = xml_attr(nn, "Structure"),
+         lable = xml_find_first(nn, "./Description") %>% xml_text()
+      )
+   })
 }
 
 

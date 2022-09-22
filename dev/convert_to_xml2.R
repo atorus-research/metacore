@@ -1,8 +1,19 @@
 library(xml2)
 path <- "/Users/christina/Dropbox/Mac/Downloads/adam_specs_whereclauses/define-cwc.xml"
+path <- "/Users/christina/Dropbox/Mac/Downloads/DefineV213-2/examples/Define-XML-2-1-ADaM/adam/defineV21-ADaM.xml"
 path <- metacore_example("SDTM_define.xml")
+
 xml <- read_xml(path)
 xml_ns_strip(xml)
+
+
+map_dfr(xml_find_all(xml, "//MetaDataVersion/ItemGroupDef[contains(@OID, 'IG')]"), function(nn){
+   tibble(
+      dataset = xml_attr(nn, "Name"),
+      structure = xml_attr(nn, "Structure"),
+      lable = xml_find_first(nn, "./Description") %>% xml_text()
+   )
+})
 
 
 # All values without the where issue
@@ -10,7 +21,7 @@ test <- xml_find_all(xml, "//ItemDef") %>%
    map_dfr(function(node){
       data.frame(
          oid = xml_attr(node,"OID"),
-         name = xml_attr(node, "Name"),
+         variable = xml_attr(node, "Name"),
          type = xml_attr(node, "DataType"),
          sig_dig = xml_attr(node, "SignificantDigits"),
          origin = xml_find_first(node, "./def:Origin") %>% xml_attr("Type"),
@@ -19,18 +30,24 @@ test <- xml_find_all(xml, "//ItemDef") %>%
          comment_id = xml_attr(node,"CommentOID"),
          codelist_id = xml_find_first(node, "CodeListRef") %>% xml_attr("CodeListOID")
       )
-      })
+   })
 
+
+define_version <- xml_find_all(xml, "//MetaDataVersion") %>%
+   xml_attr("DefineVersion") %>%
+   as.numeric_version()
+
+define_version >= as.numeric_version("2.1.0")
 
 where_to_merge <- xml_find_all(xml, "//def:ValueListDef/ItemRef") %>%
    map_dfr(function(node){
       data.frame(
-      oid = xml_parent(node) %>% xml_attr("OID"),
-      item_oid = xml_attr(node, "ItemOID"),
-      ord = xml_attr(node, "OrderNumber"),
-      where_oid = xml_find_all(node, "./def:WhereClauseRef") %>%
-         xml_attr("WhereClauseOID"),
-      derivation_id = xml_attr(node, "MethodOID")
+         oid = xml_parent(node) %>% xml_attr("OID"),
+         item_oid = xml_attr(node, "ItemOID"),
+         ord = xml_attr(node, "OrderNumber"),
+         where_oid = xml_find_all(node, "./def:WhereClauseRef") %>%
+            xml_attr("WhereClauseOID"),
+         derivation_id = xml_attr(node, "MethodOID")
       )
    }
    )
@@ -38,18 +55,31 @@ where_to_merge <- xml_find_all(xml, "//def:ValueListDef/ItemRef") %>%
 
 where_eqs <- xml_find_all(xml, "//def:WhereClauseDef[@OID]/RangeCheck") %>%
    map_dfr(function(node){
-      data.frame(
+      tibble(
          where_oid = xml_parent(node) %>% xml_attr("OID"),
          left = xml_attr(node, "ItemOID"),
          test = xml_attr(node, "Comparator"),
-         right = xml_find_first(node, "./CheckValue") %>% xml_text()
+         right = xml_find_all(node, "./CheckValue") %>% xml_text()
       )
    }
    ) %>%
    group_by(where_oid) %>%
    mutate(var = str_extract(left, "\\w*$"),
-          test = case_when(test == "EQ" ~ "=="),
-          eq = paste(var, test, right, collapse = " & ")) %>%
+          test = case_when(test == "EQ" ~ "==",
+                           test == "LT" ~ "<",
+                           test == "LE" ~ "<=",
+                           test == "GT" ~ ">",
+                           test == "GE" ~ ">=",
+                           test == "NE" ~ "!=",
+                           TRUE ~ test),
+          eq = case_when( test == "IN" ~ paste(var, "%in%", "c(",
+                                                paste(right, collapse = ","),
+                                                ")"),
+                          test == "NOTIN" ~ paste("!", var, "%in%", "c(",
+                                                   paste(right, collapse = ","),
+                                                   ")"),
+                          TRUE ~ paste(var, test, right, collapse = " & "))
+   ) %>%
    select(-left, -var, -test, -right) %>%
    distinct()
 
@@ -91,3 +121,7 @@ map_dfr(xml_find_all(xml, "//MetaDataVersion/ItemGroupDef[contains(@OID, 'IG')]"
       )
    })
 })
+
+
+
+
