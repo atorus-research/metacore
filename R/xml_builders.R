@@ -65,36 +65,31 @@ xml_to_ds_spec <- function(doc) {
 #' @export
 #'
 xml_to_ds_vars <- function(doc) {
-   # Get the name of each dataset
-   dataset_nodes <- get_ds_lvl_nodes(doc)
-
-   # Get the variable names, key sequence and keep for each variable in each ds
-   dataset_nodes %>%
-      map_dfr(function(x) {
-         # Gets the name attribute of the dataset node
-         dataset <- xmlGetAttr(x, "Name")
-         # Gets the child node, Item Ref, which contains variable level information
-         child_var_nodes <- xmlElementsByTagName(x, "ItemRef")
-         # Pulls the relevant information from child node
+   ds_var <-
+      # Each dataset is an ItemGroupDef
+      xml_find_all(xml, "//ItemGroupDef") %>%
+      map_dfr(function(node){
+         # Each Variable is a Item Ref
+         child_node <- xml_find_all(node, "./ItemRef")
          tibble(
-            dataset = dataset,
-            variable = child_var_nodes %>% get_node_attr("ItemOID"),
-            mandatory = child_var_nodes %>% get_node_attr("Mandatory"),
-            key_seq = child_var_nodes %>%
-               get_node_attr("KeySequence") %>%
+            dataset = xml_attr(node, "Name"),
+            oid = xml_attr(child_node, "ItemOID"),
+            mandatory = xml_attr(child_node, "Mandatory"),
+            key_seq = xml_attr(child_node, "KeySequence") %>%
                as.integer(),
-            order = child_var_nodes %>%
-               get_node_attr("OrderNumber") %>%
+            order = xml_attr(child_node, "OrderNumber") %>%
                as.integer()
          )
       }) %>%
       mutate(
-         variable = id_to_var(.data$variable),
+         variable = id_to_var(.data$oid),
          keep = .data$mandatory == "Yes",
          core = NA_character_,
          supp_flag = NA
       ) %>%
-      select(-.data$mandatory)
+      select(-.data$mandatory, -.data$oid)
+
+   ds_vars
 }
 
 
@@ -275,6 +270,8 @@ xml_to_value_spec <- function(doc) {
          !is.na(derivation_id_all) ~ derivation_id_all,
          TRUE ~ derivation_id)) %>%
       select(-predecessor, -comment_id, -derivation_id_all)
+
+   val_spec
 }
 
 
