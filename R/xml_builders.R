@@ -7,7 +7,7 @@
 #'
 #' @return DataDef Object
 #' @export
-#'
+#' @importFrom xml2 read_xml xml_find_all xml_attr xml_ns_strip
 define_to_metacore <- function(path, quiet = FALSE){
 
    xml <- read_xml(path)
@@ -45,11 +45,12 @@ define_to_metacore <- function(path, quiet = FALSE){
 #' @importFrom xml2 xml_attr xml_find_first xml_text
 xml_to_ds_spec <- function(doc) {
    # Read in the dataset level nodes
-   map_dfr(xml_find_all(doc, "//MetaDataVersion/ItemGroupDef[contains(@OID, 'IG')]"), function(nn){
+   xml_find_all(doc, "//MetaDataVersion/ItemGroupDef[contains(@OID, 'IG')]") %>%
+   map_dfr(function(node){
       tibble(
-         dataset = xml_attr(nn, "Name"),
-         structure = xml_attr(nn, "Structure"),
-         lable = xml_find_first(nn, "./Description") %>% xml_text()
+         dataset = xml_attr(node, "Name"),
+         structure = xml_attr(node, "Structure"),
+         label = xml_find_first(node, "./Description") %>% xml_text()
       )
    })
 }
@@ -65,9 +66,8 @@ xml_to_ds_spec <- function(doc) {
 #' @export
 #'
 xml_to_ds_vars <- function(doc) {
-   ds_var <-
-      # Each dataset is an ItemGroupDef
-      xml_find_all(xml, "//ItemGroupDef") %>%
+   # Each dataset is an ItemGroupDef
+   xml_find_all(doc, "//ItemGroupDef") %>%
       map_dfr(function(node){
          # Each Variable is a Item Ref
          child_node <- xml_find_all(node, "./ItemRef")
@@ -87,9 +87,9 @@ xml_to_ds_vars <- function(doc) {
          core = NA_character_,
          supp_flag = NA
       ) %>%
-      select(-.data$mandatory, -.data$oid)
-
-   ds_vars
+      select(.data$dataset, .data$variable, .data$key_seq,
+             .data$order, .data$keep, .data$core, .data$supp_flag,
+             -.data$mandatory, -.data$oid)
 }
 
 
@@ -104,29 +104,31 @@ xml_to_ds_vars <- function(doc) {
 #' @return data frame with variable, length, label columns
 #' @family xml builder
 #' @export
+#' @importFrom xml2 xml_attr xml_find_all xml_text
 xml_to_var_spec <- function(doc) {
-   # Get information from the variable level nodes
-   var_nodes <- get_var_lvl_nodes(doc)
 
    # Gets the name, id, and length from the variable node and the description from the child
-   var_info <- tibble(
-      var_full = var_nodes %>% get_node_attr("OID"),
-      variable = var_nodes %>% get_node_attr("Name"),
-      type = var_nodes %>% get_node_attr("DataType"),
-      length = var_nodes %>% get_node_attr("Length") %>%
-         as.integer(),
-      # Get labels
-      label = var_nodes %>% map_chr(get_node_description),
-      format = var_nodes %>% get_node_attr("DisplayFormat")
-   )
+   var_info <- xml_find_all(doc, "//ItemDef") %>%
+      map_dfr(function(node){
+         data.frame(
+            oid = xml_attr(node,"OID"),
+            variable = xml_attr(node, "Name"),
+            type = xml_attr(node, "DataType"),
+            length = xml_attr(node, "Length") %>% as.integer(),
+            format = xml_attr(node, "DisplayFormat"),
+            label =  xml_find_first(node, "./Description/TranslatedText") %>%
+               xml_text()
+         )
+      })
 
-   possible_vars <- ds_var_ls(doc) %>%
-      pull(.data$variable) %>%
-      unique()
+   possible_vars <- xml_find_all(doc, "//ItemGroupDef/ItemRef") %>%
+      map_chr(function(node){
+         oid = xml_attr(node, "ItemOID")
+      })
 
    # Get for each variable, get the number of distinct lengths and labels
    dist_df <- var_info %>%
-      filter(.data$variable %in% possible_vars) %>%
+      filter(.data$oid %in% possible_vars) %>%
       distinct(.data$variable, .data$length, .data$label, .data$type, .keep_all = TRUE) %>%
       group_by(.data$variable) %>%
       mutate(
@@ -144,14 +146,15 @@ xml_to_var_spec <- function(doc) {
       filter(n > 1) %>%
       select(.data$variable) %>%
       inner_join(var_info, by = "variable")  %>%
-      mutate(variable = str_remove(.data$var_full, "^IT\\.")) %>%
+      mutate(variable = str_remove(.data$oid, "^IT\\.")) %>%
       distinct()
 
    # Combine the variables that need full names with the variables that don't
    dist_df %>%
       filter(n == 1) %>%
       bind_rows(full_name_vars) %>%
-      select(-.data$n, -.data$var_full)
+      select(.data$variable, .data$type, .data$length, .data$label,
+             .data$format, .data$common, -.data$n, -.data$oid)
 }
 
 
@@ -166,10 +169,10 @@ xml_to_var_spec <- function(doc) {
 #' @family xml builder
 #' @export
 #'
-#' @importFrom xml2 xml_attr xml_find_first
+#' @importFrom xml2 xml_attr xml_find_first xml_parent
 xml_to_value_spec <- function(doc) {
    # Get information in the item definition
-   item_def <- xml_find_all(xml, "//ItemDef") %>%
+   item_def <- xml_find_all(doc, "//ItemDef") %>%
       map_dfr(function(node){
          data.frame(
             oid = xml_attr(node,"OID"),
@@ -191,7 +194,7 @@ xml_to_value_spec <- function(doc) {
       select(-.data$page_num)
 
    # Pull the information from the item reference
-   derivations <- xml_find_all(xml, "//ItemRef") %>%
+   derivations <- xml_find_all(doc, "//ItemRef") %>%
       map_dfr(function(node){
          tibble(
             oid = xml_attr(node, "ItemOID"),
@@ -201,7 +204,7 @@ xml_to_value_spec <- function(doc) {
    # Combine all the item information
    item_info <- left_join(item_def, derivations, by = "oid")
 
-   where_to_merge <- xml_find_all(xml, "//def:ValueListDef/ItemRef") %>%
+   where_to_merge <- xml_find_all(doc, "//def:ValueListDef/ItemRef") %>%
       map_dfr(function(node){
          tibble(
             oid = xml_parent(node) %>% xml_attr("OID"),
@@ -214,7 +217,7 @@ xml_to_value_spec <- function(doc) {
       }
       )
 
-   where_eqs <- xml_find_all(xml, "//def:WhereClauseDef[@OID]/RangeCheck") %>%
+   where_eqs <- xml_find_all(doc, "//def:WhereClauseDef[@OID]/RangeCheck") %>%
       map_dfr(function(node){
          tibble(
             where_oid = xml_parent(node) %>% xml_attr("OID"),
@@ -288,45 +291,53 @@ xml_to_value_spec <- function(doc) {
 #' @family xml builder
 #' @export
 xml_to_codelist <- function(doc) {
-   cl_nodes <- get_nodes(doc, "//ns:CodeList[ns:CodeListItem]")
-   # Get a table with the information about the code list
-   # Done like this because map_chr is faster than map_dfr
-   code_decode <- tibble(
-      code_id = cl_nodes %>% get_node_attr("OID"),
-      name = cl_nodes %>% get_node_attr("Name"),
-      dataType = cl_nodes %>% get_node_attr("DataType"),
-      codes = cl_nodes %>% get_codes(),
-      type = "code_decode"
-   )
+   cl_pv <- xml_find_all(doc, "//CodeList") %>%
+      map_dfr(function(node){
+         #Values within the code/decode
+         node_children_EI <- xml_find_all(node, "./EnumeratedItem")
+         node_children_CL <- xml_find_all(node, "./CodeListItem")
 
-   # Permitted Values
-   # following the same method as above, get permitted value information
-   permitted_nodes <- get_nodes(doc, "//ns:CodeList[ns:EnumeratedItem]")
-   permitted <- tibble(
-      code_id = permitted_nodes %>% get_node_attr("OID"),
-      name = permitted_nodes %>% get_node_attr("Name"),
-      dataType = permitted_nodes %>% get_node_attr("DataType"),
-      type = "permitted_val",
-      codes = permitted_nodes %>% get_permitted_vals()
-   )
+         decodes <- c(xml_find_all(node_children_EI, "./Decode") %>% xml_text(),
+                      xml_find_all(node_children_CL, "./Decode") %>% xml_text())
+         if(length(decodes) == 0){
+            decodes <- NA_character_
+         }
 
-   # External Libraries
-   ex_lib_nodes <- get_nodes(doc, "//ns:CodeList[ns:ExternalCodeList]")
-   ex_lib <- tibble(
-      code_id = ex_lib_nodes %>% get_node_attr("OID"),
-      name = ex_lib_nodes %>% get_node_attr("Name"),
-      dataType = ex_lib_nodes %>% get_node_attr("DataType"),
-      dictionary = ex_lib_nodes %>%
-         map_chr(~ get_child_attr(., "ExternalCodeList", "Dictionary")),
-      version = ex_lib_nodes %>%
-         map_chr(~ get_child_attr(., "ExternalCodeList", "Version")),
-      type = "external_library"
-   ) %>%
-      nest(codes = c(.data$dictionary, .data$version))
+         tibble(
+            code_id = xml_attr(node, "OID"),
+            name = xml_attr(node, "Name"),
+            code = c(xml_attr(node_children_EI, "CodedValue"),
+                     xml_attr(node_children_CL, "CodedValue")),
+            decode = decodes
+         )
+      }) %>%
+      group_by(code_id) %>%
+      mutate(type = if_else(all(is.na(decode)),
+                            "permitted_val", "code_decode"))
+
+   permitted_val <- cl_pv %>%
+      filter(type == "permitted_val") %>%
+      select(-.data$decode) %>%
+      nest(codes = c(.data$code))
+
+   code_decode <- cl_pv %>%
+      filter(type == "code_decode") %>%
+      nest(codes = c(.data$code, .data$decode))
+
+
+   external_libs <- xml_find_all(doc, "//CodeList/ExternalCodeList") %>%
+      map_dfr(function(node){
+         tibble(
+            code_id = xml_parent(node) %>% xml_attr("OID"),
+            name = xml_parent(node) %>% xml_attr("Name"),
+            dictionary = xml_attr(node, "Dictionary"),
+            version = xml_attr(node, "Version"),
+            type = "external_library"
+         )
+      })
 
    # Combinging the code decode with the permitted values
-   bind_rows(code_decode, permitted, ex_lib) %>%
-      select(-.data$dataType)
+   bind_rows(code_decode, permitted_val, external_libs)
 }
 
 
@@ -335,21 +346,42 @@ xml_to_codelist <- function(doc) {
 #'
 #' This reads in a xml document and gets all the derivations/comments. These can
 #' be cross referenced to variables using the derivation_id's
-#' @param doc ?
+#' @param doc xml document
 #'
 #' @return dataframe with derivation id's and derivations
 #' @family xml builder
 #' @export
 #'
 xml_to_derivations <- function(doc) {
-   # Gets derivation node
-   method_nodes <- get_nodes(doc, path = "//ns:MethodDef")
 
-   # Gets the derivation ID and description for each node
-   derivation <- tibble(
-      derivation_id = method_nodes %>%
-         get_node_attr("OID"),
-      derivation = method_nodes %>%
-         map_chr(get_node_description)
-   )
+   derivation <-
+      xml_find_all(doc, "//MethodDef") %>%
+      map_dfr(function(node){
+         tibble(derivation_id = xml_attr(node, "OID"),
+                derivation = xml_find_first(node, "./Description/TranslatedText") %>%
+                   xml_text())
+      })
+
+   comment <-
+      xml_find_all(doc, "//def:CommentDef") %>%
+      map_dfr(function(node){
+         tibble(derivation_id = xml_attr(node, "OID"),
+                derivation = xml_find_first(node, "./Description/TranslatedText") %>%
+                   xml_text())
+      })
+
+
+   predecessor <- xml_find_all(doc, "//ItemDef") %>%
+      map_dfr(function(node){
+         tibble(
+            derivation_id = xml_find_first(node, "./def:Origin") %>% xml_text(),
+            derivation = derivation_id
+         )
+      }) %>%
+      filter(!is.na(.data$derivation) & str_length(.data$derivation) > 0)
+
+   bind_rows(derivation,
+             comment,
+             predecessor) %>%
+      distinct()
 }

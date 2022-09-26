@@ -1,5 +1,7 @@
 # Read in doc to be used for testing
-define <- xmlTreeParse("define-2021.xml", useInternalNodes = TRUE)
+define <- read_xml("define-2021.xml")
+xml_ns_strip(define)
+
 spec <- read_all_sheets(metacore_example("p21_mock.xlsx"))
 
 

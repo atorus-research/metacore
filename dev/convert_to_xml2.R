@@ -11,10 +11,28 @@ path <- "/Users/christinafillmore/Downloads/ARM-for-Define-XML/adam/define2-0-0-
 xml <- read_xml(path)
 xml_ns_strip(xml)
 
-define_version <- xml_find_all(xml, "//MetaDataVersion") %>%
-   xml_attr("DefineVersion") %>%
-   as.numeric_version()
 
+var_info <- xml_find_all(xml, "//ItemDef") %>%
+   map_dfr(function(node){
+      data.frame(
+         oid = xml_attr(node,"OID"),
+         variable = xml_attr(node, "Name"),
+         type = xml_attr(node, "DataType"),
+         length = xml_attr(node, "Length") %>% as.integer(),
+         format = xml_attr(node, "DisplayFormat"),
+         label =  xml_find_first(node, "./Description/TranslatedText") %>%
+            xml_text()
+      )
+   })
+
+
+possible_values <- xml_find_all(xml, "//ItemRef") %>%
+   map_chr(function(node){
+         oid = xml_attr(node, "ItemOID")
+   })
+
+var_info %>%
+   filter(.data$oid %in% possible_values)
 
 
 # Get information in the item definition
@@ -199,17 +217,6 @@ val_spec <- val_spec %>%
    select(-predecessor, -comment_id)
 
 
-
-dataset_spec <- map_dfr(xml_find_all(xml, "//ItemGroupDef[contains(@OID, 'IG')]"), function(n) {
-   data.frame(
-      oid = xml_attr(n, "OID"),
-      domain = xml_attr(n, "Domain"),
-      name = xml_attr(n, "Name"),
-      desc = xml_find_first(n, "./Description") %>% xml_text(),
-      purpose = xml_attr(n, "Purpose"),
-      struc = xml_attr(n, "Structure")
-   )
-})
 
 
 
