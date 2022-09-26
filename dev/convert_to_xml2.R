@@ -1,12 +1,17 @@
 library(xml2)
-path <- "/Users/christina/Dropbox/Mac/Downloads/adam_specs_whereclauses/define-cwc.xml"
-path <- metacore_example("SDTM_define.xml")
+library(tidyverse)
+path <- "/Users/christinafillmore/Documents/GitHub/metacore/dev/define_examples/defineV21-ADaM.xml"
+# path <- "/Users/christina/Dropbox/Mac/Downloads/adam_specs_whereclauses/define-cwc.xml"
+# path <- metacore_example("SDTM_define.xml")
+path <- "/Users/christinafillmore/Documents/GitHub/metacore/dev/define_examples/defineV21-SDTM.xml"
+
+
 xml <- read_xml(path)
 xml_ns_strip(xml)
 
 
 # All values without the where issue
-test <- xml_find_all(xml, "//ItemDef") %>%
+val_spec <- xml_find_all(xml, "//ItemDef") %>%
    map_dfr(function(node){
       data.frame(
          oid = xml_attr(node,"OID"),
@@ -19,7 +24,11 @@ test <- xml_find_all(xml, "//ItemDef") %>%
          comment_id = xml_attr(node,"CommentOID"),
          codelist_id = xml_find_first(node, "CodeListRef") %>% xml_attr("CodeListOID")
       )
-      })
+      }) %>%
+   mutate(
+      origin = if_else(origin == "Collected" & !is.na(page_num), paste0(origin,", page_num = ", page_num), origin)
+   ) %>%
+   select(-page_num)
 
 
 where_to_merge <- xml_find_all(xml, "//def:ValueListDef/ItemRef") %>%
@@ -42,25 +51,27 @@ where_eqs <- xml_find_all(xml, "//def:WhereClauseDef[@OID]/RangeCheck") %>%
          where_oid = xml_parent(node) %>% xml_attr("OID"),
          left = xml_attr(node, "ItemOID"),
          test = xml_attr(node, "Comparator"),
-         right = xml_find_first(node, "./CheckValue") %>% xml_text()
+         right = xml_find_all(node, "./CheckValue") %>% xml_text()
       )
    }
    ) %>%
    group_by(where_oid) %>%
    mutate(var = str_extract(left, "\\w*$"),
-          test = case_when(test == "EQ" ~ "=="),
+          test = case_when(test == "EQ" ~ "=="), #Update from the other thing
           eq = paste(var, test, right, collapse = " & ")) %>%
    select(-left, -var, -test, -right) %>%
    distinct()
 
 
-
-
-test <- full_join(where_to_merge, where_eqs, by = "where_oid") %>%
+full_eq_where <- full_join(where_to_merge, where_eqs, by = "where_oid") %>%
    group_by(item_oid) %>%
-   mutate(full_eq = str_c(eq, collapse = "||"))
+   mutate(full_eq = str_c(eq, collapse = "||")) %>%
+   filter(!is.na(oid)) %>%
+   ungroup() %>%
+   select(item_oid, where = full_eq)
 
-
+val_spec <- val_spec %>%
+   left_join(full_eq_where, by = c("oid" = "item_oid"))
 
 
 
