@@ -12,7 +12,7 @@ spec_type_to_codelist(
   dict_cols = c(code_id = "ID", name = "[N|n]ame", dictionary = "[D|d]ictionary", version
     = "[V|v]ersion"),
   sheets = NULL,
-  simplify = TRUE
+  simplify = FALSE
 )
 }
 \arguments{
