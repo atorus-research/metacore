@@ -110,7 +110,7 @@ xml_to_var_spec <- function(doc) {
    # Gets the name, id, and length from the variable node and the description from the child
    var_info <- xml_find_all(doc, "//ItemDef") %>%
       map_dfr(function(node){
-         data.frame(
+         tibble(
             oid = xml_attr(node,"OID"),
             variable = xml_attr(node, "Name"),
             type = xml_attr(node, "DataType"),
