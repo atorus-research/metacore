@@ -261,7 +261,7 @@ all_message <- function() {
    "ds_vars",     "key_seq",       is.numeric,                  TRUE,
    "ds_vars",     "order",         is.numeric,                  TRUE,
    "ds_vars",     "keep",          is.logical,                  TRUE,
-   "ds_vars",     "core",          check_words("Expected", "Required", "Permissible", "Conditionally Required", "Conditionally Expected"), TRUE,
+   "ds_vars",     "core",          check_words("Expected", "Required", "Permissible", "Conditionally Required", "Conditionally Expected", NA), TRUE,
    "ds_vars",     "supp_flag",     is.logical,                  TRUE,
    "var_spec",    "variable",      is.character,                FALSE,
    "var_spec",    "type",          is.character,                TRUE,
