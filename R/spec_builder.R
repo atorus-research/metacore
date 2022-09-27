@@ -447,7 +447,7 @@ spec_type_to_value_spec <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]
 #'   sheet
 #' @param sheets Optional, regular expressions of the sheets
 #' @param simplify Boolean value, if true will convert code/decode pairs that
-#'   are all equal to a permitted value list
+#'   are all equal to a permitted value list. False by default
 #'
 #' @return a dataset formatted for the metacore object
 #' @export
