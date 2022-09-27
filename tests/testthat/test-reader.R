@@ -526,7 +526,7 @@ test_that("codelist reader tests", {
       select(code_id, name, codes, type)
 
    # Read from spec
-   spec_codelist <- spec_type_to_codelist(spec, simplify = FALSE) %>%
+   spec_codelist <- spec_type_to_codelist(spec, convert_permitted_vals = FALSE) %>%
       mutate(code_id = paste0("CL.", code_id)) %>%
       filter(code_id != "CL.Y_BLANK") %>%
       arrange(code_id) %>%
