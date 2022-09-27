@@ -465,7 +465,6 @@ spec_type_to_codelist <- function(doc, codelist_cols = c("code_id" = "ID",
                                                 "version" = "[V|v]ersion"),
                                   sheets = NULL, convert_permitted_vals = FALSE,
                                   ...){
-
    if(is.null(codelist_cols)){
       stop("Codelist column names must be provided", call. = FALSE)
    } else {
