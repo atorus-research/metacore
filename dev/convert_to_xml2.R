@@ -11,6 +11,7 @@ path <- "/Users/christinafillmore/Downloads/ARM-for-Define-XML/adam/define2-0-0-
 xml <- read_xml(path)
 xml_ns_strip(xml)
 
+test <- xml_to_value_spec(xml)
 
 var_info <- xml_find_all(xml, "//ItemDef") %>%
    map_dfr(function(node){

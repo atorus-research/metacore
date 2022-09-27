@@ -169,21 +169,22 @@ xml_to_var_spec <- function(doc) {
 #' @family xml builder
 #' @export
 #'
-#' @importFrom xml2 xml_attr xml_find_first xml_parent
+#' @importFrom xml2 xml_attr xml_find_first xml_parent xml_find_all
 xml_to_value_spec <- function(doc) {
    # Get information in the item definition
    item_def <- xml_find_all(doc, "//ItemDef") %>%
       map_dfr(function(node){
-         data.frame(
+         tibble(
             oid = xml_attr(node,"OID"),
             variable = xml_attr(node, "Name"),
             type = xml_attr(node, "DataType"),
-            sig_dig = xml_attr(node, "SignificantDigits"),
+            sig_dig = xml_attr(node, "SignificantDigits") %>% as.integer(),
             origin = xml_find_first(node, "./def:Origin") %>% xml_attr("Type"),
             page_num =  xml_find_first(node, "./def:Origin/def:DocumentRef/def:PDFPageRef") %>% xml_attr("PageRefs"),
             predecessor = xml_find_first(node, "./def:Origin") %>% xml_text(),
             comment_id = xml_attr(node,"CommentOID"),
-            codelist_id = xml_find_first(node, "CodeListRef") %>% xml_attr("CodeListOID")
+            code_id = xml_find_first(node, "CodeListRef") %>% xml_attr("CodeListOID"),
+            varname = xml_attr(node, "SASFieldName")
          )
       }) %>%
       mutate(
@@ -193,16 +194,17 @@ xml_to_value_spec <- function(doc) {
       ) %>%
       select(-.data$page_num)
 
-   # Pull the information from the item reference
-   derivations <- xml_find_all(doc, "//ItemRef") %>%
+   # Pull the information from the item reference only for dataset variable, not where level information
+   derivations <- xml_find_all(doc, "//ItemGroupDef/ItemRef") %>%
       map_dfr(function(node){
          tibble(
             oid = xml_attr(node, "ItemOID"),
-            derivation_id_all = xml_attr(node, "MethodOID")
+            dataset = xml_parent(node) %>% xml_attr("Name"),
+            derivation_id = xml_attr(node, "MethodOID")
          )
       })
-   # Combine all the item information
-   item_info <- left_join(item_def, derivations, by = "oid")
+   # Combine all the item information but
+   item_info <- left_join(derivations, item_def, by = "oid")
 
    where_to_merge <- xml_find_all(doc, "//def:ValueListDef/ItemRef") %>%
       map_dfr(function(node){
@@ -231,9 +233,19 @@ xml_to_value_spec <- function(doc) {
    if(nrow(where_to_merge) == 0){
       where_eqs <- where_eqs %>%
          mutate(item_oid = .data$left,
-                derivation_id = paste0("MT", str_remove(.data$left, "IT"), ".", .data$right))
+                derivation_id = paste0("MT", str_remove(.data$left, "IT"), ".", .data$right),
+                ord = NA,
+                oid = .data$left) %>%
+         left_join(item_def, by = c("oid")) %>%
+         left_join(select(derivations, -.data$derivation_id), by = c("oid"))
+
    } else{
-      where_eqs<- full_join(where_to_merge, where_eqs, by = "where_oid")
+      where_eqs<- full_join(where_to_merge, where_eqs, by = "where_oid") %>%
+         left_join(item_def, by = c("item_oid" = "oid")) %>%
+         # Allow for merging with the derivations to get the dataset
+         mutate(oid = paste0("IT", str_remove(.data$oid, "^VL")),
+                variable = .data$varname) %>%
+         left_join(select(derivations, -.data$derivation_id), by = c("oid"))
    }
 
    all_where_eqs <- where_eqs  %>%
@@ -261,18 +273,20 @@ xml_to_value_spec <- function(doc) {
       mutate(full_eq = str_c(.data$eq, collapse = "||")) %>%
       filter(!is.na(.data$item_oid)) %>%
       ungroup() %>%
-      select(.data$item_oid, where = .data$full_eq, .data$derivation_id)
-
-
+      select(-.data$eq, where = .data$full_eq, .data$derivation_id,
+             -.data$where_oid, -.data$ord, -.data$item_oid)
 
    val_spec <- item_info %>%
-      left_join(all_where_eqs, by = c("oid" = "item_oid")) %>%
+      anti_join(all_where_eqs, by = c("oid")) %>%  #remove any variables with a where
+      bind_rows(all_where_eqs) %>%
       mutate(derivation_id = case_when(
-         origin == "Predecessor" & !is.na(predecessor) ~ predecessor,
-         origin == "Assigned" & !is.na(comment_id) ~ comment_id,
-         !is.na(derivation_id_all) ~ derivation_id_all,
-         TRUE ~ derivation_id)) %>%
-      select(-predecessor, -comment_id, -derivation_id_all)
+         .data$origin == "Predecessor" & !is.na(.data$predecessor) ~ .data$predecessor,
+         .data$origin == "Assigned" & !is.na(.data$comment_id) ~ .data$comment_id,
+         TRUE ~ .data$derivation_id)) %>%
+      select(.data$dataset, .data$variable, .data$code_id, .data$derivation_id,
+             .data$type, .data$origin, .data$where, .data$sig_dig,
+         -.data$predecessor, -.data$comment_id, -.data$varname,
+             -.data$oid)
 
    val_spec
 }
@@ -334,10 +348,12 @@ xml_to_codelist <- function(doc) {
             version = xml_attr(node, "Version"),
             type = "external_library"
          )
-      })
+      }) %>%
+      nest(codes = c(.data$dictionary, .data$version))
 
    # Combinging the code decode with the permitted values
-   bind_rows(code_decode, permitted_val, external_libs)
+   bind_rows(code_decode, permitted_val, external_libs) %>%
+      ungroup()
 }
 
 
