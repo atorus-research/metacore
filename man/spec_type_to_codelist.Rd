@@ -36,7 +36,7 @@ sheet}
 \item{sheets}{Optional, regular expressions of the sheets}
 
 \item{simplify}{Boolean value, if true will convert code/decode pairs that
-are all equal to a permitted value list. False by default}
+are all equal to a permitted value list. True by default}
 }
 \value{
 a dataset formatted for the metacore object
