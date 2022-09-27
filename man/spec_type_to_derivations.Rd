@@ -8,9 +8,8 @@ spec_type_to_derivations(
   doc,
   cols = c(derivation_id = "ID", derivation = "[D|d]efinition|[D|d]escription"),
   sheet = "Method|Derivations?",
-  var_cols = c(dataset = "[D|d]ataset|[D|d]omain", variable =
-    "[N|n]ame|[V|v]ariables?", origin = "[O|o]rigin", predecessor = "[P|p]redecessor",
-    comment = "[C|c]omment")
+  var_cols = c(dataset = "[D|d]ataset|[D|d]omain", variable = "[N|n]ame|[V|v]ariables?",
+    origin = "[O|o]rigin", predecessor = "[P|p]redecessor", comment = "[C|c]omment")
 )
 }
 \arguments{

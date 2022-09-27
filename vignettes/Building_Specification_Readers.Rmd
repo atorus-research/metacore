@@ -223,6 +223,7 @@ codelist <- spec_type_to_codelist(doc, codelist_cols = c("code_id" = "Codelist C
                                                          "name" = "Codelist Name",
                                                          "code" = "Coded Value",
                                                          "decode" = "Decoded Value"),
+                                  simplify = TRUE,
                                   dict_cols = NULL)
 head(codelist)
 ```

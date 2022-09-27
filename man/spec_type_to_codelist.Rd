@@ -9,10 +9,10 @@ spec_type_to_codelist(
   codelist_cols = c(code_id = "ID", name = "[N|n]ame", code = "^[C|c]ode|^[T|t]erm",
     decode = "[D|d]ecode"),
   permitted_val_cols = NULL,
-  dict_cols = c(code_id = "ID", name = "[N|n]ame", dictionary = "[D|d]ictionary",
-    version = "[V|v]ersion"),
+  dict_cols = c(code_id = "ID", name = "[N|n]ame", dictionary = "[D|d]ictionary", version
+    = "[V|v]ersion"),
   sheets = NULL,
-  simplify = TRUE
+  simplify = FALSE
 )
 }
 \arguments{

@@ -63,13 +63,15 @@ check_structure <- function(.data, col, func, any_na_acceptable, nm) {
                     "table only contain missing values.")
       error_message <- NULL
    } else {
+
       failures <-  vec %>%
          discard(~do.call(func, list(.))) %>%
          unique()
 
       all_fails <- paste("   ", failures, collapse = "\n")
       error_message <- NULL
-      if (length(failures) > 0) {
+
+      if (length(failures) > 0 ) {
 
          if (is.primitive(func)) {
 
