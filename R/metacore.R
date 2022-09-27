@@ -318,7 +318,7 @@ metacore <- function(ds_spec = tibble(dataset = character(), structure = charact
 #' @return a filtered subset of the metacore object
 #' @export
 #'
-select_dataset <- function(.data, dataset, simplify = TRUE) {
+select_dataset <- function(.data, dataset, simplify = FALSE) {
 
    cl <- .data$clone()
    cl$metacore_filter(dataset)

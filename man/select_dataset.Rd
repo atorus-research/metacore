@@ -4,7 +4,7 @@
 \alias{select_dataset}
 \title{Select metacore object to single dataset}
 \usage{
-select_dataset(.data, dataset, simplify = TRUE)
+select_dataset(.data, dataset, simplify = FALSE)
 }
 \arguments{
 \item{.data}{the metacore object of dataframes}
