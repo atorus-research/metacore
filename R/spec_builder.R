@@ -446,9 +446,8 @@ spec_type_to_value_spec <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]
 #'   This is optional, can be left as null if there isn't a permitted value
 #'   sheet
 #' @param sheets Optional, regular expressions of the sheets
-#' @param convert_permitted_vals Boolean value, if true will convert code/decode pairs that
+#' @param simplify Boolean value, if true will convert code/decode pairs that
 #'   are all equal to a permitted value list
-#' @param ... Ellipsis is used to handle the now deprecated simplify argument
 #'
 #' @return a dataset formatted for the metacore object
 #' @export
@@ -463,9 +462,7 @@ spec_type_to_codelist <- function(doc, codelist_cols = c("code_id" = "ID",
                                                 "name" = "[N|n]ame",
                                                 "dictionary" = "[D|d]ictionary",
                                                 "version" = "[V|v]ersion"),
-                                  sheets = NULL, convert_permitted_vals = FALSE,
-                                  ...){
-
+                                  sheets = NULL, simplify = FALSE){
    if(is.null(codelist_cols)){
       stop("Codelist column names must be provided", call. = FALSE)
    } else {
