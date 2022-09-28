@@ -149,6 +149,7 @@ spec_type_to_ds_vars <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]oma
                                  key_seq_cols = c("dataset" = "Dataset",
                                                   "key_seq" = "Key Variables"),
                                  sheet = "[V|v]ar|Datasets"){
+
    name_check <- names(cols) %in% c("variable", "dataset", "order",
                                     "keep", "key_seq", "core", "supp_flag") %>%
       all()
@@ -361,7 +362,7 @@ spec_type_to_value_spec <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]
       var_out <- doc[var_sheet] %>%
          map_dfr(function(x){
             var_out <- x %>%
-               select(matches(cols)) %>%
+               select_rename_w_dups(cols) %>%
                mutate(where = "TRUE")
             if(nrow(out) > 0){
                var_out  %>%
@@ -567,6 +568,7 @@ spec_type_to_derivations <- function(doc, cols = c("derivation_id" = "ID",
                                         "origin" = "[O|o]rigin",
                                         "predecessor" = "[P|p]redecessor",
                                         "comment" = "[C|c]omment")){
+
    name_check <- names(cols) %in% c("derivation_id", "derivation") %>%
       all()
    if(!name_check| is.null(names(cols))){
@@ -691,8 +693,10 @@ create_tbl <- function(doc, cols){
                stop(call. = FALSE)
          }
       }
-      matches[[1]] %>%
-         select(matches(cols, ignore.case = FALSE))
+
+      # This needs to be done columnwise to allow for duplicate selection of the same column
+      select_rename_w_dups(matches[[1]], cols)
+
    } else {
       sheets_mats <- matches %>%
          names()
@@ -701,7 +705,7 @@ create_tbl <- function(doc, cols){
             "match the criteria set:", paste(sheets_mats, collapse = ", ")) %>%
          warning(., call. = FALSE)
       matches %>%
-         map(~select(., matches(cols)))
+         map(~select_rename_w_dups(., cols))
    }
 }
 
@@ -713,8 +717,6 @@ create_tbl <- function(doc, cols){
 #' @return returns a logical vector or normal vector with warning
 #' @noRd
 #'
-
-#ToDo add true false as string to logical
 yn_to_tf <- function(x){
    if(all(is.na(x) | str_detect(x, regex("^y$|^n$|yes$|no$", ignore_case = T)))){
       case_when(str_detect(x, regex("^y$|yes$", ignore_case = T)) ~ TRUE,
@@ -727,4 +729,30 @@ yn_to_tf <- function(x){
               call. = FALSE)
       x
    }
+}
+
+
+#' Select in a dataset with renames
+#'
+#' This works like select, but if there are duplicates it won't cause issues
+#'
+#' @param .data dataset to select columns and rename
+#' @param cols named vector
+#'
+#' @return dataset
+#' @noRd
+#' @importFrom purrr safely
+select_rename_w_dups <- function(.data, cols){
+   pull_safe <- safely(~select(.x, matches(.y, ignore.case = FALSE)))
+   cols %>%
+      map_dfr(function(col){
+         out <- pull_safe(.data, col) %>%
+            .$result
+         if(ncol(out) == 1){
+            out <- out %>% pull(1)
+         } else {
+            out <- NULL
+         }
+         out
+      })
 }
