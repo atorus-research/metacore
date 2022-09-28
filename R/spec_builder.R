@@ -742,13 +742,17 @@ yn_to_tf <- function(x){
 #' @return dataset
 #' @noRd
 #' @importFrom purrr safely
-select_rename_w_dups <- function(.data, cols, tentative = FALSE){
+select_rename_w_dups <- function(.data, cols){
+   pull_safe <- safely(~select(.x, matches(.y, ignore.case = FALSE)))
    cols %>%
       map_dfr(function(col){
-         pull_safe <- safely(pull)
-         .data %>%
-            pull_safe(matches(col, ignore.case = FALSE)) %>%
+         out <- pull_safe(.data, col) %>%
             .$result
-
+         if(ncol(out) == 1){
+            out <- out %>% pull(1)
+         } else {
+            out <- NULL
+         }
+         out
       })
 }
