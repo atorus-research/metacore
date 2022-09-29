@@ -201,7 +201,7 @@ value_spec <- spec_type_to_value_spec(doc, cols = c("dataset" = "VLM Name|Domain
 head(value_spec)
 ```
 
-The derivation table is relatively simple by comparison. It just has two columns, the derivation id and the derivation. But, the derivation comes from the derivation, predecessor, or comment column depending on the origin. In this mock we don't have a predecessor column so we can set to comment as well.  
+The derivation table is relatively simple by comparison. It just has two columns, the derivation id and the derivation. But, the derivation comes from the supplied derivation, predecessor, or comment column depending on the origin. In this mock we don't have a predecessor column so we can set to comment as well.  
 
 ```{r}
 derivation <- spec_type_to_derivations(doc, cols = c("derivation_id" = "Name",
