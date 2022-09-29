@@ -1,3 +1,9 @@
+# Metacore 0.1.0
+- Updates for latest version of {tidyselect}
+- Move from XML to xml2 for define.xml processing
+- Correct issue with warning on ds_var$core 
+- Correct bug with not reading the derivation of predecessor and assigned variables correctly
+
 # Metacore 0.0.6 
 - Correct typos
 - Limits origin value/make all origins lower case 
