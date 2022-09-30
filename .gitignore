@@ -24,7 +24,6 @@ vignettes/*.pdf
 
 # Files to draft tests
 */define_examples/*
-*.DS_Store
 
 # OAuth2 token, see https://github.com/hadley/httr/releases/tag/v0.3
 .httr-oauth
@@ -46,4 +45,5 @@ tests/testthat/temp_data/*
 docs
 doc
 Meta
+.DS_Store?
 .DS_Store
