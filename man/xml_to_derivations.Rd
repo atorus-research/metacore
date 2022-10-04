@@ -7,7 +7,7 @@
 xml_to_derivations(doc)
 }
 \arguments{
-\item{doc}{?}
+\item{doc}{xml document}
 }
 \value{
 dataframe with derivation id's and derivations

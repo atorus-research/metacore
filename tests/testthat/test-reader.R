@@ -1,5 +1,7 @@
 # Read in doc to be used for testing
-define <- xmlTreeParse("define-2021.xml", useInternalNodes = TRUE)
+define <- read_xml("define-2021.xml")
+xml_ns_strip(define)
+
 spec <- read_all_sheets(metacore_example("p21_mock.xlsx"))
 
 
@@ -307,9 +309,9 @@ test_that("values_spec reader tests", {
       "DM",   "ACTARM",     "text",  "Derived",         "CL.ARM",          NA,          NA,            "MT.DM.ACTARM",
       "DM", "ACTARMCD",     "text",  "Derived",       "CL.ARMCD",          NA,          NA,          "MT.DM.ACTARMCD",
       "DM",      "AGE",  "integer",  "Derived",               NA,          NA,          NA,               "MT.DM.AGE",
-      "DM",     "AGEU",     "text", "Assigned",        "CL.AGEU",          NA,          NA,                        NA,
-      "DM",      "ARM",     "text", "Assigned",         "CL.ARM",          NA,          NA,                        NA,
-      "DM",    "ARMCD",     "text", "Assigned",       "CL.ARMCD",          NA,          NA,                        NA,
+      "DM",     "AGEU",     "text", "Assigned",        "CL.AGEU",          NA,          NA,             "COM.DM.AGEU",
+      "DM",      "ARM",     "text", "Assigned",         "CL.ARM",          NA,          NA,              "COM.DM.ARM",
+      "DM",    "ARMCD",     "text", "Assigned",       "CL.ARMCD",          NA,          NA,            "COM.DM.ARMCD",
       "DM",  "COUNTRY",     "text",  "Derived",     "CL.COUNTRY",          NA,          NA,           "MT.DM.COUNTRY",
       "DM",    "DMDTC",     "date",      "CRF",               NA,          NA,          NA,                        NA,
       "DM",     "DMDY",  "integer",  "Derived",               NA,          NA,          NA, "MT.COMPMETHOD.STUDY_DAY",
@@ -347,29 +349,29 @@ test_that("values_spec reader tests", {
       "EX",    "VISIT",     "text",      "CRF",       "CL.VISIT",          NA,          NA,                        NA,
       "EX",  "VISITDY",  "integer",  "Derived",               NA,          NA,          NA,           "MT.EX.VISITDY",
       "EX", "VISITNUM",    "float",      "CRF",    "CL.VISITNUM",          1L,          NA,                        NA,
-      "SUPPAE",    "IDVAR",     "text", "Assigned",               NA,      NA,         NA,                        NA,
+      "SUPPAE",    "IDVAR",     "text", "Assigned",               NA,      NA,         NA,         "COM.SUPPAE.IDVAR",
       "SUPPAE", "IDVARVAL",     "text",  "Derived",               NA,      NA,         NA,      "MT.SUPPAE.IDVARVAL",
       "SUPPAE",    "QEVAL",     "text", "Assigned",       "CL.QEVAL",      NA,         NA,                        NA,
       "SUPPAE",   "QLABEL",     "text", "Assigned",               NA,      NA,         NA,                        NA,
       "SUPPAE",     "QNAM",     "text", "Assigned", "CL.SUPPAE.QNAM",      NA,         NA,                        NA,
       "SUPPAE",    "QORIG",     "text", "Assigned",               NA,      NA,         NA,                        NA,
-      "SUPPAE",     "QVAL",     "text",  "Derived",          "CL.YN",      NA, "QNAM = 'TRTEMFL'",  "MT.SUPPAE.QNAM.TRTEMFL",
-      "SUPPAE",  "RDOMAIN",     "text", "Assigned",               NA,      NA,         NA,                        NA,
+      "SUPPAE",     "QVAL",     "text",  "Derived",          "CL.YN",      NA, "QNAM == 'TRTEMFL'",  "MT.SUPPAE.QNAM.TRTEMFL",
+      "SUPPAE",  "RDOMAIN",     "text", "Assigned",               NA,      NA,         NA,            "COM.SUPPAE.RDOMAIN",
       "SUPPAE",  "STUDYID",     "text",      "CRF",               NA,      NA,         NA,                        NA,
       "SUPPAE",  "USUBJID",     "text",  "Derived",               NA,      NA,         NA,       "MT.SUPPAE.USUBJID",
-      "SUPPDM",    "IDVAR",     "text", "Assigned",               NA,      NA,         NA,                        NA,
-      "SUPPDM", "IDVARVAL",     "text", "Assigned",               NA,      NA,         NA,                        NA,
+      "SUPPDM",    "IDVAR",     "text", "Assigned",               NA,      NA,         NA,        "COM.SUPPDM.IDVAR",
+      "SUPPDM", "IDVARVAL",     "text", "Assigned",               NA,      NA,         NA,      "COM.SUPPDM.IDVARVAL",
       "SUPPDM",    "QEVAL",     "text", "Assigned",       "CL.QEVAL",      NA,         NA,                        NA,
       "SUPPDM",   "QLABEL",     "text", "Assigned",               NA,      NA,         NA,                        NA,
       "SUPPDM",     "QNAM",     "text", "Assigned", "CL.SUPPDM.QNAM",      NA,         NA,                        NA,
       "SUPPDM",    "QORIG",     "text", "Assigned",               NA,      NA,         NA,                        NA,
-      "SUPPDM",     "QVAL",     "text",  "Derived",     "CL.Y_BLANK",      NA,  "QNAM = 'COMPLT16'", "MT.SUPPDM.QNAM.COMPLT16",
-      "SUPPDM",     "QVAL",     "text",  "Derived",     "CL.Y_BLANK",      NA,  "QNAM = 'COMPLT24'", "MT.SUPPDM.QNAM.COMPLT24",
-      "SUPPDM",     "QVAL",     "text",  "Derived",     "CL.Y_BLANK",      NA,   "QNAM = 'COMPLT8'",  "MT.SUPPDM.QNAM.COMPLT8",
-      "SUPPDM",     "QVAL",     "text",  "Derived",     "CL.Y_BLANK",      NA,  "QNAM = 'EFFICACY'", "MT.SUPPDM.QNAM.EFFICACY",
-      "SUPPDM",     "QVAL",     "text",  "Derived",     "CL.Y_BLANK",      NA,    "QNAM = 'SAFETY'",   "MT.SUPPDM.QNAM.SAFETY",
-      "SUPPDM",     "QVAL",     "text",  "Derived",     "CL.Y_BLANK",      NA,       "QNAM = 'ITT'",      "MT.SUPPDM.QNAM.ITT",
-      "SUPPDM",  "RDOMAIN",     "text", "Assigned",               NA,      NA,         NA,                        NA,
+      "SUPPDM",     "QVAL",     "text",  "Derived",     "CL.Y_BLANK",      NA,  "QNAM == 'COMPLT16'", "MT.SUPPDM.QNAM.COMPLT16",
+      "SUPPDM",     "QVAL",     "text",  "Derived",     "CL.Y_BLANK",      NA,  "QNAM == 'COMPLT24'", "MT.SUPPDM.QNAM.COMPLT24",
+      "SUPPDM",     "QVAL",     "text",  "Derived",     "CL.Y_BLANK",      NA,   "QNAM == 'COMPLT8'",  "MT.SUPPDM.QNAM.COMPLT8",
+      "SUPPDM",     "QVAL",     "text",  "Derived",     "CL.Y_BLANK",      NA,  "QNAM == 'EFFICACY'", "MT.SUPPDM.QNAM.EFFICACY",
+      "SUPPDM",     "QVAL",     "text",  "Derived",     "CL.Y_BLANK",      NA,    "QNAM == 'SAFETY'",   "MT.SUPPDM.QNAM.SAFETY",
+      "SUPPDM",     "QVAL",     "text",  "Derived",     "CL.Y_BLANK",      NA,       "QNAM == 'ITT'",      "MT.SUPPDM.QNAM.ITT",
+      "SUPPDM",  "RDOMAIN",     "text", "Assigned",               NA,      NA,         NA,                 "COM.SUPPDM.RDOMAIN",
       "SUPPDM",  "STUDYID",     "text",      "CRF",               NA,      NA,         NA,                        NA,
       "SUPPDM",  "USUBJID",     "text",  "Derived",               NA,      NA,         NA,       "MT.SUPPDM.USUBJID"
    )
@@ -380,21 +382,25 @@ test_that("values_spec reader tests", {
       select(dataset, variable, type, origin, code_id, sig_dig, where, derivation_id )
 
    # Read from spec
+   comments <- spec$Comments$ID
    spec_value_spec <- spec_type_to_value_spec(spec) %>%
       arrange(dataset, variable) %>%
       select(dataset, variable, type, origin, code_id, sig_dig, where, derivation_id) %>%
       #Fix naming as it is slightly different, but matches within metacore
       mutate(code_id = if_else(!is.na(code_id), paste0("CL.", code_id), code_id, NA_character_),
-             derivation_id = if_else(!is.na(derivation_id), paste0("MT.", derivation_id), NA_character_),
-             where = str_replace(where, "EQ", "="),
+             derivation_id = case_when(
+                origin == "Derived" ~ paste0("MT.", derivation_id),
+                origin == "Assigned" & derivation_id %in% comments ~ paste0("COM.", derivation_id),
+                TRUE ~ NA_character_),
+             where = str_replace(where, "EQ", "=="),
              where = str_split(where, "\\s(?=(\\w*$))") %>%
                 map(~paste0(.[1], " '", .[2])),
              where = if_else(where == "NA 'NA", NA_character_, paste0(where, "'")))
 
+
    # Tests
    expect_equal(def_value_spec, ref_value_spec)
-   expect_equal(spec_value_spec,
-                ref_value_spec)
+   expect_equal(spec_value_spec,  ref_value_spec)
 
    })
 
@@ -403,6 +409,14 @@ test_that("derivation reader tests", {
    # Create reference derivation tibble
    ref_derivation <- tibble::tribble(
       ~derivation_id,      ~derivation,
+      "COM.DM.AGEU",       "AGEU='YEARS'",
+      "COM.DM.ARM",        "According to randomization list",
+      "COM.DM.ARMCD",      "According to randomization list",
+      "COM.SUPPAE.IDVAR",  "IDVAR='AESEQ'",
+      "COM.SUPPAE.RDOMAIN", "RDOMAIN='AE'",
+      "COM.SUPPDM.IDVAR", "IDVAR=' '",
+      "COM.SUPPDM.IDVARVAL", "IDVARVAL= ' '",
+      "COM.SUPPDM.RDOMAIN", "RDOMAIN='AE'",
       "MT.AE.AEACN" ,            "AEACN=Null (data on action taken concerning study treatment was not collected)"                                                       ,
       "MT.AE.AEDTC" ,            "Date of final visit (SV)"                                                                                                             ,
       "MT.AE.AESEQ" ,            "Sequential number identifying records within each USUBJID"                                                                            ,
@@ -447,17 +461,27 @@ test_that("derivation reader tests", {
       mutate(derivation = str_replace_all(derivation, '\\"', "\\'"))
 
    # Read from spec
+
+   ref_deriv <- spec$Methods %>%
+      select(derivation_id = ID,
+             derivation = Description) %>%
+      mutate(derivation_id = paste0("MT.", derivation_id))
+   ref_deriv <- spec$Variables %>%
+      filter(Origin %in% c("Assigned")) %>%
+      mutate(derivation_id = paste0("MT.", Dataset, ".", Variable),
+             derivation = Comment) %>%
+      select(starts_with("derivation")) %>%
+      bind_rows(ref_deriv, .) %>%
+      arrange(derivation_id) %>%
+      distinct()
+
    spec_derivation <- spec_type_to_derivations(spec) %>%
       arrange(derivation_id) %>%
-      mutate(derivation_id = paste0("MT.", derivation_id)) %>%
-      mutate(derivation = str_replace_all(derivation, '\\"', "\\'"),
-             derivation = derivation %>% str_remove_all("\\\r|\\\n$") %>%
-                str_trim()
-             )
+      mutate(derivation_id = paste0("MT.", derivation_id))
 
    # Tests
    expect_equal(def_derivation, ref_derivation)
-   expect_equal(spec_derivation, ref_derivation)
+   expect_equal(spec_derivation, ref_deriv)
 })
 
 test_that("codelist reader tests", {
@@ -498,7 +522,8 @@ test_that("codelist reader tests", {
    # Read from define
    def_codelist <- xml_to_codelist(define) %>%
       filter(code_id != "CL.Y_BLANK") %>%
-      arrange(code_id)
+      arrange(code_id) %>%
+      select(code_id, name, codes, type)
 
    # Read from spec
    spec_codelist <- spec_type_to_codelist(spec, simplify = FALSE) %>%

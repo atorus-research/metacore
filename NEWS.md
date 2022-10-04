@@ -1,3 +1,15 @@
+# Metacore 0.1.0
+- Updates for latest version of {tidyselect}
+- Move from XML to xml2 for define.xml processing
+- Correct issue with warning on ds_var$core 
+- Correct bug with not reading the derivation of predecessor and assigned variables correctly
+
+# Metacore 0.0.6 
+- Correct typos
+- Limits origin value/make all origins lower case 
+
+# Metacore 0.0.5
+- [#47](https://github.com/atorus-research/metacore/issues/47) Improve `yn_to_tf()` to be more robust in parsing yes/no columns
 
 # Metacore 0.0.4
 - Adds a supp table to store the `idvar` and `qeval` information 

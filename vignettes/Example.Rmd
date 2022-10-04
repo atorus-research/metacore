@@ -16,7 +16,7 @@ knitr::opts_chunk$set(
 
 ```{r setup}
 library(metacore)
-library(XML)
+library(xml2)
 ```
 
 [CDISC](https://www.cdisc.org/) standards provide a standard for submission of data set metadata through a document known as define.xml. The define provides a great deal of useful information that is both machine readable and can be viewed through your web browser. While many organizations wait to produce a define until the datasets are finalized, it can still be advantageous to be able to read metadata directly from a define. For this purpose, we developed readers that can go directly from a define.xml to a metacore object.
@@ -26,7 +26,8 @@ To do this, we've built separate reader function for each of the metacore tables
 We start by reading the define from disk using the `xmlTreeParse()` function from the `XML` package.
 
 ```{r}
-doc <- xmlTreeParse(metacore_example("SDTM_define.xml"), useInternalNodes = TRUE)
+doc <- read_xml(metacore_example("SDTM_define.xml"))
+xml_ns_strip(doc)
 ```
 
 

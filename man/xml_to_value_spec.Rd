@@ -2,12 +2,12 @@
 % Please edit documentation in R/xml_builders.R
 \name{xml_to_value_spec}
 \alias{xml_to_value_spec}
-\title{xml to value spec}
+\title{XML to value spec}
 \usage{
 xml_to_value_spec(doc)
 }
 \arguments{
-\item{doc}{?}
+\item{doc}{xml document}
 }
 \value{
 tibble with the value level information

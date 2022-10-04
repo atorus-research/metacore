@@ -9,10 +9,10 @@ spec_type_to_codelist(
   codelist_cols = c(code_id = "ID", name = "[N|n]ame", code = "^[C|c]ode|^[T|t]erm",
     decode = "[D|d]ecode"),
   permitted_val_cols = NULL,
-  dict_cols = c(code_id = "ID", name = "[N|n]ame", dictionary = "[D|d]ictionary",
-    version = "[V|v]ersion"),
+  dict_cols = c(code_id = "ID", name = "[N|n]ame", dictionary = "[D|d]ictionary", version
+    = "[V|v]ersion"),
   sheets = NULL,
-  simplify = TRUE
+  simplify = FALSE
 )
 }
 \arguments{
@@ -36,7 +36,7 @@ sheet}
 \item{sheets}{Optional, regular expressions of the sheets}
 
 \item{simplify}{Boolean value, if true will convert code/decode pairs that
-are all equal to a permitted value list}
+are all equal to a permitted value list. True by default}
 }
 \value{
 a dataset formatted for the metacore object

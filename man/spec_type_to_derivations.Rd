@@ -7,7 +7,9 @@
 spec_type_to_derivations(
   doc,
   cols = c(derivation_id = "ID", derivation = "[D|d]efinition|[D|d]escription"),
-  sheet = "Method|Derivations?"
+  sheet = "Method|Derivations?",
+  var_cols = c(dataset = "[D|d]ataset|[D|d]omain", variable = "[N|n]ame|[V|v]ariables?",
+    origin = "[O|o]rigin", predecessor = "[P|p]redecessor", comment = "[C|c]omment")
 )
 }
 \arguments{
@@ -19,6 +21,9 @@ expressions for more flexibility. But, the names must follow the given
 pattern}
 
 \item{sheet}{Regular expression for the sheet name}
+
+\item{var_cols}{Named vector of the name(s) of the origin, predecessor and
+comment columns. These do not have to be on the specified sheet.}
 }
 \value{
 a dataset formatted for the metacore object
@@ -26,7 +31,9 @@ a dataset formatted for the metacore object
 \description{
 Creates the derivation table from a list of datasets (optionally filtered by
 the sheet input). The named vector \code{cols} is used to determine which is the
-correct sheet and renames the columns
+correct sheet and renames the columns. The derivation will be used for
+"derived" origins, the comments for "assigned" origins, and predecessor for
+"predecessor" origins.
 }
 \seealso{
 Other spec builder: 

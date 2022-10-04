@@ -1,6 +1,6 @@
 Package: metacore
 Title: A Centralized Metadata Object Focus on Clinical Trial Data Programming Workflows
-Version: 0.0.4
+Version: 0.1.0
 Authors@R: 
     c(person(given = "Christina",
              family = "Fillmore",
@@ -27,7 +27,7 @@ Description: Create an immutable container holding metadata for the purpose of b
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE, r6 = FALSE)
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.1
 Suggests: 
     testthat,
     knitr,
@@ -39,7 +39,7 @@ Imports:
     dplyr,
     stringr,
     magrittr,
-    XML,
+    xml2,
     purrr,
     readxl,
     rlang,

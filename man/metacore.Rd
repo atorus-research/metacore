@@ -8,16 +8,16 @@ metacore(
   ds_spec = tibble(dataset = character(), structure = character(), label = character()),
   ds_vars = tibble(dataset = character(), variable = character(), keep = logical(),
     key_seq = integer(), order = integer(), core = character(), supp_flag = logical()),
-  var_spec = tibble(variable = character(), label = character(), length = integer(),
-    type = character(), common = character(), format = character()),
-  value_spec = tibble(dataset = character(), variable = character(), where =
-    character(), type = character(), sig_dig = integer(), code_id = character(), origin =
-    character(), derivation_id = integer()),
+  var_spec = tibble(variable = character(), label = character(), length = integer(), type
+    = character(), common = character(), format = character()),
+  value_spec = tibble(dataset = character(), variable = character(), where = character(),
+    type = character(), sig_dig = integer(), code_id = character(), origin = character(),
+    derivation_id = integer()),
   derivations = tibble(derivation_id = integer(), derivation = character()),
-  codelist = tibble(code_id = character(), name = character(), type = character(),
-    codes = list()),
-  supp = tibble(dataset = character(), variable = character(), idvar = character(),
-    qeval = character())
+  codelist = tibble(code_id = character(), name = character(), type = character(), codes
+    = list()),
+  supp = tibble(dataset = character(), variable = character(), idvar = character(), qeval
+    = character())
 )
 }
 \arguments{
