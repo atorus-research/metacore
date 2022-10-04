@@ -20,7 +20,7 @@ be used as building blocks for bespoke specification documents"><meta property="
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">metacore</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.0.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.0</span>
       </span>
     </div>
 
@@ -72,19 +72,30 @@ be used as building blocks for bespoke specification documents</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">spec_to_metacore</span><span class="op">(</span><span class="va">path</span>, quiet <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">spec_to_metacore</span><span class="op">(</span><span class="va">path</span>, quiet <span class="op">=</span> <span class="cn">FALSE</span>, where_sep_sheet <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>path</dt>
 <dd><p>string of file location</p></dd>
+
+
 <dt>quiet</dt>
-<dd><p>Option to quietly load in, this will suppress warnings, but not errors</p></dd>
+<dd><p>Option to quietly load in, this will suppress warnings, but not
+errors</p></dd>
+
+
+<dt>where_sep_sheet</dt>
+<dd><p>Option to tell if the where is in a separate sheet,
+like in older p21 specs or in a single sheet like newer p21 specs</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>given a spec document it returns a metacore object</p>
+    
+
+<p>given a spec document it returns a metacore object</p>
     </div>
 
   </div>
@@ -99,7 +110,7 @@ be used as building blocks for bespoke specification documents</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

@@ -19,7 +19,7 @@ correct sheet and renames the columns."><meta property="og:image" content="/refe
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">metacore</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.0.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.0</span>
       </span>
     </div>
 
@@ -70,16 +70,16 @@ correct sheet and renames the columns.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">spec_type_to_codelist</span><span class="op">(</span>
-  <span class="va">doc</span>,
-  codelist_cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>code_id <span class="op">=</span> <span class="st">"ID"</span>, name <span class="op">=</span> <span class="st">"[N|n]ame"</span>, code <span class="op">=</span> <span class="st">"^[C|c]ode|^[T|t]erm"</span>,
-    decode <span class="op">=</span> <span class="st">"[D|d]ecode"</span><span class="op">)</span>,
-  permitted_val_cols <span class="op">=</span> <span class="cn">NULL</span>,
-  dict_cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>code_id <span class="op">=</span> <span class="st">"ID"</span>, name <span class="op">=</span> <span class="st">"[N|n]ame"</span>, dictionary <span class="op">=</span> <span class="st">"[D|d]ictionary"</span>,
-    version <span class="op">=</span> <span class="st">"[V|v]ersion"</span><span class="op">)</span>,
-  sheets <span class="op">=</span> <span class="cn">NULL</span>,
-  simplify <span class="op">=</span> <span class="cn">TRUE</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">spec_type_to_codelist</span><span class="op">(</span></span>
+<span>  <span class="va">doc</span>,</span>
+<span>  codelist_cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>code_id <span class="op">=</span> <span class="st">"ID"</span>, name <span class="op">=</span> <span class="st">"[N|n]ame"</span>, code <span class="op">=</span> <span class="st">"^[C|c]ode|^[T|t]erm"</span>,</span>
+<span>    decode <span class="op">=</span> <span class="st">"[D|d]ecode"</span><span class="op">)</span>,</span>
+<span>  permitted_val_cols <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  dict_cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>code_id <span class="op">=</span> <span class="st">"ID"</span>, name <span class="op">=</span> <span class="st">"[N|n]ame"</span>, dictionary <span class="op">=</span> <span class="st">"[D|d]ictionary"</span>, version</span>
+<span>    <span class="op">=</span> <span class="st">"[V|v]ersion"</span><span class="op">)</span>,</span>
+<span>  sheets <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  simplify <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -87,29 +87,42 @@ correct sheet and renames the columns.</p>
     <dl><dt>doc</dt>
 <dd><p>Named list of datasets @seealso <code><a href="read_all_sheets.html">read_all_sheets()</a></code> for exact
 format</p></dd>
+
+
 <dt>codelist_cols</dt>
 <dd><p>Named vector of column names that make up the codelist.
 The column names can be regular expressions for more flexibility. But, the
 names must follow the given pattern</p></dd>
+
+
 <dt>permitted_val_cols</dt>
 <dd><p>Named vector of column names that make up the
 permitted value The column names can be regular expressions for more
 flexibility. This is optional, can be left as null if there isn't a
 permitted value sheet</p></dd>
+
+
 <dt>dict_cols</dt>
 <dd><p>Named vector of column names that make up the dictionary
 value The column names can be regular expressions for more flexibility.
 This is optional, can be left as null if there isn't a permitted value
 sheet</p></dd>
+
+
 <dt>sheets</dt>
 <dd><p>Optional, regular expressions of the sheets</p></dd>
+
+
 <dt>simplify</dt>
 <dd><p>Boolean value, if true will convert code/decode pairs that
-are all equal to a permitted value list</p></dd>
+are all equal to a permitted value list. True by default</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>a dataset formatted for the metacore object</p>
+    
+
+<p>a dataset formatted for the metacore object</p>
     </div>
     <div id="see-also">
     <h2>See also</h2>
@@ -133,7 +146,7 @@ are all equal to a permitted value list</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

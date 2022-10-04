@@ -19,7 +19,7 @@ sheet and renames the columns. (Note: the keep column will be converted logical)
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">metacore</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.0.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.0</span>
       </span>
     </div>
 
@@ -70,13 +70,13 @@ sheet and renames the columns. (Note: the keep column will be converted logical)
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">spec_type_to_var_spec</span><span class="op">(</span>
-  <span class="va">doc</span>,
-  cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>variable <span class="op">=</span> <span class="st">"[N|n]ame|[V|v]ariables?"</span>, length <span class="op">=</span> <span class="st">"[L|l]ength"</span>, label <span class="op">=</span>
-    <span class="st">"[L|l]abel"</span>, type <span class="op">=</span> <span class="st">"[T|t]ype"</span>, dataset <span class="op">=</span> <span class="st">"[D|d]ataset|[D|d]omain"</span>, format <span class="op">=</span>
-    <span class="st">"[F|f]ormat"</span><span class="op">)</span>,
-  sheet <span class="op">=</span> <span class="cn">NULL</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">spec_type_to_var_spec</span><span class="op">(</span></span>
+<span>  <span class="va">doc</span>,</span>
+<span>  cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>variable <span class="op">=</span> <span class="st">"[N|n]ame|[V|v]ariables?"</span>, length <span class="op">=</span> <span class="st">"[L|l]ength"</span>, label <span class="op">=</span></span>
+<span>    <span class="st">"[L|l]abel"</span>, type <span class="op">=</span> <span class="st">"[T|t]ype"</span>, dataset <span class="op">=</span> <span class="st">"[D|d]ataset|[D|d]omain"</span>, format <span class="op">=</span></span>
+<span>    <span class="st">"[F|f]ormat"</span><span class="op">)</span>,</span>
+<span>  sheet <span class="op">=</span> <span class="st">"[V|v]ar"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -84,15 +84,22 @@ sheet and renames the columns. (Note: the keep column will be converted logical)
     <dl><dt>doc</dt>
 <dd><p>Named list of datasets @seealso <code><a href="read_all_sheets.html">read_all_sheets()</a></code> for exact
 format</p></dd>
+
+
 <dt>cols</dt>
 <dd><p>Named vector of column names. The column names can be regular
 expressions for more flexibility. But, the names must follow the given pattern</p></dd>
+
+
 <dt>sheet</dt>
 <dd><p>Regular expression for the sheet name</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>a dataset formatted for the metacore object</p>
+    
+
+<p>a dataset formatted for the metacore object</p>
     </div>
     <div id="see-also">
     <h2>See also</h2>
@@ -116,7 +123,7 @@ expressions for more flexibility. But, the names must follow the given pattern</
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

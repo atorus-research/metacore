@@ -35,7 +35,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">metacore</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.0.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.0</span>
       </span>
     </div>
 
@@ -87,7 +87,6 @@
 <a class="anchor" aria-label="anchor" href="#metacore-"></a>
 </h1></div>
 <!-- badges: start -->
-
 <p>Programming for clinical trial data analysis tends to be very standardized. With data standards such as <a href="https://www.cdisc.org/" class="external-link">CDISC</a>, expectations tend to be very clearly defined. Within these programming activities, there’s ample room for the use of metadata. Metadata can be used for several different purposes, such as applying dataset attributes, establishing sort sequences, working with controlled terminology, and more. Despite CDISC standards, organizations tend to have their own means of storing metadata, be it in excel spreadsheets, databases, and more.</p>
 <p>The purpose of metacore is to establish a common foundation for the use of metadata within an R session. This is done by creating an R object that can hold the necessary data in a standardized, immutable structure (using R6) that makes it easy to extract out necessary information when needed. Users can read in their metadata from their various sources. To make this easy, we’ve provided some helper functions - and even have readers that can read directly from Define.xml 2.0. By establishing a common and consistent object in memory, further packages that support these work flows can have a common foundation upon which tools can be built that leverage metadata in the future. This reduces the need to hold different data structures containing metadata and instead allows programs to pull this information from a centralized source.</p>
 <div class="section level2">
@@ -95,7 +94,7 @@
 </h2>
 <p>You can install the current development version of metacore from <a href="https://github.com/atorus-research/metacore" class="external-link">github</a> with:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"atorus-research/metacore"</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"atorus-research/metacore"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="structure">Structure<a class="anchor" aria-label="anchor" href="#structure"></a>
@@ -118,8 +117,8 @@
 <p>This table covers the basic information about each dataset. There is only a single row per dataset, with the following information:</p>
 <ul>
 <li><p><em>dataset</em>: The abbreviated name of the dataset (e.g. AE)</p></li>
-<li><p><em>Structure</em>: Value structure of the dataset as a sting</p></li>
-<li><p><em>Label</em>: Dataset label</p></li>
+<li><p><em>structure</em>: Value structure of the dataset as a sting</p></li>
+<li><p><em>label</em>: Dataset label</p></li>
 </ul>
 </div>
 <div class="section level3">
@@ -139,7 +138,7 @@
 <div class="section level3">
 <h3 id="var_spec-">var_spec <img src="reference/figures/labeled-var_spec.png" align="right" style="height:150px;"><a class="anchor" aria-label="anchor" href="#var_spec-"></a>
 </h3>
-<p>This table contains the information the purely variable level information. The goal is there is a single row per variable, which is common across all datasets. This helps ensure variables follow the CDISC standard. But, this isn’t always possible, so if information for a given variable differs across datasets, the variable will be recorded as dataset.variable in the variable column.</p>
+<p>This table contains the purely variable level information. The goal is there is a single row per variable, which is common across all datasets. This helps ensure variables follow the CDISC standard. But, this isn’t always possible, so if information for a given variable differs across datasets, the variable will be recorded as dataset.variable in the variable column.</p>
 <ul>
 <li><p><em>variable</em>: Variable name, which should match the name in <strong>ds_spec</strong>. Unless the variable needs to be duplicated, then the name will be a combination of the the dataset name and variable name from <strong>ds_spec</strong> (dataset.variable)</p></li>
 <li><p><em>type</em>: Variable class</p></li>
@@ -165,7 +164,7 @@
 </ul>
 </div>
 <div class="section level3">
-<h3 id="derivation-">derivation <img src="reference/figures/labeled-derivation.png" align="right" style="height:150px;"><a class="anchor" aria-label="anchor" href="#derivation-"></a>
+<h3 id="derivations-">derivations <img src="reference/figures/labeled-derivation.png" align="right" style="height:150px;"><a class="anchor" aria-label="anchor" href="#derivations-"></a>
 </h3>
 <p>This table has all the derivation information, with one row per derivation ID and the following information:</p>
 <ul>
@@ -183,8 +182,6 @@
 <li><p><em>code</em>: A list of tibbles (for code / decode combinations) and vectors (for permitted values and libraries), which contain all the codes</p></li>
 <li><p><em>type</em>: An indicator of if the information in the code column is a code/decode table, permitted value, or external library</p></li>
 </ul>
-<p>To see a metacore object in about please see our vignettes</p>
-<p><img src="reference/figures/labeled_schema.png" title="man/figures/Metacore Schema"></p>
 </div>
 <div class="section level3">
 <h3 id="supp-">supp <img src="reference/figures/labeled-supp.png" align="right" style="height:150px;"><a class="anchor" aria-label="anchor" href="#supp-"></a>
@@ -196,7 +193,8 @@
 <li><p><em>idvar</em>: ID variable used for the supplemental variable. Can be left missing if not needed</p></li>
 <li><p><em>qeval</em>: Evaluator for the supplemental variable</p></li>
 </ul>
-<p>To see a metacore object in about please see our vignettes</p>
+<p>To get more information about the metacore objects and how to build a specification reader, please see our vignettes.</p>
+<p><img src="reference/figures/labeled_schema.png" title="man/figures/Metacore Schema"></p>
 </div>
 </div>
 <div class="section level2">
@@ -266,7 +264,7 @@
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer>

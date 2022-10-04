@@ -19,7 +19,7 @@ correct sheet and renames the columns"><meta property="og:image" content="/refer
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">metacore</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.0.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.0</span>
       </span>
     </div>
 
@@ -70,16 +70,17 @@ correct sheet and renames the columns</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">spec_type_to_value_spec</span><span class="op">(</span>
-  <span class="va">doc</span>,
-  cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>dataset <span class="op">=</span> <span class="st">"[D|d]ataset|[D|d]omain"</span>, variable <span class="op">=</span> <span class="st">"[N|n]ame|[V|v]ariables?"</span>,
-    origin <span class="op">=</span> <span class="st">"[O|o]rigin"</span>, type <span class="op">=</span> <span class="st">"[T|t]ype"</span>, code_id <span class="op">=</span> <span class="st">"[C|c]odelist|Controlled Term"</span>,
-    sig_dig <span class="op">=</span> <span class="st">"[S|s]ignificant"</span>, where <span class="op">=</span> <span class="st">"[W|w]here"</span>, derivation_id <span class="op">=</span> <span class="st">"[M|m]ethod"</span><span class="op">)</span>,
-  sheet <span class="op">=</span> <span class="cn">NULL</span>,
-  where_sep_sheet <span class="op">=</span> <span class="cn">TRUE</span>,
-  where_cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>id <span class="op">=</span> <span class="st">"ID"</span>, where <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Variable"</span>, <span class="st">"Comparator"</span>, <span class="st">"Value"</span><span class="op">)</span><span class="op">)</span>,
-  var_sheet <span class="op">=</span> <span class="st">"[V|v]ar"</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">spec_type_to_value_spec</span><span class="op">(</span></span>
+<span>  <span class="va">doc</span>,</span>
+<span>  cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>dataset <span class="op">=</span> <span class="st">"[D|d]ataset|[D|d]omain"</span>, variable <span class="op">=</span> <span class="st">"[N|n]ame|[V|v]ariables?"</span>,</span>
+<span>    origin <span class="op">=</span> <span class="st">"[O|o]rigin"</span>, type <span class="op">=</span> <span class="st">"[T|t]ype"</span>, code_id <span class="op">=</span> <span class="st">"[C|c]odelist|Controlled Term"</span>,</span>
+<span>    sig_dig <span class="op">=</span> <span class="st">"[S|s]ignificant"</span>, where <span class="op">=</span> <span class="st">"[W|w]here"</span>, derivation_id <span class="op">=</span> <span class="st">"[M|m]ethod"</span>,</span>
+<span>    predecessor <span class="op">=</span> <span class="st">"[P|p]redecessor"</span><span class="op">)</span>,</span>
+<span>  sheet <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  where_sep_sheet <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  where_cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>id <span class="op">=</span> <span class="st">"ID"</span>, where <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Variable"</span>, <span class="st">"Comparator"</span>, <span class="st">"Value"</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  var_sheet <span class="op">=</span> <span class="st">"[V|v]ar"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -87,29 +88,42 @@ correct sheet and renames the columns</p>
     <dl><dt>doc</dt>
 <dd><p>Named list of datasets @seealso <code><a href="read_all_sheets.html">read_all_sheets()</a></code> for exact
 format</p></dd>
+
+
 <dt>cols</dt>
 <dd><p>Named vector of column names. The column names can be regular
 expressions for more flexibility. But, the names must follow the given
 pattern</p></dd>
+
+
 <dt>sheet</dt>
 <dd><p>Regular expression for the sheet name</p></dd>
+
+
 <dt>where_sep_sheet</dt>
 <dd><p>Boolean value to control if the where information in a
 separate dataset. If the where information is on a separate sheet, set to
 true and provide the column information with the <code>where_cols</code> inputs.</p></dd>
+
+
 <dt>where_cols</dt>
 <dd><p>Named list with an id and where field. All columns in the
 where field will be collapsed together</p></dd>
+
+
 <dt>var_sheet</dt>
 <dd><p>Name of sheet with the Variable information on it. Metacore
 expects each variable will have a row in the value_spec. Because many
 specification only have information in the value tab this is added. If the
 information already exists in the value tab of your specification set to
 NULL</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>a dataset formatted for the metacore object</p>
+    
+
+<p>a dataset formatted for the metacore object</p>
     </div>
     <div id="see-also">
     <h2>See also</h2>
@@ -133,7 +147,7 @@ NULL</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

@@ -19,7 +19,7 @@ is different control terminology for different datasets"><meta property="og:imag
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">metacore</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.0.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.0</span>
       </span>
     </div>
 
@@ -70,31 +70,42 @@ is different control terminology for different datasets</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">get_control_term</span><span class="op">(</span><span class="va">metacode</span>, <span class="va">variable</span>, dataset <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">get_control_term</span><span class="op">(</span><span class="va">metacode</span>, <span class="va">variable</span>, dataset <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>metacode</dt>
 <dd><p>metacore object</p></dd>
+
+
 <dt>variable</dt>
 <dd><p>A variable name to get the controlled terms for. This can
 either be a string or just the name of the variable</p></dd>
+
+
 <dt>dataset</dt>
 <dd><p>A dataset name. This is not required if there is only one set
 of control terminology across all datasets</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>a vector for permitted values and a 2-column tibble for codelists</p>
+    
+
+<p>a vector for permitted values and a 2-column tibble for codelists</p>
     </div>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="va">meta_ex</span> <span class="op">&lt;-</span> <span class="fu"><a href="spec_to_metacore.html">spec_to_metacore</a></span><span class="op">(</span><span class="fu"><a href="metacore_example.html">metacore_example</a></span><span class="op">(</span><span class="st">"p21_mock.xlsx"</span><span class="op">)</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">meta_ex</span> <span class="op">&lt;-</span> <span class="fu"><a href="spec_to_metacore.html">spec_to_metacore</a></span><span class="op">(</span><span class="fu"><a href="metacore_example.html">metacore_example</a></span><span class="op">(</span><span class="st">"p21_mock.xlsx"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>core from the ds_vars table only contain missing values.</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> supp_flag from the ds_vars table only contain missing values.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> The following words in value_spec$origin are not allowed: </span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span>     edt</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> dataset from the supp table only contain missing values.</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> </span>
@@ -114,13 +125,13 @@ of control terminology across all datasets</p></dd>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  Metadata successfully imported</span>
-<span class="r-in"><span class="fu">get_control_term</span><span class="op">(</span><span class="va">meta_ex</span>, <span class="va">QVAL</span>, <span class="va">SUPPAE</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="fu">get_control_term</span><span class="op">(</span><span class="va">meta_ex</span>, <span class="va">QVAL</span>, <span class="va">SUPPAE</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 2 × 2</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   code  decode</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> N     No    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> Y     Yes   </span>
-<span class="r-in"><span class="fu">get_control_term</span><span class="op">(</span><span class="va">meta_ex</span>, <span class="st">"QVAL"</span>, <span class="st">"SUPPAE"</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="fu">get_control_term</span><span class="op">(</span><span class="va">meta_ex</span>, <span class="st">"QVAL"</span>, <span class="st">"SUPPAE"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 2 × 2</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   code  decode</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> </span>
@@ -140,7 +151,7 @@ of control terminology across all datasets</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>
