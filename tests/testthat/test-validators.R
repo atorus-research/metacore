@@ -94,3 +94,13 @@ test_that("test for incorrect column names", {
       mutate(codelist2 = "A")
    expect_warning(do.call(metacore, dfs[1:7]))
 })
+
+test_that("check object works", {
+   load(metacore_example("pilot_ADaM.rda"))
+   metacore %>%
+      is_metacore() %>%
+      expect_equal(TRUE)
+
+   is_metacore("THIS IS NOT A THING") %>%
+      expect_equal(FALSE)
+})

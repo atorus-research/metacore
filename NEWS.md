@@ -1,3 +1,6 @@
+# Metacore 0.1.1
+- Add variable cross checks to check consistent use of label, type, and format
+
 # Metacore 0.1.0
 - Updates for latest version of {tidyselect}
 - Move from XML to xml2 for define.xml processing
