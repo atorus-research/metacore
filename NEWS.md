@@ -1,5 +1,6 @@
 # Metacore 0.1.1
 - Add variable cross checks to check consistent use of label, type, and format
+- Add `is_metacore()` function to check if it is a metacore object 
 
 # Metacore 0.1.0
 - Updates for latest version of {tidyselect}
