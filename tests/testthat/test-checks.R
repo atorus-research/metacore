@@ -11,8 +11,10 @@ test_that("Test label Checks", {
       "CHG"    , "Change from Baseline"                ,     6L, c("ADLBC.CHG", "ADLBCPV.CHG", "ADLBH.CHG", "ADLBHPV.CHG", "ADNPIX.CHG", "ADVS.CHG"),
       "ITTFL"  , "Intent-to-Treat Population Flag"     ,     3L, c("ADADAS.ITTFL", "ADCIBC.ITTFL", "ADNPIX.ITTFL"),
       "ITTFL"  , "Intent-To-Treat Population Flag"     ,     1L, "ADSL.ITTFL"
-   )
-   label_df <- check_inconsistent_labels(metacore)
+   ) %>%
+      dplyr::arrange(variable, label)
+   label_df <- check_inconsistent_labels(metacore) %>%
+      dplyr::arrange(variable, label)
    expect_equal(label_df, man_label)
 
    load(metacore_example("pilot_SDTM.rda"))
