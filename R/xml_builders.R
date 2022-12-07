@@ -233,8 +233,10 @@ xml_to_value_spec <- function(doc) {
    # tmp workaround until below bug is resolved in purrr
    # https://github.com/tidyverse/purrr/issues/824
    if(nrow(where_eqs) == 0){
-      where_eqs <- c("where_oid", "left", "test", "right") %>%
-         map_dfr(setNames, object = list(character()))
+      where_eqs <- tibble(where_oid=character(),
+                          left=character(),
+                          test=character(),
+                          right = character())
    }
 
    if(nrow(where_to_merge) == 0){

@@ -54,6 +54,7 @@ check_inconsistent_formats <- function(metacore){
 #'   duplicated variables.
 #' @noRd
 #' @importFrom stringr str_glue
+#' @importFrom dplyr across
 basic_check <- function(col_to_check, metacore){
    if(!is_metacore(metacore)){
       stop("Expects a metacore object", call. = FALSE)

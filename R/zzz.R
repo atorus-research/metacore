@@ -35,4 +35,6 @@ globalVariables(c("private",
                   "type",
                   "variable",
                   "where",
-                  "where_new"))
+                  "where_new",
+                  "var1",
+                  "n_lab"))
