@@ -40,6 +40,9 @@
     <loc>/reference/check_words.html</loc>
   </url>
   <url>
+    <loc>/reference/checks.html</loc>
+  </url>
+  <url>
     <loc>/reference/create_tbl.html</loc>
   </url>
   <url>
@@ -50,6 +53,9 @@
   </url>
   <url>
     <loc>/reference/index.html</loc>
+  </url>
+  <url>
+    <loc>/reference/is_metacore.html</loc>
   </url>
   <url>
     <loc>/reference/load_metacore.html</loc>
