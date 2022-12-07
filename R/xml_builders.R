@@ -229,6 +229,13 @@ xml_to_value_spec <- function(doc) {
          )
       }
       )
+   # create 0x4 tibble if where_eqs is 0x0
+   # tmp workaround until below bug is resolved in purrr
+   # https://github.com/tidyverse/purrr/issues/824
+   if(nrow(where_eqs) == 0){
+      where_eqs <- c("where_oid", "left", "test", "right") %>%
+         map_dfr(setNames, object = list(character()))
+   }
 
    if(nrow(where_to_merge) == 0){
       where_eqs <- where_eqs %>%
