@@ -22,7 +22,7 @@ with inconsistencies.
 }
 \description{
 These functions check to see if values (e.g labels, formats)
-which should be consistent for a variable across all data actaully as
+that should be consistent for a variable across all data are actually
 consistent.
 }
 \examples{
