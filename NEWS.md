@@ -1,3 +1,8 @@
+# Metacore 0.1.1
+- Add variable cross checks to check consistent use of label, type, and format
+- Add `is_metacore()` function to check if it is a metacore object 
+- [#64](https://github.com/atorus-research/metacore/issues/64) Resolve issue so define and spec readers work when value levels are empty
+
 # Metacore 0.1.0
 - Updates for latest version of {tidyselect}
 - Move from XML to xml2 for define.xml processing

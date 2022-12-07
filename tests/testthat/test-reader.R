@@ -553,3 +553,12 @@ test_that("Specification Reader's errors and warnings", {
    expect_error(spec_type_to_codelist(spec, cols = c("foo" = "foo")))
 
 })
+
+
+test_that("Check no value reader",{
+   empty_val_check <- spec_to_metacore("spec_no_val.xlsx", quiet = TRUE,
+                    where_sep_sheet = FALSE)
+   auto_val <- empty_val_check$value_spec %>%
+      filter(where != "TRUE")
+   expect_equal(nrow(auto_val), 0L)
+})

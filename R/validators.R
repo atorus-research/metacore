@@ -327,3 +327,19 @@ check_columns <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, c
 
 
 }
+
+#' Is metacore object
+#'
+#' @param x object to check
+#'
+#' @return `TRUE` if metacore, `FALSE` if not
+#' @export
+#'
+#' @examples
+#' # Loads in a metacore obj called metacore
+#' load(metacore_example("pilot_ADaM.rda"))
+#' is_metacore(metacore)
+#'
+is_metacore <- function(x){
+   inherits(x, "Metacore")
+}
