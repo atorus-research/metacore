@@ -12,6 +12,8 @@ status](https://github.com/atorus-research/metacore/workflows/R-CMD-check/badge.
 [<img src="https://img.shields.io/badge/License-MIT-blue.svg">](https://github.com/atorus-research/metacore/blob/master/LICENSE)
 [![Lifecycle:
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental-1)
+[![CRAN
+status](https://www.r-pkg.org/badges/version/metacore)](https://CRAN.R-project.org/package=metacore)
 <!-- badges: end -->
 
 Programming for clinical trial data analysis tends to be very
