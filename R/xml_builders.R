@@ -111,8 +111,8 @@ xml_to_var_spec <- function(doc) {
    var_info <- xml_find_all(doc, "//ItemDef") %>%
       map_dfr(function(node){
          tibble(
-            oid = xml_attr(node,"OID"),
-            variable = xml_attr(node, "Name"),
+            oid = xml_attr(node,"OID") %>% as.character(),
+            variable = xml_attr(node, "Name") %>% as.character(),
             type = xml_attr(node, "DataType"),
             length = xml_attr(node, "Length") %>% as.integer(),
             format = xml_attr(node, "DisplayFormat"),
@@ -175,8 +175,8 @@ xml_to_value_spec <- function(doc) {
    item_def <- xml_find_all(doc, "//ItemDef") %>%
       map_dfr(function(node){
          tibble(
-            oid = xml_attr(node,"OID"),
-            variable = xml_attr(node, "Name"),
+            oid = xml_attr(node,"OID") %>% as.character(),
+            variable = xml_attr(node, "Name") %>% as.character(),
             type = xml_attr(node, "DataType"),
             sig_dig = xml_attr(node, "SignificantDigits") %>% as.integer(),
             origin = xml_find_first(node, "./def:Origin") %>% xml_attr("Type"),
@@ -184,7 +184,7 @@ xml_to_value_spec <- function(doc) {
             predecessor = xml_find_first(node, "./def:Origin") %>% xml_text(),
             comment_id = xml_attr(node,"CommentOID"),
             code_id = xml_find_first(node, "CodeListRef") %>% xml_attr("CodeListOID"),
-            varname = xml_attr(node, "SASFieldName")
+            varname = xml_attr(node, "SASFieldName") %>% as.character()
          )
       }) %>%
       mutate(
@@ -198,8 +198,8 @@ xml_to_value_spec <- function(doc) {
    derivations <- xml_find_all(doc, "//ItemGroupDef/ItemRef") %>%
       map_dfr(function(node){
          tibble(
-            oid = xml_attr(node, "ItemOID"),
-            dataset = xml_parent(node) %>% xml_attr("Name"),
+            oid = xml_attr(node, "ItemOID") %>% as.character(),
+            dataset = xml_parent(node) %>% xml_attr("Name") %>% as.character(),
             derivation_id = xml_attr(node, "MethodOID")
          )
       })
@@ -209,7 +209,7 @@ xml_to_value_spec <- function(doc) {
    where_to_merge <- xml_find_all(doc, "//def:ValueListDef/ItemRef") %>%
       map_dfr(function(node){
          tibble(
-            oid = xml_parent(node) %>% xml_attr("OID"),
+            oid = xml_parent(node) %>% xml_attr("OID") %>% as.character(),
             item_oid = xml_attr(node, "ItemOID"),
             ord = xml_attr(node, "OrderNumber"),
             where_oid = xml_find_all(node, "./def:WhereClauseRef") %>%
@@ -229,6 +229,15 @@ xml_to_value_spec <- function(doc) {
          )
       }
       )
+   # create 0x4 tibble if where_eqs is 0x0
+   # tmp workaround until below bug is resolved in purrr
+   # https://github.com/tidyverse/purrr/issues/824
+   if(nrow(where_eqs) == 0){
+      where_eqs <- tibble(where_oid=character(),
+                          left=character(),
+                          test=character(),
+                          right = character())
+   }
 
    if(nrow(where_to_merge) == 0){
       where_eqs <- where_eqs %>%
