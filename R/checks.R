@@ -65,10 +65,7 @@ basic_check <- function(col_to_check, metacore){
       group_by(var1) %>%
       mutate(n_lab = n_distinct({{col_to_check}})) %>%
       filter(n_lab > 1) %>%
-      mutate(across(everything(), function(x){
-         attr(x, "label") <- NULL
-         x
-      })) %>%
+      mutate(across(everything(), remove_label)) %>%
       group_by(var1, {{col_to_check}}) %>%
       summarise(n_vars = n(),
                 ls_of_vars = list(variable),
@@ -81,4 +78,9 @@ basic_check <- function(col_to_check, metacore){
    } else {
       message(str_glue("No mismatch {as_label(enexpr(col_to_check))}s detected"))
    }
+}
+
+remove_label <- function(x) {
+   attr(x, "label") <- NULL
+   x
 }
