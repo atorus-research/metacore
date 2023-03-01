@@ -185,14 +185,19 @@ MetaCore_filter <- function(value) {
       # remove the temporary column
       select(-dataset) %>%
       # right join
-      right_join(private$.ds_vars %>% select(variable), by="variable") %>%
+      right_join(private$.ds_vars %>% select(variable), by="variable",
+                 multiple = "all") %>%
       distinct(variable, .keep_all = TRUE) # for when duplicates gett through and have different lables but the same name
 
    private$.derivations <- private$.derivations %>%
-      right_join(private$.value_spec %>% select(derivation_id) %>% na.omit(), by = "derivation_id")
+      right_join(private$.value_spec %>%
+                    select(derivation_id) %>%
+                    na.omit(), by = "derivation_id", multiple = "all")
 
    private$.codelist <- private$.codelist %>%
-      right_join(private$.value_spec %>% select(code_id) %>% na.omit(), by = "code_id")
+      right_join(private$.value_spec %>%
+                    select(code_id) %>%
+                    na.omit(), by = "code_id", multiple = "all")
 
    private$.supp <- private$.supp %>% filter(dataset == value)
 }

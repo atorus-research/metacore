@@ -23,25 +23,6 @@ with_dir <- function (new, code) {
    force(code)
 }
 
-# test_that("metacore print function works", {
-#    private <- list(.ds_pec = data.frame(dataset = c("a", "b", "c"), structure = 1:3))
-#    MetaCore_print(const)
-# })
-
-#
-# test_that("metacore init function works", {
-# })
-#
-# test_that("metacore filter works", {
-# })
-#
-# test_that("select_dataset works", {
-# })
-
-#
-# test_that("metacore_filter works", {
-#
-# })
 
 test_that("readonly function factory", {
    a <- readonly("a")
