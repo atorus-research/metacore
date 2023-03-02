@@ -367,9 +367,11 @@ select_dataset <- function(.data, dataset, simplify = FALSE) {
 #' @importFrom rlang as_label enexpr as_name
 #'
 #' @examples
+#' \dontrun{
 #' meta_ex <- spec_to_metacore(metacore_example("p21_mock.xlsx"))
 #' get_control_term(meta_ex, QVAL, SUPPAE)
 #' get_control_term(meta_ex, "QVAL", "SUPPAE")
+#' }
 get_control_term <- function(metacode, variable, dataset = NULL){
    var_str <- ifelse(str_detect(as_label(enexpr(variable)), "\""),
                      as_name(variable), as_label(enexpr(variable)))
