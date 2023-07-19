@@ -35,7 +35,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">metacore</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.2</span>
       </span>
     </div>
 
@@ -80,7 +80,7 @@
 
       
 
-      </header><script src="Building_Specification_Readers_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
+      </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Building Specification Readers</h1>
@@ -106,111 +106,161 @@
 <span><span class="co">#&gt;     intersect, setdiff, setequal, union</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://purrr.tidyverse.org/" class="external-link">purrr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://stringr.tidyverse.org" class="external-link">stringr</a></span><span class="op">)</span></span></code></pre></div>
-<p>The first thing to do when trying to build a specification reader is to try the default. By default metacore can read in specifications that are in the Pinnacle 21 specification format. If your document isn’t in that format, it is still worth trying the default readers, as the error messages can be helpful.</p>
+<p>The first thing to do when trying to build a specification reader is
+to try the default. By default metacore can read in specifications that
+are in the Pinnacle 21 specification format. If your document isn’t in
+that format, it is still worth trying the default readers, as the error
+messages can be helpful.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/spec_to_metacore.html">spec_to_metacore</a></span><span class="op">(</span><span class="fu"><a href="../reference/metacore_example.html">metacore_example</a></span><span class="op">(</span><span class="st">"mock_spec.xlsx"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Error: Unable to rename the following columns in Domains:</span></span>
 <span><span class="co">#&gt;  label matches 2 columns</span></span>
 <span><span class="co">#&gt; Please check your regular expression</span></span></code></pre></div>
-<p>As we can see, the mock spec we are using here doesn’t match the format. Therefore we will have to build a bespoke reader. Before we start, it is important to understand the structure of the metacore object. Each object acts as its own database for all dataset related metadata. The object has 7 tables and their general purpose are as follows:</p>
+<p>As we can see, the mock spec we are using here doesn’t match the
+format. Therefore we will have to build a bespoke reader. Before we
+start, it is important to understand the structure of the metacore
+object. Each object acts as its own database for all dataset related
+metadata. The object has 7 tables and their general purpose are as
+follows:</p>
 <ul>
-<li><p><strong>ds_spec</strong>: Contains dataset level information</p></li>
-<li><p><strong>ds_vars</strong>: Bridges the dataset and variable level information</p></li>
-<li><p><strong>var_spec</strong>: Contains variable level information</p></li>
-<li><p><strong>value_spec</strong>: Contains value level information</p></li>
+<li><p><strong>ds_spec</strong>: Contains dataset level
+information</p></li>
+<li><p><strong>ds_vars</strong>: Bridges the dataset and variable level
+information</p></li>
+<li><p><strong>var_spec</strong>: Contains variable level
+information</p></li>
+<li><p><strong>value_spec</strong>: Contains value level
+information</p></li>
 <li><p><strong>derivations</strong>: Contains all derivations</p></li>
-<li><p><strong>codelist</strong>: Contains information about code/decodes, permitted values and external libraries</p></li>
-<li><p><strong>supp</strong>: Contains information specific to supplemental variables</p></li>
+<li><p><strong>codelist</strong>: Contains information about
+code/decodes, permitted values and external libraries</p></li>
+<li><p><strong>supp</strong>: Contains information specific to
+supplemental variables</p></li>
 </ul>
 <p>Here is a schema of how all this fits together</p>
 <p><img src="../reference/figures/labeled_schema.png" title="Metacore Schema"></p>
-<p>ds_spec is connected to ds_vars by the ‘dataset’ variable and ds_vars is connected to var_spec by the ‘variable’ variable, etc. For more information on the make-up of metacore objects please see the README.</p>
-<p>Now that we understand what makes a metacore object, we can start to develop the reader.</p>
-<p>First, we need to identify what type of specification format you have. At the moment we support a specification where each tab contains information relevant to a different table, such as a domain tab, a variable tab, etc. To test this you can use the <code>spec_type</code> function.</p>
+<p>ds_spec is connected to ds_vars by the ‘dataset’ variable and ds_vars
+is connected to var_spec by the ‘variable’ variable, etc. For more
+information on the make-up of metacore objects please see the
+README.</p>
+<p>Now that we understand what makes a metacore object, we can start to
+develop the reader.</p>
+<p>First, we need to identify what type of specification format you
+have. At the moment we support a specification where each tab contains
+information relevant to a different table, such as a domain tab, a
+variable tab, etc. To test this you can use the <code>spec_type</code>
+function.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">metacore</span><span class="fu">:::</span><span class="fu"><a href="../reference/spec_type.html">spec_type</a></span><span class="op">(</span><span class="fu"><a href="../reference/metacore_example.html">metacore_example</a></span><span class="op">(</span><span class="st">"mock_spec.xlsx"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "by_type"</span></span></code></pre></div>
-<p>Given we have the type style of specification, we can attempt to run with the lower level built-in specification to metacore build. There are 6 lower level specification builders to match each of the 6 datasets needed, spec_type_to_*. Even if these fail, the error messages should help identify the issues.</p>
-<p>But, before we start any of that, we need to read in our document using the <code>read_all_sheets</code> function. This function reads in a multisheet excel file into a named list, where the name of each dataset is the name of the tab. The lower level specification builders do assume the provided <code>doc</code> is a named list. This mock specification has 5 tabs, domain, variables, value level metadata, controlled terms, and computational method. So it looks like we might need to split the information in these tabs to get the 6 tables needed for the metacore object.</p>
+<p>Given we have the type style of specification, we can attempt to run
+with the lower level built-in specification to metacore build. There are
+6 lower level specification builders to match each of the 6 datasets
+needed, spec_type_to_*. Even if these fail, the error messages should
+help identify the issues.</p>
+<p>But, before we start any of that, we need to read in our document
+using the <code>read_all_sheets</code> function. This function reads in
+a multisheet excel file into a named list, where the name of each
+dataset is the name of the tab. The lower level specification builders
+do assume the provided <code>doc</code> is a named list. This mock
+specification has 5 tabs, domain, variables, value level metadata,
+controlled terms, and computational method. So it looks like we might
+need to split the information in these tabs to get the 6 tables needed
+for the metacore object.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">doc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_all_sheets.html">read_all_sheets</a></span><span class="op">(</span><span class="fu"><a href="../reference/metacore_example.html">metacore_example</a></span><span class="op">(</span><span class="st">"mock_spec.xlsx"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">doc</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span><span class="va">head</span><span class="op">)</span></span>
 <span><span class="co">#&gt; $Domains</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 10</span></span></span>
-<span><span class="co">#&gt;   Domain Na…¹ Label Repea…² Is Re…³ Class Source Data …⁴ Key V…⁵ Descr…⁶ Docum…⁷</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> ADDS        Disp… Y       N       BDS   DS     One re… USUBJI… Contai… <span style="color: #BB0000;">NA</span>     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> ADRACE      Race… Y       N       OTHER DM, S… One re… USUBJI… <span style="color: #BB0000;">NA</span>      <span style="color: #BB0000;">NA</span>     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> ADTRT       Trea… Y       N       OTHER ADSL   One re… USUBJI… To be … <span style="color: #BB0000;">NA</span>     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> ADSL        Subj… N       N       ADSL  <span style="color: #BB0000;">NA</span>     One re… USUBJI… <span style="color: #BB0000;">NA</span>      <span style="color: #BB0000;">NA</span>     </span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># … with abbreviated variable names ¹​`Domain Name`, ²​Repeating,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   ³​`Is Reference?`, ⁴​`Data Structure`, ⁵​`Key Variables`, ⁶​Description,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   ⁷​Documentation</span></span></span>
+<span><span class="co">#&gt;   `Domain Name` Label    Repeating `Is Reference?` Class Source `Data Structure`</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> ADDS          Disposi… Y         N               BDS   DS     One record per …</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> ADRACE        Race An… Y         N               OTHER DM, S… One record per …</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> ADTRT         Treatme… Y         N               OTHER ADSL   One record per …</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> ADSL          Subject… N         N               ADSL  <span style="color: #BB0000;">NA</span>     One record per …</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 3 more variables: `Key Variables` &lt;chr&gt;, Description &lt;chr&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   Documentation &lt;chr&gt;</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $Variables</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 18</span></span></span>
-<span><span class="co">#&gt;   Domain N…¹ Thera…² Indic…³ Varia…⁴ Label Type  Max L…⁵ Varia…⁶ Manda…⁷ Signf…⁸</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> ADAE       CORE    CORE    STUDYID Stud… Text  9       10      Y       <span style="color: #BB0000;">NA</span>     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> ADAE       CORE    CORE    USUBJID Uniq… Text  30      20      Y       <span style="color: #BB0000;">NA</span>     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> ADAE       CORE    CORE    SUBJID  Subj… Text  20      25      <span style="color: #BB0000;">NA</span>      <span style="color: #BB0000;">NA</span>     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> ADAE       CORE    CORE    SITEID  Stud… Text  10      30      <span style="color: #BB0000;">NA</span>      <span style="color: #BB0000;">NA</span>     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> ADAE       CORE    CORE    AGE     Age   Inte… 8       40      <span style="color: #BB0000;">NA</span>      <span style="color: #BB0000;">NA</span>     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> ADAE       CORE    CORE    SEX     Sex   Text  1       50      <span style="color: #BB0000;">NA</span>      <span style="color: #BB0000;">NA</span>     </span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># … with 8 more variables: `Sort Order` &lt;chr&gt;, Required &lt;chr&gt;, Origin &lt;chr&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   `Value Level Metadata` &lt;chr&gt;, `Controlled Term or Format` &lt;chr&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   `Computational Method` &lt;chr&gt;, `Definition / Comments` &lt;chr&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   `Additional Information` &lt;chr&gt;, and abbreviated variable names</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   ¹​`Domain Name`, ²​`Therapeutic Area`, ³​Indication, ⁴​`Variable Name`,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   ⁵​`Max Length`, ⁶​`Variable Order`, ⁷​Mandatory, ⁸​`Signficant Digits`</span></span></span>
+<span><span class="co">#&gt;   `Domain Name` `Therapeutic Area` Indication `Variable Name` Label        Type </span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> ADAE          CORE               CORE       STUDYID         Study Ident… Text </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> ADAE          CORE               CORE       USUBJID         Unique Subj… Text </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> ADAE          CORE               CORE       SUBJID          Subject Ide… Text </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> ADAE          CORE               CORE       SITEID          Study Site … Text </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> ADAE          CORE               CORE       AGE             Age          Inte…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> ADAE          CORE               CORE       SEX             Sex          Text </span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 12 more variables: `Max Length` &lt;chr&gt;, `Variable Order` &lt;chr&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   Mandatory &lt;chr&gt;, `Signficant Digits` &lt;chr&gt;, `Sort Order` &lt;chr&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   Required &lt;chr&gt;, Origin &lt;chr&gt;, `Value Level Metadata` &lt;chr&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   `Controlled Term or Format` &lt;chr&gt;, `Computational Method` &lt;chr&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   `Definition / Comments` &lt;chr&gt;, `Additional Information` &lt;chr&gt;</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $Value_level_Metadata</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 0 × 13</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># … with 13 variables: VLM Name &lt;chr&gt;, Therapeutic Area &lt;chr&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   Indication &lt;chr&gt;, Parameter Code &lt;chr&gt;, Parameter &lt;chr&gt;, Type &lt;chr&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   Max Length &lt;chr&gt;, Signficant Digits &lt;chr&gt;, Origin &lt;chr&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   Controlled Term &lt;chr&gt;, Computational Method &lt;chr&gt;, Mandatory &lt;chr&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   Definition/Comments &lt;chr&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 13 variables: VLM Name &lt;chr&gt;, Therapeutic Area &lt;chr&gt;, Indication &lt;chr&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   Parameter Code &lt;chr&gt;, Parameter &lt;chr&gt;, Type &lt;chr&gt;, Max Length &lt;chr&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   Signficant Digits &lt;chr&gt;, Origin &lt;chr&gt;, Controlled Term &lt;chr&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   Computational Method &lt;chr&gt;, Mandatory &lt;chr&gt;, Definition/Comments &lt;chr&gt;</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $Controlled_Terms</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 8</span></span></span>
-<span><span class="co">#&gt;   `Codelist Name` `Codelist Code` Coded V…¹ Descr…² Code …³ Exten…⁴ Rank  Source</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> SEX             SEX             F         Female  <span style="color: #BB0000;">NA</span>      <span style="color: #BB0000;">NA</span>      <span style="color: #BB0000;">NA</span>    GSK   </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> SEX             SEX             M         Male    <span style="color: #BB0000;">NA</span>      <span style="color: #BB0000;">NA</span>      <span style="color: #BB0000;">NA</span>    GSK   </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> SEX             SEX             U         Unknown <span style="color: #BB0000;">NA</span>      <span style="color: #BB0000;">NA</span>      <span style="color: #BB0000;">NA</span>    GSK   </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> RACE            RACE            BLACK OR… <span style="color: #BB0000;">NA</span>      <span style="color: #BB0000;">NA</span>      <span style="color: #BB0000;">NA</span>      <span style="color: #BB0000;">NA</span>    GSK   </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> RACE            RACE            AMERICAN… <span style="color: #BB0000;">NA</span>      <span style="color: #BB0000;">NA</span>      <span style="color: #BB0000;">NA</span>      <span style="color: #BB0000;">NA</span>    GSK   </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> RACE            RACE            ASIAN     <span style="color: #BB0000;">NA</span>      <span style="color: #BB0000;">NA</span>      <span style="color: #BB0000;">NA</span>      <span style="color: #BB0000;">NA</span>    GSK   </span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># … with abbreviated variable names ¹​`Coded Value`,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   ²​`Description / Decoded Value`, ³​`Code Info`, ⁴​`Extension?`</span></span></span>
+<span><span class="co">#&gt;   `Codelist Name` `Codelist Code` `Coded Value`           Description / Decode…¹</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> SEX             SEX             F                       Female                </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> SEX             SEX             M                       Male                  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> SEX             SEX             U                       Unknown               </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> RACE            RACE            BLACK OR AFRICAN AMERI… <span style="color: #BB0000;">NA</span>                    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> RACE            RACE            AMERICAN INDIAN OR ALA… <span style="color: #BB0000;">NA</span>                    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> RACE            RACE            ASIAN                   <span style="color: #BB0000;">NA</span>                    </span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ abbreviated name: ¹​`Description / Decoded Value`</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 4 more variables: `Code Info` &lt;chr&gt;, `Extension?` &lt;chr&gt;, Rank &lt;chr&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   Source &lt;chr&gt;</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $Computational_Method</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 3</span></span></span>
-<span><span class="co">#&gt;   `Computational Method Name` `Definition / Comments`                    Addit…¹</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                                      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> TRTP                        Compare ADT/ASTDT to the series of ADSL.A… <span style="color: #BB0000;">NA</span>     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> TRTA                        Compare ADT/ASTDT to the series of ADSL.A… <span style="color: #BB0000;">NA</span>     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> TPERIOD                     Latest value of APERIOD from ADTRT where … <span style="color: #BB0000;">NA</span>     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> TPERADY                     Contains the number of days from the firs… <span style="color: #BB0000;">NA</span>     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> TPERSTDY                    Contains the number of days from the firs… <span style="color: #BB0000;">NA</span>     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> TPERENDY                    Contains the number of days from the firs… <span style="color: #BB0000;">NA</span>     </span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># … with abbreviated variable name ¹​`Additional Information`</span></span></span></code></pre></div>
-<p>Let’s start with making the ds_spec (dataset specification) table using <code>spec_type_to_ds_spec</code>. The ds_spec table is made of 3 columns: the dataset name, the dataset structure, and the dataset label. If we look at our specification document, it looks like all this information is in the Domains tab. Now we know what we need, we can start building the table by trying the <code>spec_type_to_ds_spec</code> function.</p>
-<p>This function takes in our named list of datasets (doc), a named vector of columns (cols) and a sheet name (sheet). But, only doc is needed, the other inputs have defaults. So we can try with just the default and see what we get.</p>
+<span><span class="co">#&gt;   `Computational Method Name` `Definition / Comments`     Additional Informati…¹</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> TRTP                        Compare ADT/ASTDT to the s… <span style="color: #BB0000;">NA</span>                    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> TRTA                        Compare ADT/ASTDT to the s… <span style="color: #BB0000;">NA</span>                    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> TPERIOD                     Latest value of APERIOD fr… <span style="color: #BB0000;">NA</span>                    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> TPERADY                     Contains the number of day… <span style="color: #BB0000;">NA</span>                    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> TPERSTDY                    Contains the number of day… <span style="color: #BB0000;">NA</span>                    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> TPERENDY                    Contains the number of day… <span style="color: #BB0000;">NA</span>                    </span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ abbreviated name: ¹​`Additional Information`</span></span></span></code></pre></div>
+<p>Let’s start with making the ds_spec (dataset specification) table
+using <code>spec_type_to_ds_spec</code>. The ds_spec table is made of 3
+columns: the dataset name, the dataset structure, and the dataset label.
+If we look at our specification document, it looks like all this
+information is in the Domains tab. Now we know what we need, we can
+start building the table by trying the <code>spec_type_to_ds_spec</code>
+function.</p>
+<p>This function takes in our named list of datasets (doc), a named
+vector of columns (cols) and a sheet name (sheet). But, only doc is
+needed, the other inputs have defaults. So we can try with just the
+default and see what we get.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/spec_type_to_ds_spec.html">spec_type_to_ds_spec</a></span><span class="op">(</span><span class="va">doc</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Error: Unable to rename the following columns in Domains:</span></span>
 <span><span class="co">#&gt;  label matches 2 columns</span></span>
 <span><span class="co">#&gt; Please check your regular expression</span></span></code></pre></div>
-<p>The error tells us there is an issue with the label column in the Domains table. Meaning, we need to change the default vector for the cols input because the default regular expression isn’t specific enough. First, let’s check the column names in the Domain tab</p>
+<p>The error tells us there is an issue with the label column in the
+Domains table. Meaning, we need to change the default vector for the
+cols input because the default regular expression isn’t specific enough.
+First, let’s check the column names in the Domain tab</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">doc</span><span class="op">$</span><span class="va">Domains</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt;  [1] "Domain Name"    "Label"          "Repeating"      "Is Reference?" </span></span>
 <span><span class="co">#&gt;  [5] "Class"          "Source"         "Data Structure" "Key Variables" </span></span>
 <span><span class="co">#&gt;  [9] "Description"    "Documentation"</span></span></code></pre></div>
-<p>If we look at the default input for cols, <code>"label" = "[L|l]abel|[D|d]escription"</code>, we can see the label is matching to the <code>Label</code> and the <code>Description</code> columns .</p>
-<p>We only need the Domain <code>Name</code>, <code>Label</code>, and <code>Data Structure</code> columns. So we can update the expressions to be more specific.</p>
+<p>If we look at the default input for cols,
+<code>"label" = "[L|l]abel|[D|d]escription"</code>, we can see the label
+is matching to the <code>Label</code> and the <code>Description</code>
+columns .</p>
+<p>We only need the Domain <code>Name</code>, <code>Label</code>, and
+<code>Data Structure</code> columns. So we can update the expressions to
+be more specific.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ds_spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spec_type_to_ds_spec.html">spec_type_to_ds_spec</a></span><span class="op">(</span><span class="va">doc</span>, </span>
 <span>                                cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"dataset"</span> <span class="op">=</span> <span class="st">"Name"</span>, </span>
@@ -224,42 +274,61 @@
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> ADRACE  One record per subject per analysis sequence number          Race Ana…</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> ADTRT   One record per subject per period                            Treatmen…</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> ADSL    One record per subject                                       Subject-…</span></span></code></pre></div>
-<p>Regular expressions are used to match the columns, so if you needed a more flexible input, you could do that. Now, we have the ds_spec table we can move on to the ds_vars table.</p>
+<p>Regular expressions are used to match the columns, so if you needed a
+more flexible input, you could do that. Now, we have the ds_spec table
+we can move on to the ds_vars table.</p>
 <p>The ds_vars table has 7 columns:</p>
 <ul>
 <li><p>dataset: dataset name</p></li>
 <li><p>variable: variable name</p></li>
-<li><p>key_seq: integers controlling the sort order of each dataset</p></li>
-<li><p>order: integer controlling the column order of each dataset</p></li>
+<li><p>key_seq: integers controlling the sort order of each
+dataset</p></li>
+<li><p>order: integer controlling the column order of each
+dataset</p></li>
 <li><p>keep: boolean to determine if the variable is needed</p></li>
 <li><p>core: ADaM core (Expected, Required, Permissible)</p></li>
-<li><p>supp_flag: boolean to determine if the variable is in the supplementals</p></li>
+<li><p>supp_flag: boolean to determine if the variable is in the
+supplementals</p></li>
 </ul>
-<p>When we look back at our specification document we can see all this information is in the variable tab. The inputs for the <code>spec_type_to_ds_vars</code> function are the same as before, but with slightly different defaults. By default ds_vars only checks sheets labeled “Variable” (this is because all the settings are defaulted to read in P21 formatted specs). But, those default work for our specifications cause all the information is in the variable tab; so we can try with just the defaults again.</p>
+<p>When we look back at our specification document we can see all this
+information is in the variable tab. The inputs for the
+<code>spec_type_to_ds_vars</code> function are the same as before, but
+with slightly different defaults. By default ds_vars only checks sheets
+labeled “Variable” (this is because all the settings are defaulted to
+read in P21 formatted specs). But, those default work for our
+specifications cause all the information is in the variable tab; so we
+can try with just the defaults again.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/spec_type_to_ds_vars.html">spec_type_to_ds_vars</a></span><span class="op">(</span><span class="va">doc</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Error: Unable to rename the following columns in Variables:</span></span>
 <span><span class="co">#&gt;  variable matches 2 columns</span></span>
 <span><span class="co">#&gt;  order matches 2 columns</span></span>
 <span><span class="co">#&gt; Please check your regular expression</span></span></code></pre></div>
-<p>This error means it is trying to match the sheet entitled Variable, the variable column matches to two different columns. This is the same error we had before. We just need to have a quick look at the columns and adjust the regular expression to be more specific. Additionally, for the key sequence variable isn’t in the variable tab. We saw this information above in the domain tab. So we will need to do two things to fix this. First, adjust the dataset name in the <code>key_seq_cols</code> argument. Second, change the sheets to include the variable and the domain sheet.</p>
+<p>This error means it is trying to match the sheet entitled Variable,
+the variable column matches to two different columns. This is the same
+error we had before. We just need to have a quick look at the columns
+and adjust the regular expression to be more specific. Additionally, for
+the key sequence variable isn’t in the variable tab. We saw this
+information above in the domain tab. So we will need to do two things to
+fix this. First, adjust the dataset name in the
+<code>key_seq_cols</code> argument. Second, change the sheets to include
+the variable and the domain sheet.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">doc</span><span class="op">$</span><span class="va">Variables</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 18</span></span></span>
-<span><span class="co">#&gt;   Domain N…¹ Thera…² Indic…³ Varia…⁴ Label Type  Max L…⁵ Varia…⁶ Manda…⁷ Signf…⁸</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> ADAE       CORE    CORE    STUDYID Stud… Text  9       10      Y       <span style="color: #BB0000;">NA</span>     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> ADAE       CORE    CORE    USUBJID Uniq… Text  30      20      Y       <span style="color: #BB0000;">NA</span>     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> ADAE       CORE    CORE    SUBJID  Subj… Text  20      25      <span style="color: #BB0000;">NA</span>      <span style="color: #BB0000;">NA</span>     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> ADAE       CORE    CORE    SITEID  Stud… Text  10      30      <span style="color: #BB0000;">NA</span>      <span style="color: #BB0000;">NA</span>     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> ADAE       CORE    CORE    AGE     Age   Inte… 8       40      <span style="color: #BB0000;">NA</span>      <span style="color: #BB0000;">NA</span>     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> ADAE       CORE    CORE    SEX     Sex   Text  1       50      <span style="color: #BB0000;">NA</span>      <span style="color: #BB0000;">NA</span>     </span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># … with 8 more variables: `Sort Order` &lt;chr&gt;, Required &lt;chr&gt;, Origin &lt;chr&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   `Value Level Metadata` &lt;chr&gt;, `Controlled Term or Format` &lt;chr&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   `Computational Method` &lt;chr&gt;, `Definition / Comments` &lt;chr&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   `Additional Information` &lt;chr&gt;, and abbreviated variable names</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   ¹​`Domain Name`, ²​`Therapeutic Area`, ³​Indication, ⁴​`Variable Name`,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   ⁵​`Max Length`, ⁶​`Variable Order`, ⁷​Mandatory, ⁸​`Signficant Digits`</span></span></span>
+<span><span class="co">#&gt;   `Domain Name` `Therapeutic Area` Indication `Variable Name` Label        Type </span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> ADAE          CORE               CORE       STUDYID         Study Ident… Text </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> ADAE          CORE               CORE       USUBJID         Unique Subj… Text </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> ADAE          CORE               CORE       SUBJID          Subject Ide… Text </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> ADAE          CORE               CORE       SITEID          Study Site … Text </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> ADAE          CORE               CORE       AGE             Age          Inte…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> ADAE          CORE               CORE       SEX             Sex          Text </span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 12 more variables: `Max Length` &lt;chr&gt;, `Variable Order` &lt;chr&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   Mandatory &lt;chr&gt;, `Signficant Digits` &lt;chr&gt;, `Sort Order` &lt;chr&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   Required &lt;chr&gt;, Origin &lt;chr&gt;, `Value Level Metadata` &lt;chr&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   `Controlled Term or Format` &lt;chr&gt;, `Computational Method` &lt;chr&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   `Definition / Comments` &lt;chr&gt;, `Additional Information` &lt;chr&gt;</span></span></span>
 <span></span>
 <span><span class="va">ds_vars</span><span class="op">&lt;-</span> <span class="fu"><a href="../reference/spec_type_to_ds_vars.html">spec_type_to_ds_vars</a></span><span class="op">(</span><span class="va">doc</span>, cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"dataset"</span> <span class="op">=</span> <span class="st">"Domain"</span>,</span>
 <span>                                             <span class="st">"variable"</span> <span class="op">=</span> <span class="st">"[V|v]ariable [N|n]ame"</span>,</span>
@@ -279,7 +348,12 @@
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> ADAE    SITEID      30 <span style="color: #BB0000;">NA</span>         <span style="color: #BB0000;">NA</span> <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>       </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> ADAE    AGE         40 <span style="color: #BB0000;">NA</span>         <span style="color: #BB0000;">NA</span> <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>       </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> ADAE    SEX         50 <span style="color: #BB0000;">NA</span>         <span style="color: #BB0000;">NA</span> <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span></span></span></code></pre></div>
-<p>The next table we have is var_spec, the table of variable level metadata. var_spec is separate from ds_vars because, in accordance with CDISC standards, labels and lengths should be the same for a given variable across all datasets. So, we are able to normalize the data to only have one row per variable, which ensures this rule and helps reduce the size of the object. There are 6 columns in var_spec:</p>
+<p>The next table we have is var_spec, the table of variable level
+metadata. var_spec is separate from ds_vars because, in accordance with
+CDISC standards, labels and lengths should be the same for a given
+variable across all datasets. So, we are able to normalize the data to
+only have one row per variable, which ensures this rule and helps reduce
+the size of the object. There are 6 columns in var_spec:</p>
 <ul>
 <li><p>variable: variable name</p></li>
 <li><p>length: variable length</p></li>
@@ -288,7 +362,19 @@
 <li><p>format: variable format</p></li>
 <li><p>common: boolean if variable is common across ADaM</p></li>
 </ul>
-<p>Looking back at our specification we see this will also be built using the Variable tab. So, we know we need to edit the regular expression for the variable to make it more specific. Additionally, if you look at the default for <code>cols</code> you see there is a dataset input. This is because some standards aren’t 100% consistent, some variables (e.g. visit) have different lengths depending on the dataset. <strong>So to accommodate this some of the variables in var_spec are in the ds.variable format</strong>. These builders will do this conversion for you , but the dataset is needed. The other thing the builders can automatically deal with is the common variable. If given a dataset column, the builder function will automatically figure out which variables are common to all dataset. This is good because we don’t have a common variable in our specs.</p>
+<p>Looking back at our specification we see this will also be built
+using the Variable tab. So, we know we need to edit the regular
+expression for the variable to make it more specific. Additionally, if
+you look at the default for <code>cols</code> you see there is a dataset
+input. This is because some standards aren’t 100% consistent, some
+variables (e.g. visit) have different lengths depending on the dataset.
+<strong>So to accommodate this some of the variables in var_spec are in
+the ds.variable format</strong>. These builders will do this conversion
+for you , but the dataset is needed. The other thing the builders can
+automatically deal with is the common variable. If given a dataset
+column, the builder function will automatically figure out which
+variables are common to all dataset. This is good because we don’t have
+a common variable in our specs.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">var_spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spec_type_to_var_spec.html">spec_type_to_var_spec</a></span><span class="op">(</span><span class="va">doc</span>, cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"variable"</span> <span class="op">=</span> <span class="st">"Variable Name"</span>,</span>
 <span>                                                <span class="st">"length"</span> <span class="op">=</span> <span class="st">"[L|l]ength"</span>,</span>
@@ -306,11 +392,17 @@
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> SITEID       10 Study Site Identifier            Text    <span style="color: #BB0000;">NA</span>     TRUE  </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> AGE           8 Age                              Integer <span style="color: #BB0000;">NA</span>     TRUE  </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> SEX           1 Sex                              Text    SEX    TRUE</span></span></code></pre></div>
-<p>There is one issue here: the format column is also the codelist names. This is because the information came from the “Controlled Term or Format” column of my spec document. So the final step of preparing var_spec table is to remove the controlled terms. It is easy here because all the formats end in a full stop (.), but the controlled terms don’t.</p>
+<p>There is one issue here: the format column is also the codelist
+names. This is because the information came from the “Controlled Term or
+Format” column of my spec document. So the final step of preparing
+var_spec table is to remove the controlled terms. It is easy here
+because all the formats end in a full stop (.), but the controlled terms
+don’t.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">var_spec</span> <span class="op">&lt;-</span> <span class="va">var_spec</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
 <span>   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>format <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/if_else.html" class="external-link">if_else</a></span><span class="op">(</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_detect.html" class="external-link">str_detect</a></span><span class="op">(</span><span class="va">format</span>, <span class="st">"\\."</span><span class="op">)</span>, <span class="va">format</span>, <span class="st">""</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p>The next dataset is value_spec, which contains the value level metadata. It is made up of 8 columns:</p>
+<p>The next dataset is value_spec, which contains the value level
+metadata. It is made up of 8 columns:</p>
 <ul>
 <li><p>dataset: dataset name</p></li>
 <li><p>variable: variable name</p></li>
@@ -321,7 +413,13 @@
 <li><p>where: value of the variable</p></li>
 <li><p>derivation_id: id used to cross-reference the derivation</p></li>
 </ul>
-<p>By default, <code>spec_type_to_value_spec</code> is set up to have the where information on a different sheet because that is the format of a P21 spec, but in our spec we don’t have that. In fact, we don’t have any value level metadata in our spec. But, that is fine - the default builders will just pull what information it can from the variable tab. Additionally this spec doesn’t have a predecessor column, so we can just use the method column.</p>
+<p>By default, <code>spec_type_to_value_spec</code> is set up to have
+the where information on a different sheet because that is the format of
+a P21 spec, but in our spec we don’t have that. In fact, we don’t have
+any value level metadata in our spec. But, that is fine - the default
+builders will just pull what information it can from the variable tab.
+Additionally this spec doesn’t have a predecessor column, so we can just
+use the method column.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">value_spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spec_type_to_value_spec.html">spec_type_to_value_spec</a></span><span class="op">(</span><span class="va">doc</span>, cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"dataset"</span> <span class="op">=</span> <span class="st">"VLM Name|Domain"</span>,</span>
 <span>                                                    <span class="st">"variable"</span> <span class="op">=</span> <span class="st">"VLM Name|Variable Name"</span>,</span>
@@ -342,7 +440,11 @@
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> ADAE    SITEID   Predecessor Text    <span style="color: #BB0000;">NA</span>      <span style="color: #BB0000;">NA</span>            TRUE       <span style="color: #BB0000;">NA</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> ADAE    AGE      Predecessor Integer <span style="color: #BB0000;">NA</span>      <span style="color: #BB0000;">NA</span>            TRUE       <span style="color: #BB0000;">NA</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> ADAE    SEX      Predecessor Text    SEX     <span style="color: #BB0000;">NA</span>            TRUE       <span style="color: #BB0000;">NA</span></span></span></code></pre></div>
-<p>The derivation table is relatively simple by comparison. It just has two columns, the derivation id and the derivation. But, the derivation comes from the supplied derivation, predecessor, or comment column depending on the origin. In this mock we don’t have a predecessor column so we can set to comment as well.</p>
+<p>The derivation table is relatively simple by comparison. It just has
+two columns, the derivation id and the derivation. But, the derivation
+comes from the supplied derivation, predecessor, or comment column
+depending on the origin. In this mock we don’t have a predecessor column
+so we can set to comment as well.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">derivation</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spec_type_to_derivations.html">spec_type_to_derivations</a></span><span class="op">(</span><span class="va">doc</span>, cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"derivation_id"</span> <span class="op">=</span> <span class="st">"Name"</span>,</span>
 <span>                                                     <span class="st">"derivation"</span> <span class="op">=</span> <span class="st">"[D|d]efinition|[D|d]escription"</span><span class="op">)</span>, </span>
@@ -361,8 +463,18 @@
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> TPERADY       Contains the number of days from the first exposure date in the…</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> TPERSTDY      Contains the number of days from the first exposure date in the…</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> TPERENDY      Contains the number of days from the first exposure date in the…</span></span></code></pre></div>
-<p>The final table is codelist. This table contains all the code/decode pairs, all lists of permitted values and information about external libraries. What is somewhat special about the structure of this table is there isn’t just a code and a decode column, but rather a codes column that contains a list of code/decode tables, permitted value vectors and external dictionary vectors. So there is one row per code (i.e. a row for country and one for yes/no codes etc.). This structure makes it easier to see all the codes at once and allows some code to be numeric and others to be character.</p>
-<p>By default the <code>spec_type_to_codelist</code> function expects codelists and external dictionaries. But, in the specification we only have codelist so <code>dict_cols</code> needs to be set to null.</p>
+<p>The final table is codelist. This table contains all the code/decode
+pairs, all lists of permitted values and information about external
+libraries. What is somewhat special about the structure of this table is
+there isn’t just a code and a decode column, but rather a codes column
+that contains a list of code/decode tables, permitted value vectors and
+external dictionary vectors. So there is one row per code (i.e. a row
+for country and one for yes/no codes etc.). This structure makes it
+easier to see all the codes at once and allows some code to be numeric
+and others to be character.</p>
+<p>By default the <code>spec_type_to_codelist</code> function expects
+codelists and external dictionaries. But, in the specification we only
+have codelist so <code>dict_cols</code> needs to be set to null.</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">codelist</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spec_type_to_codelist.html">spec_type_to_codelist</a></span><span class="op">(</span><span class="va">doc</span>, codelist_cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"code_id"</span> <span class="op">=</span> <span class="st">"Codelist Code"</span>,</span>
 <span>                                                         <span class="st">"name"</span> <span class="op">=</span> <span class="st">"Codelist Name"</span>,</span>
@@ -380,7 +492,8 @@
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> NY      NY      code_decode <span style="color: #949494;">&lt;tibble [2 × 2]&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> DATEFL  DATEFL  code_decode <span style="color: #949494;">&lt;tibble [2 × 2]&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> AESEV   AESEV   code_decode <span style="color: #949494;">&lt;tibble [3 × 2]&gt;</span></span></span></code></pre></div>
-<p>Now we have all the tables we need we can make the metacore object</p>
+<p>Now we have all the tables we need we can make the metacore
+object</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/metacore.html">metacore</a></span><span class="op">(</span><span class="va">ds_spec</span>, <span class="va">ds_vars</span>, <span class="va">var_spec</span>, <span class="va">value_spec</span>,</span>
 <span>         <span class="va">derivation</span>, <span class="va">codelist</span><span class="op">)</span></span>

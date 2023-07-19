@@ -35,7 +35,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">metacore</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.2</span>
       </span>
     </div>
 
@@ -80,7 +80,7 @@
 
       
 
-      </header><script src="Example_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
+      </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Example</h1>
@@ -96,13 +96,25 @@
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://atorus-research.github.io/metacore/" class="external-link">metacore</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://xml2.r-lib.org/" class="external-link">xml2</a></span><span class="op">)</span></span></code></pre></div>
-<p><a href="https://www.cdisc.org/" class="external-link">CDISC</a> standards provide a standard for submission of data set metadata through a document known as define.xml. The define provides a great deal of useful information that is both machine readable and can be viewed through your web browser. While many organizations wait to produce a define until the datasets are finalized, it can still be advantageous to be able to read metadata directly from a define. For this purpose, we developed readers that can go directly from a define.xml to a metacore object.</p>
-<p>To do this, we’ve built separate reader function for each of the metacore tables. For more information on the structure of the metacore tables, check out the README.</p>
-<p>We start by reading the define from disk using the <code>xmlTreeParse()</code> function from the <code>XML</code> package.</p>
+<p><a href="https://www.cdisc.org/" class="external-link">CDISC</a> standards provide a
+standard for submission of data set metadata through a document known as
+define.xml. The define provides a great deal of useful information that
+is both machine readable and can be viewed through your web browser.
+While many organizations wait to produce a define until the datasets are
+finalized, it can still be advantageous to be able to read metadata
+directly from a define. For this purpose, we developed readers that can
+go directly from a define.xml to a metacore object.</p>
+<p>To do this, we’ve built separate reader function for each of the
+metacore tables. For more information on the structure of the metacore
+tables, check out the README.</p>
+<p>We start by reading the define from disk using the
+<code>xmlTreeParse()</code> function from the <code>XML</code>
+package.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">doc</span> <span class="op">&lt;-</span> <span class="fu"><a href="http://xml2.r-lib.org/reference/read_xml.html" class="external-link">read_xml</a></span><span class="op">(</span><span class="fu"><a href="../reference/metacore_example.html">metacore_example</a></span><span class="op">(</span><span class="st">"SDTM_define.xml"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="http://xml2.r-lib.org/reference/xml_ns_strip.html" class="external-link">xml_ns_strip</a></span><span class="op">(</span><span class="va">doc</span><span class="op">)</span></span></code></pre></div>
-<p>Next, we use the metacore readers for each of the separate tables necessary for a metacore object.</p>
+<p>Next, we use the metacore readers for each of the separate tables
+necessary for a metacore object.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ds_spec2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/xml_to_ds_spec.html">xml_to_ds_spec</a></span><span class="op">(</span><span class="va">doc</span><span class="op">)</span></span>
 <span><span class="va">ds_vars</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/xml_to_ds_vars.html">xml_to_ds_vars</a></span><span class="op">(</span><span class="va">doc</span><span class="op">)</span></span>
@@ -138,7 +150,13 @@
 <span><span class="co">#&gt;  MEDICAL HISTORY DICTIONARY</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Metadata successfully imported</span></span></code></pre></div>
-<p>Something to note about a metacore object is that it inherently holds all data from your source of metadata, be it your specification, define.xml, database, etc. So that means you have <em>all</em> the metadata. In your program, it’s likely that you’ll just want to keep metadata relevant to the dataset you’re currently programming. We’ve made process easily, with functions that filter metadata down to information only relevant to a specific dataset.</p>
+<p>Something to note about a metacore object is that it inherently holds
+all data from your source of metadata, be it your specification,
+define.xml, database, etc. So that means you have <em>all</em> the
+metadata. In your program, it’s likely that you’ll just want to keep
+metadata relevant to the dataset you’re currently programming. We’ve
+made process easily, with functions that filter metadata down to
+information only relevant to a specific dataset.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># a metacore object with all your dataframes</span></span>
 <span><span class="va">subset</span> <span class="op">&lt;-</span> <span class="va">test</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/select_dataset.html">select_dataset</a></span><span class="op">(</span><span class="st">"DM"</span><span class="op">)</span></span>
@@ -150,26 +168,28 @@
 <span></span>
 <span><span class="co"># a simplified dataframe </span></span>
 <span><span class="va">subset_t</span> <span class="op">&lt;-</span> <span class="va">test</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/select_dataset.html">select_dataset</a></span><span class="op">(</span><span class="st">"DM"</span>, simplify <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<p>As can be seen above, the metacore object can be filtered directly, or by using the <code>simplify = TRUE</code> argument, a simplified data frame can be returned.</p>
+<p>As can be seen above, the metacore object can be filtered directly,
+or by using the <code>simplify = TRUE</code> argument, a simplified data
+frame can be returned.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">subset_t</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 25 × 22</span></span></span>
-<span><span class="co">#&gt;    dataset variable key_seq order keep  core  supp_f…¹ type  length label format</span></span>
-<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> DM      STUDYID        1     1 TRUE  <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>       text      12 Stud… <span style="color: #BB0000;">NA</span>    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> DM      DOMAIN        <span style="color: #BB0000;">NA</span>     2 TRUE  <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>       text       2 Doma… <span style="color: #BB0000;">NA</span>    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> DM      USUBJID        2     3 TRUE  <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>       text      11 Uniq… <span style="color: #BB0000;">NA</span>    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> DM      SUBJID        <span style="color: #BB0000;">NA</span>     4 TRUE  <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>       text       4 Subj… <span style="color: #BB0000;">NA</span>    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> DM      RFSTDTC       <span style="color: #BB0000;">NA</span>     5 FALSE <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>       date      10 Subj… <span style="color: #BB0000;">NA</span>    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> DM      RFENDTC       <span style="color: #BB0000;">NA</span>     6 FALSE <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>       date      10 Subj… <span style="color: #BB0000;">NA</span>    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> DM      RFXSTDTC      <span style="color: #BB0000;">NA</span>     7 FALSE <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>       date…     20 Date… <span style="color: #BB0000;">NA</span>    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> DM      RFXENDTC      <span style="color: #BB0000;">NA</span>     8 FALSE <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>       date…     20 Date… <span style="color: #BB0000;">NA</span>    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> DM      RFICDTC       <span style="color: #BB0000;">NA</span>     9 FALSE <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>       date…     20 Date… <span style="color: #BB0000;">NA</span>    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> DM      RFPENDTC      <span style="color: #BB0000;">NA</span>    10 FALSE <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>       date…     20 Date… <span style="color: #BB0000;">NA</span>    </span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># … with 15 more rows, 11 more variables: common &lt;lgl&gt;, code_id &lt;chr&gt;,</span></span></span>
+<span><span class="co">#&gt;    dataset variable key_seq order keep  core  supp_flag type     length label   </span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> DM      STUDYID        1     1 TRUE  <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>        text         12 Study I…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> DM      DOMAIN        <span style="color: #BB0000;">NA</span>     2 TRUE  <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>        text          2 Domain …</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> DM      USUBJID        2     3 TRUE  <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>        text         11 Unique …</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> DM      SUBJID        <span style="color: #BB0000;">NA</span>     4 TRUE  <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>        text          4 Subject…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> DM      RFSTDTC       <span style="color: #BB0000;">NA</span>     5 FALSE <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>        date         10 Subject…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> DM      RFENDTC       <span style="color: #BB0000;">NA</span>     6 FALSE <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>        date         10 Subject…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> DM      RFXSTDTC      <span style="color: #BB0000;">NA</span>     7 FALSE <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>        datetime     20 Date/Ti…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> DM      RFXENDTC      <span style="color: #BB0000;">NA</span>     8 FALSE <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>        datetime     20 Date/Ti…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> DM      RFICDTC       <span style="color: #BB0000;">NA</span>     9 FALSE <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>        datetime     20 Date/Ti…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> DM      RFPENDTC      <span style="color: #BB0000;">NA</span>    10 FALSE <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>        datetime     20 Date/Ti…</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 15 more rows</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 12 more variables: format &lt;chr&gt;, common &lt;lgl&gt;, code_id &lt;chr&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   derivation_id &lt;chr&gt;, origin &lt;chr&gt;, where &lt;chr&gt;, sig_dig &lt;int&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   derivation &lt;chr&gt;, name &lt;chr&gt;, codes &lt;list&gt;, idvar &lt;chr&gt;, qeval &lt;chr&gt;, and</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   abbreviated variable name ¹​supp_flag</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;">#   derivation &lt;chr&gt;, name &lt;chr&gt;, codes &lt;list&gt;, idvar &lt;chr&gt;, qeval &lt;chr&gt;</span></span></span></code></pre></div>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
