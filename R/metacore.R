@@ -189,14 +189,17 @@ MetaCore_filter <- function(value) {
                  multiple = "all") %>%
       distinct(variable, .keep_all = TRUE) # for when duplicates gett through and have different lables but the same name
 
+   # Get values/variables that need derivations
+   val_deriv <- private$.value_spec %>%
+      distinct(.data$derivation_id) %>%
+      na.omit()
+
    private$.derivations <- private$.derivations %>%
-      right_join(private$.value_spec %>%
-                    select(derivation_id) %>%
-                    na.omit(), by = "derivation_id", multiple = "all")
+      right_join(val_deriv, by = "derivation_id", multiple = "all")
 
    private$.codelist <- private$.codelist %>%
       right_join(private$.value_spec %>%
-                    select(code_id) %>%
+                    distinct(.data$code_id) |>
                     na.omit(), by = "code_id", multiple = "all")
 
    private$.supp <- private$.supp %>% filter(dataset == value)
@@ -330,13 +333,13 @@ select_dataset <- function(.data, dataset, simplify = FALSE) {
 
    if (simplify) {
 
-      suppressMessages(
+     test <-  suppressMessages(
          list(
             cl$ds_vars,
             cl$var_spec,
             cl$value_spec,
             cl$derivations,
-            cl$codelist,
+            select(cl$codelist, code_id, codes),
             cl$supp
          ) %>%
             reduce(left_join)
