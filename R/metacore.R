@@ -199,7 +199,7 @@ MetaCore_filter <- function(value) {
 
    private$.codelist <- private$.codelist %>%
       right_join(private$.value_spec %>%
-                    distinct(.data$code_id) |>
+                    distinct(.data$code_id) %>%
                     na.omit(), by = "code_id", multiple = "all")
 
    private$.supp <- private$.supp %>% filter(dataset == value)
