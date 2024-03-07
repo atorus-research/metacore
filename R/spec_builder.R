@@ -590,7 +590,21 @@ spec_type_to_derivations <- function(doc, cols = c("derivation_id" = "ID",
    if(class(ls_derivations)[1] == "list"){
       ls_derivations <- ls_derivations %>%
          reduce(bind_rows)
+      # Get the comments
+      if(any(str_detect(names(doc), "[C|c]omment"))){
+         comments <- doc[str_detect(names(doc), "[C|c]omment")][[1]] |>
+            select(matches("ID|Description"))
+         with_comments <- ls_derivations |>
+            filter(str_to_lower(.data$origin) == "assigned") |>
+            left_join(comments, by = c("comment" = "ID" )) |>
+            mutate(comment = .data$Description) |>
+            select(-.data$Description)
+         ls_derivations <- ls_derivations |>
+            filter(str_to_lower(origin) != "assigned") |>
+            bind_rows(with_comments)
+      }
    }
+
    other_derivations <- ls_derivations %>%
       mutate(
          derivation_id = case_when(

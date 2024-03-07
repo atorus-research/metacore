@@ -466,10 +466,12 @@ test_that("derivation reader tests", {
       select(derivation_id = ID,
              derivation = Description) %>%
       mutate(derivation_id = paste0("MT.", derivation_id))
+
    ref_deriv <- spec$Variables %>%
       filter(Origin %in% c("Assigned")) %>%
+      left_join(select(spec$Comments, ID, Description), by = c("Comment" = "ID")) %>%
       mutate(derivation_id = paste0("MT.", Dataset, ".", Variable),
-             derivation = Comment) %>%
+             derivation = Description) %>%
       select(starts_with("derivation")) %>%
       bind_rows(ref_deriv, .) %>%
       arrange(derivation_id) %>%
