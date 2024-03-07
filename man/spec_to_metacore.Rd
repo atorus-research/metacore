@@ -21,6 +21,6 @@ given a spec document it returns a metacore object
 \description{
 This function takes the location of an excel specification document and reads
 it in as a meta core object. At the moment it only supports specification in
-the format of pinnacle 21 specifications. But, the @family spec builder can
-be used as building blocks for bespoke specification documents
+the format of pinnacle 21 specifications. But, the section level spec builder can
+be used as building blocks for bespoke specification documents.
 }
