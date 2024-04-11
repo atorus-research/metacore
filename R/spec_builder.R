@@ -600,7 +600,7 @@ spec_type_to_derivations <- function(doc, cols = c("derivation_id" = "ID",
             mutate(comment = .data$Description) |>
             select(-.data$Description)
          ls_derivations <- ls_derivations |>
-            filter(str_to_lower(origin) != "assigned") |>
+            filter(str_to_lower(.data$origin) != "assigned") |>
             bind_rows(with_comments)
       }
    }
