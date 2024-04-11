@@ -357,8 +357,12 @@ xml_to_codelist <- function(doc) {
             version = xml_attr(node, "Version"),
             type = "external_library"
          )
-      }) %>%
-      nest(codes = c(.data$dictionary, .data$version))
+      })
+   if(nrow(external_libs) > 0){
+      external_libs <- external_libs |>
+         nest(codes = c(.data$dictionary, .data$version))
+   }
+
 
    # Combinging the code decode with the permitted values
    bind_rows(code_decode, permitted_val, external_libs) %>%

@@ -255,10 +255,18 @@ test_that("Test var_spec readers", {
    spec_var_spec <- spec_type_to_var_spec(spec) %>%
       arrange(variable) %>%
       select(variable, type, length, label, format)
-   # remove common as it is derived when reading in specs but left alone from defines
+
+   spec2 <- spec
+   spec2$Variables |>
+      select(-Dataset)
+   no_ds <- spec_type_to_var_spec(spec2) |>
+      arrange(variable) %>%
+      select(variable, type, length, label, format)
+   expect_equal(no_ds, spec_var_spec)
 
    # Tests
    expect_equal(def_var_spec, ref_var_spec)
+   # remove common as it is derived when reading in specs but left alone from defines
    expect_equal(spec_var_spec,
                 ref_var_spec %>%
                    select(-common))
@@ -397,7 +405,6 @@ test_that("values_spec reader tests", {
                 map(~paste0(.[1], " '", .[2])),
              where = if_else(where == "NA 'NA", NA_character_, paste0(where, "'")))
 
-
    # Tests
    expect_equal(def_value_spec, ref_value_spec)
    expect_equal(spec_value_spec,  ref_value_spec)
@@ -466,10 +473,12 @@ test_that("derivation reader tests", {
       select(derivation_id = ID,
              derivation = Description) %>%
       mutate(derivation_id = paste0("MT.", derivation_id))
+
    ref_deriv <- spec$Variables %>%
       filter(Origin %in% c("Assigned")) %>%
+      left_join(select(spec$Comments, ID, Description), by = c("Comment" = "ID")) %>%
       mutate(derivation_id = paste0("MT.", Dataset, ".", Variable),
-             derivation = Comment) %>%
+             derivation = Description) %>%
       select(starts_with("derivation")) %>%
       bind_rows(ref_deriv, .) %>%
       arrange(derivation_id) %>%
