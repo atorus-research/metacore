@@ -413,6 +413,42 @@ get_control_term <- function(metacode, variable, dataset = NULL){
 }
 
 
+#' Get Dataset Keys
+#'
+#' Returns the dataset keys for a given dataset
+#'
+#' @param metacode metacore object
+#' @param dataset A dataset name
+#'
+#' @return a 2-column tibble with dataset key variables and key sequence
+#' @export
+#'
+#' @importFrom rlang as_label enexpr as_name
+#'
+#' @examples
+#' \dontrun{
+#' meta_ex <- spec_to_metacore(metacore_example("p21_mock.xlsx"))
+#' get_keys(meta_ex, "AE")
+#' }
+get_keys <- function(metacode, dataset){
+   dataset_val <- ifelse(str_detect(as_label(enexpr(dataset)), "\""),
+                         as_name(dataset), as_label(enexpr(dataset))) # to make the filter more explicit
+
+   subset_data <- metacode$ds_vars %>%
+      filter(dataset == dataset_val)
+   if(nrow(subset_data) == 0){
+      stop(paste0(dataset_val, " not found in the value_spec table. Please check the dataset name"))
+   }
+
+   keys <- subset_data %>%
+      filter(!is.na(key_seq)) %>%
+      select(variable, key_seq)
+
+   keys <- keys[order(keys$key_seq),]
+
+   return(keys)
+}
+
 
 #' save metacore object
 #'
