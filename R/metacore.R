@@ -429,6 +429,7 @@ get_control_term <- function(metacode, variable, dataset = NULL){
 #' \dontrun{
 #' meta_ex <- spec_to_metacore(metacore_example("p21_mock.xlsx"))
 #' get_keys(meta_ex, "AE")
+#' get_keys(meta_ex, AE)
 #' }
 get_keys <- function(metacode, dataset){
    dataset_val <- ifelse(str_detect(as_label(enexpr(dataset)), "\""),
