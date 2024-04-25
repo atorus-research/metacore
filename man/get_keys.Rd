@@ -21,5 +21,6 @@ Returns the dataset keys for a given dataset
 \dontrun{
 meta_ex <- spec_to_metacore(metacore_example("p21_mock.xlsx"))
 get_keys(meta_ex, "AE")
+get_keys(meta_ex, AE)
 }
 }

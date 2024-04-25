@@ -438,7 +438,7 @@ get_keys <- function(metacode, dataset){
    subset_data <- metacode$ds_vars %>%
       filter(dataset == dataset_val)
    if(nrow(subset_data) == 0){
-      stop(paste0(dataset_val, " not found in the value_spec table. Please check the dataset name"))
+      stop(paste0(dataset_val, " not found in the ds_vars table. Please check the dataset name"))
    }
 
    keys <- subset_data %>%
