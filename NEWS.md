@@ -1,4 +1,7 @@
-# Metacroe 0.1.2
+# Metacore 0.1.3
+- Add `get_keys` function which returns the dataset keys for a given dataset
+
+# Metacore 0.1.2
 - Update to resolve issues from the dplyr updates
 
 # Metacore 0.1.1

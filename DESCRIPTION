@@ -21,6 +21,10 @@ Authors@R:
              role = "aut",
              email = "mike.stackhouse@atorusresearch.com",
              comment = c(ORCID = "0000-0001-6030-723X")),
+      person(given = "Tamara",
+             family = "Senior",
+             role = "aut",
+             email = "tamara.senior@roche.com"),
       person(given = "GSK/Atorus JPT",
              role = c("cph", "fnd")))
 Description: Create an immutable container holding metadata for the purpose of better enabling programming activities and functionality of other packages within the clinical programming workflow.
