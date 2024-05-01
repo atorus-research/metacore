@@ -1,5 +1,6 @@
 # Metacore 0.1.3
-- Add `get_keys` function which returns the dataset keys for a given dataset
+- Add `get_keys` function which returns the dataset keys for a given dataset [#102](https://github.com/atorus-research/metacore/issues/102) 
+- Fix issues with `select_dataset(simplify = TRUE)` [#97](https://github.com/atorus-research/metacore/issues/97) 
 
 # Metacore 0.1.2
 - Update to resolve issues from the dplyr updates
