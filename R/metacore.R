@@ -189,14 +189,17 @@ MetaCore_filter <- function(value) {
                  multiple = "all") %>%
       distinct(variable, .keep_all = TRUE) # for when duplicates gett through and have different lables but the same name
 
+   # Get values/variables that need derivations
+   val_deriv <- private$.value_spec %>%
+      distinct(.data$derivation_id) %>%
+      na.omit()
+
    private$.derivations <- private$.derivations %>%
-      right_join(private$.value_spec %>%
-                    select(derivation_id) %>%
-                    na.omit(), by = "derivation_id", multiple = "all")
+      right_join(val_deriv, by = "derivation_id", multiple = "all")
 
    private$.codelist <- private$.codelist %>%
       right_join(private$.value_spec %>%
-                    select(code_id) %>%
+                    distinct(.data$code_id) %>%
                     na.omit(), by = "code_id", multiple = "all")
 
    private$.supp <- private$.supp %>% filter(dataset == value)
@@ -330,13 +333,13 @@ select_dataset <- function(.data, dataset, simplify = FALSE) {
 
    if (simplify) {
 
-      suppressMessages(
+     test <-  suppressMessages(
          list(
             cl$ds_vars,
             cl$var_spec,
             cl$value_spec,
             cl$derivations,
-            cl$codelist,
+            select(cl$codelist, code_id, codes),
             cl$supp
          ) %>%
             reduce(left_join)
@@ -409,6 +412,43 @@ get_control_term <- function(metacode, variable, dataset = NULL){
    }
 }
 
+
+#' Get Dataset Keys
+#'
+#' Returns the dataset keys for a given dataset
+#'
+#' @param metacode metacore object
+#' @param dataset A dataset name
+#'
+#' @return a 2-column tibble with dataset key variables and key sequence
+#' @export
+#'
+#' @importFrom rlang as_label enexpr as_name
+#'
+#' @examples
+#' \dontrun{
+#' meta_ex <- spec_to_metacore(metacore_example("p21_mock.xlsx"))
+#' get_keys(meta_ex, "AE")
+#' get_keys(meta_ex, AE)
+#' }
+get_keys <- function(metacode, dataset){
+   dataset_val <- ifelse(str_detect(as_label(enexpr(dataset)), "\""),
+                         as_name(dataset), as_label(enexpr(dataset))) # to make the filter more explicit
+
+   subset_data <- metacode$ds_vars %>%
+      filter(dataset == dataset_val)
+   if(nrow(subset_data) == 0){
+      stop(paste0(dataset_val, " not found in the ds_vars table. Please check the dataset name"))
+   }
+
+   keys <- subset_data %>%
+      filter(!is.na(key_seq)) %>%
+      select(variable, key_seq)
+
+   keys <- keys[order(keys$key_seq),]
+
+   return(keys)
+}
 
 
 #' save metacore object

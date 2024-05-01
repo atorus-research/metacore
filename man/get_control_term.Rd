@@ -24,7 +24,9 @@ lists) for a given variable. The dataset can be optionally specified if there
 is different control terminology for different datasets
 }
 \examples{
+\dontrun{
 meta_ex <- spec_to_metacore(metacore_example("p21_mock.xlsx"))
 get_control_term(meta_ex, QVAL, SUPPAE)
 get_control_term(meta_ex, "QVAL", "SUPPAE")
+}
 }

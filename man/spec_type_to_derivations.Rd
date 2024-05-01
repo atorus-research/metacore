@@ -36,11 +36,11 @@ correct sheet and renames the columns. The derivation will be used for
 "predecessor" origins.
 }
 \seealso{
-Other spec builder: 
+Other {spec builder}: 
 \code{\link{spec_type_to_codelist}()},
 \code{\link{spec_type_to_ds_spec}()},
 \code{\link{spec_type_to_ds_vars}()},
 \code{\link{spec_type_to_value_spec}()},
 \code{\link{spec_type_to_var_spec}()}
 }
-\concept{spec builder}
+\concept{{spec builder}}

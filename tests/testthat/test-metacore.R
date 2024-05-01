@@ -137,3 +137,18 @@ test_that("pulling out control terminology works", {
    )
    })
 
+test_that("get_keys works", {
+   test <- spec_to_metacore(metacore_example("p21_mock.xlsx"), quiet = TRUE)
+   #Testing Errors
+   ## Domain not in ds_vars table
+   expect_error(get_keys(test, DS))
+   ## Missing dataset name
+   expect_error(get_keys(test))
+   #Testing Correct Output
+   expect_equal(
+      get_keys(test, DM),
+      tibble(variable = c("STUDYID", "USUBJID"), key_seq = c(1L, 2L)) %>%
+         add_labs(variable = "Variable Name",
+                  key_seq = "Sequence Key")
+   )
+})

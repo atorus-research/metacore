@@ -2,8 +2,8 @@
 #'
 #' This function takes the location of an excel specification document and reads
 #' it in as a meta core object. At the moment it only supports specification in
-#' the format of pinnacle 21 specifications. But, the @family spec builder can
-#' be used as building blocks for bespoke specification documents
+#' the format of pinnacle 21 specifications. But, the section level spec builder can
+#' be used as building blocks for bespoke specification documents.
 #'
 #' @param path string of file location
 #' @param quiet Option to quietly load in, this will suppress warnings, but not
@@ -96,7 +96,7 @@ read_all_sheets <- function(path){
 #' @return a dataset formatted for the metacore object
 #' @export
 #'
-#' @family spec builder
+#' @family {spec builder}
 spec_type_to_ds_spec <- function(doc, cols = c("dataset" = "[N|n]ame|[D|d]ataset|[D|d]omain",
                                                "structure" = "[S|s]tructure",
                                                "label" = "[L|l]abel|[D|d]escription"), sheet = NULL){
@@ -140,7 +140,7 @@ spec_type_to_ds_spec <- function(doc, cols = c("dataset" = "[N|n]ame|[D|d]ataset
 #' @return a dataset formatted for the metacore object
 #' @export
 #'
-#' @family spec builder
+#' @family {spec builder}
 spec_type_to_ds_vars <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]omain",
                                                "variable" = "[V|v]ariable [[N|n]ame]?|[V|v]ariables?",
                                                "order" = "[V|v]ariable [O|o]rder|[O|o]rder",
@@ -214,7 +214,7 @@ spec_type_to_ds_vars <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]oma
 #' @return a dataset formatted for the metacore object
 #' @export
 #'
-#' @family spec builder
+#' @family {spec builder}
 spec_type_to_var_spec <- function(doc, cols = c("variable" = "[N|n]ame|[V|v]ariables?",
                                                 "length" = "[L|l]ength",
                                                 "label" = "[L|l]abel",
@@ -314,7 +314,7 @@ spec_type_to_var_spec <- function(doc, cols = c("variable" = "[N|n]ame|[V|v]aria
 #' @return a dataset formatted for the metacore object
 #' @export
 #'
-#' @family spec builder
+#' @family {spec builder}
 spec_type_to_value_spec <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]omain",
                                                   "variable" = "[N|n]ame|[V|v]ariables?",
                                                   "origin" = "[O|o]rigin",
@@ -408,7 +408,10 @@ spec_type_to_value_spec <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]
 
    if(!"derivation_id" %in% names(cols)){
       out <- out %>%
-         mutate(derivation_id = paste0(dataset, ".", variable))
+         mutate(derivation_id =
+                   if_else(str_to_lower(.data$origin) == "assigned",
+                      paste0(dataset, ".", variable),
+                      paste0("pred.", dataset, ".", variable)))
    }
 
    # Get missing columns
@@ -421,7 +424,7 @@ spec_type_to_value_spec <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]
       mutate(sig_dig = as.integer(.data$sig_dig),
              derivation_id = case_when(
                 !is.na(.data$derivation_id) ~ .data$derivation_id,
-                str_to_lower(.data$origin) == "predecessor" ~ as.character(.data$predecessor),
+                str_to_lower(.data$origin) == "predecessor" ~ paste0("pred.", as.character(.data$predecessor)),
                 str_to_lower(.data$origin) == "assigned" ~ paste0(.data$dataset, ".", .data$variable))
       ) %>%
       select(-.data$predecessor)
@@ -453,7 +456,7 @@ spec_type_to_value_spec <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]
 #' @return a dataset formatted for the metacore object
 #' @export
 #'
-#' @family spec builder
+#' @family {spec builder}
 spec_type_to_codelist <- function(doc, codelist_cols = c("code_id" = "ID",
                                                          "name" = "[N|n]ame",
                                                          "code" = "^[C|c]ode|^[T|t]erm",
@@ -558,7 +561,7 @@ spec_type_to_codelist <- function(doc, codelist_cols = c("code_id" = "ID",
 #' @return a dataset formatted for the metacore object
 #' @export
 #'
-#' @family spec builder
+#' @family {spec builder}
 #' @importFrom purrr quietly
 spec_type_to_derivations <- function(doc, cols = c("derivation_id" = "ID",
                                                    "derivation" = "[D|d]efinition|[D|d]escription"),
@@ -587,11 +590,25 @@ spec_type_to_derivations <- function(doc, cols = c("derivation_id" = "ID",
    if(class(ls_derivations)[1] == "list"){
       ls_derivations <- ls_derivations %>%
          reduce(bind_rows)
+      # Get the comments
+      if(any(str_detect(names(doc), "[C|c]omment"))){
+         comments <- doc[str_detect(names(doc), "[C|c]omment")][[1]] |>
+            select(matches("ID|Description"))
+         with_comments <- ls_derivations |>
+            filter(str_to_lower(.data$origin) == "assigned") |>
+            left_join(comments, by = c("comment" = "ID" )) |>
+            mutate(comment = .data$Description) |>
+            select(-.data$Description)
+         ls_derivations <- ls_derivations |>
+            filter(str_to_lower(.data$origin) != "assigned") |>
+            bind_rows(with_comments)
+      }
    }
+
    other_derivations <- ls_derivations %>%
       mutate(
          derivation_id = case_when(
-            str_to_lower(.data$origin) == "predecessor" ~ as.character(.data$predecessor),
+            str_to_lower(.data$origin) == "predecessor" ~ paste0("pred.", as.character(.data$predecessor)),
             str_to_lower(.data$origin) == "assigned" ~ paste0(.data$dataset, ".", .data$variable),
             TRUE ~ NA_character_
             ),
