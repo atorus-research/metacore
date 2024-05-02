@@ -47,11 +47,11 @@ sheet input). The named vector \verb{*_cols} is used to determine which is the
 correct sheet and renames the columns.
 }
 \seealso{
-Other {spec builder}: 
+Other spec builders: 
 \code{\link{spec_type_to_derivations}()},
 \code{\link{spec_type_to_ds_spec}()},
 \code{\link{spec_type_to_ds_vars}()},
 \code{\link{spec_type_to_value_spec}()},
 \code{\link{spec_type_to_var_spec}()}
 }
-\concept{{spec builder}}
+\concept{spec builders}

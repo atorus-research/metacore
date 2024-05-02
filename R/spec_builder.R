@@ -96,7 +96,7 @@ read_all_sheets <- function(path){
 #' @return a dataset formatted for the metacore object
 #' @export
 #'
-#' @family {spec builder}
+#' @family spec builders
 spec_type_to_ds_spec <- function(doc, cols = c("dataset" = "[N|n]ame|[D|d]ataset|[D|d]omain",
                                                "structure" = "[S|s]tructure",
                                                "label" = "[L|l]abel|[D|d]escription"), sheet = NULL){
@@ -140,7 +140,7 @@ spec_type_to_ds_spec <- function(doc, cols = c("dataset" = "[N|n]ame|[D|d]ataset
 #' @return a dataset formatted for the metacore object
 #' @export
 #'
-#' @family {spec builder}
+#' @family spec builders
 spec_type_to_ds_vars <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]omain",
                                                "variable" = "[V|v]ariable [[N|n]ame]?|[V|v]ariables?",
                                                "order" = "[V|v]ariable [O|o]rder|[O|o]rder",
@@ -214,7 +214,7 @@ spec_type_to_ds_vars <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]oma
 #' @return a dataset formatted for the metacore object
 #' @export
 #'
-#' @family {spec builder}
+#' @family spec builders
 spec_type_to_var_spec <- function(doc, cols = c("variable" = "[N|n]ame|[V|v]ariables?",
                                                 "length" = "[L|l]ength",
                                                 "label" = "[L|l]abel",
@@ -314,7 +314,7 @@ spec_type_to_var_spec <- function(doc, cols = c("variable" = "[N|n]ame|[V|v]aria
 #' @return a dataset formatted for the metacore object
 #' @export
 #'
-#' @family {spec builder}
+#' @family spec builders
 spec_type_to_value_spec <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]omain",
                                                   "variable" = "[N|n]ame|[V|v]ariables?",
                                                   "origin" = "[O|o]rigin",
@@ -456,7 +456,7 @@ spec_type_to_value_spec <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]
 #' @return a dataset formatted for the metacore object
 #' @export
 #'
-#' @family {spec builder}
+#' @family spec builders
 spec_type_to_codelist <- function(doc, codelist_cols = c("code_id" = "ID",
                                                          "name" = "[N|n]ame",
                                                          "code" = "^[C|c]ode|^[T|t]erm",
@@ -561,7 +561,7 @@ spec_type_to_codelist <- function(doc, codelist_cols = c("code_id" = "ID",
 #' @return a dataset formatted for the metacore object
 #' @export
 #'
-#' @family {spec builder}
+#' @family spec builders
 #' @importFrom purrr quietly
 spec_type_to_derivations <- function(doc, cols = c("derivation_id" = "ID",
                                                    "derivation" = "[D|d]efinition|[D|d]escription"),
