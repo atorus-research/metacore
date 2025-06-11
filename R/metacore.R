@@ -73,8 +73,14 @@ MetaCore_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivati
                idvar = "Identifying Variable",
                qeval = "Evaluator")
 
+   private$ds_len <- ds_spec %>% nrow()
+
+   private$ds_names <- ds_spec %>% pull(dataset)
+
+   private$ds_labels <- ds_spec %>% pull(label)
+
    self$validate()
-   message("\n Metadata successfully imported")
+   if (class(self)[1] == "Metacore") { private$greet() }
 }
 
 
@@ -85,10 +91,11 @@ MetaCore_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivati
 #' @noRd
 #'
 MetaCore_print <- function(...){
-   ds_len <- private$.ds_spec %>% pull(.data$dataset) %>% length()
-   paste0("Metacore object contains metadata for ", ds_len, " datasets\n") %>%
-      cat()
+   # ds_len <- private$.ds_spec %>% pull(.data$dataset) %>% length()
+   cli_rule("Metacore object contains metadata for {private$ds_len} datasets")
 }
+
+
 
 
 #' Metacore R6 object validation function
@@ -214,41 +221,81 @@ MetaCore_filter <- function(value) {
 #' @noRd
 #
 MetaCore <- R6::R6Class("Metacore",
-                       public = list(
-                          initialize = MetaCore_initialize,
-                          print = MetaCore_print,
-                          validate =  MetaCore_validate,
-                          metacore_filter = MetaCore_filter
-                       ),
-                       private = list(
-                          .ds_spec = tibble(dataset = character(), structure = character(), label = character()),
-                          .ds_vars = tibble(dataset = character(), variable = character(), keep = logical(),
-                                            key_seq = integer(), order = integer(), core = character(),
-                                            supp_flag = logical()),
-                          .var_spec = tibble(variable = character(), label = character(), length = integer(),
-                                             type = character(), common = character(), format = character()),
-                          .value_spec = tibble(dataset = character(),
-                                               variable = character(),
-                                               where  = character(),
-                                               type = character(),
-                                               sig_dig = integer(),
-                                               code_id = character(),
-                                               origin = character(),
-                                               derivation_id = integer()),
-                          .derivations = tibble(derivation_id = integer(), derivation = character()),
-                          # code_type == df | permitted_val | external_lib
-                          .codelist = tibble(code_id = character(), name = character(), type = character(), codes = list()),
-                          .supp = tibble(dataset = character(), variable = character(), idvar = character(), qeval = character())
-                       ),
-                       active = list(
-                          ds_spec = readonly('ds_spec'),
-                          ds_vars =  readonly('ds_vars'),
-                          var_spec = readonly('var_spec'),
-                          value_spec = readonly('value_spec'),
-                          derivations = readonly('derivations'),
-                          codelist = readonly('codelist'),
-                          supp = readonly('supp')
-                       )
+  public = list(
+     initialize = MetaCore_initialize,
+     print = MetaCore_print,
+     validate =  MetaCore_validate,
+     metacore_filter = MetaCore_filter
+  ),
+
+  private = list(
+     .ds_spec = tibble(
+        dataset = character(),
+        structure = character(),
+        label = character()
+     ),
+     .ds_vars = tibble(
+        dataset = character(),
+        variable = character(),
+        keep = logical(),
+        key_seq = integer(),
+        order = integer(),
+        core = character(),
+        supp_flag = logical()
+     ),
+     .var_spec = tibble(
+        variable = character(),
+        label = character(),
+        length = integer(),
+        type = character(),
+        common = character(),
+        format = character()
+     ),
+     .value_spec = tibble(
+        dataset = character(),
+        variable = character(),
+        where  = character(),
+        type = character(),
+        sig_dig = integer(),
+        code_id = character(),
+        origin = character(),
+        derivation_id = integer()
+     ),
+     .derivations = tibble(
+        derivation_id = integer(),
+        derivation = character()
+     ),
+     # code_type == df | permitted_val | external_lib
+     .codelist = tibble(
+        code_id = character(),
+        name = character(),
+        type = character(),
+        codes = list()
+     ),
+     .supp = tibble(
+        dataset = character(),
+        variable = character(),
+        idvar = character(),
+        qeval = character()
+     ),
+     ds_len = NA,
+     ds_names = list(),
+     ds_labels = list(),
+
+     greet = function() {
+        cli_alert_success("Metadata successfully imported")
+     }
+   ),
+
+  active = list(
+     ds_spec = readonly('ds_spec'),
+     ds_vars =  readonly('ds_vars'),
+     var_spec = readonly('var_spec'),
+     value_spec = readonly('value_spec'),
+     derivations = readonly('derivations'),
+     codelist = readonly('codelist'),
+     supp = readonly('supp')
+  )
 )
 
 
@@ -332,7 +379,6 @@ select_dataset <- function(.data, dataset, simplify = FALSE) {
    cl$metacore_filter(dataset)
 
    if (simplify) {
-
      test <-  suppressMessages(
          list(
             cl$ds_vars,
@@ -344,9 +390,8 @@ select_dataset <- function(.data, dataset, simplify = FALSE) {
          ) %>%
             reduce(left_join)
       )
-
    } else {
-      return(cl)
+      DatasetMeta$new(metacore = cl)
    }
 }
 
