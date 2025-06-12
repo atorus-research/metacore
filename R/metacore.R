@@ -16,7 +16,7 @@
 #' @noRd
 #'
 #' @importFrom stringr str_to_lower
-MetaCore_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist, supp){
+MetaCore_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist, supp, quiet = FALSE){
 
    private$.ds_spec <- ds_spec %>%
       add_labs(dataset = "Dataset Name",
@@ -73,14 +73,14 @@ MetaCore_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivati
                idvar = "Identifying Variable",
                qeval = "Evaluator")
 
-   private$ds_len <- ds_spec %>% nrow()
+   private$.ds_len <- ds_spec %>% nrow()
 
-   private$ds_names <- ds_spec %>% pull(dataset)
+   private$.ds_names <- ds_spec %>% pull(dataset)
 
-   private$ds_labels <- ds_spec %>% pull(label)
+   private$.ds_labels <- ds_spec %>% pull(label)
 
    self$validate()
-   if (class(self)[1] == "Metacore") { private$greet() }
+   if (class(self)[1] == "Metacore") { private$.greet(quiet) }
 }
 
 
@@ -91,10 +91,15 @@ MetaCore_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivati
 #' @noRd
 #'
 MetaCore_print <- function(...){
-   # ds_len <- private$.ds_spec %>% pull(.data$dataset) %>% length()
-   cli_rule("Metacore object contains metadata for {private$ds_len} datasets")
-}
+   cli_par()
+   cli_rule("Metacore object contains metadata for {private$.ds_len} datasets")
+   for (i in 1:private$.ds_len) {
+      cli_bullets(c(">" = "{private$.ds_names[i]} ({private$.ds_labels[i]})"))
+   }
+   cli_end()
 
+   cli_text(cli::col_red("To use the Metacore object with metatools package, first subset a dataset using metacore::select_dateset"))
+}
 
 
 
@@ -278,12 +283,14 @@ MetaCore <- R6::R6Class("Metacore",
         idvar = character(),
         qeval = character()
      ),
-     ds_len = NA,
-     ds_names = list(),
-     ds_labels = list(),
+     .ds_len = NA,
+     .ds_names = list(),
+     .ds_labels = list(),
 
-     greet = function() {
+     .greet = function(quiet = FALSE) {
         cli_alert_success("Metadata successfully imported")
+        if (quiet) cli_alert_warning(col_red("Dataset metadata imported with suppressed warnings"))
+        cli_text(cli::col_red("To use the Metacore object with metatools package, first subset a dataset using metacore::select_dateset"))
      }
    ),
 
@@ -329,7 +336,8 @@ metacore <- function(ds_spec = tibble(dataset = character(), structure = charact
                                          derivation_id = integer()),
                      derivations = tibble(derivation_id = integer(), derivation = character()),
                      codelist = tibble(code_id = character(), name = character(), type = character(), codes = list()),
-                     supp = tibble(dataset = character(), variable = character(), idvar = character(), qeval = character())) {
+                     supp = tibble(dataset = character(), variable = character(), idvar = character(), qeval = character()),
+                     quiet = FALSE) {
    # Check if there are any empty datasets that need adding
    is_empty_df <- as.list(environment()) %>%
       keep(is.null)
@@ -359,7 +367,7 @@ metacore <- function(ds_spec = tibble(dataset = character(), structure = charact
       names(replaced) <- to_replace %>% map_chr(~unique(.$dataset))
       list2env(replaced, environment())
       }
-   MetaCore$new(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist, supp)
+   MetaCore$new(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist, supp, quiet)
 }
 
 
@@ -373,7 +381,7 @@ metacore <- function(ds_spec = tibble(dataset = character(), structure = charact
 #' @return a filtered subset of the metacore object
 #' @export
 #'
-select_dataset <- function(.data, dataset, simplify = FALSE) {
+select_dataset <- function(.data, dataset, simplify = FALSE, quiet = FALSE) {
 
    cl <- .data$clone()
    cl$metacore_filter(dataset)
@@ -391,7 +399,8 @@ select_dataset <- function(.data, dataset, simplify = FALSE) {
             reduce(left_join)
       )
    } else {
-      DatasetMeta$new(metacore = cl)
+      if (!quiet) DatasetMeta$new(metacore = cl)
+      else suppressWarnings(DatasetMeta$new(metacore = cl, quiet = quiet))
    }
 }
 

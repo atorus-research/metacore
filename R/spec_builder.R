@@ -26,8 +26,7 @@ spec_to_metacore <- function(path, quiet = FALSE, where_sep_sheet = TRUE){
       if(!quiet){
          out <- metacore(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist = code_list)
       } else{
-         out<- suppressWarnings(metacore(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist = code_list))
-         message("Loading in metacore object with suppressed warnings")
+         out<- suppressWarnings(metacore(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist = code_list, quiet = quiet))
       }
    } else {
       stop("This specification format is not currently supported. You will need to write your own reader",
