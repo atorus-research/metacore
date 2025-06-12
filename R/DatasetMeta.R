@@ -14,8 +14,10 @@ DatasetMeta <- R6::R6Class("DatasetMeta",
      .num_vars = NA,
 
      .greet = function(quiet) {
+        cli_par()
         cli_alert_success("{private$.name} dataset successfully selected")
         if (quiet) cli_alert_warning(col_red("Dataset metadata specification subsetted with suppressed warnings"))
+        cli_end()
      }
   ),
 
