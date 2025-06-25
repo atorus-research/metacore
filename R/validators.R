@@ -354,10 +354,10 @@ is_metacore <- function(x){
 #'
 #' @examples
 #' load(metacore_example("pilot_ADaM.rda"))
-#' dm <- select_dataset(metacore, "DM", quiet = TRUE)
-#' if_DatasetMeta("DUMMY")   # Expect error
+#' adsl <- select_dataset(metacore, "ADSL", quiet = TRUE)
+#' is_DatasetMeta("DUMMY")   # Expect error
 #' is_DatasetMeta(metacore)  # Expect error
-#' is_DatasetMeta(dm)        # Expect valid, i.e., return TRUE
+#' is_DatasetMeta(adsl)      # Expect valid, i.e., return TRUE
 is_DatasetMeta <- function(x){
    inherits(x, "DatasetMeta")
 }
@@ -379,18 +379,19 @@ is_DatasetMeta <- function(x){
 #'   otherwise abort with errors.
 #'
 #' @examples
-#' load(metacore_example("pilot_ADaM.rda"))
-#' dm <- select_dataset(metacore, "DM", quiet = TRUE)
+#' \dontrun{
 #' check_DatasetMeta("DUMMY")   # Expect error
 #' check_DatasetMeta(metacore)  # Expect error
-#' check_DatasetMeta(dm)        # Expect valid, i.e., return TRUE
+#' check_DatasetMeta(adsl)      # Expect valid, i.e., return TRUE
+#' }
+#' @keywords internal
 check_DatasetMeta <- function(x) {
    if (!is_metacore(x)) {
-      cli_abort(col_red("The object supplied to the argument 'metacore' is not a Metacore object. You have supplied an object of class {class(x)}."))
+      cli_abort(col_red("The object supplied to the argument {.arg metacore} is not a Metacore object. You have supplied an object of class {class(x)}."))
    }
 
    if (!is_DatasetMeta(x)) {
-      cli_abort(col_red("Expecting a subsetted Metacore object. Use metacore::select_dataset to subset metadata for the required dataset."))
+      cli_abort(col_red("The object supplied to the argument {.arg metacore} is not a subsetted Metacore object. Use {.fn metacore::select_dataset} to subset metadata for the required dataset."))
    }
 
    return(TRUE)
