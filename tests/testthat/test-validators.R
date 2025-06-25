@@ -104,3 +104,27 @@ test_that("check object works", {
    is_metacore("THIS IS NOT A THING") %>%
       expect_equal(FALSE)
 })
+
+# Test that is_DatasetMeta works as intended for various class types
+load(metacore_example("pilot_ADaM.rda"))
+test_that("is_DatasetMeta returns FALSE if a non-DatasetMeta object is supplied", {
+   expect_false(is_DatasetMeta(metacore))
+})
+
+dataset_meta <- select_dataset(metacore, "ADSL", quiet = TRUE)
+test_that("is_DatasetMeta returns TRUE if a DatasetMeta object is supplied", {
+   expect_true(is_DatasetMeta(dataset_meta))
+})
+
+# Test that internal function check_DatasetMeta works as intended for various class types
+test_that("check_DatasetMeta throws an error if a non-Metacore object is supplied", {
+   expect_error(check_DatasetMeta("DUMMY"))
+})
+
+test_that("is_DatasetMeta throws an error if a non-DatasetMeta object is supplied", {
+   expect_error(check_DatasetMeta(metacore))
+})
+
+test_that("is_DatasetMeta returns TRUE if a DatasetMeta object is supplied", {
+   expect_true(check_DatasetMeta(dataset_meta))
+})
