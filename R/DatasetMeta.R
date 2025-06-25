@@ -53,12 +53,12 @@ DatasetMeta <- R6::R6Class("DatasetMeta",
         for (table in tables) {
            obj <- get(table, envir = self)
            if (!is.list(obj)) { next }
-           cli_bullets(c(">" = "{table}: {typeof(table)} [{dim(obj)[1]} x {dim(obj)[2]}] {paste(names(obj), collapse = ' ')}"))
+           cli_bullets(c(">" = "{table}: {typeof(table)} [{dim(obj)[1]} x {dim(obj)[2]}] {ansi_collapse(names(obj), last = ', ')}"))
         }
         cli_end()
 
-        cli_div(theme = list(span.emph = list(color = "orange")))
-        cli_text("To inspect the specification object use {.emph View(<name>)} in the console.")
+        cli_div()
+        cli_text("To inspect the specification object use {.fn utils::View} in the console.")
         cli_end()
      }
   )

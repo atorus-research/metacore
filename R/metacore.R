@@ -11,6 +11,8 @@
 #'   have the same derivation
 #' @param code_list contains the code/decode information
 #' @param supp contains the idvar and qeval information for supplemental variables
+#' @param quiet Option to quietly load in, this will suppress warnings, but not
+#'   errors. Expects either `TRUE` or `FALSE`. Default behaviour is `FALSE`.
 #'
 #' @family Metacore
 #' @noRd
@@ -80,7 +82,7 @@ MetaCore_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivati
    private$.ds_labels <- ds_spec %>% pull(label)
 
    self$validate()
-   if (class(self)[1] == "Metacore") { private$.greet(quiet) }
+   if (inherits_only(self, c("Metacore", "R6"))) { private$.greet(quiet) }
 }
 
 
@@ -98,7 +100,7 @@ MetaCore_print <- function(...){
    }
    cli_end()
 
-   cli_alert_info(col_red("To use the Metacore object with metatools package, first subset a dataset using metacore::select_dateset"))
+   cli_alert_info("To use the {.obj Metacore} object with {.pkg metatools} package, first subset a dataset using {.fn metacore::select_dateset}")
 }
 
 
@@ -291,7 +293,7 @@ MetaCore <- R6::R6Class("Metacore",
         cli_par()
         cli_alert_success("Metadata successfully imported")
         if (quiet) cli_alert_info(col_red("Dataset metadata imported with suppressed warnings"))
-        cli_alert_info(col_red("To use the Metacore object with metatools package, first subset a dataset using metacore::select_dateset"))
+        cli_alert_info("To use the {.obj Metacore} object with {.pkg metatools} package, first subset a dataset using {.fn metacore::select_dateset}")
         cli_end()
      }
    ),
@@ -317,6 +319,8 @@ MetaCore <- R6::R6Class("Metacore",
 #' @param derivations contains derivation, it allows for different variables to have the same derivation
 #' @param codelist contains the code/decode information
 #' @param supp contains the idvar and qeval information for supplemental variables
+#' @param quiet Option to quietly load in, this will suppress warnings, but not
+#'   errors. Expects either `TRUE` or `FALSE`. Default behaviour is `FALSE`.
 #'
 #' @family Metacore
 #'
@@ -379,6 +383,8 @@ metacore <- function(ds_spec = tibble(dataset = character(), structure = charact
 #' @param .data the metacore object of dataframes
 #' @param dataset the specific dataset to subset by
 #' @param simplify return a single dataframe
+#' @param quiet Option to quietly load in, this will suppress warnings, but not
+#'   errors. Expects either `TRUE` or `FALSE`. Default behaviour is `FALSE`.
 #'
 #' @return a filtered subset of the metacore object
 #' @export
