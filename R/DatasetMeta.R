@@ -1,7 +1,8 @@
 #' The DatasetMeta R6 Class
 #'
-#' This uses the initialize, print, and validate functions above to create a single object
-#' The user can query
+#' A subclass of the class Metacore. Creates a programatic distinction between
+#' the full specification object of type Metacore and the subsetted specification
+#' for a single dataset of type DatasetMeta.
 #'
 #' @family Metacore
 #' @noRd
@@ -16,7 +17,7 @@ DatasetMeta <- R6::R6Class("DatasetMeta",
      .greet = function(quiet) {
         cli_par()
         cli_alert_success("{private$.name} dataset successfully selected")
-        if (quiet) cli_alert_warning(col_red("Dataset metadata specification subsetted with suppressed warnings"))
+        if (quiet) cli_alert_info(col_red("Dataset metadata specification subsetted with suppressed warnings"))
         cli_end()
      }
   ),
