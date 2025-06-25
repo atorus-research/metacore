@@ -345,34 +345,52 @@ is_metacore <- function(x){
 }
 
 
-#' Verify that the Class Type of an object is DatasetMeta.
+#' Is DatasetMeta object
 #'
-#' @description
-#'  This function checks whether the provided object (named `metacore`) is of class
-#' `DatasetMeta`. If the class type is `DatasetMeta`, the function returns TRUE.
-#' Otherwise, it outputs a warning message and aborts the program.
+#' @param x object to check
 #'
-#' This function is used as a guard clause in many features of the {metatools}
-#' package that are intended only to be used with the subsetted Metacore object
-#' of class type DatasetMeta.
-#'
-#' @param metacore An object whose class type needs to be checked.
-#' @return Logical: TRUE if the class type of `metacore` is `DatasetMeta`,
-#'   otherwise abort with errors.
+#' @return `TRUE` if DatasetMeta, `FALSE` if not
 #' @export
+#'
 #' @examples
-#' metacore <- metacore::spec_to_metacore(metacore::metacore_example("p21_mock.xlsx"), quiet = TRUE)
-#' dm <- metacore::select_dataset(metacore, "DM", quiet = TRUE)
+#' load(metacore_example("pilot_ADaM.rda"))
+#' dm <- select_dataset(metacore, "DM", quiet = TRUE)
 #' if_DatasetMeta("DUMMY")   # Expect error
 #' is_DatasetMeta(metacore)  # Expect error
 #' is_DatasetMeta(dm)        # Expect valid, i.e., return TRUE
-is_DatasetMeta <- function(metacore) {
-   if (!inherits(metacore, "Metacore")) {
-      cli_abort("The object supplied to the argument 'metacore' is not a Metacore object. You have supplied an object of class {class(metacore)}.")
+is_DatasetMeta <- function(x){
+   inherits(x, "DatasetMeta")
+}
+
+
+#' Check that the Class Type of an object is DatasetMeta.
+#'
+#' @description
+#' This is an internal function that is a wrapper to the exported functions
+#' `is_metacore` and `is_DatasetMeta`.
+#'
+#' This function is used as a guard clause in many features of the {metatools}
+#' package that are intended only to be used with the subsetted Metacore object
+#' of class type DatasetMeta. If either of the wrapped functions return `FALSE `
+#' then an appropriate error message is displayed.
+#'
+#' @param x An object whose class type needs to be checked.
+#' @return Logical: TRUE if the class type of `metacore` is `DatasetMeta`,
+#'   otherwise abort with errors.
+#'
+#' @examples
+#' load(metacore_example("pilot_ADaM.rda"))
+#' dm <- select_dataset(metacore, "DM", quiet = TRUE)
+#' check_DatasetMeta("DUMMY")   # Expect error
+#' check_DatasetMeta(metacore)  # Expect error
+#' check_DatasetMeta(dm)        # Expect valid, i.e., return TRUE
+check_DatasetMeta <- function(x) {
+   if (!is_metacore(x)) {
+      cli_abort(col_red("The object supplied to the argument 'metacore' is not a Metacore object. You have supplied an object of class {class(x)}."))
    }
 
-   if (!inherits(metacore, "DatasetMeta")) {
-      cli_abort("Expecting a subsetted Metacore object. Use metacore::select_dataset to subset metadata for the required dataset.")
+   if (!is_DatasetMeta(x)) {
+      cli_abort(col_red("Expecting a subsetted Metacore object. Use metacore::select_dataset to subset metadata for the required dataset."))
    }
 
    return(TRUE)
