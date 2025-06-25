@@ -98,7 +98,7 @@ MetaCore_print <- function(...){
    }
    cli_end()
 
-   cli_alert_warning(cli::col_red("To use the Metacore object with metatools package, first subset a dataset using metacore::select_dateset"))
+   cli_alert_warning(col_red("To use the Metacore object with metatools package, first subset a dataset using metacore::select_dateset"))
 }
 
 
