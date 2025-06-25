@@ -52,3 +52,19 @@ test_that("metacore example returns file options", {
                       "pilot_SDTM.rda",
                       "SDTM_define.xml", "SDTM_spec_CDISC_pilot.xlsx")))
 })
+
+# Test that is_DatasetMeta works as intended for various class types
+not_metacore <- "metacore"
+test_that("is_DatasetMeta throws an error if non-metacore object is supplied", {
+   expect_error(is_DatasetMeta(not_metacore))
+})
+
+load(metacore_example("pilot_ADaM.rda"))
+test_that("is_DatasetMeta throws an error if non-DatasetMeta object is supplied", {
+   expect_error(is_DatasetMeta(metacore))
+})
+
+dataset_meta <- select_dataset(metacore, "ADSL", quiet = TRUE)
+test_that("is_DatasetMeta returns TRUE if a DatasetMeta object is supplied", {
+   expect_true(is_DatasetMeta(dataset_meta))
+})
