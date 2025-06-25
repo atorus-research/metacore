@@ -17,8 +17,8 @@ Is DatasetMeta object
 }
 \examples{
 load(metacore_example("pilot_ADaM.rda"))
-dm <- select_dataset(metacore, "DM", quiet = TRUE)
-if_DatasetMeta("DUMMY")   # Expect error
+adsl <- select_dataset(metacore, "ADSL", quiet = TRUE)
+is_DatasetMeta("DUMMY")   # Expect error
 is_DatasetMeta(metacore)  # Expect error
-is_DatasetMeta(dm)        # Expect valid, i.e., return TRUE
+is_DatasetMeta(adsl)      # Expect valid, i.e., return TRUE
 }

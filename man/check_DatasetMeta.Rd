@@ -23,9 +23,10 @@ of class type DatasetMeta. If either of the wrapped functions return \code{FALSE
 then an appropriate error message is displayed.
 }
 \examples{
-load(metacore_example("pilot_ADaM.rda"))
-dm <- select_dataset(metacore, "DM", quiet = TRUE)
+\dontrun{
 check_DatasetMeta("DUMMY")   # Expect error
 check_DatasetMeta(metacore)  # Expect error
-check_DatasetMeta(dm)        # Expect valid, i.e., return TRUE
+check_DatasetMeta(adsl)      # Expect valid, i.e., return TRUE
 }
+}
+\keyword{internal}

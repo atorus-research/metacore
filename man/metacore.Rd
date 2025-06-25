@@ -35,6 +35,9 @@ metacore(
 \item{codelist}{contains the code/decode information}
 
 \item{supp}{contains the idvar and qeval information for supplemental variables}
+
+\item{quiet}{Option to quietly load in, this will suppress warnings, but not
+errors. Expects either \code{TRUE} or \code{FALSE}. Default behaviour is \code{FALSE}.}
 }
 \description{
 R6 Class wrapper to create your own metacore object

@@ -42,6 +42,7 @@ Suggests:
 Imports: 
     R6,
     tidyr,
+    cli,
     dplyr,
     stringr,
     magrittr,
