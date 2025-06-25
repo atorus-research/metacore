@@ -17,7 +17,8 @@ metacore(
   codelist = tibble(code_id = character(), name = character(), type = character(), codes
     = list()),
   supp = tibble(dataset = character(), variable = character(), idvar = character(), qeval
-    = character())
+    = character()),
+  quiet = FALSE
 )
 }
 \arguments{

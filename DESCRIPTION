@@ -31,7 +31,7 @@ Description: Create an immutable container holding metadata for the purpose of b
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE, r6 = FALSE)
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2
 Depends: 
     R (>= 3.6)
 Suggests: 
