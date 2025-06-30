@@ -100,7 +100,7 @@ MetaCore_print <- function(...){
    }
    cli_end()
 
-   cli_alert_info("To use the {.obj Metacore} object with {.pkg metatools} package, first subset a dataset using {.fn metacore::select_dateset}")
+   cli_alert_info("To use the {.obj Metacore} object with {.pkg metatools} package, first subset a dataset using {.fn metacore::select_dataset}")
 }
 
 
@@ -293,7 +293,7 @@ MetaCore <- R6::R6Class("Metacore",
         cli_par()
         cli_alert_success("Metadata successfully imported")
         if (quiet) cli_alert_info(col_red("Dataset metadata imported with suppressed warnings"))
-        cli_alert_info("To use the {.obj Metacore} object with {.pkg metatools} package, first subset a dataset using {.fn metacore::select_dateset}")
+        cli_alert_info("To use the {.obj Metacore} object with {.pkg metatools} package, first subset a dataset using {.fn metacore::select_dataset}")
         cli_end()
      }
    ),
