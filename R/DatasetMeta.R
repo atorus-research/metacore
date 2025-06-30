@@ -58,7 +58,7 @@ DatasetMeta <- R6::R6Class("DatasetMeta",
         cli_end()
 
         cli_div()
-        cli_text("To inspect the specification object use {.fn utils::View} in the console.")
+        cli_text("To inspect the specification object use {.fn View} in the console.")
         cli_end()
      }
   )
