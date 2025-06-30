@@ -355,42 +355,46 @@ is_metacore <- function(x){
 #' @examples
 #' load(metacore_example("pilot_ADaM.rda"))
 #' adsl <- select_dataset(metacore, "ADSL", quiet = TRUE)
-#' is_DatasetMeta("DUMMY")   # Expect error
-#' is_DatasetMeta(metacore)  # Expect error
-#' is_DatasetMeta(adsl)      # Expect valid, i.e., return TRUE
+#' is_DatasetMeta("DUMMY")   # Expect FALSE
+#' is_DatasetMeta(metacore)  # Expect FALSE
+#' is_DatasetMeta(adsl)      # Expect TRUE
 is_DatasetMeta <- function(x){
    inherits(x, "DatasetMeta")
 }
 
 
-#' Check that the Class Type of an object is DatasetMeta.
+#' Verify that the Class Type of an object is DatasetMeta with warnings
 #'
 #' @description
-#' This is an internal function that is a wrapper to the exported functions
-#' `is_metacore` and `is_DatasetMeta`.
+#' This function that is a wrapper to the functions `is_metacore` and
+#' `is_DatasetMeta`.
 #'
-#' This function is used as a guard clause in many features of the {metatools}
-#' package that are intended only to be used with the subsetted Metacore object
-#' of class type DatasetMeta. If either of the wrapped functions return `FALSE `
-#' then an appropriate error message is displayed.
+#' This function is not intended to be called directly by the user. It is
+#' used as a guard clause in many features of the {metatools} package that are
+#' intended only to be used with the subsetted Metacore object of class type
+#' `DatasetMeta`. If either of the wrapped functions return `FALSE `then
+#' execution is stopped and an appropriate error message is displayed.
 #'
-#' @param x An object whose class type needs to be checked.
+#' @param metacore An object whose class type needs to be checked.
 #' @return Logical: TRUE if the class type of `metacore` is `DatasetMeta`,
 #'   otherwise abort with errors.
 #'
+#' @export
+#'
 #' @examples
+#' load(metacore_example("pilot_ADaM.rda"))
+#' adsl <- select_dataset(metacore, "ADSL", quiet = TRUE)
 #' \dontrun{
-#' check_DatasetMeta("DUMMY")   # Expect error
-#' check_DatasetMeta(metacore)  # Expect error
-#' check_DatasetMeta(adsl)      # Expect valid, i.e., return TRUE
+#' verify_DatasetMeta("DUMMY")   # Expect error
+#' verify_DatasetMeta(metacore)  # Expect error
 #' }
-#' @keywords internal
-check_DatasetMeta <- function(x) {
-   if (!is_metacore(x)) {
-      cli_abort(col_red("The object supplied to the argument {.arg metacore} is not a Metacore object. You have supplied an object of class {class(x)}."))
+#' verify_DatasetMeta(adsl)      # Expect valid, i.e., return TRUE
+verify_DatasetMeta <- function(metacore) {
+   if (!is_metacore(metacore)) {
+      cli_abort(col_red("The object supplied to the argument {.arg metacore} is not a Metacore object. You have supplied an object of class {class(metacore)}."))
    }
 
-   if (!is_DatasetMeta(x)) {
+   if (!is_DatasetMeta(metacore)) {
       cli_abort(col_red("The object supplied to the argument {.arg metacore} is not a subsetted Metacore object. Use {.fn metacore::select_dataset} to subset metadata for the required dataset."))
    }
 

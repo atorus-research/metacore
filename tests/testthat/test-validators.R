@@ -118,13 +118,13 @@ test_that("is_DatasetMeta returns TRUE if a DatasetMeta object is supplied", {
 
 # Test that internal function check_DatasetMeta works as intended for various class types
 test_that("check_DatasetMeta throws an error if a non-Metacore object is supplied", {
-   expect_error(check_DatasetMeta("DUMMY"))
+   expect_error(verify_DatasetMeta("DUMMY"))
 })
 
 test_that("is_DatasetMeta throws an error if a non-DatasetMeta object is supplied", {
-   expect_error(check_DatasetMeta(metacore))
+   expect_error(verify_DatasetMeta(metacore))
 })
 
 test_that("is_DatasetMeta returns TRUE if a DatasetMeta object is supplied", {
-   expect_true(check_DatasetMeta(dataset_meta))
+   expect_true(verify_DatasetMeta(dataset_meta))
 })
