@@ -218,64 +218,68 @@
                      MethodOID="MT.ADSL.AGEGR1"/>
             <ItemRef ItemOID="IT.ADSL.AGEGR1N" Mandatory="No" OrderNumber="18"
                      MethodOID="MT.ADSL.AGEGR1N"/>
-            <ItemRef ItemOID="IT.ADSL.AGEU" Mandatory="No" OrderNumber="19" MethodOID="MT.ADSL.AGEU"/>
-            <ItemRef ItemOID="IT.ADSL.RACE" Mandatory="No" OrderNumber="20" MethodOID="MT.ADSL.RACE"/>
-            <ItemRef ItemOID="IT.ADSL.RACEN" Mandatory="No" OrderNumber="21"
+            <ItemRef ItemOID="IT.ADSL.AGEGR2" Mandatory="No" OrderNumber="19"
+                     MethodOID="MT.ADSL.AGEGR2"/>
+            <ItemRef ItemOID="IT.ADSL.AGEGR2N" Mandatory="No" OrderNumber="20"
+                     MethodOID="MT.ADSL.AGEGR2N"/>
+            <ItemRef ItemOID="IT.ADSL.AGEU" Mandatory="No" OrderNumber="21" MethodOID="MT.ADSL.AGEU"/>
+            <ItemRef ItemOID="IT.ADSL.RACE" Mandatory="No" OrderNumber="22" MethodOID="MT.ADSL.RACE"/>
+            <ItemRef ItemOID="IT.ADSL.RACEN" Mandatory="No" OrderNumber="23"
                      MethodOID="MT.ADSL.RACEN"/>
-            <ItemRef ItemOID="IT.ADSL.SEX" Mandatory="No" OrderNumber="22" MethodOID="MT.ADSL.SEX"/>
-            <ItemRef ItemOID="IT.ADSL.ETHNIC" Mandatory="No" OrderNumber="23"
+            <ItemRef ItemOID="IT.ADSL.SEX" Mandatory="No" OrderNumber="24" MethodOID="MT.ADSL.SEX"/>
+            <ItemRef ItemOID="IT.ADSL.ETHNIC" Mandatory="No" OrderNumber="25"
                      MethodOID="MT.ADSL.ETHNIC"/>
-            <ItemRef ItemOID="IT.ADSL.SAFFL" Mandatory="No" OrderNumber="24"
+            <ItemRef ItemOID="IT.ADSL.SAFFL" Mandatory="No" OrderNumber="26"
                      MethodOID="MT.ADSL.SAFFL"/>
-            <ItemRef ItemOID="IT.ADSL.ITTFL" Mandatory="No" OrderNumber="25"
+            <ItemRef ItemOID="IT.ADSL.ITTFL" Mandatory="No" OrderNumber="27"
                      MethodOID="MT.ADSL.ITTFL"/>
-            <ItemRef ItemOID="IT.ADSL.EFFFL" Mandatory="No" OrderNumber="26"
+            <ItemRef ItemOID="IT.ADSL.EFFFL" Mandatory="No" OrderNumber="28"
                      MethodOID="MT.ADSL.EFFFL"/>
-            <ItemRef ItemOID="IT.ADSL.COMP8FL" Mandatory="No" OrderNumber="27"
+            <ItemRef ItemOID="IT.ADSL.COMP8FL" Mandatory="No" OrderNumber="29"
                      MethodOID="MT.ADSL.COMP8FL"/>
-            <ItemRef ItemOID="IT.ADSL.COMP16FL" Mandatory="No" OrderNumber="28"
+            <ItemRef ItemOID="IT.ADSL.COMP16FL" Mandatory="No" OrderNumber="30"
                      MethodOID="MT.ADSL.COMP16FL"/>
-            <ItemRef ItemOID="IT.ADSL.COMP24FL" Mandatory="No" OrderNumber="29"
+            <ItemRef ItemOID="IT.ADSL.COMP24FL" Mandatory="No" OrderNumber="31"
                      MethodOID="MT.ADSL.COMP24FL"/>
-            <ItemRef ItemOID="IT.ADSL.DISCONFL" Mandatory="No" OrderNumber="30"
+            <ItemRef ItemOID="IT.ADSL.DISCONFL" Mandatory="No" OrderNumber="32"
                      MethodOID="MT.ADSL.DISCONFL"/>
-            <ItemRef ItemOID="IT.ADSL.DSRAEFL" Mandatory="No" OrderNumber="31"
+            <ItemRef ItemOID="IT.ADSL.DSRAEFL" Mandatory="No" OrderNumber="33"
                      MethodOID="MT.ADSL.DSRAEFL"/>
-            <ItemRef ItemOID="IT.ADSL.DTHFL" Mandatory="No" OrderNumber="32"
+            <ItemRef ItemOID="IT.ADSL.DTHFL" Mandatory="No" OrderNumber="34"
                      MethodOID="MT.ADSL.DTHFL"/>
-            <ItemRef ItemOID="IT.ADSL.BMIBL" Mandatory="No" OrderNumber="33"
+            <ItemRef ItemOID="IT.ADSL.BMIBL" Mandatory="No" OrderNumber="35"
                      MethodOID="MT.ADSL.BMIBL"/>
-            <ItemRef ItemOID="IT.ADSL.BMIBLGR1" Mandatory="No" OrderNumber="34"
+            <ItemRef ItemOID="IT.ADSL.BMIBLGR1" Mandatory="No" OrderNumber="36"
                      MethodOID="MT.ADSL.BMIBLGR1"/>
-            <ItemRef ItemOID="IT.ADSL.HEIGHTBL" Mandatory="No" OrderNumber="35"
+            <ItemRef ItemOID="IT.ADSL.HEIGHTBL" Mandatory="No" OrderNumber="37"
                      MethodOID="MT.ADSL.HEIGHTBL"/>
-            <ItemRef ItemOID="IT.ADSL.WEIGHTBL" Mandatory="No" OrderNumber="36"
+            <ItemRef ItemOID="IT.ADSL.WEIGHTBL" Mandatory="No" OrderNumber="38"
                      MethodOID="MT.ADSL.WEIGHTBL"/>
-            <ItemRef ItemOID="IT.ADSL.EDUCLVL" Mandatory="No" OrderNumber="37"
+            <ItemRef ItemOID="IT.ADSL.EDUCLVL" Mandatory="No" OrderNumber="39"
                      MethodOID="MT.ADSL.EDUCLVL"/>
-            <ItemRef ItemOID="IT.ADSL.DISONSDT" Mandatory="No" OrderNumber="38"
+            <ItemRef ItemOID="IT.ADSL.DISONSDT" Mandatory="No" OrderNumber="40"
                      MethodOID="MT.ADSL.DISONSDT"/>
-            <ItemRef ItemOID="IT.ADSL.DURDIS" Mandatory="No" OrderNumber="39"
+            <ItemRef ItemOID="IT.ADSL.DURDIS" Mandatory="No" OrderNumber="41"
                      MethodOID="MT.ADSL.DURDIS"/>
-            <ItemRef ItemOID="IT.ADSL.DURDSGR1" Mandatory="No" OrderNumber="40"
+            <ItemRef ItemOID="IT.ADSL.DURDSGR1" Mandatory="No" OrderNumber="42"
                      MethodOID="MT.ADSL.DURDSGR1"/>
-            <ItemRef ItemOID="IT.ADSL.VISIT1DT" Mandatory="No" OrderNumber="41"
+            <ItemRef ItemOID="IT.ADSL.VISIT1DT" Mandatory="No" OrderNumber="43"
                      MethodOID="MT.ADSL.VISIT1DT"/>
-            <ItemRef ItemOID="IT.ADSL.RFSTDTC" Mandatory="No" OrderNumber="42"
+            <ItemRef ItemOID="IT.ADSL.RFSTDTC" Mandatory="No" OrderNumber="44"
                      MethodOID="MT.ADSL.RFSTDTC"/>
-            <ItemRef ItemOID="IT.ADSL.RFENDTC" Mandatory="No" OrderNumber="43"
+            <ItemRef ItemOID="IT.ADSL.RFENDTC" Mandatory="No" OrderNumber="45"
                      MethodOID="MT.ADSL.RFENDTC"/>
-            <ItemRef ItemOID="IT.ADSL.VISNUMEN" Mandatory="No" OrderNumber="44"
+            <ItemRef ItemOID="IT.ADSL.VISNUMEN" Mandatory="No" OrderNumber="46"
                      MethodOID="MT.ADSL.VISNUMEN"/>
-            <ItemRef ItemOID="IT.ADSL.RFENDT" Mandatory="No" OrderNumber="45"
+            <ItemRef ItemOID="IT.ADSL.RFENDT" Mandatory="No" OrderNumber="47"
                      MethodOID="MT.ADSL.RFENDT"/>
-            <ItemRef ItemOID="IT.ADSL.DCDECOD" Mandatory="No" OrderNumber="46"
+            <ItemRef ItemOID="IT.ADSL.DCDECOD" Mandatory="No" OrderNumber="48"
                      MethodOID="MT.ADSL.DCDECOD"/>
-            <ItemRef ItemOID="IT.ADSL.EOSSTT" Mandatory="No" OrderNumber="47"
+            <ItemRef ItemOID="IT.ADSL.EOSSTT" Mandatory="No" OrderNumber="49"
                      MethodOID="MT.ADSL.EOSSTT"/>
-            <ItemRef ItemOID="IT.ADSL.DCSREAS" Mandatory="No" OrderNumber="48"
+            <ItemRef ItemOID="IT.ADSL.DCSREAS" Mandatory="No" OrderNumber="50"
                      MethodOID="MT.ADSL.DCREASCD"/>
-            <ItemRef ItemOID="IT.ADSL.MMSETOT" Mandatory="No" OrderNumber="49"
+            <ItemRef ItemOID="IT.ADSL.MMSETOT" Mandatory="No" OrderNumber="51"
                      MethodOID="MT.ADSL.MMSETOT"/>
             <def:leaf ID="LF.ADSL" xlink:href="adsl.xpt">
                <def:title>adsl.xpt</def:title>
@@ -732,6 +736,22 @@
                <TranslatedText>Pooled Age Group 1 (N)</TranslatedText>
             </Description>
             <CodeListRef CodeListOID="CL.AGEGR1N"/>
+            <def:Origin Type="Derived"/>
+         </ItemDef>
+         <ItemDef OID="IT.ADSL.AGEGR2" Name="AGEGR2" DataType="text" Length="5"
+                  SASFieldName="AGEGR2">
+            <Description>
+               <TranslatedText>Pooled Age Group 2</TranslatedText>
+            </Description>
+            <CodeListRef CodeListOID="CL.AGEGR2"/>
+            <def:Origin Type="Derived"/>
+         </ItemDef>
+         <ItemDef OID="IT.ADSL.AGEGR2N" Name="AGEGR2N" DataType="integer" Length="8"
+                  SASFieldName="AGEGR2N">
+            <Description>
+               <TranslatedText>Pooled Age Group 2 (N)</TranslatedText>
+            </Description>
+            <CodeListRef CodeListOID="CL.AGEGR2N"/>
             <def:Origin Type="Derived"/>
          </ItemDef>
          <ItemDef OID="IT.ADSL.AGEU" Name="AGEU" DataType="text" Length="5" SASFieldName="AGEU">
@@ -2667,6 +2687,40 @@
             <CodeListItem CodedValue="3" OrderNumber="3">
                <Decode>
                   <TranslatedText>&gt;80</TranslatedText>
+               </Decode>
+            </CodeListItem>
+         </CodeList>
+         <CodeList OID="CL.AGEGR2" Name="AGEGR2" DataType="text">
+            <CodeListItem CodedValue="18-64" OrderNumber="1">
+               <Decode>
+                  <TranslatedText>18-64 years</TranslatedText>
+               </Decode>
+            </CodeListItem>
+            <CodeListItem CodedValue="65-80" OrderNumber="2">
+               <Decode>
+                  <TranslatedText>65-80 years</TranslatedText>
+               </Decode>
+            </CodeListItem>
+            <CodeListItem CodedValue="&gt;80" OrderNumber="3">
+               <Decode>
+                  <TranslatedText>&gt;80 years</TranslatedText>
+               </Decode>
+            </CodeListItem>
+         </CodeList>
+         <CodeList OID="CL.AGEGR2N" Name="AGEGR2N" DataType="integer">
+            <CodeListItem CodedValue="1" OrderNumber="1">
+               <Decode>
+                  <TranslatedText>18-64 years</TranslatedText>
+               </Decode>
+            </CodeListItem>
+            <CodeListItem CodedValue="2" OrderNumber="2">
+               <Decode>
+                  <TranslatedText>65-80 years</TranslatedText>
+               </Decode>
+            </CodeListItem>
+            <CodeListItem CodedValue="3" OrderNumber="3">
+               <Decode>
+                  <TranslatedText>&gt;80 years</TranslatedText>
                </Decode>
             </CodeListItem>
          </CodeList>
@@ -4873,6 +4927,17 @@ ADT - TRTSDT, if ADT&lt;TRTSDT.</TranslatedText>
                     Type="Computation">
             <Description>
                <TranslatedText>AGEGR1 = 1 if AGE &lt;65. AGEGR1 = 2 if AGE 65-80. AGEGR1 = 3 if AGE &gt;80.</TranslatedText>
+            </Description>
+         </MethodDef>
+         <MethodDef OID="MT.ADSL.AGEGR2" Name="Algorithm to derive ADSL.AGEGR2" Type="Computation">
+            <Description>
+               <TranslatedText>Character variable derived from ADSL.AGEGR2N</TranslatedText>
+            </Description>
+         </MethodDef>
+         <MethodDef OID="MT.ADSL.AGEGR2N" Name="Algorithm to derive ADSL.AGEGR2N"
+                    Type="Computation">
+            <Description>
+               <TranslatedText>AGEGR2 = 1 if AGE 18-64. AGEGR2 = 2 if AGE 65-80. AGEGR2 = 3 if AGE &gt;80.</TranslatedText>
             </Description>
          </MethodDef>
          <MethodDef OID="MT.ADSL.AGEU" Name="Algorithm to derive ADSL.AGEU" Type="Computation">
