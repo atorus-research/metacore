@@ -10,7 +10,7 @@
 #' @importFrom readxl excel_sheets read_excel
 #' @importFrom tibble tibble as_tibble
 #' @importFrom readxl excel_sheets read_excel
-#' @importFrom cli ansi_collapse cli_abort cli_alert_info cli_alert_success cli_alert_warning cli_bullets cli_div cli_end cli_par cli_rule cli_text col_red
+#' @importFrom cli ansi_collapse cli_abort cli_inform cli_alert_success cli_warn cli_bullets cli_div cli_end cli_par cli_rule cli_text col_red
 
 NULL
 

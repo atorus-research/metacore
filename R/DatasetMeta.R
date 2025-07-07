@@ -13,11 +13,15 @@ DatasetMeta <- R6::R6Class("DatasetMeta",
      .name  = NA,
      .label = NA,
      .num_vars = NA,
+     .key_vars = NA,
 
      .greet = function(quiet) {
         cli_par()
         cli_alert_success("{private$.name} dataset successfully selected")
-        if (quiet) cli_alert_info(col_red("Dataset metadata specification subsetted with suppressed warnings"))
+        if (quiet) {
+           cli_inform(c(
+              "i" = col_red("Dataset metadata specification subsetted with suppressed warnings")))
+        }
         cli_end()
      }
   ),
@@ -36,6 +40,9 @@ DatasetMeta <- R6::R6Class("DatasetMeta",
         private$.name  = metacore$ds_spec$dataset[1]
         private$.label = metacore$ds_spec$label[1]
         private$.num_vars = metacore$ds_vars |> nrow()
+        private$.key_vars = metacore$ds_vars |>
+           filter(!is.na(key_seq)) |>
+           pull(variable)
 
         private$.greet(quiet)
      },
@@ -45,7 +52,8 @@ DatasetMeta <- R6::R6Class("DatasetMeta",
 
         cli_par()
         cli_rule(left = "Dataset specification object for {private$.name} ({private$.label})")
-        cli_text("The dataset contains {private$.num_vars} variables")
+        cli_text("The dataset contains {private$.num_vars} variable{?s}")
+        cli_text("Dataset key{?s}: {ansi_collapse(private$.key_vars, last = ', ')}")
         cli_end()
 
         cli_par()
