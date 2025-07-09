@@ -52,40 +52,36 @@ add_labs <- function(.data,...) {
 check_structure <- function(.data, col, func, any_na_acceptable, nm) {
 
    column <- as_string(col)
-
    vec <- .data %>% pull(!!col)
+   warning_string <- NULL
+   error_message <- NULL
 
    if(any(is.na(vec)) & !any_na_acceptable) {
-      error_message <- paste(column, "from the", nm, "table contains missing values. Actual values are needed.")
-      warning_string <- NULL
+      error_message <- str_glue("`{column}` from the `{nm}` table contains missing values. Actual values are needed.")
    } else if (all(is.na(vec))){
-      warning_string <- paste(column, "from the", nm,
-                    "table only contain missing values.")
-      error_message <- NULL
+      warning_string <- str_glue("`{column}` from the `{nm}` table only contains missing values.")
    } else {
 
       failures <-  vec %>%
          discard(~do.call(func, list(.))) %>%
          unique()
 
-      all_fails <- paste("   ", failures, collapse = "\n")
-      error_message <- NULL
+      all_fails <- paste(failures)
 
       if (length(failures) > 0 ) {
 
          if (is.primitive(func)) {
 
             assertion_func <- prim_name(func)
-            warning_string <- paste0(nm, "$", column, " fails ", assertion_func, " check \n")
+            warning_string <- str_glue("{nm}${column} fails {assertion_func} check")
 
          } else {
-            warning_string <- paste0("The following words in ", nm, "$", column, " are not allowed: \n", all_fails, "\n")
+            cli_warn(c(
+               "The following {qty(all_fails)} word{?s} in {nm}${column} {qty(all_fails)} {?is/are} not allowed:",
+               "i" = ansi_collapse(all_fails, last = ", ")
+            ), call. = FALSE)
          }
-
-      } else {
-         warning_string <- NULL
       }
-
    }
 
    list(warning = warning_string, error = error_message)

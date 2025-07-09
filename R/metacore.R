@@ -121,7 +121,7 @@ MetaCore_validate <-  function() {
       nrow(private$.derivations) == 0 &
       nrow(private$.codelist) == 0 &
       nrow(private$.supp) == 0 ){
-         warning("Other checks were not preformed, because all datasets are empty",
+         cli_warn("Other checks were not preformed, because all datasets are empty",
                  call. = FALSE)
       } else {
          check_columns(private$.ds_spec,
@@ -144,7 +144,7 @@ MetaCore_validate <-  function() {
       }
 
    } else {
-      warning("Other checks were not preformed, because column names were incorrect",
+      cli_warn("Other checks were not preformed, because column names were incorrect",
               call. = FALSE)
    }
 }
@@ -168,7 +168,7 @@ readonly <- function(name) {
       if (missing(value)) {
          private[[paste0(".", name)]]
       } else {
-         stop(paste0(name, " is read only"), call. = FALSE)
+         cli_abort("{name} is read only", call. = FALSE)
       }
    }
    attributes(inside) <- list(name = name)
@@ -182,7 +182,7 @@ MetaCore_filter <- function(value) {
 
    private$.ds_spec <- private$.ds_spec %>% filter(dataset == value)
    if(nrow(private$.ds_spec) == 0){
-      stop(paste0(value, " is not a dataset in the metacore object", call. = FALSE))
+      cli_abort("{value} is not a dataset in the metacore object", call. = FALSE)
    }
    private$.ds_vars <- private$.ds_vars %>% filter(dataset == value)
    private$.value_spec <- private$.value_spec %>% filter(dataset == value)
@@ -443,7 +443,7 @@ get_control_term <- function(metacode, variable, dataset = NULL){
    dataset_val <- ifelse(str_detect(as_label(enexpr(dataset)), "\""),
                          as_name(dataset), as_label(enexpr(dataset))) # to make the filter more explicit
    if(!var_str %in% metacode$value_spec$variable){
-      stop(paste0(var_str, " not found in the value_spec table. Please check the variable name"))
+      cli_abort("{var_str} not found in the value_spec table. Please check the variable name")
    }
    if(dataset_val == "NULL"){
       var_code_id <- metacode$value_spec %>%
@@ -454,7 +454,7 @@ get_control_term <- function(metacode, variable, dataset = NULL){
       subset_data <- metacode$value_spec %>%
          filter(dataset == dataset_val)
       if(nrow(subset_data) == 0){
-         stop(paste0(dataset_val, " not found in the value_spec table. Please check the dataset name"))
+         cli_abort("{dataset_val} not found in the value_spec table. Please check the dataset name")
       }
       var_code_id <- subset_data %>%
          filter(variable == var_str) %>%
@@ -462,13 +462,13 @@ get_control_term <- function(metacode, variable, dataset = NULL){
          unique()
    }
    if(length(var_code_id) > 1){
-      stop(paste0(var_str, " does not have a unique control term, consider spcificing a dataset"))
+      cli_abort("{var_str} does not have a unique control term, consider spcificing a dataset")
    }
    ct <- metacode$codelist %>%
       filter(code_id == var_code_id) %>%
       pull(codes)
    if(length(ct) == 0){
-      message(paste0(var_str, " has no control terminology"))
+      cli_inform("{var_str} has no control terminology")
    } else {
       return(ct[[1]])
    }
@@ -500,7 +500,7 @@ get_keys <- function(metacode, dataset){
    subset_data <- metacode$ds_vars %>%
       filter(dataset == dataset_val)
    if(nrow(subset_data) == 0){
-      stop(paste0(dataset_val, " not found in the ds_vars table. Please check the dataset name"))
+      cli_abort("{dataset_val} not found in the ds_vars table. Please check the dataset name")
    }
 
    keys <- subset_data %>%
@@ -554,9 +554,9 @@ load_metacore <- function(path = NULL) {
    if (is.null(path)) {
       rdss <- list.files(".", ".rds")
       if (length(rdss) == 0) {
-         stop("please supply path to metacore object ending with extension .rds", call. = FALSE)
+         cli_abort("please supply path to metacore object ending with extension .rds", call. = FALSE)
       } else {
-         stop("metacore object path required, did you mean:",
+         cli_abort("metacore object path required, did you mean:",
               paste("   ", rdss, sep = "\n   "), call. = FALSE)
       }
    }

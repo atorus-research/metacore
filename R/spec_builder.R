@@ -29,7 +29,7 @@ spec_to_metacore <- function(path, quiet = FALSE, where_sep_sheet = TRUE){
          out<- suppressWarnings(metacore(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist = code_list, quiet = quiet))
       }
    } else {
-      stop("This specification format is not currently supported. You will need to write your own reader",
+      cli_abort("This specification format is not currently supported. You will need to write your own reader",
            call. = FALSE)
    }
    out
@@ -48,14 +48,14 @@ spec_to_metacore <- function(path, quiet = FALSE, where_sep_sheet = TRUE){
 spec_type <- function(path){
    sheets <- excel_sheets(path)
    if(!any(sheets %>% str_detect("[D|d]omains?|[D|d]atasets?"))){
-      stop("File does not contain a Domain/Datasets tab, which is needed. Please either modify the spec document or write a reader (see documentation for more information)",
+      cli_abort("File does not contain a Domain/Datasets tab, which is needed. Please either modify the spec document or write a reader (see documentation for more information)",
            call. = FALSE)
    } else if(any(sheets %>% str_detect("ADSL|DM"))){
       type <- "by_ds"
    } else if(any(sheets %>% str_detect("[V|v]ariables?"))){
       type <- "by_type"
    } else {
-      stop("File in an unknown format. Please either modify the spec document or write a reader (see documentation for more information)",
+      cli_abort("File in an unknown format. Please either modify the spec document or write a reader (see documentation for more information)",
            call. = FALSE)
    }
    type
@@ -102,8 +102,10 @@ spec_type_to_ds_spec <- function(doc, cols = c("dataset" = "[N|n]ame|[D|d]ataset
    name_check <- names(cols) %in% c("dataset", "structure", "label") %>%
       all()
    if(!name_check | is.null(names(cols))){
-      stop("Supplied column vector must be named using the following names:
-              'dataset', 'structure', 'label'")
+      cli_abort(c(
+         "Supplied column vector must be named using the following names:",
+         "'dataset', 'structure', 'label'"
+      ))
    }
    if(!is.null(sheet)){
       sheet_ls <- str_subset(names(doc), sheet)
@@ -159,7 +161,7 @@ spec_type_to_ds_vars <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]oma
 
    # Testing for names of vectors
    if(any(!name_check, !name_check_extra, is.null(names(cols)))){
-      stop("Supplied column vector must be named using the following names:
+      cli_abort("Supplied column vector must be named using the following names:
               'variable', 'dataset', 'order', 'keep', 'core', 'key_seq', 'supp_flag'")
    }
    # Subsetting sheets
@@ -226,10 +228,12 @@ spec_type_to_var_spec <- function(doc, cols = c("variable" = "[N|n]ame|[V|v]aria
                                     "type", "dataset", "common", "format") %>%
       all()
    if(!name_check | is.null(names(cols))){
-      stop("Supplied column vector must be named using the following names:
-              'variable', 'length', 'label', 'type', 'dataset', 'common', 'format'
-              If common is not avaliable it can be excluded and will be automatically filled in.
-           Additionally, dataset is only used to clarify if information differs by domain")
+      cli_abort(paste(
+         "Supplied column vector must be named using the following names:",
+         "'variable', 'length', 'label', 'type', 'dataset', 'common', 'format'",
+         "If common is not avaliable it can be excluded and will be automatically filled in.",
+         "Additionally, dataset is only used to clarify if information differs by domain."
+      ))
    }
 
    # Check if sheet is specified
@@ -245,12 +249,12 @@ spec_type_to_var_spec <- function(doc, cols = c("variable" = "[N|n]ame|[V|v]aria
          summarise(n = n(), .groups = "drop") %>%
          filter(n > 1)
       if(nrow(dups) > 0){
-         dups %>%
-            pull(variable) %>%
-            paste(collapse = "\n") %>%
-            paste0("The following variables are repeated with different metadata for different datasets:\n",
-                   ., "\nPlease add 'dataset' = [Name of dataset column] to your named cols vector, to correct for this") %>%
-            stop(., call. = FALSE)
+         x <- dups %>% pull(variable)
+         cli_abort(c(
+            col_red("The following variables are repeated with different metadata for different datasets:"),
+            "i" = ansi_collapse(x),
+            "i" = "Please add 'dataset' = [Name of dataset column] to your named cols vector to correct this."
+         ), call. = FALSE)
       }
    } else {
       if(!"common" %in% names(cols)){
@@ -334,12 +338,12 @@ spec_type_to_value_spec <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]
       all()
 
    if(!name_check| is.null(names(cols))){
-      stop("Supplied column vector must be named using the following names:
-              'dataset', 'variable', 'origin', 'code_id', 'type', 'where', 'sig_dig', 'derivation_id',
-              'predecessor'
-              If derivation_id is not avaliable it can be excluded and dataset.variable will be used.
-
-              If the where information is on a seperate sheet, put the column with cross ref as where.")
+      cli_abort(c(
+         "Supplied column vector must be named using the following names:",
+         "i" = "'dataset', 'variable', 'origin', 'code_id', 'type', 'where', 'sig_dig', 'derivation_id','predecessor'",
+         "i" = paste("If derivation_id is not avaliable it can be excluded and dataset.variable will be used.",
+                     "If the where information is on a seperate sheet, put the column with cross ref as where.")
+         ), call = FALSE)
    }
 
    # Select a subset of sheets if specified
@@ -401,7 +405,7 @@ spec_type_to_value_spec <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]
          left_join(where_df, by = c("where" = "id")) %>%
          select(-where, where = where_new)
    } else if(where_sep_sheet) {
-      warning("Not able to add where infromation from seperate sheet cause a where column is needed to cross-reference the information",
+      cli_warn("Not able to add where infromation from seperate sheet cause a where column is needed to cross-reference the information",
               call. = FALSE)
    }
 
@@ -467,12 +471,12 @@ spec_type_to_codelist <- function(doc, codelist_cols = c("code_id" = "ID",
                                                 "version" = "[V|v]ersion"),
                                   sheets = NULL, simplify = FALSE){
    if(is.null(codelist_cols)){
-      stop("Codelist column names must be provided", call. = FALSE)
+      cli_abort("Codelist column names must be provided", call. = FALSE)
    } else {
       name_check <- names(codelist_cols) %in% c("code_id", "name", "code", "decode") %>%
          all()
       if(!name_check| is.null(names(codelist_cols))){
-         stop("Supplied column vector for codelist_cols must be named using the following names:
+         cli_abort("Supplied column vector for codelist_cols must be named using the following names:
               'code_id', 'name', 'code', 'decode'",
               call. = FALSE
          )
@@ -483,7 +487,7 @@ spec_type_to_codelist <- function(doc, codelist_cols = c("code_id" = "ID",
       name_check <- names(permitted_val_cols) %in% c("code_id", "name", "code") %>%
          all()
       if(!name_check){
-         stop("Supplied column vector for permitted_val_cols must be named using the following names:
+         cli_abort("Supplied column vector for permitted_val_cols must be named using the following names:
               'code_id', 'name', 'code'",
               call. = FALSE)
       }
@@ -492,10 +496,10 @@ spec_type_to_codelist <- function(doc, codelist_cols = c("code_id" = "ID",
       name_check <- names(dict_cols) %in% c("code_id", "name", "dictionary", "version") %>%
          all()
       if(!name_check){
-         stop("Supplied column vector for `dict_cols` must be named using the following names:
-              'code_id', 'name', 'dictionary', 'version',
-              If a dictionary sheet isn't avaliable set `dict_cols` to NULL",
-              call. = FALSE)
+         cli_abort(paste0(
+            "Supplied column vector for `dict_cols` must be named using the following names:",
+            "'code_id', 'name', 'dictionary', 'version'. If a dictionary sheet isn't avaliable",
+            "set `dict_cols` to NULL"), call. = FALSE)
       }
    }
 
@@ -574,14 +578,15 @@ spec_type_to_derivations <- function(doc, cols = c("derivation_id" = "ID",
    name_check <- names(cols) %in% c("derivation_id", "derivation") %>%
       all()
    if(!name_check| is.null(names(cols))){
-      stop("Supplied column vector must be named using the following names:
-              'derivation_id', 'derivation'")
+      cli_abort(c(
+         "Supplied column vector must be named using the following names:",
+         "'derivation_id', 'derivation'"))
    }
 
    name_check <- names(var_cols) %in% c('dataset', 'variable', 'origin', 'predecessor', 'comment') %>%
       all()
    if(!name_check| is.null(names(var_cols))){
-      stop("Supplied variable column vector must be named using the following names:
+      cli_abort("Supplied variable column vector must be named using the following names:
                'dataset', 'variable', 'origin', 'predecessor', 'comment'")
    }
    # Get the predecessor
@@ -683,7 +688,7 @@ create_tbl <- function(doc, cols){
          }) %>%
          paste0(collapse = "\n") %>%
          paste0("Unable to identify a sheet with all columns.\n", . ) %>%
-         stop(call. = FALSE)
+        (call. = FALSE)
 
    } else if(length(matches) == 1){
       # Check names and write a better warning message if names don't work
@@ -702,11 +707,12 @@ create_tbl <- function(doc, cols){
             cols[names(nm_test)] <- cols[names(nm_test)] %>%
                paste0("^", ., "$")
          } else {
-            str_c(names(nm_test),  " matches ",nm_test, " columns") %>%
-               str_c(collapse = "\n ") %>%
-               paste0("Unable to rename the following columns in ", names(matches[1]), ":\n ", .,
-                      "\nPlease check your regular expression ") %>%
-               stop(call. = FALSE)
+            x <- str_c(names(nm_test),  " matches ",nm_test, " columns")
+            cli_abort(c(
+               "Unable to rename the following columns in {names(matches[1])}:",
+               "i" = ansi_collapse(x),
+               "i" = "Please check your regular expression"
+            ), call. = FALSE)
          }
       }
 
@@ -714,14 +720,12 @@ create_tbl <- function(doc, cols){
       select_rename_w_dups(matches[[1]], cols)
 
    } else {
-      sheets_mats <- matches %>%
-         names()
-      paste("Column names are not specific enough to identify a single sheet. The following",
-            length(sheets_mats),
-            "match the criteria set:", paste(sheets_mats, collapse = ", ")) %>%
-         warning(., call. = FALSE)
-      matches %>%
-         map(~select_rename_w_dups(., cols))
+      sheets_mats <- matches %>% names()
+      cli_warn(c(paste(
+         "Column names are not specific enough to identify a single sheet."),
+         "The following {length(sheets_mats)} match the criteria set:"),
+         ansi_collapse(sheets_mats), call. = FALSE)
+      matches %>% map(~select_rename_w_dups(., cols))
    }
 }
 
@@ -741,7 +745,7 @@ yn_to_tf <- function(x){
    } else if(is.logical(x)){
       x
    } else {
-      warning("Keep column needs to be True or False, please correct before converting to a Metacore object",
+      cli_warn("Keep column needs to be True or False, please correct before converting to a Metacore object",
               call. = FALSE)
       x
    }

@@ -57,7 +57,7 @@ check_inconsistent_formats <- function(metacore){
 #' @importFrom dplyr across
 basic_check <- function(col_to_check, metacore){
    if(!is_metacore(metacore)){
-      stop("Expects a metacore object", call. = FALSE)
+      cli_abort("Expects a metacore object", call. = FALSE)
    }
 
    report_df <- metacore$var_spec %>%
@@ -73,10 +73,10 @@ basic_check <- function(col_to_check, metacore){
       select(variable = var1, everything())
 
    if(nrow(report_df) > 0){
-      message(str_glue("Mismatch {as_label(enexpr(col_to_check))}s detected"))
+      cli_warn(str_glue("Mismatch {as_label(enexpr(col_to_check))}s detected"))
       return(report_df)
    } else {
-      message(str_glue("No mismatch {as_label(enexpr(col_to_check))}s detected"))
+      cli_inform(str_glue("No mismatch {as_label(enexpr(col_to_check))}s detected"))
    }
 }
 
