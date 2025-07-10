@@ -1,3 +1,9 @@
+# Metacore 0.2.0
+- `select_dataset()` now creates a subsetted metacore object that is a subclass of `Metacore` called `DatasetMeta`.
+- Objects of `DatasetMeta` subclass will be expected as input to {metatools} functions going forward.
+- Print statement updated for both combined Metacore and subsetted DatasetMeta objects. This should be more informative and highlight the difference between the two object types (i.e., all datasets vs. single dataset). 
+- Errors and warning messages improved throughout. 
+
 # Metacore 0.1.3
 - Add `get_keys` function which returns the dataset keys for a given dataset [#102](https://github.com/atorus-research/metacore/issues/102) 
 - Fix issues with `select_dataset(simplify = TRUE)` [#97](https://github.com/atorus-research/metacore/issues/97) 
