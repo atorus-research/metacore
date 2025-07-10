@@ -17,7 +17,8 @@ metacore(
   codelist = tibble(code_id = character(), name = character(), type = character(), codes
     = list()),
   supp = tibble(dataset = character(), variable = character(), idvar = character(), qeval
-    = character())
+    = character()),
+  quiet = FALSE
 )
 }
 \arguments{
@@ -34,6 +35,9 @@ metacore(
 \item{codelist}{contains the code/decode information}
 
 \item{supp}{contains the idvar and qeval information for supplemental variables}
+
+\item{quiet}{Option to quietly load in, this will suppress warnings, but not
+errors. Expects either \code{TRUE} or \code{FALSE}. Default behaviour is \code{FALSE}.}
 }
 \description{
 R6 Class wrapper to create your own metacore object

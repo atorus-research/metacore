@@ -7,7 +7,7 @@
 #'
 #' @return DataDef Object
 #' @export
-#' @importFrom xml2 read_xml xml_find_all xml_attr xml_ns_strip
+#'
 define_to_metacore <- function(path, quiet = FALSE){
 
    xml <- read_xml(path)
@@ -27,8 +27,7 @@ define_to_metacore <- function(path, quiet = FALSE){
    if(!quiet){
       out <- metacore(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist = code_list)
    } else{
-      out<- suppressWarnings(metacore(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist = code_list))
-      message("Loading in metacore object with suppressed warnings")
+      out<- suppressWarnings(metacore(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist = code_list, quiet = quiet))
    }
    out
 }
@@ -42,7 +41,7 @@ define_to_metacore <- function(path, quiet = FALSE){
 #' @return data frame with the data set specifications
 #' @family xml builder
 #' @export
-#' @importFrom xml2 xml_attr xml_find_first xml_text
+#'
 xml_to_ds_spec <- function(doc) {
    # Read in the dataset level nodes
    xml_find_all(doc, "//MetaDataVersion/ItemGroupDef[contains(@OID, 'IG')]") %>%
@@ -104,7 +103,7 @@ xml_to_ds_vars <- function(doc) {
 #' @return data frame with variable, length, label columns
 #' @family xml builder
 #' @export
-#' @importFrom xml2 xml_attr xml_find_all xml_text
+#'
 xml_to_var_spec <- function(doc) {
 
    # Gets the name, id, and length from the variable node and the description from the child

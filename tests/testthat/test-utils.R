@@ -1,21 +1,20 @@
 test_df <- data.frame(
-   a = c("blah", NA),
-   b = c("SpecificWord", "Incorrect")
+   a = c("blah", NA, NA),
+   b = c("SpecificWord", "Incorrect", "Dummy")
 )
 
 test_that("check_structure function works", {
   # error when NA not permissible
 
   expect_equal(check_structure(test_df, "a", is.character, FALSE, "test_df")$error,
-               "a from the test_df table contains missing values. Actual values are needed.")
+               "`a` from the `test_df` table contains missing values. Actual values are needed.")
 
   expect_equal(check_structure(test_df, "a", is.logical, TRUE, "test_df")$warning,
-               "test_df$a fails is.logical check \n"
+               "test_df$a fails is.logical check"
                )
 
-  expect_null(check_structure(test_df, "b", check_words("SpecificWord", "Incorrect"), TRUE, "test_df")$warning)
-  expect_equal(check_structure(test_df, "b", check_words("SpecificWord"), TRUE, "test_df")$warning,
-               "The following words in test_df$b are not allowed: \n    Incorrect\n")
+  expect_null(check_structure(test_df, "b", check_words("SpecificWord", "Incorrect", "Dummy"), TRUE, "test_df")$warning)
+  expect_warning(check_structure(test_df, "b", check_words("SpecificWord"), TRUE, "test_df"))
 
 })
 
@@ -48,7 +47,6 @@ test_that("add labels adds NULL to missing labels", {
 
 test_that("metacore example returns file options", {
   expect_equal(sort(metacore_example()),
-               sort(c("ADaM_define.xml", "mock_spec.xlsx", "p21_mock.xlsx", "pilot_ADaM.rda",
-                      "pilot_SDTM.rda",
-                      "SDTM_define.xml", "SDTM_spec_CDISC_pilot.xlsx")))
+               sort(c("ADaM_define_CDISC_pilot3.xml", "mock_spec.xlsx", "p21_mock.xlsx", "pilot_ADaM.rda",
+                      "pilot_SDTM.rda", "SDTM_define.xml", "SDTM_spec_CDISC_pilot.xlsx")))
 })

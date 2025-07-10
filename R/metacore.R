@@ -11,12 +11,14 @@
 #'   have the same derivation
 #' @param code_list contains the code/decode information
 #' @param supp contains the idvar and qeval information for supplemental variables
+#' @param quiet Option to quietly load in, this will suppress warnings, but not
+#'   errors. Expects either `TRUE` or `FALSE`. Default behaviour is `FALSE`.
 #'
 #' @family Metacore
 #' @noRd
 #'
 #' @importFrom stringr str_to_lower
-MetaCore_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist, supp){
+MetaCore_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist, supp, quiet = FALSE){
 
    private$.ds_spec <- ds_spec %>%
       add_labs(dataset = "Dataset Name",
@@ -73,8 +75,14 @@ MetaCore_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivati
                idvar = "Identifying Variable",
                qeval = "Evaluator")
 
+   private$.ds_len <- ds_spec %>% nrow()
+
+   private$.ds_names <- ds_spec %>% pull(dataset)
+
+   private$.ds_labels <- ds_spec %>% pull(label)
+
    self$validate()
-   message("\n Metadata successfully imported")
+   if (inherits_only(self, c("Metacore", "R6"))) { private$.greet(quiet) }
 }
 
 
@@ -85,10 +93,16 @@ MetaCore_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivati
 #' @noRd
 #'
 MetaCore_print <- function(...){
-   ds_len <- private$.ds_spec %>% pull(.data$dataset) %>% length()
-   paste0("Metacore object contains metadata for ", ds_len, " datasets\n") %>%
-      cat()
+   cli_par()
+   cli_rule("Metacore object contains metadata for {private$.ds_len} datasets")
+   for (i in 1:private$.ds_len) {
+      cli_bullets(c(">" = "{private$.ds_names[i]} ({private$.ds_labels[i]})"))
+   }
+   cli_end()
+
+   cli_inform("To use the {.obj Metacore} object with {.pkg metatools} package, first subset a dataset using {.fn metacore::select_dataset}")
 }
+
 
 
 #' Metacore R6 object validation function
@@ -107,7 +121,7 @@ MetaCore_validate <-  function() {
       nrow(private$.derivations) == 0 &
       nrow(private$.codelist) == 0 &
       nrow(private$.supp) == 0 ){
-         warning("Other checks were not preformed, because all datasets are empty",
+         cli_warn("Other checks were not preformed, because all datasets are empty",
                  call. = FALSE)
       } else {
          check_columns(private$.ds_spec,
@@ -130,7 +144,7 @@ MetaCore_validate <-  function() {
       }
 
    } else {
-      warning("Other checks were not preformed, because column names were incorrect",
+      cli_warn("Other checks were not preformed, because column names were incorrect",
               call. = FALSE)
    }
 }
@@ -154,7 +168,7 @@ readonly <- function(name) {
       if (missing(value)) {
          private[[paste0(".", name)]]
       } else {
-         stop(paste0(name, " is read only"), call. = FALSE)
+         cli_abort("{name} is read only", call. = FALSE)
       }
    }
    attributes(inside) <- list(name = name)
@@ -168,7 +182,7 @@ MetaCore_filter <- function(value) {
 
    private$.ds_spec <- private$.ds_spec %>% filter(dataset == value)
    if(nrow(private$.ds_spec) == 0){
-      stop(paste0(value, " is not a dataset in the metacore object", call. = FALSE))
+      cli_abort("{value} is not a dataset in the metacore object", call. = FALSE)
    }
    private$.ds_vars <- private$.ds_vars %>% filter(dataset == value)
    private$.value_spec <- private$.value_spec %>% filter(dataset == value)
@@ -214,41 +228,85 @@ MetaCore_filter <- function(value) {
 #' @noRd
 #
 MetaCore <- R6::R6Class("Metacore",
-                       public = list(
-                          initialize = MetaCore_initialize,
-                          print = MetaCore_print,
-                          validate =  MetaCore_validate,
-                          metacore_filter = MetaCore_filter
-                       ),
-                       private = list(
-                          .ds_spec = tibble(dataset = character(), structure = character(), label = character()),
-                          .ds_vars = tibble(dataset = character(), variable = character(), keep = logical(),
-                                            key_seq = integer(), order = integer(), core = character(),
-                                            supp_flag = logical()),
-                          .var_spec = tibble(variable = character(), label = character(), length = integer(),
-                                             type = character(), common = character(), format = character()),
-                          .value_spec = tibble(dataset = character(),
-                                               variable = character(),
-                                               where  = character(),
-                                               type = character(),
-                                               sig_dig = integer(),
-                                               code_id = character(),
-                                               origin = character(),
-                                               derivation_id = integer()),
-                          .derivations = tibble(derivation_id = integer(), derivation = character()),
-                          # code_type == df | permitted_val | external_lib
-                          .codelist = tibble(code_id = character(), name = character(), type = character(), codes = list()),
-                          .supp = tibble(dataset = character(), variable = character(), idvar = character(), qeval = character())
-                       ),
-                       active = list(
-                          ds_spec = readonly('ds_spec'),
-                          ds_vars =  readonly('ds_vars'),
-                          var_spec = readonly('var_spec'),
-                          value_spec = readonly('value_spec'),
-                          derivations = readonly('derivations'),
-                          codelist = readonly('codelist'),
-                          supp = readonly('supp')
-                       )
+  public = list(
+     initialize = MetaCore_initialize,
+     print = MetaCore_print,
+     validate =  MetaCore_validate,
+     metacore_filter = MetaCore_filter
+  ),
+
+  private = list(
+     .ds_spec = tibble(
+        dataset = character(),
+        structure = character(),
+        label = character()
+     ),
+     .ds_vars = tibble(
+        dataset = character(),
+        variable = character(),
+        keep = logical(),
+        key_seq = integer(),
+        order = integer(),
+        core = character(),
+        supp_flag = logical()
+     ),
+     .var_spec = tibble(
+        variable = character(),
+        label = character(),
+        length = integer(),
+        type = character(),
+        common = character(),
+        format = character()
+     ),
+     .value_spec = tibble(
+        dataset = character(),
+        variable = character(),
+        where  = character(),
+        type = character(),
+        sig_dig = integer(),
+        code_id = character(),
+        origin = character(),
+        derivation_id = integer()
+     ),
+     .derivations = tibble(
+        derivation_id = integer(),
+        derivation = character()
+     ),
+     # code_type == df | permitted_val | external_lib
+     .codelist = tibble(
+        code_id = character(),
+        name = character(),
+        type = character(),
+        codes = list()
+     ),
+     .supp = tibble(
+        dataset = character(),
+        variable = character(),
+        idvar = character(),
+        qeval = character()
+     ),
+     .ds_len = NA,
+     .ds_names = list(),
+     .ds_labels = list(),
+
+     .greet = function(quiet = FALSE) {
+        cli_par()
+        cli_alert_success("Metadata successfully imported")
+        if (quiet) cli_inform(c("i" = col_red("Dataset metadata imported with suppressed warnings")))
+        cli_inform(c("i" = "To use the {.obj Metacore} object with {.pkg metatools} package, first subset a dataset using {.fn metacore::select_dataset}"))
+        cli_end()
+     }
+   ),
+
+  active = list(
+     ds_spec = readonly('ds_spec'),
+     ds_vars =  readonly('ds_vars'),
+     var_spec = readonly('var_spec'),
+     value_spec = readonly('value_spec'),
+     derivations = readonly('derivations'),
+     codelist = readonly('codelist'),
+     supp = readonly('supp')
+  )
 )
 
 
@@ -261,6 +319,8 @@ MetaCore <- R6::R6Class("Metacore",
 #' @param derivations contains derivation, it allows for different variables to have the same derivation
 #' @param codelist contains the code/decode information
 #' @param supp contains the idvar and qeval information for supplemental variables
+#' @param quiet Option to quietly load in, this will suppress warnings, but not
+#'   errors. Expects either `TRUE` or `FALSE`. Default behaviour is `FALSE`.
 #'
 #' @family Metacore
 #'
@@ -282,7 +342,8 @@ metacore <- function(ds_spec = tibble(dataset = character(), structure = charact
                                          derivation_id = integer()),
                      derivations = tibble(derivation_id = integer(), derivation = character()),
                      codelist = tibble(code_id = character(), name = character(), type = character(), codes = list()),
-                     supp = tibble(dataset = character(), variable = character(), idvar = character(), qeval = character())) {
+                     supp = tibble(dataset = character(), variable = character(), idvar = character(), qeval = character()),
+                     quiet = FALSE) {
    # Check if there are any empty datasets that need adding
    is_empty_df <- as.list(environment()) %>%
       keep(is.null)
@@ -312,7 +373,7 @@ metacore <- function(ds_spec = tibble(dataset = character(), structure = charact
       names(replaced) <- to_replace %>% map_chr(~unique(.$dataset))
       list2env(replaced, environment())
       }
-   MetaCore$new(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist, supp)
+   MetaCore$new(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist, supp, quiet)
 }
 
 
@@ -322,17 +383,18 @@ metacore <- function(ds_spec = tibble(dataset = character(), structure = charact
 #' @param .data the metacore object of dataframes
 #' @param dataset the specific dataset to subset by
 #' @param simplify return a single dataframe
+#' @param quiet Option to quietly load in, this will suppress warnings, but not
+#'   errors. Expects either `TRUE` or `FALSE`. Default behaviour is `FALSE`.
 #'
 #' @return a filtered subset of the metacore object
 #' @export
 #'
-select_dataset <- function(.data, dataset, simplify = FALSE) {
+select_dataset <- function(.data, dataset, simplify = FALSE, quiet = FALSE) {
 
    cl <- .data$clone()
    cl$metacore_filter(dataset)
 
    if (simplify) {
-
      test <-  suppressMessages(
          list(
             cl$ds_vars,
@@ -344,9 +406,9 @@ select_dataset <- function(.data, dataset, simplify = FALSE) {
          ) %>%
             reduce(left_join)
       )
-
    } else {
-      return(cl)
+      if (!quiet) DatasetMeta$new(metacore = cl)
+      else suppressWarnings(DatasetMeta$new(metacore = cl, quiet = quiet))
    }
 }
 
@@ -381,7 +443,7 @@ get_control_term <- function(metacode, variable, dataset = NULL){
    dataset_val <- ifelse(str_detect(as_label(enexpr(dataset)), "\""),
                          as_name(dataset), as_label(enexpr(dataset))) # to make the filter more explicit
    if(!var_str %in% metacode$value_spec$variable){
-      stop(paste0(var_str, " not found in the value_spec table. Please check the variable name"))
+      cli_abort("{var_str} not found in the value_spec table. Please check the variable name")
    }
    if(dataset_val == "NULL"){
       var_code_id <- metacode$value_spec %>%
@@ -392,7 +454,7 @@ get_control_term <- function(metacode, variable, dataset = NULL){
       subset_data <- metacode$value_spec %>%
          filter(dataset == dataset_val)
       if(nrow(subset_data) == 0){
-         stop(paste0(dataset_val, " not found in the value_spec table. Please check the dataset name"))
+         cli_abort("{dataset_val} not found in the value_spec table. Please check the dataset name")
       }
       var_code_id <- subset_data %>%
          filter(variable == var_str) %>%
@@ -400,13 +462,13 @@ get_control_term <- function(metacode, variable, dataset = NULL){
          unique()
    }
    if(length(var_code_id) > 1){
-      stop(paste0(var_str, " does not have a unique control term, consider spcificing a dataset"))
+      cli_abort("{var_str} does not have a unique control term, consider spcificing a dataset")
    }
    ct <- metacode$codelist %>%
       filter(code_id == var_code_id) %>%
       pull(codes)
    if(length(ct) == 0){
-      message(paste0(var_str, " has no control terminology"))
+      cli_inform("{var_str} has no control terminology")
    } else {
       return(ct[[1]])
    }
@@ -438,7 +500,7 @@ get_keys <- function(metacode, dataset){
    subset_data <- metacode$ds_vars %>%
       filter(dataset == dataset_val)
    if(nrow(subset_data) == 0){
-      stop(paste0(dataset_val, " not found in the ds_vars table. Please check the dataset name"))
+      cli_abort("{dataset_val} not found in the ds_vars table. Please check the dataset name")
    }
 
    keys <- subset_data %>%
@@ -492,9 +554,9 @@ load_metacore <- function(path = NULL) {
    if (is.null(path)) {
       rdss <- list.files(".", ".rds")
       if (length(rdss) == 0) {
-         stop("please supply path to metacore object ending with extension .rds", call. = FALSE)
+         cli_abort("please supply path to metacore object ending with extension .rds", call. = FALSE)
       } else {
-         stop("metacore object path required, did you mean:",
+         cli_abort("metacore object path required, did you mean:",
               paste("   ", rdss, sep = "\n   "), call. = FALSE)
       }
    }
