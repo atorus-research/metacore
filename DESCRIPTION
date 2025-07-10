@@ -3,17 +3,17 @@ Title: A Centralized Metadata Object Focus on Clinical Trial Data
     Programming Workflows
 Version: 0.2.0
 Authors@R: c(
-    person(given = "Liam", family = "Hobby", email = "liam.f.hobby@gsk.com", role = c("cre", "aut")),
-    person(given = "Christina", family = "Fillmore", email = "christina.e.fillmore@gsk.com", role = "aut",
+    person("Liam", "Hobby", , "liam.f.hobby@gsk.com", role = c("aut", "cre")),
+    person("Christina", "Fillmore", , "christina.e.fillmore@gsk.com", role = "aut",
            comment = c(ORCID = "0000-0003-0595-2302")),
-    person(given = "Bill", family = "Denney", role = "aut"),
-    person(given = "Maya", family = "Gans", email = "maya.gans@atorusresearch.com", role = "aut",
+    person("Bill", "Denney", role = "aut"),
+    person("Maya", "Gans", , "maya.gans@atorusresearch.com", role = "aut",
            comment = c(ORCID = "0000-0002-5452-6089")),
-    person(given = "Ashley", family = "Tarasiewicz", email = "ashley.tarasiewicz@atorusresearch.com", role = "aut"),
-    person(given = "Mike", family = "Stackhouse", email = "mike.stackhouse@atorusresearch.com", role = "aut",
+    person("Ashley", "Tarasiewicz", , "ashley.tarasiewicz@atorusresearch.com", role = "aut"),
+    person("Mike", "Stackhouse", , "mike.stackhouse@atorusresearch.com", role = "aut",
            comment = c(ORCID = "0000-0001-6030-723X")),
-    person(given = "Tamara", family = "Senior", email = "tamara.senior@roche.com", role = "aut"),
-    person(given = "GSK/Atorus JPT", role = c("cph", "fnd"))
+    person("Tamara", "Senior", , "tamara.senior@roche.com", role = "aut"),
+    person("GSK/Atorus JPT", role = c("cph", "fnd"))
   )
 Description: Create an immutable container holding metadata for the
     purpose of better enabling programming activities and functionality of
