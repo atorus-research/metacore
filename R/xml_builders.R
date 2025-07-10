@@ -358,7 +358,7 @@ xml_to_codelist <- function(doc) {
          )
       })
    if(nrow(external_libs) > 0){
-      external_libs <- external_libs |>
+      external_libs <- external_libs %>%
          nest(codes = c(.data$dictionary, .data$version))
    }
 

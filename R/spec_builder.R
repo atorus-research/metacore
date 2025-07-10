@@ -596,15 +596,15 @@ spec_type_to_derivations <- function(doc, cols = c("derivation_id" = "ID",
          reduce(bind_rows)
       # Get the comments
       if(any(str_detect(names(doc), "[C|c]omment"))){
-         comments <- doc[str_detect(names(doc), "[C|c]omment")][[1]] |>
+         comments <- doc[str_detect(names(doc), "[C|c]omment")][[1]] %>%
             select(matches("ID|Description"))
-         with_comments <- ls_derivations |>
-            filter(str_to_lower(.data$origin) == "assigned") |>
-            left_join(comments, by = c("comment" = "ID" )) |>
-            mutate(comment = .data$Description) |>
+         with_comments <- ls_derivations %>%
+            filter(str_to_lower(.data$origin) == "assigned") %>%
+            left_join(comments, by = c("comment" = "ID" )) %>%
+            mutate(comment = .data$Description) %>%
             select(-.data$Description)
-         ls_derivations <- ls_derivations |>
-            filter(str_to_lower(.data$origin) != "assigned") |>
+         ls_derivations <- ls_derivations %>%
+            filter(str_to_lower(.data$origin) != "assigned") %>%
             bind_rows(with_comments)
       }
    }
