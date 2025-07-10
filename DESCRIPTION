@@ -1,64 +1,49 @@
 Package: metacore
-Title: A Centralized Metadata Object Focus on Clinical Trial Data Programming Workflows
+Title: A Centralized Metadata Object Focus on Clinical Trial Data
+    Programming Workflows
 Version: 0.2.0
-Authors@R: 
-    c(person(given = "Liam",
-             family = "Hobby",
-             role = c("aut", "cre"),
-             email = "liam.f.hobby@gsk.com"),
-      person(given = "Christina",
-             family = "Fillmore",
-             role = "aut",
-             email = "christina.e.fillmore@gsk.com",
-             comment = c(ORCID = "0000-0003-0595-2302")),
-      person(given = "Bill",
-             family = "Denney",
-             role = "aut"),
-      person(given = "Maya",
-             family = "Gans",
-             role = "aut",
-             email = "maya.gans@atorusresearch.com",
-             comment = c(ORCID = "0000-0002-5452-6089")),
-      person(given = "Ashley",
-             family = "Tarasiewicz",
-             role = "aut",
-             email = "ashley.tarasiewicz@atorusresearch.com"),
-      person(given = "Mike",
-             family = "Stackhouse",
-             role = "aut",
-             email = "mike.stackhouse@atorusresearch.com",
-             comment = c(ORCID = "0000-0001-6030-723X")),
-      person(given = "Tamara",
-             family = "Senior",
-             role = "aut",
-             email = "tamara.senior@roche.com"),
-      person(given = "GSK/Atorus JPT",
-             role = c("cph", "fnd")))
-Description: Create an immutable container holding metadata for the purpose of better enabling programming activities and functionality of other packages within the clinical programming workflow.
+Authors@R: c(
+    person(given = "Liam", family = "Hobby", email = "liam.f.hobby@gsk.com", role = c("cre", "aut")),
+    person(given = "Christina", family = "Fillmore", email = "christina.e.fillmore@gsk.com", role = "aut",
+           comment = c(ORCID = "0000-0003-0595-2302")),
+    person(given = "Bill", family = "Denney", role = "aut"),
+    person(given = "Maya", family = "Gans", email = "maya.gans@atorusresearch.com", role = "aut",
+           comment = c(ORCID = "0000-0002-5452-6089")),
+    person(given = "Ashley", family = "Tarasiewicz", email = "ashley.tarasiewicz@atorusresearch.com", role = "aut"),
+    person(given = "Mike", family = "Stackhouse", email = "mike.stackhouse@atorusresearch.com", role = "aut",
+           comment = c(ORCID = "0000-0001-6030-723X")),
+    person(given = "Tamara", family = "Senior", email = "tamara.senior@roche.com", role = "aut"),
+    person(given = "GSK/Atorus JPT", role = c("cph", "fnd"))
+  )
+Description: Create an immutable container holding metadata for the
+    purpose of better enabling programming activities and functionality of
+    other packages within the clinical programming workflow.
 License: MIT + file LICENSE
+URL: https://atorus-research.github.io/metacore/,
+    https://github.com/atorus-research/metacore
+BugReports: https://github.com/atorus-research/metacore/issues
+Depends: 
+    R (>= 3.6)
+Imports: 
+    cli,
+    dplyr,
+    magrittr,
+    purrr,
+    R6,
+    readxl,
+    rlang,
+    stringr,
+    tibble,
+    tidyr,
+    tidyselect,
+    xml2
+Suggests: 
+    covr,
+    knitr,
+    rmarkdown,
+    testthat
+VignetteBuilder: 
+    knitr
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE, r6 = FALSE)
 RoxygenNote: 7.3.2
-Depends: 
-    R (>= 3.6)
-Suggests: 
-    testthat,
-    knitr,
-    rmarkdown,
-    covr
-Imports: 
-    R6,
-    tidyr,
-    cli,
-    dplyr,
-    stringr,
-    magrittr,
-    xml2,
-    purrr,
-    readxl,
-    rlang,
-    tibble,
-    tidyselect
-VignetteBuilder: knitr
-URL: https://atorus-research.github.io/metacore/, https://github.com/atorus-research/metacore
-BugReports: https://github.com/atorus-research/metacore/issues
