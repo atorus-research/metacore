@@ -14,6 +14,7 @@ status](https://github.com/atorus-research/metacore/workflows/R-CMD-check/badge.
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental-1)
 [![CRAN
 status](https://www.r-pkg.org/badges/version/metacore)](https://CRAN.R-project.org/package=metacore)
+[![R-CMD-check](https://github.com/atorus-research/metacore/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/atorus-research/metacore/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 Programming for clinical trial data analysis tends to be very
