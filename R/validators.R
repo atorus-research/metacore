@@ -371,7 +371,7 @@ is_DatasetMeta <- function(x){
 #' `is_DatasetMeta`.
 #'
 #' This function is not intended to be called directly by the user. It is
-#' used as a guard clause in many features of the {metatools} package that are
+#' used as a guard clause in many features of the `{metatools}` package that are
 #' intended only to be used with the subsetted Metacore object of class type
 #' `DatasetMeta`. If either of the wrapped functions return `FALSE `then
 #' execution is stopped and an appropriate error message is displayed.

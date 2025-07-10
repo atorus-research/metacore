@@ -18,7 +18,7 @@ This function that is a wrapper to the functions \code{is_metacore} and
 \code{is_DatasetMeta}.
 
 This function is not intended to be called directly by the user. It is
-used as a guard clause in many features of the {metatools} package that are
+used as a guard clause in many features of the \code{{metatools}} package that are
 intended only to be used with the subsetted Metacore object of class type
 \code{DatasetMeta}. If either of the wrapped functions return \code{FALSE }then
 execution is stopped and an appropriate error message is displayed.

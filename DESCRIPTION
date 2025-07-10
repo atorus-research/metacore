@@ -23,7 +23,7 @@ URL: https://atorus-research.github.io/metacore/,
     https://github.com/atorus-research/metacore
 BugReports: https://github.com/atorus-research/metacore/issues
 Depends: 
-    R (>= 3.6)
+    R (>= 4.1.0)
 Imports: 
     cli,
     dplyr,
