@@ -110,9 +110,10 @@ that format, it is still worth trying the default readers, as the error
 messages can be helpful.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/spec_to_metacore.html">spec_to_metacore</a></span><span class="op">(</span><span class="fu"><a href="../reference/metacore_example.html">metacore_example</a></span><span class="op">(</span><span class="st">"mock_spec.xlsx"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Error: Unable to rename the following columns in Domains:</span></span>
-<span><span class="co">#&gt;  label matches 2 columns</span></span>
-<span><span class="co">#&gt; Please check your regular expression</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `create_tbl()`:</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Unable to rename the following columns in Domains:</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> label matches 2 columns</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Please check your regular expression</span></span></code></pre></div>
 <p>As we can see, the mock spec we are using here doesn’t match the
 format. Therefore we will have to build a bespoke reader. Before we
 start, it is important to understand the structure of the metacore
@@ -239,9 +240,10 @@ needed, the other inputs have defaults. So we can try with just the
 default and see what we get.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/spec_type_to_ds_spec.html">spec_type_to_ds_spec</a></span><span class="op">(</span><span class="va">doc</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Error: Unable to rename the following columns in Domains:</span></span>
-<span><span class="co">#&gt;  label matches 2 columns</span></span>
-<span><span class="co">#&gt; Please check your regular expression</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `create_tbl()`:</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Unable to rename the following columns in Domains:</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> label matches 2 columns</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Please check your regular expression</span></span></code></pre></div>
 <p>The error tells us there is an issue with the label column in the
 Domains table. Meaning, we need to change the default vector for the
 cols input because the default regular expression isn’t specific enough.
@@ -297,10 +299,10 @@ specifications cause all the information is in the variable tab; so we
 can try with just the defaults again.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/spec_type_to_ds_vars.html">spec_type_to_ds_vars</a></span><span class="op">(</span><span class="va">doc</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Error: Unable to rename the following columns in Variables:</span></span>
-<span><span class="co">#&gt;  variable matches 2 columns</span></span>
-<span><span class="co">#&gt;  order matches 2 columns</span></span>
-<span><span class="co">#&gt; Please check your regular expression</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `create_tbl()`:</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Unable to rename the following columns in Variables:</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> variable matches 2 columns and order matches 2 columns</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Please check your regular expression</span></span></code></pre></div>
 <p>This error means it is trying to match the sheet entitled Variable,
 the variable column matches to two different columns. This is the same
 error we had before. We just need to have a quick look at the columns
@@ -494,294 +496,105 @@ object</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/metacore.html">metacore</a></span><span class="op">(</span><span class="va">ds_spec</span>, <span class="va">ds_vars</span>, <span class="va">var_spec</span>, <span class="va">value_spec</span>,</span>
 <span>         <span class="va">derivation</span>, <span class="va">codelist</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: core from the ds_vars table only contain missing values.</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; supp_flag from the ds_vars table only contain missing values.</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; sig_dig from the value_spec table only contain missing values.</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; dataset from the supp table only contain missing values.</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; variable from the supp table only contain missing values.</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; idvar from the supp table only contain missing values.</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; qeval from the supp table only contain missing values.</span></span>
+<span><span class="co">#&gt; Warning: `core` from the `ds_vars` table only contains missing values.</span></span>
+<span><span class="co">#&gt; Warning: `supp_flag` from the `ds_vars` table only contains missing</span></span>
+<span><span class="co">#&gt; values.</span></span>
+<span><span class="co">#&gt; Warning: `sig_dig` from the `value_spec` table only contains missing</span></span>
+<span><span class="co">#&gt; values.</span></span>
+<span><span class="co">#&gt; Warning: `dataset` from the `supp` table only contains missing values.</span></span>
+<span><span class="co">#&gt; Warning: `variable` from the `supp` table only contains missing values.</span></span>
+<span><span class="co">#&gt; Warning: `idvar` from the `supp` table only contains missing values.</span></span>
+<span><span class="co">#&gt; Warning: `qeval` from the `supp` table only contains missing values.</span></span>
 <span><span class="co">#&gt; Warning: The following variables have derivation ids not found in the derivations table:</span></span>
-<span><span class="co">#&gt;  ASTDT</span></span>
-<span><span class="co">#&gt;  ASTTM</span></span>
-<span><span class="co">#&gt;  ASTDTM</span></span>
-<span><span class="co">#&gt;  AENDT</span></span>
-<span><span class="co">#&gt;  AENTM</span></span>
-<span><span class="co">#&gt;  AENDTM</span></span>
-<span><span class="co">#&gt;  AFTRTSTC</span></span>
-<span><span class="co">#&gt;  ALTRTSTC</span></span>
-<span><span class="co">#&gt;  APFTRSTC</span></span>
-<span><span class="co">#&gt;  ASTDT</span></span>
-<span><span class="co">#&gt;  AFTRTST</span></span>
-<span><span class="co">#&gt;  AFTRTSTC</span></span>
-<span><span class="co">#&gt;  ALTRTST</span></span>
-<span><span class="co">#&gt;  ALTRTSTC</span></span>
-<span><span class="co">#&gt;  ASTDT</span></span>
-<span><span class="co">#&gt;  ASTTM</span></span>
-<span><span class="co">#&gt;  ASTDTM</span></span>
-<span><span class="co">#&gt;  AENDT</span></span>
-<span><span class="co">#&gt;  AENTM</span></span>
-<span><span class="co">#&gt;  AENDTM</span></span>
-<span><span class="co">#&gt;  CMBASE</span></span>
-<span><span class="co">#&gt;  CMBASECD</span></span>
-<span><span class="co">#&gt;  DOSCUMA</span></span>
-<span><span class="co">#&gt;  AVISIT</span></span>
-<span><span class="co">#&gt;  ATPT</span></span>
-<span><span class="co">#&gt;  ADT</span></span>
-<span><span class="co">#&gt;  ATM</span></span>
-<span><span class="co">#&gt;  ADTM</span></span>
-<span><span class="co">#&gt;  APERADY</span></span>
-<span><span class="co">#&gt;  APERSTDY</span></span>
-<span><span class="co">#&gt;  APERENDY</span></span>
-<span><span class="co">#&gt;  ADT</span></span>
-<span><span class="co">#&gt;  ATM</span></span>
-<span><span class="co">#&gt;  ADTM</span></span>
-<span><span class="co">#&gt;  ADT</span></span>
-<span><span class="co">#&gt;  ATM</span></span>
-<span><span class="co">#&gt;  ADTM</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> ASTDT, ASTTM, ASTDTM, AENDT, AENTM, AENDTM, AFTRTSTC, ALTRTSTC, APFTRSTC,</span></span>
+<span><span class="co">#&gt;   ASTDT, AFTRTST, AFTRTSTC, ALTRTST, ALTRTSTC, ASTDT, ASTTM, ASTDTM, AENDT,</span></span>
+<span><span class="co">#&gt;   AENTM, AENDTM, CMBASE, CMBASECD, DOSCUMA, AVISIT, ATPT, ADT, ATM, ADTM,</span></span>
+<span><span class="co">#&gt;   APERADY, APERSTDY, APERENDY, ADT, ATM, ADTM, ADT, ATM, ADTM</span></span>
 <span><span class="co">#&gt; Warning: The following derivations are never used:</span></span>
-<span><span class="co">#&gt;  pred.AE.STUDYID: AE.STUDYID</span></span>
-<span><span class="co">#&gt;  pred.AE.USUBJID: AE.USUBJID</span></span>
-<span><span class="co">#&gt;  pred.AE.SUBJID: AE.SUBJID</span></span>
-<span><span class="co">#&gt;  pred.ADSL.SITEID: ADSL.SITEID</span></span>
-<span><span class="co">#&gt;  pred.ADSL.AGE: ADSL.AGE</span></span>
-<span><span class="co">#&gt;  pred.ADSL.SEX: ADSL.SEX</span></span>
-<span><span class="co">#&gt;  pred.ADSL.RACE: ADSL.RACE</span></span>
-<span><span class="co">#&gt;  pred.ADSL.ACOUNTRY: ADSL.ACOUNTRY</span></span>
-<span><span class="co">#&gt;  pred.ADSL.FASFL: ADSL.FASFL</span></span>
-<span><span class="co">#&gt;  pred.ADSL.ITTFL: ADSL.ITTFL</span></span>
-<span><span class="co">#&gt;  pred.ADSL.SAFFL: ADSL.SAFFL</span></span>
-<span><span class="co">#&gt;  pred.ADSL.PPROTFL: ADSL.PPROTFL</span></span>
-<span><span class="co">#&gt;  pred.ADSL.TRTxxPN that corresponds to the treatment selected in TRTP: ADSL.TRTxxPN that corresponds to the treatment selected in TRTP</span></span>
-<span><span class="co">#&gt;  pred.ADSL.TRTxxAN that corresponds to the treatment selected in TRTA: ADSL.TRTxxAN that corresponds to the treatment selected in TRTA</span></span>
-<span><span class="co">#&gt;  pred.ADSL.TRT01A: ADSL.TRT01A</span></span>
-<span><span class="co">#&gt;  pred.ADSL.TRT01AN: ADSL.TRT01AN</span></span>
-<span><span class="co">#&gt;  pred.ADSL.TRT01P: ADSL.TRT01P</span></span>
-<span><span class="co">#&gt;  pred.ADSL.TRT01PN: ADSL.TRT01PN</span></span>
-<span><span class="co">#&gt;  pred.ADSL.TRTSEQP: ADSL.TRTSEQP</span></span>
-<span><span class="co">#&gt;  pred.ADSL.TRTSEQPN: ADSL.TRTSEQPN</span></span>
-<span><span class="co">#&gt;  pred.ADSL.TRTSEQA: ADSL.TRTSEQA</span></span>
-<span><span class="co">#&gt;  pred.ADSL.TRTSEQAN: ADSL.TRTSEQAN</span></span>
-<span><span class="co">#&gt;  pred.AE.AESTDY: AE.AESTDY</span></span>
-<span><span class="co">#&gt;  pred.AE.AESTDTC: AE.AESTDTC</span></span>
-<span><span class="co">#&gt;  pred.AE.AEENDTC: AE.AEENDTC</span></span>
-<span><span class="co">#&gt;  pred.AE.AEENDY: AE.AEENDY</span></span>
-<span><span class="co">#&gt;  pred.AE.AESEQ: AE.AESEQ</span></span>
-<span><span class="co">#&gt;  pred.AE.AETERM: AE.AETERM</span></span>
-<span><span class="co">#&gt;  pred.AE.AEMODIFY: AE.AEMODIFY</span></span>
-<span><span class="co">#&gt;  pred.AE.AEDECOD: AE.AEDECOD</span></span>
-<span><span class="co">#&gt;  pred.AE.AEBODSYS: AE.AEBODSYS</span></span>
-<span><span class="co">#&gt;  pred.AE.AEBDSYCD: AE.AEBDSYCD</span></span>
-<span><span class="co">#&gt;  pred.AE.AELLT: AE.AELLT</span></span>
-<span><span class="co">#&gt;  pred.AE.AELLTCD: AE.AELLTCD</span></span>
-<span><span class="co">#&gt;  pred.AE.AEPTCD: AE.AEPTCD</span></span>
-<span><span class="co">#&gt;  pred.AE.AEHLT: AE.AEHLT</span></span>
-<span><span class="co">#&gt;  pred.AE.AEHLTCD: AE.AEHLTCD</span></span>
-<span><span class="co">#&gt;  pred.AE.AEHLGT: AE.AEHLGT</span></span>
-<span><span class="co">#&gt;  pred.AE.AEHLGTCD: AE.AEHLGTCD</span></span>
-<span><span class="co">#&gt;  pred.AE.AESOC: AE.AESOC</span></span>
-<span><span class="co">#&gt;  pred.AE.AESOCCD: AE.AESOCCD</span></span>
-<span><span class="co">#&gt;  pred.AE.AEDUR: AE.AEDUR</span></span>
-<span><span class="co">#&gt;  pred.AE.AESEV: AE.AESEV</span></span>
-<span><span class="co">#&gt;  pred.AE.AESEV or as per RAP: AE.AESEV or as per RAP</span></span>
-<span><span class="co">#&gt;  pred.AE.AEACN: AE.AEACN</span></span>
-<span><span class="co">#&gt;  pred.SUPPAE.QVAL where SUPPAE.QNAM="ACT1": SUPPAE.QVAL where SUPPAE.QNAM="ACT1"</span></span>
-<span><span class="co">#&gt;  pred.SUPPAE.QVAL where QNAM="AETRTEM": SUPPAE.QVAL where QNAM="AETRTEM"</span></span>
-<span><span class="co">#&gt;  pred.AE.AEREFID: AE.AEREFID</span></span>
-<span><span class="co">#&gt;  pred.AE.AEACNOTH: AE.AEACNOTH</span></span>
-<span><span class="co">#&gt;  pred.AE.AESER: AE.AESER</span></span>
-<span><span class="co">#&gt;  pred.AE.AESCAN: AE.AESCAN</span></span>
-<span><span class="co">#&gt;  pred.AE.AESCONG: AE.AESCONG</span></span>
-<span><span class="co">#&gt;  pred.AE.AESDISAB: AE.AESDISAB</span></span>
-<span><span class="co">#&gt;  pred.AE.AESDTH: AE.AESDTH</span></span>
-<span><span class="co">#&gt;  pred.AE.AESHOSP: AE.AESHOSP</span></span>
-<span><span class="co">#&gt;  pred.AE.AESLIFE: AE.AESLIFE</span></span>
-<span><span class="co">#&gt;  pred.AE.AESOD: AE.AESOD</span></span>
-<span><span class="co">#&gt;  pred.AE.AESMIE: AE.AESMIE</span></span>
-<span><span class="co">#&gt;  pred.SUPPAE.QVAL where QNAM="AESPROT": SUPPAE.QVAL where QNAM="AESPROT"</span></span>
-<span><span class="co">#&gt;  pred.AE.AEOUT: AE.AEOUT</span></span>
-<span><span class="co">#&gt;  pred.AE.AEREL: AE.AEREL</span></span>
-<span><span class="co">#&gt;  pred.AE.AETOXGR: AE.AETOXGR</span></span>
-<span><span class="co">#&gt;  pred.Numeric version of AETOXGR: Numeric version of AETOXGR</span></span>
-<span><span class="co">#&gt;  pred.SUPPAE.QVAL where SUPPAE.QNAM="GRADED": SUPPAE.QVAL where SUPPAE.QNAM="GRADED"</span></span>
-<span><span class="co">#&gt;  pred.SUPPAE.QVAL where SUPPAE.QNAM="AEDLT": SUPPAE.QVAL where SUPPAE.QNAM="AEDLT"</span></span>
-<span><span class="co">#&gt;  pred.SUPPAE.QVAL where SUPPAE.QNAM="AERDG1": SUPPAE.QVAL where SUPPAE.QNAM="AERDG1"</span></span>
-<span><span class="co">#&gt;  pred.xx.STUDYID: xx.STUDYID</span></span>
-<span><span class="co">#&gt;  pred.xx.USUBJID: xx.USUBJID</span></span>
-<span><span class="co">#&gt;  pred.ADSL.SUBJID: ADSL.SUBJID</span></span>
-<span><span class="co">#&gt;  pred.ADSL.AGEU: ADSL.AGEU</span></span>
-<span><span class="co">#&gt;  pred.ADSL.SAFFL if needed: ADSL.SAFFL if needed</span></span>
-<span><span class="co">#&gt;  pred.ADSL.FASFL if needed: ADSL.FASFL if needed</span></span>
-<span><span class="co">#&gt;  pred.ADSL.ITTFL if needed: ADSL.ITTFL if needed</span></span>
-<span><span class="co">#&gt;  pred.ADSL.ITTEFL if required: ADSL.ITTEFL if required</span></span>
-<span><span class="co">#&gt;  pred.ADSL.PPROTFL if needed: ADSL.PPROTFL if needed</span></span>
-<span><span class="co">#&gt;  pred.ADSL.TRTSDT: ADSL.TRTSDT</span></span>
-<span><span class="co">#&gt;  pred.ADSL.TRTEDT: ADSL.TRTEDT</span></span>
-<span><span class="co">#&gt;  pred.ADSL.TR01SDT: ADSL.TR01SDT</span></span>
-<span><span class="co">#&gt;  pred.ADSL.TR01EDT: ADSL.TR01EDT</span></span>
-<span><span class="co">#&gt;  pred.CE.CESEQ: CE.CESEQ</span></span>
-<span><span class="co">#&gt;  pred.CE.CEREFID: CE.CEREFID</span></span>
-<span><span class="co">#&gt;  pred.CE.CETERM: CE.CETERM</span></span>
-<span><span class="co">#&gt;  pred.Study-specific definition: Study-specific definition</span></span>
-<span><span class="co">#&gt;  pred.CE.CNDPREV: CE.CNDPREV</span></span>
-<span><span class="co">#&gt;  pred.CE.CESTDTC: CE.CESTDTC</span></span>
-<span><span class="co">#&gt;  pred.ADSL.DTHFL: ADSL.DTHFL</span></span>
-<span><span class="co">#&gt;  pred.ADSL.DTHFN: ADSL.DTHFN</span></span>
-<span><span class="co">#&gt;  pred.ADSL.DTHDT: ADSL.DTHDT</span></span>
-<span><span class="co">#&gt;  pred.Cause of Death.: Cause of Death.</span></span>
-<span><span class="co">#&gt;  pred.CM.STUDYID: CM.STUDYID</span></span>
-<span><span class="co">#&gt;  pred.CM.USUBJID: CM.USUBJID</span></span>
-<span><span class="co">#&gt;  pred.CM.SUBJID: CM.SUBJID</span></span>
-<span><span class="co">#&gt;  pred.CM.CMSTDTC: CM.CMSTDTC</span></span>
-<span><span class="co">#&gt;  pred.CM.CMSTRF: CM.CMSTRF</span></span>
-<span><span class="co">#&gt;  pred.CM.CMENDTC: CM.CMENDTC</span></span>
-<span><span class="co">#&gt;  pred.CM.CMENRF: CM.CMENRF</span></span>
-<span><span class="co">#&gt;  pred.CM.CMSEQ: CM.CMSEQ</span></span>
-<span><span class="co">#&gt;  pred.CM.CMREFID: CM.CMREFID</span></span>
-<span><span class="co">#&gt;  pred.CM.CMTRT: CM.CMTRT</span></span>
-<span><span class="co">#&gt;  pred.CM.CMCAT: CM.CMCAT</span></span>
-<span><span class="co">#&gt;  pred.CM.CMSCAT: CM.CMSCAT</span></span>
-<span><span class="co">#&gt;  pred.CM.CMINDC: CM.CMINDC</span></span>
-<span><span class="co">#&gt;  pred.CM.CMDOSE: CM.CMDOSE</span></span>
-<span><span class="co">#&gt;  pred.CM.CMDOSTXT: CM.CMDOSTXT</span></span>
-<span><span class="co">#&gt;  pred.CM.CMDOSU: CM.CMDOSU</span></span>
-<span><span class="co">#&gt;  pred.CM.CMDOSFRQ: CM.CMDOSFRQ</span></span>
-<span><span class="co">#&gt;  pred.CM.CMROUTE: CM.CMROUTE</span></span>
-<span><span class="co">#&gt;  pred.CM.CMPRESP: CM.CMPRESP</span></span>
-<span><span class="co">#&gt;  pred.CM.CMCLAS: CM.CMCLAS</span></span>
-<span><span class="co">#&gt;  pred.CM.CMCLASCD: CM.CMCLASCD</span></span>
-<span><span class="co">#&gt;  pred.GSKDRUG.CMATC1 where GSKDRUG.CMDRGCOL = CM.DRGCOLCD and GSKDRUG.CMNC = 'C': GSKDRUG.CMATC1 where GSKDRUG.CMDRGCOL = CM.DRGCOLCD and GSKDRUG.CMNC = 'C'</span></span>
-<span><span class="co">#&gt;  pred.GSKDRUG.CMATC2 where GSKDRUG.CMDRGCOL = CM.DRGCOLCD and GSKDRUG.CMNC = 'C': GSKDRUG.CMATC2 where GSKDRUG.CMDRGCOL = CM.DRGCOLCD and GSKDRUG.CMNC = 'C'</span></span>
-<span><span class="co">#&gt;  pred.GSKDRUG.CMATC3 where GSKDRUG.CMDRGCOL = CM.DRGCOLCD and GSKDRUG.CMNC = 'C': GSKDRUG.CMATC3 where GSKDRUG.CMDRGCOL = CM.DRGCOLCD and GSKDRUG.CMNC = 'C'</span></span>
-<span><span class="co">#&gt;  pred.GSKDRUG.CMATC4 where GSKDRUG.CMDRGCOL = CM.DRGCOLCD and GSKDRUG.CMNC = 'C': GSKDRUG.CMATC4 where GSKDRUG.CMDRGCOL = CM.DRGCOLCD and GSKDRUG.CMNC = 'C'</span></span>
-<span><span class="co">#&gt;  pred.CM.CMDUR: CM.CMDUR</span></span>
-<span><span class="co">#&gt;  pred.CM.CMOCCUR: CM.CMOCCUR</span></span>
-<span><span class="co">#&gt;  pred.CM.CMDOSFRM: CM.CMDOSFRM</span></span>
-<span><span class="co">#&gt;  pred.DA.STUDYID: DA.STUDYID</span></span>
-<span><span class="co">#&gt;  pred.DA.USUBJID: DA.USUBJID</span></span>
-<span><span class="co">#&gt;  pred.DA.SUBJID: DA.SUBJID</span></span>
-<span><span class="co">#&gt;  pred.DA.VISITNUM: DA.VISITNUM</span></span>
-<span><span class="co">#&gt;  pred.DA.VISIT: DA.VISIT</span></span>
-<span><span class="co">#&gt;  pred.DA.DACAT: DA.DACAT</span></span>
-<span><span class="co">#&gt;  pred.DA.DASCAT: DA.DASCAT</span></span>
-<span><span class="co">#&gt;  pred.DA.DASEQ: DA.DASEQ</span></span>
-<span><span class="co">#&gt;  pred.DA.DADTC: DA.DADTC</span></span>
-<span><span class="co">#&gt;  pred.DA.DADY: DA.DADY</span></span>
-<span><span class="co">#&gt;  pred.DA.DATEST and/or derived. Example contains "Compliance %": DA.DATEST and/or derived. Example contains "Compliance %"</span></span>
-<span><span class="co">#&gt;  pred.DA.DATESTCD and/or derived: DA.DATESTCD and/or derived</span></span>
-<span><span class="co">#&gt;  pred.ADSL.STUDYID: ADSL.STUDYID</span></span>
-<span><span class="co">#&gt;  pred.ADSL.USUBJID: ADSL.USUBJID</span></span>
-<span><span class="co">#&gt;  pred.FAAE.SUBJID: FAAE.SUBJID</span></span>
-<span><span class="co">#&gt;  pred.FAAE.FATPTREF: FAAE.FATPTREF</span></span>
-<span><span class="co">#&gt;  pred.FAAE.FATPTNUM: FAAE.FATPTNUM</span></span>
-<span><span class="co">#&gt;  pred.FAAE.FATPT: FAAE.FATPT</span></span>
-<span><span class="co">#&gt;  pred.DD.STUDYID: DD.STUDYID</span></span>
-<span><span class="co">#&gt;  pred.DD.USUBJID: DD.USUBJID</span></span>
-<span><span class="co">#&gt;  pred.ADSL.ACTARM: ADSL.ACTARM</span></span>
-<span><span class="co">#&gt;  pred.ADSL.ENRLFL: ADSL.ENRLFL</span></span>
-<span><span class="co">#&gt;  pred.ADSL.AP01SDT: ADSL.AP01SDT</span></span>
-<span><span class="co">#&gt;  pred.ADSL.AP01SDTM: ADSL.AP01SDTM</span></span>
-<span><span class="co">#&gt;  pred.ADSL.AP01EDT: ADSL.AP01EDT</span></span>
-<span><span class="co">#&gt;  pred.ADSL.AP01EDTM: ADSL.AP01EDTM</span></span>
-<span><span class="co">#&gt;  pred.DD.DDTPTREF: DD.DDTPTREF</span></span>
-<span><span class="co">#&gt;  pred.DD.DDTPTNUM: DD.DDTPTNUM</span></span>
-<span><span class="co">#&gt;  pred.DD.DDTPT: DD.DDTPT</span></span>
-<span><span class="co">#&gt;  pred.DS.STUDYID: DS.STUDYID</span></span>
-<span><span class="co">#&gt;  pred.DS.USUBJID: DS.USUBJID</span></span>
-<span><span class="co">#&gt;  pred.DS.SUBJID: DS.SUBJID</span></span>
-<span><span class="co">#&gt;  pred.DS.DSSTDTC: DS.DSSTDTC</span></span>
-<span><span class="co">#&gt;  pred.DS.DSSEQ: DS.DSSEQ</span></span>
-<span><span class="co">#&gt;  pred.DM.STUDYID: DM.STUDYID</span></span>
-<span><span class="co">#&gt;  pred.DM.USUBJID: DM.USUBJID</span></span>
-<span><span class="co">#&gt;  pred.DQ.SUBJID: DQ.SUBJID</span></span>
-<span><span class="co">#&gt;  pred.SUPPDM.QVAL when QNAM=RACEOR or QNAM=RACEORx  where x=1,2, ..., n.: SUPPDM.QVAL when QNAM=RACEOR or QNAM=RACEORx  where x=1,2, ..., n.</span></span>
-<span><span class="co">#&gt;  pred.ADSL.ARACE: ADSL.ARACE</span></span>
-<span><span class="co">#&gt;  pred.ADSL.ARACEN: ADSL.ARACEN</span></span>
-<span><span class="co">#&gt;  pred.ADSL.INVID: ADSL.INVID</span></span>
-<span><span class="co">#&gt;  pred.ADSL.INVNAM: ADSL.INVNAM</span></span>
-<span><span class="co">#&gt;  pred.ADSL.COUNTRY: ADSL.COUNTRY</span></span>
-<span><span class="co">#&gt;  pred.ADSL.AGEGR1: ADSL.AGEGR1</span></span>
-<span><span class="co">#&gt;  pred.ADSL.AGEGR1N: ADSL.AGEGR1N</span></span>
-<span><span class="co">#&gt;  pred.ADSL.RACEN: ADSL.RACEN</span></span>
-<span><span class="co">#&gt;  pred.ADSL.ETHNIC: ADSL.ETHNIC</span></span>
-<span><span class="co">#&gt;  pred.ADSL.ETHNICN: ADSL.ETHNICN</span></span>
-<span><span class="co">#&gt;  pred.ADSL.TOTFL: ADSL.TOTFL</span></span>
-<span><span class="co">#&gt;  pred.ADSL.TOTFN: ADSL.TOTFN</span></span>
-<span><span class="co">#&gt;  pred.ADSL.ITTFN: ADSL.ITTFN</span></span>
-<span><span class="co">#&gt;  pred.ADSL.PPROTFN: ADSL.PPROTFN</span></span>
-<span><span class="co">#&gt;  pred.ADSL.COMPLFL: ADSL.COMPLFL</span></span>
-<span><span class="co">#&gt;  pred.ADSL.COMPLFN: ADSL.COMPLFN</span></span>
-<span><span class="co">#&gt;  pred.ADSL.RUNFFL: ADSL.RUNFFL</span></span>
-<span><span class="co">#&gt;  pred.ADSL.RUNFFN: ADSL.RUNFFN</span></span>
-<span><span class="co">#&gt;  pred.ADSL.SCRFFL: ADSL.SCRFFL</span></span>
-<span><span class="co">#&gt;  pred.ADSL.SCRFFN: ADSL.SCRFFN</span></span>
-<span><span class="co">#&gt;  pred.ADSL.ARM: ADSL.ARM</span></span>
-<span><span class="co">#&gt;  pred.ADSL.ARMCD: ADSL.ARMCD</span></span>
-<span><span class="co">#&gt;  pred.ADSL.TRTxxP, where xx is the value for APERIOD: ADSL.TRTxxP, where xx is the value for APERIOD</span></span>
-<span><span class="co">#&gt;  pred.ADSL.TRTxxA, where xx is the value for APERIOD: ADSL.TRTxxA, where xx is the value for APERIOD</span></span>
-<span><span class="co">#&gt;  pred.ADSL.RANDDT: ADSL.RANDDT</span></span>
-<span><span class="co">#&gt;  pred.ADSL.RFSTDT: ADSL.RFSTDT</span></span>
-<span><span class="co">#&gt;  pred.ADSL.RFENDT: ADSL.RFENDT</span></span>
-<span><span class="co">#&gt;  pred.ADSL.APxxSDT, where xx is the value for APERIOD: ADSL.APxxSDT, where xx is the value for APERIOD</span></span>
-<span><span class="co">#&gt;  pred.ADSL.APxxEDT, where xx is the value for APERIOD: ADSL.APxxEDT, where xx is the value for APERIOD</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> pred.AE.STUDYID, pred.AE.USUBJID, pred.AE.SUBJID, pred.ADSL.SITEID,</span></span>
+<span><span class="co">#&gt;   pred.ADSL.AGE, pred.ADSL.SEX, pred.ADSL.RACE, pred.ADSL.ACOUNTRY,</span></span>
+<span><span class="co">#&gt;   pred.ADSL.FASFL, pred.ADSL.ITTFL, pred.ADSL.SAFFL, pred.ADSL.PPROTFL,</span></span>
+<span><span class="co">#&gt;   pred.ADSL.TRTxxPN that corresponds to the treatment selected in TRTP,</span></span>
+<span><span class="co">#&gt;   pred.ADSL.TRTxxAN that corresponds to the treatment selected in TRTA,</span></span>
+<span><span class="co">#&gt;   pred.ADSL.TRT01A, pred.ADSL.TRT01AN, pred.ADSL.TRT01P, pred.ADSL.TRT01PN,</span></span>
+<span><span class="co">#&gt;   pred.ADSL.TRTSEQP, pred.ADSL.TRTSEQPN, pred.ADSL.TRTSEQA, pred.ADSL.TRTSEQAN,</span></span>
+<span><span class="co">#&gt;   pred.AE.AESTDY, pred.AE.AESTDTC, pred.AE.AEENDTC, pred.AE.AEENDY,</span></span>
+<span><span class="co">#&gt;   pred.AE.AESEQ, pred.AE.AETERM, pred.AE.AEMODIFY, pred.AE.AEDECOD,</span></span>
+<span><span class="co">#&gt;   pred.AE.AEBODSYS, pred.AE.AEBDSYCD, pred.AE.AELLT, pred.AE.AELLTCD,</span></span>
+<span><span class="co">#&gt;   pred.AE.AEPTCD, pred.AE.AEHLT, pred.AE.AEHLTCD, pred.AE.AEHLGT,</span></span>
+<span><span class="co">#&gt;   pred.AE.AEHLGTCD, pred.AE.AESOC, pred.AE.AESOCCD, pred.AE.AEDUR,</span></span>
+<span><span class="co">#&gt;   pred.AE.AESEV, pred.AE.AESEV or as per RAP, pred.AE.AEACN, pred.SUPPAE.QVAL</span></span>
+<span><span class="co">#&gt;   where SUPPAE.QNAM="ACT1", pred.SUPPAE.QVAL where QNAM="AETRTEM",</span></span>
+<span><span class="co">#&gt;   pred.AE.AEREFID, pred.AE.AEACNOTH, pred.AE.AESER, pred.AE.AESCAN,</span></span>
+<span><span class="co">#&gt;   pred.AE.AESCONG, pred.AE.AESDISAB, pred.AE.AESDTH, pred.AE.AESHOSP,</span></span>
+<span><span class="co">#&gt;   pred.AE.AESLIFE, pred.AE.AESOD, pred.AE.AESMIE, pred.SUPPAE.QVAL where</span></span>
+<span><span class="co">#&gt;   QNAM="AESPROT", pred.AE.AEOUT, pred.AE.AEREL, pred.AE.AETOXGR, pred.Numeric</span></span>
+<span><span class="co">#&gt;   version of AETOXGR, pred.SUPPAE.QVAL where SUPPAE.QNAM="GRADED",</span></span>
+<span><span class="co">#&gt;   pred.SUPPAE.QVAL where SUPPAE.QNAM="AEDLT", pred.SUPPAE.QVAL where</span></span>
+<span><span class="co">#&gt;   SUPPAE.QNAM="AERDG1", pred.xx.STUDYID, pred.xx.USUBJID, pred.ADSL.SUBJID,</span></span>
+<span><span class="co">#&gt;   pred.ADSL.AGEU, pred.ADSL.SAFFL if needed, pred.ADSL.FASFL if needed,</span></span>
+<span><span class="co">#&gt;   pred.ADSL.ITTFL if needed, pred.ADSL.ITTEFL if required, pred.ADSL.PPROTFL if</span></span>
+<span><span class="co">#&gt;   needed, pred.ADSL.TRTSDT, pred.ADSL.TRTEDT, pred.ADSL.TR01SDT,</span></span>
+<span><span class="co">#&gt;   pred.ADSL.TR01EDT, pred.CE.CESEQ, pred.CE.CEREFID, pred.CE.CETERM,</span></span>
+<span><span class="co">#&gt;   pred.Study-specific definition, pred.CE.CNDPREV, pred.CE.CESTDTC,</span></span>
+<span><span class="co">#&gt;   pred.ADSL.DTHFL, pred.ADSL.DTHFN, pred.ADSL.DTHDT, pred.Cause of Death.,</span></span>
+<span><span class="co">#&gt;   pred.CM.STUDYID, pred.CM.USUBJID, pred.CM.SUBJID, pred.CM.CMSTDTC,</span></span>
+<span><span class="co">#&gt;   pred.CM.CMSTRF, pred.CM.CMENDTC, pred.CM.CMENRF, pred.CM.CMSEQ,</span></span>
+<span><span class="co">#&gt;   pred.CM.CMREFID, pred.CM.CMTRT, pred.CM.CMCAT, pred.CM.CMSCAT,</span></span>
+<span><span class="co">#&gt;   pred.CM.CMINDC, pred.CM.CMDOSE, pred.CM.CMDOSTXT, pred.CM.CMDOSU,</span></span>
+<span><span class="co">#&gt;   pred.CM.CMDOSFRQ, pred.CM.CMROUTE, pred.CM.CMPRESP, pred.CM.CMCLAS,</span></span>
+<span><span class="co">#&gt;   pred.CM.CMCLASCD, pred.GSKDRUG.CMATC1 where GSKDRUG.CMDRGCOL = CM.DRGCOLCD</span></span>
+<span><span class="co">#&gt;   and GSKDRUG.CMNC = 'C', pred.GSKDRUG.CMATC2 where GSKDRUG.CMDRGCOL =</span></span>
+<span><span class="co">#&gt;   CM.DRGCOLCD and GSKDRUG.CMNC = 'C', pred.GSKDRUG.CMATC3 where</span></span>
+<span><span class="co">#&gt;   GSKDRUG.CMDRGCOL = CM.DRGCOLCD and GSKDRUG.CMNC = 'C', pred.GSKDRUG.CMATC4</span></span>
+<span><span class="co">#&gt;   where GSKDRUG.CMDRGCOL = CM.DRGCOLCD and GSKDRUG.CMNC = 'C', pred.CM.CMDUR,</span></span>
+<span><span class="co">#&gt;   pred.CM.CMOCCUR, pred.CM.CMDOSFRM, pred.DA.STUDYID, pred.DA.USUBJID,</span></span>
+<span><span class="co">#&gt;   pred.DA.SUBJID, pred.DA.VISITNUM, pred.DA.VISIT, pred.DA.DACAT,</span></span>
+<span><span class="co">#&gt;   pred.DA.DASCAT, pred.DA.DASEQ, pred.DA.DADTC, pred.DA.DADY, pred.DA.DATEST</span></span>
+<span><span class="co">#&gt;   and/or derived. Example contains "Compliance %", pred.DA.DATESTCD and/or</span></span>
+<span><span class="co">#&gt;   derived, pred.ADSL.STUDYID, pred.ADSL.USUBJID, pred.FAAE.SUBJID,</span></span>
+<span><span class="co">#&gt;   pred.FAAE.FATPTREF, pred.FAAE.FATPTNUM, pred.FAAE.FATPT, pred.DD.STUDYID,</span></span>
+<span><span class="co">#&gt;   pred.DD.USUBJID, pred.ADSL.ACTARM, pred.ADSL.ENRLFL, pred.ADSL.AP01SDT,</span></span>
+<span><span class="co">#&gt;   pred.ADSL.AP01SDTM, pred.ADSL.AP01EDT, pred.ADSL.AP01EDTM, pred.DD.DDTPTREF,</span></span>
+<span><span class="co">#&gt;   pred.DD.DDTPTNUM, pred.DD.DDTPT, pred.DS.STUDYID, pred.DS.USUBJID,</span></span>
+<span><span class="co">#&gt;   pred.DS.SUBJID, pred.DS.DSSTDTC, pred.DS.DSSEQ, pred.DM.STUDYID,</span></span>
+<span><span class="co">#&gt;   pred.DM.USUBJID, pred.DQ.SUBJID, pred.SUPPDM.QVAL when QNAM=RACEOR or</span></span>
+<span><span class="co">#&gt;   QNAM=RACEORx where x=1,2, ..., n., pred.ADSL.ARACE, pred.ADSL.ARACEN,</span></span>
+<span><span class="co">#&gt;   pred.ADSL.INVID, pred.ADSL.INVNAM, pred.ADSL.COUNTRY, pred.ADSL.AGEGR1,</span></span>
+<span><span class="co">#&gt;   pred.ADSL.AGEGR1N, pred.ADSL.RACEN, pred.ADSL.ETHNIC, pred.ADSL.ETHNICN,</span></span>
+<span><span class="co">#&gt;   pred.ADSL.TOTFL, pred.ADSL.TOTFN, pred.ADSL.ITTFN, pred.ADSL.PPROTFN,</span></span>
+<span><span class="co">#&gt;   pred.ADSL.COMPLFL, pred.ADSL.COMPLFN, pred.ADSL.RUNFFL, pred.ADSL.RUNFFN,</span></span>
+<span><span class="co">#&gt;   pred.ADSL.SCRFFL, pred.ADSL.SCRFFN, pred.ADSL.ARM, pred.ADSL.ARMCD,</span></span>
+<span><span class="co">#&gt;   pred.ADSL.TRTxxP, where xx is the value for APERIOD, pred.ADSL.TRTxxA, where</span></span>
+<span><span class="co">#&gt;   xx is the value for APERIOD, pred.ADSL.RANDDT, pred.ADSL.RFSTDT,</span></span>
+<span><span class="co">#&gt;   pred.ADSL.RFENDT, pred.ADSL.APxxSDT, where xx is the value for APERIOD,</span></span>
+<span><span class="co">#&gt;   pred.ADSL.APxxEDT, where xx is the value for APERIOD</span></span>
 <span><span class="co">#&gt; Warning: The following variables have code ids not found in the codelist(s):</span></span>
-<span><span class="co">#&gt;  ASTDT</span></span>
-<span><span class="co">#&gt;  ASTTM</span></span>
-<span><span class="co">#&gt;  ASTDTM</span></span>
-<span><span class="co">#&gt;  AENDT</span></span>
-<span><span class="co">#&gt;  AENTM</span></span>
-<span><span class="co">#&gt;  AENDTM</span></span>
-<span><span class="co">#&gt;  AESTDTC</span></span>
-<span><span class="co">#&gt;  AEENDTC</span></span>
-<span><span class="co">#&gt;  AEDECOD</span></span>
-<span><span class="co">#&gt;  AEBODSYS</span></span>
-<span><span class="co">#&gt;  AEBDSYCD</span></span>
-<span><span class="co">#&gt;  AELLT</span></span>
-<span><span class="co">#&gt;  AELLTCD</span></span>
-<span><span class="co">#&gt;  AEPTCD</span></span>
-<span><span class="co">#&gt;  AEHLT</span></span>
-<span><span class="co">#&gt;  AEHLTCD</span></span>
-<span><span class="co">#&gt;  AEHLGT</span></span>
-<span><span class="co">#&gt;  AEHLGTCD</span></span>
-<span><span class="co">#&gt;  AESOC</span></span>
-<span><span class="co">#&gt;  AESOCCD</span></span>
-<span><span class="co">#&gt;  AEDUR</span></span>
-<span><span class="co">#&gt;  ASEVN</span></span>
-<span><span class="co">#&gt;  AEOUTN</span></span>
-<span><span class="co">#&gt;  AETOXGR</span></span>
-<span><span class="co">#&gt;  AETOXGRN</span></span>
-<span><span class="co">#&gt;  TRTSDT</span></span>
-<span><span class="co">#&gt;  TRTEDT</span></span>
-<span><span class="co">#&gt;  TR01SDT</span></span>
-<span><span class="co">#&gt;  TR01EDT</span></span>
-<span><span class="co">#&gt;  DTHDT</span></span>
-<span><span class="co">#&gt;  TPERIOD</span></span>
-<span><span class="co">#&gt;  TPERIODC</span></span>
-<span><span class="co">#&gt;  CMDUR</span></span>
-<span><span class="co">#&gt;  ADT</span></span>
-<span><span class="co">#&gt;  ATM</span></span>
-<span><span class="co">#&gt;  ADTM</span></span>
-<span><span class="co">#&gt;  PARAMCD</span></span>
-<span><span class="co">#&gt;  AP01SDT</span></span>
-<span><span class="co">#&gt;  AP01SDTM</span></span>
-<span><span class="co">#&gt;  AP01EDT</span></span>
-<span><span class="co">#&gt;  AP01EDTM</span></span>
-<span><span class="co">#&gt;  PARCAT1</span></span>
-<span><span class="co">#&gt;  PARCAT1N</span></span>
-<span><span class="co">#&gt;  PARAM</span></span>
-<span><span class="co">#&gt;  PARAMCD</span></span>
-<span><span class="co">#&gt;  RACEORCD</span></span>
-<span><span class="co">#&gt;  ARACE</span></span>
-<span><span class="co">#&gt;  ETHNIC</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> ASTDT, ASTTM, ASTDTM, AENDT, AENTM, AENDTM, AESTDTC, AEENDTC, AEDECOD,</span></span>
+<span><span class="co">#&gt;   AEBODSYS, AEBDSYCD, AELLT, AELLTCD, AEPTCD, AEHLT, AEHLTCD, AEHLGT, AEHLGTCD,</span></span>
+<span><span class="co">#&gt;   AESOC, AESOCCD, AEDUR, ASEVN, AEOUTN, AETOXGR, AETOXGRN, TRTSDT, TRTEDT,</span></span>
+<span><span class="co">#&gt;   TR01SDT, TR01EDT, DTHDT, TPERIOD, TPERIODC, CMDUR, ADT, ATM, ADTM, PARAMCD,</span></span>
+<span><span class="co">#&gt;   AP01SDT, AP01SDTM, AP01EDT, AP01EDTM, PARCAT1, PARCAT1N, PARAM, PARAMCD,</span></span>
+<span><span class="co">#&gt;   RACEORCD, ARACE, ETHNIC</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Metadata successfully imported</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> To use the Metacore object with <span style="color: #0000BB;">metatools</span> package, first subset a dataset</span></span>
+<span><span class="co">#&gt;   using `metacore::select_dataset()`</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Metadata successfully imported</span></span>
-<span><span class="co">#&gt; Metacore object contains metadata for 4 datasets</span></span></code></pre></div>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ── Metacore object contains metadata for 4 datasets ────────────────────────────</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; → ADDS (Disposition Analysis)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; → ADRACE (Race Analysis)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; → ADTRT (Treatment Analysis)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; → ADSL (Subject-Level Analysis Dataset)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; To use the Metacore object with <span style="color: #0000BB;">metatools</span> package, first subset a dataset using</span></span>
+<span><span class="co">#&gt; `metacore::select_dataset()`</span></span></code></pre></div>
 <p>And we’re good to go!</p>
   </div>
 

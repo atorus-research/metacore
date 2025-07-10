@@ -66,7 +66,7 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">select_dataset</span><span class="op">(</span><span class="va">.data</span>, <span class="va">dataset</span>, simplify <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">select_dataset</span><span class="op">(</span><span class="va">.data</span>, <span class="va">dataset</span>, simplify <span class="op">=</span> <span class="cn">FALSE</span>, quiet <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -83,6 +83,11 @@
 
 <dt id="arg-simplify">simplify<a class="anchor" aria-label="anchor" href="#arg-simplify"></a></dt>
 <dd><p>return a single dataframe</p></dd>
+
+
+<dt id="arg-quiet">quiet<a class="anchor" aria-label="anchor" href="#arg-quiet"></a></dt>
+<dd><p>Option to quietly load in, this will suppress warnings, but not
+errors. Expects either <code>TRUE</code> or <code>FALSE</code>. Default behaviour is <code>FALSE</code>.</p></dd>
 
 </dl></div>
     <div id="value">
