@@ -114,14 +114,16 @@ derivation_check <- function(value_spec, derivations){
 #' @noRd
 codelist_check <- function(value_spec, codelist){
    code_vars <- value_spec %>%
-      filter(!is.na(.data$code_id)) %>%
-      distinct(.data$variable, .data$code_id)
+      filter(!is.na(code_id)) %>%
+      distinct(dataset, variable, code_id)
 
    #Check the variables in don't codelists have codelist
    not_in_val <- anti_join(code_vars, codelist, by = c("code_id"))
    if(nrow(not_in_val)){
       variables <- not_in_val %>%
-         pull(.data$variable)
+         mutate(cat = str_c(dataset, variable, sep = ".")) %>%
+         pull(cat) %>%
+         unique()
       cli_warn(c(
          "The following variables have code ids not found in the codelist(s):",
          "i" = ansi_collapse(variables, last = ", ")
