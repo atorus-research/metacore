@@ -369,7 +369,7 @@ spec_type_to_value_spec <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]
                mutate(where = "TRUE")
             if(nrow(out) > 0){
                var_out  %>%
-                  anti_join(out, by = "variable")
+                  anti_join(out, by = c("dataset", "variable"))
             } else {
                var_out
             }
@@ -761,7 +761,6 @@ yn_to_tf <- function(x){
 #'
 #' @return dataset
 #' @noRd
-#' @importFrom purrr safely
 select_rename_w_dups <- function(.data, cols){
    pull_safe <- safely(~select(.x, matches(.y, ignore.case = FALSE)))
    cols %>%
