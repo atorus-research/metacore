@@ -111,8 +111,8 @@ messages can be helpful.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/spec_to_metacore.html">spec_to_metacore</a></span><span class="op">(</span><span class="fu"><a href="../reference/metacore_example.html">metacore_example</a></span><span class="op">(</span><span class="st">"mock_spec.xlsx"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `create_tbl()`:</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Unable to rename the following columns in Domains:</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> label matches 2 columns</span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Unable to rename the following columns in Domains</span></span>
+<span><span class="co">#&gt; <span style="color: #BB0000;">✖</span> label matches 2 columns: c("Label", "Description")</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Please check your regular expression</span></span></code></pre></div>
 <p>As we can see, the mock spec we are using here doesn’t match the
 format. Therefore we will have to build a bespoke reader. Before we
@@ -241,8 +241,8 @@ default and see what we get.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/spec_type_to_ds_spec.html">spec_type_to_ds_spec</a></span><span class="op">(</span><span class="va">doc</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `create_tbl()`:</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Unable to rename the following columns in Domains:</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> label matches 2 columns</span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Unable to rename the following columns in Domains</span></span>
+<span><span class="co">#&gt; <span style="color: #BB0000;">✖</span> label matches 2 columns: c("Label", "Description")</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Please check your regular expression</span></span></code></pre></div>
 <p>The error tells us there is an issue with the label column in the
 Domains table. Meaning, we need to change the default vector for the
@@ -300,8 +300,9 @@ can try with just the defaults again.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/spec_type_to_ds_vars.html">spec_type_to_ds_vars</a></span><span class="op">(</span><span class="va">doc</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `create_tbl()`:</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Unable to rename the following columns in Variables:</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> variable matches 2 columns and order matches 2 columns</span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Unable to rename the following columns in Variables</span></span>
+<span><span class="co">#&gt; <span style="color: #BB0000;">✖</span> variable matches 2 columns: c("Variable Name", "Variable Order")</span></span>
+<span><span class="co">#&gt; <span style="color: #BB0000;">✖</span> order matches 2 columns: c("Variable Order", "Sort Order")</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Please check your regular expression</span></span></code></pre></div>
 <p>This error means it is trying to match the sheet entitled Variable,
 the variable column matches to two different columns. This is the same
@@ -570,12 +571,18 @@ object</p>
 <span><span class="co">#&gt;   pred.ADSL.RFENDT, pred.ADSL.APxxSDT, where xx is the value for APERIOD,</span></span>
 <span><span class="co">#&gt;   pred.ADSL.APxxEDT, where xx is the value for APERIOD</span></span>
 <span><span class="co">#&gt; Warning: The following variables have code ids not found in the codelist(s):</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> ASTDT, ASTTM, ASTDTM, AENDT, AENTM, AENDTM, AESTDTC, AEENDTC, AEDECOD,</span></span>
-<span><span class="co">#&gt;   AEBODSYS, AEBDSYCD, AELLT, AELLTCD, AEPTCD, AEHLT, AEHLTCD, AEHLGT, AEHLGTCD,</span></span>
-<span><span class="co">#&gt;   AESOC, AESOCCD, AEDUR, ASEVN, AEOUTN, AETOXGR, AETOXGRN, TRTSDT, TRTEDT,</span></span>
-<span><span class="co">#&gt;   TR01SDT, TR01EDT, DTHDT, TPERIOD, TPERIODC, CMDUR, ADT, ATM, ADTM, PARAMCD,</span></span>
-<span><span class="co">#&gt;   AP01SDT, AP01SDTM, AP01EDT, AP01EDTM, PARCAT1, PARCAT1N, PARAM, PARAMCD,</span></span>
-<span><span class="co">#&gt;   RACEORCD, ARACE, ETHNIC</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> ADAE.ASTDT, ADAE.ASTTM, ADAE.ASTDTM, ADAE.AENDT, ADAE.AENTM, ADAE.AENDTM,</span></span>
+<span><span class="co">#&gt;   ADAE.AESTDTC, ADAE.AEENDTC, ADAE.AEDECOD, ADAE.AEBODSYS, ADAE.AEBDSYCD,</span></span>
+<span><span class="co">#&gt;   ADAE.AELLT, ADAE.AELLTCD, ADAE.AEPTCD, ADAE.AEHLT, ADAE.AEHLTCD, ADAE.AEHLGT,</span></span>
+<span><span class="co">#&gt;   ADAE.AEHLGTCD, ADAE.AESOC, ADAE.AESOCCD, ADAE.AEDUR, ADAE.ASEVN, ADAE.AEOUTN,</span></span>
+<span><span class="co">#&gt;   ADAE.AETOXGR, ADAE.AETOXGRN, ADCE.TRTSDT, ADCE.TRTEDT, ADCE.TR01SDT,</span></span>
+<span><span class="co">#&gt;   ADCE.TR01EDT, ADCE.ASTDT, ADCE.DTHDT, ADCM.TPERIOD, ADCM.TPERIODC,</span></span>
+<span><span class="co">#&gt;   ADCM.ASTDT, ADCM.ASTTM, ADCM.ASTDTM, ADCM.AENDT, ADCM.AENTM, ADCM.AENDTM,</span></span>
+<span><span class="co">#&gt;   ADCM.CMDUR, ADCOMP.ADT, ADCOMP.ATM, ADCOMP.ADTM, ADCOMP.PARAMCD, ADCOVID.ADT,</span></span>
+<span><span class="co">#&gt;   ADCOVID.ATM, ADCOVID.ADTM, ADCOVID.AENDT, ADCOVID.ASTDT, ADDD.AP01SDT,</span></span>
+<span><span class="co">#&gt;   ADDD.AP01SDTM, ADDD.AP01EDT, ADDD.AP01EDTM, ADDD.ADT, ADDS.ADT, ADDS.ATM,</span></span>
+<span><span class="co">#&gt;   ADDS.ADTM, ADDS.PARCAT1, ADDS.PARCAT1N, ADDS.PARAM, ADDS.PARAMCD,</span></span>
+<span><span class="co">#&gt;   ADRACE.RACEORCD, ADRACE.ARACE, ADTRT.ETHNIC</span></span>
 <span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Metadata successfully imported</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> To use the Metacore object with <span style="color: #0000BB;">metatools</span> package, first subset a dataset</span></span>
 <span><span class="co">#&gt;   using `metacore::select_dataset()`</span></span>
