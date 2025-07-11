@@ -369,7 +369,7 @@ spec_type_to_value_spec <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]
                mutate(where = "TRUE")
             if(nrow(out) > 0){
                var_out  %>%
-                  anti_join(out, by = "variable")
+                  anti_join(out, by = c("dataset", "variable"))
             } else {
                var_out
             }
@@ -692,11 +692,12 @@ create_tbl <- function(doc, cols){
 
    } else if(length(matches) == 1){
       # Check names and write a better warning message if names don't work
-      ds_nm <- matches[[1]] %>%
-         names()
+      ds_nm <- matches[[1]] %>% names()
       nm_test <- cols %>%
-         map_int(~sum(str_detect(ds_nm, .))) %>%
-         keep(~ . != 1)
+         map(~str_detect(ds_nm, .)) %>%
+         map(~ds_nm[.]) %>%
+         keep(~length(.) > 1)
+
       if(length(nm_test) > 0) {
          # See if an exact match will
          test_exact <- cols[names(nm_test)] %>%
@@ -707,12 +708,16 @@ create_tbl <- function(doc, cols){
             cols[names(nm_test)] <- cols[names(nm_test)] %>%
                paste0("^", ., "$")
          } else {
-            x <- str_c(names(nm_test),  " matches ",nm_test, " columns")
-            cli_abort(c(
-               "Unable to rename the following columns in {names(matches[1])}:",
-               "i" = ansi_collapse(x),
+            errors <- NULL
+            for(i in 1:length(nm_test)) {
+               errors <- c(errors, str_glue("{names(nm_test[i])} matches {length(nm_test[[i]])} columns: {nm_test[i]}"))
+            }
+            msg <- c(
+               "Unable to rename the following columns in {names(matches)}",
+               set_names(errors, rep("x", length(errors))),
                "i" = "Please check your regular expression"
-            ), call. = FALSE)
+            )
+            cli_abort(msg, .call = FALSE)
          }
       }
 
@@ -761,7 +766,6 @@ yn_to_tf <- function(x){
 #'
 #' @return dataset
 #' @noRd
-#' @importFrom purrr safely
 select_rename_w_dups <- function(.data, cols){
    pull_safe <- safely(~select(.x, matches(.y, ignore.case = FALSE)))
    cols %>%
