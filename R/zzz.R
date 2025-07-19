@@ -10,7 +10,7 @@
 #' @importFrom readxl excel_sheets read_excel
 #' @importFrom tibble tibble as_tibble
 #' @importFrom readxl excel_sheets read_excel
-#' @importFrom cli ansi_collapse cli_abort cli_inform cli_alert_success cli_warn cli_bullets cli_div cli_end cli_par cli_rule cli_text col_red qty
+#' @importFrom cli ansi_collapse cli_abort cli_inform cli_alert_success cli_alert_info cli_warn cli_bullets cli_div cli_end cli_par cli_rule cli_text col_red qty
 #' @importFrom xml2 read_xml xml_find_all xml_find_first xml_attr xml_ns_strip xml_text
 NULL
 
