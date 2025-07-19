@@ -1,3 +1,6 @@
+# Metacore 0.2.1
+-   Hotfix import `cli_alert_info` issue from {cli} package.
+
 # Metacore 0.2.0
 - `select_dataset()` now creates a subsetted metacore object that is a subclass of `Metacore` called `DatasetMeta`.
 - Objects of `DatasetMeta` subclass will be expected as input to {metatools} functions going forward.
