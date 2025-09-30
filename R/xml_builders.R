@@ -24,11 +24,9 @@ define_to_metacore <- function(path, quiet = FALSE){
    value_spec <- xml_to_value_spec(xml)
    code_list <- xml_to_codelist(xml)
    derivations <- xml_to_derivations(xml)
-   if(!quiet){
-      out <- metacore(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist = code_list)
-   } else{
-      out<- suppressWarnings(metacore(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist = code_list, quiet = quiet))
-   }
+
+   out <- metacore(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist = code_list, quiet = quiet)
+
    out
 }
 

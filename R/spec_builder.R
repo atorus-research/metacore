@@ -23,14 +23,12 @@ spec_to_metacore <- function(path, quiet = FALSE, where_sep_sheet = TRUE){
       value_spec <- spec_type_to_value_spec(doc, where_sep_sheet = where_sep_sheet)
       derivations <- spec_type_to_derivations(doc)
       code_list <- spec_type_to_codelist(doc)
-      if(!quiet){
-         out <- metacore(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist = code_list)
-      } else{
-         out<- suppressWarnings(metacore(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist = code_list, quiet = quiet))
-      }
+
+      out <- metacore(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist = code_list, quiet = quiet)
+
    } else {
       cli_abort("This specification format is not currently supported. You will need to write your own reader",
-           call. = FALSE)
+                call. = FALSE)
    }
    out
 }
@@ -49,14 +47,14 @@ spec_type <- function(path){
    sheets <- excel_sheets(path)
    if(!any(sheets %>% str_detect("[D|d]omains?|[D|d]atasets?"))){
       cli_abort("File does not contain a Domain/Datasets tab, which is needed. Please either modify the spec document or write a reader (see documentation for more information)",
-           call. = FALSE)
+                call. = FALSE)
    } else if(any(sheets %>% str_detect("ADSL|DM"))){
       type <- "by_ds"
    } else if(any(sheets %>% str_detect("[V|v]ariables?"))){
       type <- "by_type"
    } else {
       cli_abort("File in an unknown format. Please either modify the spec document or write a reader (see documentation for more information)",
-           call. = FALSE)
+                call. = FALSE)
    }
    type
 }
@@ -343,7 +341,7 @@ spec_type_to_value_spec <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]
          "i" = "'dataset', 'variable', 'origin', 'code_id', 'type', 'where', 'sig_dig', 'derivation_id','predecessor'",
          "i" = paste("If derivation_id is not avaliable it can be excluded and dataset.variable will be used.",
                      "If the where information is on a seperate sheet, put the column with cross ref as where.")
-         ), call = FALSE)
+      ), call = FALSE)
    }
 
    # Select a subset of sheets if specified
@@ -406,15 +404,15 @@ spec_type_to_value_spec <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]
          select(-where, where = where_new)
    } else if(where_sep_sheet) {
       cli_warn("Not able to add where infromation from seperate sheet cause a where column is needed to cross-reference the information",
-              call. = FALSE)
+               call. = FALSE)
    }
 
    if(!"derivation_id" %in% names(cols)){
       out <- out %>%
          mutate(derivation_id =
                    if_else(str_to_lower(.data$origin) == "assigned",
-                      paste0(dataset, ".", variable),
-                      paste0("pred.", dataset, ".", variable)))
+                           paste0(dataset, ".", variable),
+                           paste0("pred.", dataset, ".", variable)))
    }
 
    # Get missing columns
@@ -478,7 +476,7 @@ spec_type_to_codelist <- function(doc, codelist_cols = c("code_id" = "ID",
       if(!name_check| is.null(names(codelist_cols))){
          cli_abort("Supplied column vector for codelist_cols must be named using the following names:
               'code_id', 'name', 'code', 'decode'",
-              call. = FALSE
+                   call. = FALSE
          )
       }
    }
@@ -489,7 +487,7 @@ spec_type_to_codelist <- function(doc, codelist_cols = c("code_id" = "ID",
       if(!name_check){
          cli_abort("Supplied column vector for permitted_val_cols must be named using the following names:
               'code_id', 'name', 'code'",
-              call. = FALSE)
+                   call. = FALSE)
       }
    }
    if(!is.null(dict_cols)){
@@ -571,9 +569,9 @@ spec_type_to_derivations <- function(doc, cols = c("derivation_id" = "ID",
                                      sheet = "Method|Derivations?",
                                      var_cols = c("dataset" = "[D|d]ataset|[D|d]omain",
                                                   "variable" = "[N|n]ame|[V|v]ariables?",
-                                        "origin" = "[O|o]rigin",
-                                        "predecessor" = "[P|p]redecessor",
-                                        "comment" = "[C|c]omment")){
+                                                  "origin" = "[O|o]rigin",
+                                                  "predecessor" = "[P|p]redecessor",
+                                                  "comment" = "[C|c]omment")){
 
    name_check <- names(cols) %in% c("derivation_id", "derivation") %>%
       all()
@@ -615,7 +613,7 @@ spec_type_to_derivations <- function(doc, cols = c("derivation_id" = "ID",
             str_to_lower(.data$origin) == "predecessor" ~ paste0("pred.", as.character(.data$predecessor)),
             str_to_lower(.data$origin) == "assigned" ~ paste0(.data$dataset, ".", .data$variable),
             TRUE ~ NA_character_
-            ),
+         ),
          derivation = case_when(
             str_to_lower(.data$origin) == "predecessor" ~ as.character(.data$predecessor),
             str_to_lower(.data$origin) == "assigned" ~ .data$comment,
@@ -688,7 +686,7 @@ create_tbl <- function(doc, cols){
          }) %>%
          paste0(collapse = "\n") %>%
          paste0("Unable to identify a sheet with all columns.\n", . ) %>%
-        (call. = FALSE)
+         (call. = FALSE)
 
    } else if(length(matches) == 1){
       # Check names and write a better warning message if names don't work
@@ -751,7 +749,7 @@ yn_to_tf <- function(x){
       x
    } else {
       cli_warn("Keep column needs to be True or False, please correct before converting to a Metacore object",
-              call. = FALSE)
+               call. = FALSE)
       x
    }
 }
