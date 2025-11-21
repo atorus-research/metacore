@@ -397,11 +397,15 @@ metacore <- function(ds_spec = tibble(dataset = character(), structure = charact
 #'
 select_dataset <- function(.data, dataset, simplify = FALSE, quiet = FALSE) {
 
+   quiet_if_true <- function(expr) {
+      if (quiet) suppressWarnings(suppressMessages(expr)) else expr
+   }
+
    cl <- .data$clone()
    cl$metacore_filter(dataset)
 
    if (simplify) {
-      test <-  suppressMessages(
+      test <- quiet_if_true( suppressMessages(
          list(
             cl$ds_vars,
             cl$var_spec,
@@ -411,11 +415,13 @@ select_dataset <- function(.data, dataset, simplify = FALSE, quiet = FALSE) {
             cl$supp
          ) %>%
             reduce(left_join)
-      )
+      ))
    } else {
-      if (!quiet) DatasetMeta$new(metacore = cl)
-      else suppressWarnings(DatasetMeta$new(metacore = cl, quiet = quiet))
+      test <- quiet_if_true(
+         DatasetMeta$new(metacore = cl, quiet = quiet)
+      )
    }
+   if(quiet) invisible(test) else test
 }
 
 

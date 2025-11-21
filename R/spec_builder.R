@@ -14,9 +14,18 @@
 #' @return given a spec document it returns a metacore object
 #' @export
 spec_to_metacore <- function(path, quiet = FALSE, where_sep_sheet = TRUE){
-   doc <- read_all_sheets(path)
 
-   if(spec_type(path) == "by_type"){
+   quiet_if_true <- function(expr) {
+      if (quiet) {
+         suppressWarnings(suppressMessages(expr))
+      } else {
+         expr
+      }
+   }
+
+   doc <- quiet_if_true(read_all_sheets(path))
+
+   if (quiet_if_true(spec_type(path)) == "by_type"){
       ds_spec <- spec_type_to_ds_spec(doc)
       ds_vars <- spec_type_to_ds_vars(doc)
       var_spec <- spec_type_to_var_spec(doc)
@@ -24,13 +33,16 @@ spec_to_metacore <- function(path, quiet = FALSE, where_sep_sheet = TRUE){
       derivations <- spec_type_to_derivations(doc)
       code_list <- spec_type_to_codelist(doc)
 
-      out <- metacore(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist = code_list, quiet = quiet)
+      out <- quiet_if_true(
+         metacore(
+            ds_spec, ds_vars, var_spec, value_spec, derivations,
+            codelist = code_list, quiet = quiet))
 
    } else {
       cli_abort("This specification format is not currently supported. You will need to write your own reader",
                 call. = FALSE)
    }
-   out
+   if (quiet) invisible(out) else out
 }
 
 
