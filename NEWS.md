@@ -1,3 +1,5 @@
+# metacore 0.3.0
+
 # Metacore 0.2.1
 -   Hotfix import `cli_alert_info` issue from {cli} package.
 
