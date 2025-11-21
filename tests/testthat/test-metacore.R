@@ -162,3 +162,12 @@ test_that("spec_to_metacore() is silent when quiet = TRUE", {
 
    expect_true(inherits(out, "Metacore"))
 })
+
+test_that("select_dataset() is silent when quiet = TRUE", {
+   test <- spec_to_metacore(metacore_example("p21_mock.xlsx"), quiet = TRUE)
+   subset <- test %>% select_dataset("DM", quiet = TRUE)
+   expect_silent({
+      subset <- test %>% select_dataset("DM", quiet = TRUE)
+   })
+
+})
