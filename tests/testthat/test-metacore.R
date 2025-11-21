@@ -152,3 +152,13 @@ test_that("get_keys works", {
                   key_seq = "Sequence Key")
    )
 })
+
+test_that("spec_to_metacore() is silent when quiet = TRUE", {
+   test  <- metacore_example("p21_mock.xlsx")
+
+   expect_silent({
+      out <- spec_to_metacore(test , quiet = TRUE)
+   })
+
+   expect_true(inherits(out, "Metacore"))
+})
