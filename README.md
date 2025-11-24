@@ -108,9 +108,11 @@ variable:
 
 - *keep*: Logical value about if the variable needs to be kept
 
-- *core*: ADaM core, which should be one of the following values:
-  “Expected”, “Required”, “Permissible”, “Conditionally Required”,
-  “Conditionally Expected”, or NA. For more information about core see
+- *core*: Core attribute indicating variable requirements. According to
+  ADaM IG 1.3, valid values are "Required", "Conditionally Required",
+  or "Permissible". For SDTM, values may include "Required",
+  "Expected", or "Permissible". The field can also be NA. For more
+  information about core see
   [CDISC](https://www.cdisc.org/standards/foundational/adam)
 
 - *supp_flag*: Logical to determine if the variable is in the
