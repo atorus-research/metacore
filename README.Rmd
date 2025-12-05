@@ -80,7 +80,7 @@ This table contains the information that bridges between purely dataset level an
 
 -   *order*: Order sets the order of the columns to appear in the dataset. This is also a numeric value
 
--   *keep*: Logical value about if the variable needs to be kept
+-   *mandatory*: Boolean specifying whether a variable can have blank variables. From the CDISC Define-XML v2.1 documentation: Required items that have Mandatory set to "Yes" cannot have blank values. Variables in SDTM domains that have `core = "Required"` should have `mandatory = TRUE`.
 
 -   *core*: ADaM core, which should be one of the following values: "Expected", "Required", "Permissible", "Conditionally Required", "Conditionally Expected", or NA. For more information about core see [CDISC](https://www.cdisc.org/standards/foundational/adam)
 
