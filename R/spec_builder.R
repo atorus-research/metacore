@@ -191,10 +191,10 @@ spec_type_to_ds_vars <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]oma
    out %>%
       distinct() %>%
       `is.na<-`(missing) %>%
-      mutate(key_seq = as.integer(key_seq),
-             mandatory = yn_to_tf(mandatory),
-             core = as.character(core),
-             order = as.numeric(order))
+      mutate(key_seq = as.integer(.data$key_seq),
+             mandatory = yn_to_tf(.data$mandatory),
+             core = as.character(.data$core),
+             order = as.numeric(.data$order))
 }
 
 
