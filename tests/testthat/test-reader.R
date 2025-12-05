@@ -40,7 +40,7 @@ test_that("Test ds_spec readers", {
 test_that("Test ds_vars readers", {
    # Create a reference ds_vars
    ref_ds_vars <- tibble::tribble(
-      ~dataset,  ~variable, ~key_seq, ~order, ~keep, ~core, ~supp_flag,
+      ~dataset,  ~variable, ~key_seq, ~order, ~mandatory, ~core, ~supp_flag,
       "AE",    "AEACN",       NA,    21L, FALSE,    NA_character_, NA,
       "AE", "AEBDSYCD",       NA,    16L, FALSE,    NA_character_, NA,
       "AE", "AEBODSYS",       NA,    15L, FALSE,    NA_character_, NA,
@@ -150,7 +150,7 @@ test_that("Test ds_vars readers", {
    # Read from spec
    spec_ds_vars <- spec_type_to_ds_vars(spec) %>%
       arrange(dataset, variable) %>%
-      select(dataset, variable, key_seq, order, keep, core, supp_flag)
+      select(dataset, variable, key_seq, order, mandatory, core, supp_flag)
 
 
    # Tests
