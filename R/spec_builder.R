@@ -143,14 +143,14 @@ spec_type_to_ds_spec <- function(doc, cols = c("dataset" = "[N|n]ame|[D|d]ataset
 spec_type_to_ds_vars <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]omain",
                                                "variable" = "[V|v]ariable [[N|n]ame]?|[V|v]ariables?",
                                                "order" = "[V|v]ariable [O|o]rder|[O|o]rder",
-                                               "keep" = "[K|k]eep|[M|m]andatory"),
+                                               "mandatory" = "[K|k]eep|[M|m]andatory"),
                                  key_seq_sep_sheet = TRUE,
                                  key_seq_cols = c("dataset" = "Dataset",
                                                   "key_seq" = "Key Variables"),
                                  sheet = "[V|v]ar|Datasets"){
 
    name_check <- names(cols) %in% c("variable", "dataset", "order",
-                                    "keep", "key_seq", "core", "supp_flag") %>%
+                                    "mandatory", "key_seq", "core", "supp_flag") %>%
       all()
 
    name_check_extra <- names(key_seq_cols) %in% c("dataset", "key_seq") %>%
@@ -160,7 +160,7 @@ spec_type_to_ds_vars <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]oma
    # Testing for names of vectors
    if(any(!name_check, !name_check_extra, is.null(names(cols)))){
       cli_abort("Supplied column vector must be named using the following names:
-              'variable', 'dataset', 'order', 'keep', 'core', 'key_seq', 'supp_flag'")
+              'variable', 'dataset', 'order', 'mandatory', 'core', 'key_seq', 'supp_flag'")
    }
    # Subsetting sheets
    if(!is.null(sheet)){
@@ -192,7 +192,7 @@ spec_type_to_ds_vars <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]oma
       distinct() %>%
       `is.na<-`(missing) %>%
       mutate(key_seq = as.integer(key_seq),
-             keep = yn_to_tf(keep),
+             mandatory = yn_to_tf(mandatory),
              core = as.character(core),
              order = as.numeric(order))
 }
@@ -403,7 +403,7 @@ spec_type_to_value_spec <- function(doc, cols = c("dataset" = "[D|d]ataset|[D|d]
          left_join(where_df, by = c("where" = "id")) %>%
          select(-where, where = where_new)
    } else if(where_sep_sheet) {
-      cli_warn("Not able to add where infromation from seperate sheet cause a where column is needed to cross-reference the information",
+      cli_warn("Not able to add where information from seperate sheet cause a where column is needed to cross-reference the information",
                call. = FALSE)
    }
 
