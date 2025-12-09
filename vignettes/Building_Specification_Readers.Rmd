@@ -109,7 +109,7 @@ The ds_vars table has 7 columns:
 
 -   keep: boolean to determine if the variable is needed
 
--   core: ADaM core (Expected, Required, Permissible)
+-   core: Core attribute (ADaM: Required, Conditionally Required, Permissible; SDTM: Required, Expected, Permissible)
 
 -   supp_flag: boolean to determine if the variable is in the supplementals
 
