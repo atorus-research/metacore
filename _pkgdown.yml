@@ -1,9 +1,15 @@
+url: https://atorus-research.github.io/metacore
+
 destination: docs
 
 template:
+  bootstrap: 5
   params:
     bootswatch: yeti
   opengraph:
     image:
       src: man/figures/metacore.PNG
       alt: "metacore Hex Sticker"
+
+search:
+  exclude: ['news/index.html']
