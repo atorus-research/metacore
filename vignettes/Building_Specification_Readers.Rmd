@@ -107,7 +107,7 @@ The ds_vars table has 7 columns:
 
 -   order: integer controlling the column order of each dataset
 
--   mandatory: from Define-XML v2.1. A Boolean value indicating if NULL values are permitted
+-   mandatory: from Define-XML v2.1. A Boolean value indicating if NULL values are permitted. `mandatory = TRUE` indicates that NULL values are not permitted.
 
 -   core: ADaM core (Expected, Required, Permissible)
 
