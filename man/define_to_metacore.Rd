@@ -9,11 +9,12 @@ define_to_metacore(path, quiet = FALSE)
 \arguments{
 \item{path}{location of the define xml as a string}
 
-\item{quiet}{Option to quietly load in, this will suppress warnings, but not errors}
+\item{quiet}{Option to quietly load in; when \code{TRUE}, messages and warnings
+are suppressed, but errors are still raised.}
 }
 \value{
-DataDef Object
+Metacore/DataDef object
 }
 \description{
-Given a path, this function converts the define xml to a DataDef Object
+Given a path, this function converts the define xml to a DataDef/Metacore object.
 }

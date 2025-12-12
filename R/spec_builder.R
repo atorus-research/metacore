@@ -6,8 +6,9 @@
 #' be used as building blocks for bespoke specification documents.
 #'
 #' @param path string of file location
-#' @param quiet Option to quietly load in, this will suppress warnings, but not
-#'   errors
+#' @param quiet Option to quietly load in; when `TRUE`, messages, warnings,
+#'   and other non-error console output are suppressed, but errors are still
+#'   raised.
 #' @param where_sep_sheet Option to tell if the where is in a separate sheet,
 #'   like in older p21 specs or in a single sheet like newer p21 specs
 #'
@@ -15,37 +16,42 @@
 #' @export
 spec_to_metacore <- function(path, quiet = FALSE, where_sep_sheet = TRUE){
 
-   quiet_if_true <- function(expr) {
-      if (quiet) {
-         suppressWarnings(suppressMessages(expr))
-      } else {
-         expr
-      }
-   }
+   doc <- quiet_if_true(read_all_sheets(path), quiet = quiet)
 
-   doc <- quiet_if_true(read_all_sheets(path))
+   if (quiet_if_true(spec_type(path), quiet = quiet) == "by_type") {
 
-   if (quiet_if_true(spec_type(path)) == "by_type"){
-      ds_spec <- spec_type_to_ds_spec(doc)
-      ds_vars <- spec_type_to_ds_vars(doc)
-      var_spec <- spec_type_to_var_spec(doc)
-      value_spec <- spec_type_to_value_spec(doc, where_sep_sheet = where_sep_sheet)
-      derivations <- spec_type_to_derivations(doc)
-      code_list <- spec_type_to_codelist(doc)
+      ds_spec     <- quiet_if_true(spec_type_to_ds_spec(doc), quiet = quiet)
+      ds_vars     <- quiet_if_true(spec_type_to_ds_vars(doc), quiet = quiet)
+      var_spec    <- quiet_if_true(spec_type_to_var_spec(doc), quiet = quiet)
+      value_spec  <- quiet_if_true(
+         spec_type_to_value_spec(doc, where_sep_sheet = where_sep_sheet),
+         quiet = quiet
+      )
+      derivations <- quiet_if_true(spec_type_to_derivations(doc), quiet = quiet)
+      code_list   <- quiet_if_true(spec_type_to_codelist(doc), quiet = quiet)
 
-      out <- quiet_if_true(
+      test <- quiet_if_true(
          metacore(
-            ds_spec, ds_vars, var_spec, value_spec, derivations,
-            codelist = code_list, quiet = quiet))
+            ds_spec,
+            ds_vars,
+            var_spec,
+            value_spec,
+            derivations,
+            codelist = code_list,
+            quiet = quiet
+         ),
+         quiet = quiet
+      )
 
    } else {
-      cli_abort("This specification format is not currently supported. You will need to write your own reader",
-                call. = FALSE)
+      cli_abort(
+         "This specification format is not currently supported. You will need to write your own reader",
+         call. = FALSE
+      )
    }
-   if (quiet) invisible(out) else out
+
+   if (quiet) invisible(test) else test
 }
-
-
 
 
 #' Check the type of spec document
