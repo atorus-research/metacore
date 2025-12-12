@@ -1,7 +1,7 @@
 Package: metacore
 Title: A Centralized Metadata Object Focus on Clinical Trial Data
     Programming Workflows
-Version: 0.2.1
+Version: 0.3.0
 Authors@R: c(
     person("Liam", "Hobby", , "liam.f.hobby@gsk.com", role = c("aut", "cre")),
     person("Christina", "Fillmore", , "christina.e.fillmore@gsk.com", role = "aut",
