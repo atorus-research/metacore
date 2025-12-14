@@ -1,15 +1,15 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# metacore <a href='https://github.com/atorus-research/metacore'><img src="man/figures/metacore.PNG" align="right" style="height:139px;"/></a>
+# metacore <a href='https://github.com/atorus-research/metacore'><img src="man/figures/metacore.PNG" align="right" style="height:139px;" alt="Metacore Package Hex Sticker"/></a>
 
 <!-- badges: start -->
 
-[<img src="https://img.shields.io/badge/Slack-RValidationHub-blue?style=flat&logo=slack">](https://RValidationHub.slack.com)
+[<img src="https://img.shields.io/badge/Slack-RValidationHub-blue?style=flat&logo=slack" alt="Slack Status">](https://RValidationHub.slack.com)
 [![R build
 status](https://github.com/atorus-research/metacore/workflows/R-CMD-check/badge.svg)](https://github.com/atorus-research/xportr/actions?workflow=R-CMD-check)
-[<img src="https://img.shields.io/codecov/c/github/atorus-research/metacore">](https://app.codecov.io/gh/atorus-research/metacore)
-[<img src="https://img.shields.io/badge/License-MIT-blue.svg">](https://github.com/atorus-research/metacore/blob/master/LICENSE)
+[<img src="https://img.shields.io/codecov/c/github/atorus-research/metacore" alt="Codecov Coverage">](https://app.codecov.io/gh/atorus-research/metacore)
+[<img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="MIT License">](https://github.com/atorus-research/metacore/blob/master/LICENSE)
 [![Lifecycle:
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental-1)
 [![CRAN
@@ -74,9 +74,15 @@ remember. They are as follows:
 
 Here is a schema of how all this fits together:
 
-![](man/figures/schema-colors.png "man/figures/Metacore Schema")
+<figure>
+<img src="man/figures/schema-colors.png"
+title="man/figures/Metacore Schema"
+alt="Schema diagram showing the relationships between all metacore tables (variable names not included)" />
+<figcaption aria-hidden="true">Schema diagram showing the relationships
+between all metacore tables (variable names not included)</figcaption>
+</figure>
 
-### ds_spec <img src="man/figures/labeled-ds_spec.png" align="right" style="height:150px;"/>
+### ds_spec <img src="man/figures/labeled-ds_spec.png" align="right" style="height:150px;" alt="Diagram of ds_spec table structure"/>
 
 This table covers the basic information about each dataset. There is
 only a single row per dataset, with the following information:
@@ -87,7 +93,7 @@ only a single row per dataset, with the following information:
 
 - *label*: Dataset label
 
-### ds_vars <img src="man/figures/labeled-ds_vars.png" align="right" style="height:150px;"/>
+### ds_vars <img src="man/figures/labeled-ds_vars.png" align="right" style="height:150px;" alt="Diagram of ds_vars table structure"/>
 
 This table contains the information that bridges between purely dataset
 level and purely variable level. There is one row per dataset per
@@ -116,7 +122,7 @@ variable:
 - *supp_flag*: Logical to determine if the variable is in the
   supplemental datasets
 
-### var_spec <img src="man/figures/labeled-var_spec.png" align="right" style="height:150px;"/>
+### var_spec <img src="man/figures/labeled-var_spec.png" align="right" style="height:150px;" alt="Diagram of var_spec table structure"/>
 
 This table contains the purely variable level information. The goal is
 there is a single row per variable, which is common across all datasets.
@@ -141,7 +147,7 @@ variable column.
 
 - *format*: Variable format
 
-### value_spec <img src="man/figures/labeled-value_spec.png" align="right" style="height:150px;"/>
+### value_spec <img src="man/figures/labeled-value_spec.png" align="right" style="height:150px;" alt="Diagram of value_spec table structure"/>
 
 This table contains the information the information at the value level.
 There will be at least one row per dataset/variable combination. There
@@ -169,7 +175,7 @@ are as follows:
 - *derivation_id*: ID for the derivation to match with the
   **derivation** table
 
-### derivations <img src="man/figures/labeled-derivation.png" align="right" style="height:150px;"/>
+### derivations <img src="man/figures/labeled-derivation.png" align="right" style="height:150px;" alt="Diagram of derivation table structure"/>
 
 This table has all the derivation information, with one row per
 derivation ID and the following information:
@@ -178,7 +184,7 @@ derivation ID and the following information:
 
 - *derivation*: Text describing the derivation
 
-### codelist <img src="man/figures/labeled-code_list.png" align="right" style="height:150px;"/>
+### codelist <img src="man/figures/labeled-code_list.png" align="right" style="height:150px;" alt="Diagram of codelist table structure"/>
 
 This table contains the code lists, permitted value lists, and external
 libraries nested within a tibble. There is only a single row per
@@ -195,7 +201,7 @@ list/library, with the following information:
 - *type*: An indicator of if the information in the code column is a
   code/decode table, permitted value, or external library
 
-### supp <img src="man/figures/labeled-supp.png" align="right" style="height:150px;"/>
+### supp <img src="man/figures/labeled-supp.png" align="right" style="height:150px;" alt="Diagram of supp table structure"/>
 
 This table contains the information needed to create supplemental
 tables. If you want to add a variable which will go into a supplemental
@@ -218,7 +224,13 @@ single row per dataset/variable, with the following information:
 To get more information about the metacore objects and how to build a
 specification reader, please see our vignettes.
 
-![](man/figures/labeled_schema.png "man/figures/Metacore Schema")
+<figure>
+<img src="man/figures/labeled_schema.png"
+title="man/figures/Metacore Schema"
+alt="Schema diagram showing the relationships between all metacore tables" />
+<figcaption aria-hidden="true">Schema diagram showing the relationships
+between all metacore tables</figcaption>
+</figure>
 
 ## Future Development
 
