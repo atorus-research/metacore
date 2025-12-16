@@ -1,4 +1,5 @@
 # metacore 0.3.0
+- `keep` variable in `ds_vars` table has been changed to `mandatory` to better reflect the CDISC standard terminology. 
 
 # Metacore 0.2.1
 -   Hotfix import `cli_alert_info` issue from {cli} package.

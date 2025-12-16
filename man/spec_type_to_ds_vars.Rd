@@ -8,7 +8,7 @@ spec_type_to_ds_vars(
   doc,
   cols = c(dataset = "[D|d]ataset|[D|d]omain", variable =
     "[V|v]ariable [[N|n]ame]?|[V|v]ariables?", order =
-    "[V|v]ariable [O|o]rder|[O|o]rder", keep = "[K|k]eep|[M|m]andatory"),
+    "[V|v]ariable [O|o]rder|[O|o]rder", mandatory = "[K|k]eep|[M|m]andatory"),
   key_seq_sep_sheet = TRUE,
   key_seq_cols = c(dataset = "Dataset", key_seq = "Key Variables"),
   sheet = "[V|v]ar|Datasets"

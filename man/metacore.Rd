@@ -6,7 +6,7 @@
 \usage{
 metacore(
   ds_spec = tibble(dataset = character(), structure = character(), label = character()),
-  ds_vars = tibble(dataset = character(), variable = character(), keep = logical(),
+  ds_vars = tibble(dataset = character(), variable = character(), mandatory = logical(),
     key_seq = integer(), order = integer(), core = character(), supp_flag = logical()),
   var_spec = tibble(variable = character(), label = character(), length = integer(), type
     = character(), common = character(), format = character()),
