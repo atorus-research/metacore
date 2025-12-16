@@ -1,37 +1,45 @@
 #' Define XML to DataDef Object
 #'
-#' Given a path, this function converts the define xml to a DataDef Object
+#' Given a path, this function converts the define xml to a DataDef/Metacore object.
 #'
 #' @param path location of the define xml as a string
-#' @param quiet Option to quietly load in, this will suppress warnings, but not errors
+#' @param quiet Option to quietly load in; when `TRUE`, messages and warnings
+#'   are suppressed, but errors are still raised.
 #'
-#' @return DataDef Object
+#' @return Metacore/DataDef object
 #' @export
-#'
 define_to_metacore <- function(path, quiet = FALSE){
 
-   xml <- read_xml(path)
-   xml_ns_strip(xml)
+   test <- quiet_if_true({
 
-   define_version <- xml_find_all(xml, "//MetaDataVersion") %>%
-      xml_attr("DefineVersion") %>%
-      as.numeric_version()
+      xml <- read_xml(path)
+      xml_ns_strip(xml)
 
+      define_version <- xml_find_all(xml, "//MetaDataVersion") %>%
+         xml_attr("DefineVersion") %>%
+         as.numeric_version()
 
-   ds_spec <- xml_to_ds_spec(xml)
-   ds_vars <- xml_to_ds_vars(xml)
-   var_spec <- xml_to_var_spec(xml)
-   value_spec <- xml_to_value_spec(xml)
-   code_list <- xml_to_codelist(xml)
-   derivations <- xml_to_derivations(xml)
-   if(!quiet){
-      out <- metacore(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist = code_list)
-   } else{
-      out<- suppressWarnings(metacore(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist = code_list, quiet = quiet))
-   }
-   out
+      ds_spec     <- xml_to_ds_spec(xml)
+      ds_vars     <- xml_to_ds_vars(xml)
+      var_spec    <- xml_to_var_spec(xml)
+      value_spec  <- xml_to_value_spec(xml)
+      code_list   <- xml_to_codelist(xml)
+      derivations <- xml_to_derivations(xml)
+
+      metacore(
+         ds_spec,
+         ds_vars,
+         var_spec,
+         value_spec,
+         derivations,
+         codelist = code_list,
+         quiet = quiet
+      )
+
+   }, quiet = quiet)
+
+   if (quiet) invisible(test) else test
 }
-
 
 #' XML to Data Set Spec
 #'
@@ -82,13 +90,13 @@ xml_to_ds_vars <- function(doc) {
       }) %>%
       mutate(
          variable = id_to_var(.data$oid),
-         keep = .data$mandatory == "Yes",
+         mandatory = .data$mandatory == "Yes",
          core = NA_character_,
          supp_flag = NA
       ) %>%
       select(.data$dataset, .data$variable, .data$key_seq,
-             .data$order, .data$keep, .data$core, .data$supp_flag,
-             -.data$mandatory, -.data$oid)
+             .data$order, .data$mandatory, .data$core, .data$supp_flag,
+             .data$mandatory, -.data$oid)
 }
 
 

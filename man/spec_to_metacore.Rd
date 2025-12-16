@@ -9,8 +9,9 @@ spec_to_metacore(path, quiet = FALSE, where_sep_sheet = TRUE)
 \arguments{
 \item{path}{string of file location}
 
-\item{quiet}{Option to quietly load in, this will suppress warnings, but not
-errors}
+\item{quiet}{Option to quietly load in; when \code{TRUE}, messages, warnings,
+and other non-error console output are suppressed, but errors are still
+raised.}
 
 \item{where_sep_sheet}{Option to tell if the where is in a separate sheet,
 like in older p21 specs or in a single sheet like newer p21 specs}

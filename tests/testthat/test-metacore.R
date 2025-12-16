@@ -56,7 +56,7 @@ test_that("Can pass metacore NULL df's", {
    dummy <- list(character(), character(), numeric(), numeric(),
                  logical(), character(), logical())
    names(dummy) <- c("dataset", "variable", "key_seq", "order",
-                     "keep", "core", "supp_flag")
+                     "mandatory", "core", "supp_flag")
    dummy <- as_tibble(dummy)
    #Because of the labels the dfs are slightly different so checking
    # the insides match
@@ -151,4 +151,174 @@ test_that("get_keys works", {
          add_labs(variable = "Variable Name",
                   key_seq = "Sequence Key")
    )
+})
+
+test_that("spec_to_metacore() is silent when quiet = TRUE", {
+   test  <- metacore_example("p21_mock.xlsx")
+
+   expect_silent({
+      out <- spec_to_metacore(test , quiet = TRUE)
+   })
+
+   expect_true(inherits(out, "Metacore"))
+})
+
+test_that("spec_to_metacore() quiet = TRUE is silent and returns Metacore", {
+   path_try <- try(metacore_example("p21_mock.xlsx"), silent = TRUE)
+   if (inherits(path_try, "try-error") || path_try == "") {
+      skip("p21_mock.xlsx example spec not available")
+   }
+   path <- path_try
+
+   expect_silent({
+      mc_q <- spec_to_metacore(path, quiet = TRUE)
+      expect_true(inherits(mc_q, "Metacore"))
+   })
+})
+
+test_that("spec_to_metacore() quiet = TRUE returns invisibly", {
+   path_try <- try(metacore_example("p21_mock.xlsx"), silent = TRUE)
+   if (inherits(path_try, "try-error") || path_try == "") {
+      skip("p21_mock.xlsx example spec not available")
+   }
+   path <- path_try
+
+   expect_invisible(
+      spec_to_metacore(path, quiet = TRUE)
+   )
+})
+
+test_that("spec_to_metacore() quiet = FALSE returns a Metacore object", {
+   path_try <- try(metacore_example("p21_mock.xlsx"), silent = TRUE)
+   if (inherits(path_try, "try-error") || path_try == "") {
+      skip("p21_mock.xlsx example spec not available")
+   }
+   path <- path_try
+
+   # We don't assert on printed output here; just on the return type.
+   mc_n <- suppressWarnings(spec_to_metacore(path, quiet = FALSE))
+   expect_true(inherits(mc_n, "Metacore"))
+})
+
+test_that("spec_to_metacore() returns structurally similar objects for quiet TRUE/FALSE", {
+   path_try <- try(metacore_example("p21_mock.xlsx"), silent = TRUE)
+   if (inherits(path_try, "try-error") || path_try == "") {
+      skip("p21_mock.xlsx example spec not available")
+   }
+   path <- path_try
+
+   mc_q <- suppressWarnings(spec_to_metacore(path, quiet = TRUE))
+   mc_n <- suppressWarnings(spec_to_metacore(path, quiet = FALSE))
+
+   expect_true(inherits(mc_q, "Metacore"))
+   expect_true(inherits(mc_n, "Metacore"))
+
+   # Basic structural check: same component tables
+   expect_identical(names(mc_q$data), names(mc_n$data))
+})
+
+
+test_that("select_dataset() is silent when quiet = TRUE", {
+   test <- spec_to_metacore(metacore_example("p21_mock.xlsx"), quiet = TRUE)
+   subset <- test %>% select_dataset("DM", quiet = TRUE)
+   expect_silent({
+      subset <- test %>% select_dataset("DM", quiet = TRUE)
+   })
+
+})
+
+test_that("metacore() quiet = TRUE is silent and returns Metacore object", {
+
+   # simplest small valid inputs
+   ds_spec  <- tibble::tibble(dataset = "AE", structure = "OneRowPerRecord", label = "Adverse Events")
+   ds_vars  <- tibble::tibble(dataset = "AE", variable = "AETERM", keep = TRUE,
+                              key_seq = 1L, order = 1L, core = "Req", supp_flag = FALSE)
+   var_spec <- tibble::tibble(variable = "AETERM", label = "Reported Term", length = 200L,
+                              type = "character", common = NA_character_, format = NA_character_)
+   value_spec <- tibble::tibble(dataset = "AE", variable = "AETERM", where = NA_character_,
+                                type = "character", sig_dig = NA_integer_,
+                                code_id = NA_character_, origin = "Collected", derivation_id = NA_integer_)
+   derivations <- tibble::tibble(derivation_id = integer(), derivation = character())
+   codelist <- tibble::tibble(code_id = character(), name = character(), type = character(), codes = list())
+   supp <- tibble::tibble(dataset = character(), variable = character(), idvar = character(), qeval = character())
+
+   expect_silent({
+      mc_q <- metacore(
+         ds_spec, ds_vars, var_spec, value_spec, derivations, codelist, supp,
+         quiet = TRUE
+      )
+      expect_true(inherits(mc_q, "Metacore"))
+   })
+})
+
+test_that("metacore() quiet = TRUE returns invisibly", {
+
+   ds_spec  <- tibble::tibble(dataset = "AE", structure = "Row", label = "AE")
+   ds_vars  <- tibble::tibble(dataset = "AE", variable = "AETERM", keep = TRUE,
+                              key_seq = 1L, order = 1L, core = "Req", supp_flag = FALSE)
+   var_spec <- tibble::tibble(variable = "AETERM", label = "Term", length = 200L,
+                              type = "character", common = NA_character_, format = NA_character_)
+   value_spec <- tibble::tibble(dataset = "AE", variable = "AETERM", where = NA_character_,
+                                type = "character", sig_dig = NA_integer_,
+                                code_id = NA_character_, origin = "Collected", derivation_id = NA_integer_)
+
+   expect_invisible(
+      metacore(
+         ds_spec, ds_vars, var_spec, value_spec,
+         derivations = tibble::tibble(),
+         codelist = tibble::tibble(),
+         supp = tibble::tibble(),
+         quiet = TRUE
+      )
+   )
+})
+
+test_that("metacore() quiet = FALSE returns a Metacore object", {
+
+   ds_spec  <- tibble::tibble(dataset = "AE", structure = "Row", label = "AE")
+   ds_vars  <- tibble::tibble(dataset = "AE", variable = "AETERM", keep = TRUE,
+                              key_seq = 1L, order = 1L, core = "Req", supp_flag = FALSE)
+   var_spec <- tibble::tibble(variable = "AETERM", label = "Term", length = 200L,
+                              type = "character", common = NA_character_, format = NA_character_)
+   value_spec <- tibble::tibble(dataset = "AE", variable = "AETERM", where = NA_character_,
+                                type = "character", sig_dig = NA_integer_,
+                                code_id = NA_character_, origin = "Collected", derivation_id = NA_integer_)
+
+   mc <- suppressWarnings(
+      metacore(
+         ds_spec, ds_vars, var_spec, value_spec,
+         derivations = tibble::tibble(),
+         codelist    = tibble::tibble(),
+         supp        = tibble::tibble(),
+         quiet = FALSE
+      )
+   )
+
+   expect_true(inherits(mc, "Metacore"))
+})
+
+test_that("metacore() quiet TRUE/FALSE paths produce similar structure", {
+
+   ds_spec  <- tibble::tibble(dataset = "AE", structure = "Row", label = "AE")
+   ds_vars  <- tibble::tibble(dataset = "AE", variable = "AETERM", keep = TRUE,
+                              key_seq = 1L, order = 1L, core = "Req", supp_flag = FALSE)
+   var_spec <- tibble::tibble(variable = "AETERM", label = "Term", length = 200L,
+                              type = "character", common = NA_character_, format = NA_character_)
+   value_spec <- tibble::tibble(dataset = "AE", variable = "AETERM", where = NA_character_,
+                                type = "character", sig_dig = NA_integer_,
+                                code_id = NA_character_, origin = "Collected", derivation_id = NA_integer_)
+
+   mc_q <- suppressWarnings(
+      metacore(ds_spec, ds_vars, var_spec, value_spec,
+               tibble::tibble(), tibble::tibble(), tibble::tibble(),
+               quiet = TRUE)
+   )
+
+   mc_n <- suppressWarnings(
+      metacore(ds_spec, ds_vars, var_spec, value_spec,
+               tibble::tibble(), tibble::tibble(), tibble::tibble(),
+               quiet = FALSE)
+   )
+
+   expect_identical(names(mc_q$data), names(mc_n$data))
 })

@@ -50,3 +50,67 @@ test_that("metacore example returns file options", {
                sort(c("ADaM_define_CDISC_pilot3.xml", "mock_spec.xlsx", "p21_mock.xlsx", "pilot_ADaM.rda",
                       "pilot_SDTM.rda", "SDTM_define.xml", "SDTM_spec_CDISC_pilot.xlsx")))
 })
+test_that("quiet_if_true returns expression result when quiet = FALSE", {
+   result <- quiet_if_true({ 1 + 1 }, quiet = FALSE)
+   expect_equal(result, 2)
+})
+
+test_that("quiet_if_true suppresses messages when quiet = TRUE", {
+   expect_silent(
+      quiet_if_true({
+         message("this should not print")
+         10
+      }, quiet = TRUE)
+   )
+})
+
+test_that("quiet_if_true suppresses warnings when quiet = TRUE", {
+   expect_silent(
+      quiet_if_true({
+         warning("this should not print")
+         5
+      }, quiet = TRUE)
+   )
+})
+
+test_that("quiet_if_true suppresses cli output when quiet = TRUE", {
+   skip_if_not_installed("cli")
+
+   expect_silent(
+      quiet_if_true({
+         cli::cli_alert_info("cli output should not print")
+         cli::cli_rule("Suppressed rule")
+         cli::cli_bullets(c("• Bullet should be suppressed"))
+         42
+      }, quiet = TRUE)
+   )
+})
+
+test_that("quiet_if_true does not suppress errors when quiet = TRUE", {
+   expect_error(
+      quiet_if_true({
+         stop("this error must propagate")
+      }, quiet = TRUE),
+      "this error must propagate"
+   )
+})
+
+test_that("quiet_if_true still evaluates side-effect code when quiet = TRUE", {
+   env <- new.env(parent = emptyenv())
+   env$x <- 0
+
+   quiet_if_true({
+      env$x <- 99
+   }, quiet = TRUE)
+
+   expect_equal(env$x, 99)
+})
+
+test_that("quiet_if_true evaluates expr normally when quiet = FALSE", {
+   x <- quiet_if_true({
+      message("this should print normally")
+      123
+   }, quiet = FALSE)
+
+   expect_equal(x, 123)
+})

@@ -120,3 +120,17 @@ metacore_example <- function(file = NULL) {
       system.file("extdata", file, package = "metacore", mustWork = TRUE)
    }
 }
+
+#' Conditionally suppress messages and warnings
+#' @keywords internal
+quiet_if_true <- function(expr, quiet = FALSE) {
+   if (isTRUE(quiet)) {
+      suppressWarnings(
+         suppressMessages(
+            force(expr)
+         )
+      )
+   } else {
+      force(expr)
+   }
+}
