@@ -1,4 +1,5 @@
-# metacore 0.3.0
+# Metacore 0.3.0
+- Added extended function of `quiet` argument in `spec_to_metacore()`, `define_to_metacore()`, and `select_dataset` functions to suppress optional messages, notes and warnings [#122](https://github.com/atorus-research/metacore/issues/122)
 - `keep` variable in `ds_vars` table has been changed to `mandatory` to better reflect the CDISC standard terminology. 
 
 # Metacore 0.2.1

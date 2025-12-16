@@ -332,56 +332,75 @@ MetaCore <- R6::R6Class("Metacore",
 #'
 #' @export
 #'
-metacore <- function(ds_spec = tibble(dataset = character(), structure = character(), label = character()),
-                     ds_vars = tibble(dataset = character(), variable = character(), mandatory = logical(),
-                                      key_seq = integer(), order = integer(), core = character(),
-                                      supp_flag = logical()),
-                     var_spec = tibble(variable = character(), label = character(), length = integer(),
-                                       type = character(), common = character(), format = character()),
-                     value_spec = tibble(dataset = character(),
-                                         variable = character(),
-                                         where  = character(),
-                                         type = character(),
-                                         sig_dig = integer(),
-                                         code_id = character(),
-                                         origin = character(),
-                                         derivation_id = integer()),
-                     derivations = tibble(derivation_id = integer(), derivation = character()),
-                     codelist = tibble(code_id = character(), name = character(), type = character(), codes = list()),
-                     supp = tibble(dataset = character(), variable = character(), idvar = character(), qeval = character()),
-                     quiet = FALSE) {
-   # Check if there are any empty datasets that need adding
-   is_empty_df <- as.list(environment()) %>%
-      keep(is.null)
-   if(length(is_empty_df) > 0) {
-      # Adding empty datasets
-      to_replace <- all_message() %>%
-         #get the type each variable needs to be
-         mutate(convert =
-                   map(.data$test, function(x){
-                      if(identical(x, .Primitive("is.numeric"))){
-                         numeric()
-                      } else if(identical(x, .Primitive("is.logical"))){
-                         logical()
-                      } else {
-                         character()
-                      }
-                   })) %>%
-         filter(dataset %in% names(is_empty_df)) %>%
-         group_by(dataset) %>%
-         group_split()
-      replaced <- to_replace %>%
-         map(function(df){
-            names(df$convert) <- df$var
-            df$convert %>%
-               as_tibble()
-         })
-      names(replaced) <- to_replace %>% map_chr(~unique(.$dataset))
-      list2env(replaced, environment())
-   }
-   MetaCore$new(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist, supp, quiet)
-}
+metacore <- function(
+      ds_spec = tibble(dataset = character(), structure = character(), label = character()),
+      ds_vars = tibble(dataset = character(), variable = character(), mandatory = logical(),
+                       key_seq = integer(), order = integer(), core = character(),
+                       supp_flag = logical()),
+      var_spec = tibble(variable = character(), label = character(), length = integer(),
+                        type = character(), common = character(), format = character()),
+      value_spec = tibble(dataset = character(),
+                          variable = character(),
+                          where  = character(),
+                          type = character(),
+                          sig_dig = integer(),
+                          code_id = character(),
+                          origin = character(),
+                          derivation_id = integer()),
+      derivations = tibble(derivation_id = integer(), derivation = character()),
+      codelist = tibble(code_id = character(), name = character(), type = character(), codes = list()),
+      supp = tibble(dataset = character(), variable = character(), idvar = character(), qeval = character()),
+      quiet = FALSE
+) {
 
+   test <- quiet_if_true({
+
+      is_empty_df <- as.list(environment()) %>%
+         keep(is.null)
+
+      if (length(is_empty_df) > 0) {
+         to_replace <- all_message() %>%
+            mutate(
+               convert = map(.data$test, function(x) {
+                  if (identical(x, .Primitive("is.numeric"))) {
+                     numeric()
+                  } else if (identical(x, .Primitive("is.logical"))) {
+                     logical()
+                  } else {
+                     character()
+                  }
+               })
+            ) %>%
+            filter(.data$dataset %in% names(is_empty_df)) %>%
+            group_by(.data$dataset) %>%
+            group_split()
+
+         replaced <- to_replace %>%
+            map(function(df) {
+               names(df$convert) <- df$var
+               df$convert %>%
+                  as_tibble()
+            })
+
+         names(replaced) <- to_replace %>% map_chr(~ unique(.x$dataset))
+         list2env(replaced, environment())
+      }
+
+      MetaCore$new(
+         ds_spec  = ds_spec,
+         ds_vars  = ds_vars,
+         var_spec = var_spec,
+         value_spec = value_spec,
+         derivations = derivations,
+         codelist = codelist,
+         supp = supp,
+         quiet = quiet
+      )
+
+   }, quiet = quiet)
+
+   if (quiet) invisible(test) else test
+}
 
 
 #' Select metacore object to single dataset
@@ -394,14 +413,14 @@ metacore <- function(ds_spec = tibble(dataset = character(), structure = charact
 #'
 #' @return a filtered subset of the metacore object
 #' @export
-#'
 select_dataset <- function(.data, dataset, simplify = FALSE, quiet = FALSE) {
 
    cl <- .data$clone()
    cl$metacore_filter(dataset)
 
    if (simplify) {
-      test <-  suppressMessages(
+
+      test <- quiet_if_true({
          list(
             cl$ds_vars,
             cl$var_spec,
@@ -411,13 +430,19 @@ select_dataset <- function(.data, dataset, simplify = FALSE, quiet = FALSE) {
             cl$supp
          ) %>%
             reduce(left_join)
-      )
-   } else {
-      if (!quiet) DatasetMeta$new(metacore = cl)
-      else suppressWarnings(DatasetMeta$new(metacore = cl, quiet = quiet))
-   }
-}
+      }, quiet = quiet)
 
+   } else {
+
+      test <- quiet_if_true(
+         DatasetMeta$new(metacore = cl, quiet = quiet),
+         quiet = quiet
+      )
+
+   }
+
+   if (quiet) invisible(test) else test
+}
 
 
 #' Get Control Term
