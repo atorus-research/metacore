@@ -107,7 +107,7 @@ The ds_vars table has 7 columns:
 
 -   order: integer controlling the column order of each dataset
 
--   keep: boolean to determine if the variable is needed
+-   mandatory: from Define-XML v2.1. A Boolean value indicating if NULL values are permitted. `mandatory = TRUE` indicates that NULL values are not permitted.
 
 -   core: ADaM core (Expected, Required, Permissible)
 
@@ -127,7 +127,7 @@ doc$Variables %>% head()
 ds_vars<- spec_type_to_ds_vars(doc, cols = c("dataset" = "Domain",
                                              "variable" = "[V|v]ariable [N|n]ame",
                                              "order" = "[V|v]ariable [O|o]rder",
-                                             "keep" = "[M|m]andatory"),
+                                             "mandatory" = "[M|m]andatory"),
                                key_seq_cols = c("dataset" = "Domain Name",
                                                 "key_seq" = "Key"),
                                sheet = "[V|v]ar|Domains") 

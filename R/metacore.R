@@ -30,7 +30,7 @@ MetaCore_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivati
                variable = "Variable Name",
                key_seq = "Sequence Key",
                order = "Variable Order",
-               keep = "Keep (Boolean)",
+               mandatory = "Mandatory (Boolean)",
                core = "ADaM core (Expected, Required, Permissible)",
                supp_flag = "Supplemental Flag")
 
@@ -250,7 +250,7 @@ MetaCore <- R6::R6Class("Metacore",
                            .ds_vars = tibble(
                               dataset = character(),
                               variable = character(),
-                              keep = logical(),
+                              mandatory = logical(),
                               key_seq = integer(),
                               order = integer(),
                               core = character(),
@@ -334,7 +334,7 @@ MetaCore <- R6::R6Class("Metacore",
 #'
 metacore <- function(
       ds_spec = tibble(dataset = character(), structure = character(), label = character()),
-      ds_vars = tibble(dataset = character(), variable = character(), keep = logical(),
+      ds_vars = tibble(dataset = character(), variable = character(), mandatory = logical(),
                        key_seq = integer(), order = integer(), core = character(),
                        supp_flag = logical()),
       var_spec = tibble(variable = character(), label = character(), length = integer(),

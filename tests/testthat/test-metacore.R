@@ -56,7 +56,7 @@ test_that("Can pass metacore NULL df's", {
    dummy <- list(character(), character(), numeric(), numeric(),
                  logical(), character(), logical())
    names(dummy) <- c("dataset", "variable", "key_seq", "order",
-                     "keep", "core", "supp_flag")
+                     "mandatory", "core", "supp_flag")
    dummy <- as_tibble(dummy)
    #Because of the labels the dfs are slightly different so checking
    # the insides match

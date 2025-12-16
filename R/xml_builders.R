@@ -90,13 +90,13 @@ xml_to_ds_vars <- function(doc) {
       }) %>%
       mutate(
          variable = id_to_var(.data$oid),
-         keep = .data$mandatory == "Yes",
+         mandatory = .data$mandatory == "Yes",
          core = NA_character_,
          supp_flag = NA
       ) %>%
       select(.data$dataset, .data$variable, .data$key_seq,
-             .data$order, .data$keep, .data$core, .data$supp_flag,
-             -.data$mandatory, -.data$oid)
+             .data$order, .data$mandatory, .data$core, .data$supp_flag,
+             .data$mandatory, -.data$oid)
 }
 
 
