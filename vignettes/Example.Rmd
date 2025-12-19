@@ -55,7 +55,7 @@ Something to note about a metacore object is that it inherently holds all data f
 subset <- test %>% select_dataset("DM")
 subset$ds_spec
 
-# a simplified dataframe 
+# a simplified dataframe
 subset_t <- test %>% select_dataset("DM", simplify = TRUE)
 ```
 
