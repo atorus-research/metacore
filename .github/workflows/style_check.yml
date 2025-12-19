@@ -1,0 +1,20 @@
+name: Style
+on:
+  pull_request: {branches: ['main']}
+
+jobs:
+  Style:
+    runs-on: ubuntu-latest
+    container: {image: "rocker/tidyverse:4.2.1"}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+      - name: Install styler
+        run: install.packages("styler")
+        shell: Rscript {0}
+      - name: styler version
+        run: packageVersion("styler")
+        shell: Rscript {0}
+      - name: Run styler
+        run: styler::style_dir(dry = "fail")
+        shell: Rscript {0}
