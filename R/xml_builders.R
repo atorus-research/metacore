@@ -8,10 +8,8 @@
 #'
 #' @return Metacore/DataDef object
 #' @export
-define_to_metacore <- function(path, quiet = FALSE){
-
-   test <- quiet_if_true({
-
+define_to_metacore <- function(path, quiet = FALSE, verbose = "message"){
+   with_verbosity({
       xml <- read_xml(path)
       xml_ns_strip(xml)
 
@@ -35,10 +33,7 @@ define_to_metacore <- function(path, quiet = FALSE){
          codelist = code_list,
          quiet = quiet
       )
-
-   }, quiet = quiet)
-
-   if (quiet) invisible(test) else test
+   }, quiet, verbose)
 }
 
 #' XML to Data Set Spec
