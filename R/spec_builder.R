@@ -87,7 +87,7 @@ spec_type <- function(path){
 read_all_sheets <- function(path){
    sheets <- excel_sheets(path)
    all_dat <- sheets %>%
-      map(~read_excel(path, sheet = ., col_types = "text"))
+      map(~read_excel(path, sheet = ., col_types = "text", progress = FALSE))
    names(all_dat) <- sheets
    all_dat
 }
