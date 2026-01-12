@@ -291,11 +291,10 @@ MetaCore <- R6::R6Class("Metacore",
                            .ds_labels = list(),
 
                            .greet = function(quiet = FALSE) {
-                              cli_par()
+                              cli_text()
                               cli_alert_success("Metadata successfully imported")
                               if (quiet) cli_inform(c("i" = col_red("Dataset metadata imported with suppressed warnings")))
                               cli_inform(c("i" = "To use the {.obj Metacore} object with {.pkg metatools} package, first subset a dataset using {.fn metacore::select_dataset}"))
-                              cli_end()
                            }
                         ),
 
@@ -408,15 +407,14 @@ metacore <- function(
 #'
 #' @return a filtered subset of the metacore object
 #' @export
-select_dataset <- function(.data, dataset, simplify = FALSE, quiet = FALSE) {
+select_dataset <- function(.data, dataset, simplify = FALSE, quiet = FALSE, verbose = "message") {
 
-   cl <- .data$clone()
-   cl$metacore_filter(dataset)
+   with_verbosity({
+      cl <- .data$clone()
+      cl$metacore_filter(dataset)
 
-   if (simplify) {
-
-      test <- quiet_if_true({
-         list(
+      if (simplify) {
+         test <- list(
             cl$ds_vars,
             cl$var_spec,
             cl$value_spec,
@@ -425,18 +423,10 @@ select_dataset <- function(.data, dataset, simplify = FALSE, quiet = FALSE) {
             cl$supp
          ) %>%
             reduce(left_join)
-      }, quiet = quiet)
-
-   } else {
-
-      test <- quiet_if_true(
-         DatasetMeta$new(metacore = cl, quiet = quiet),
-         quiet = quiet
-      )
-
-   }
-
-   if (quiet) invisible(test) else test
+      } else {
+         test <- DatasetMeta$new(metacore = cl, quiet = quiet)
+      }
+   }, quiet, verbose)
 }
 
 
