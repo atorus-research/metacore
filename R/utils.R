@@ -121,16 +121,42 @@ metacore_example <- function(file = NULL) {
    }
 }
 
-#' Conditionally suppress messages and warnings
-#' @keywords internal
-quiet_if_true <- function(expr, quiet = FALSE) {
-   if (isTRUE(quiet)) {
-      suppressWarnings(
-         suppressMessages(
-            force(expr)
-         )
+#' @export
+with_verbosity <- function(expr, quiet = FALSE, verbose = "message") {
+   expr <- substitute(expr)
+   verbose <- validate_verbose(verbose)
+
+   if (quiet | verbose == "silent") {
+      return(withCallingHandlers(
+         eval(expr, parent.frame()),
+         message = function(m) invokeRestart("muffleMessage"),
+         warning = function(w) invokeRestart("muffleWarning")
+      ))
+
+   } else if (verbose == "warn") {
+      return(withCallingHandlers(
+         eval(expr, parent.frame()),
+         message = function(m) invokeRestart("muffleMessage")
+      ))
+
+   } else if (verbose == "message") {
+      return(
+         eval(expr, envir = parent.frame())
       )
-   } else {
-      force(expr)
    }
+}
+
+#' Validate verbose parameter
+#' @param verbose Verbosity level to validate
+#' @noRd
+validate_verbose <- function(verbose, arg = rlang::caller_arg(verbose), call = rlang::caller_env()) {
+   choices <- c("message", "warn", "silent")
+   tryCatch(
+      match.arg(verbose, choices),
+      error = function(e) {
+         cli_abort(c(
+            "x" = "{.arg {arg}} should be one of: {cli::ansi_collapse(choices, last = ', ')}"
+         ), call = call)
+      }
+   )
 }
