@@ -18,7 +18,7 @@
 #' @noRd
 #'
 #' @importFrom stringr str_to_lower
-MetaCore_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist, supp, quiet = FALSE){
+MetaCore_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist, supp, quiet = FALSE, verbose = "message") {
 
    private$.ds_spec <- ds_spec %>%
       add_labs(dataset = "Dataset Name",
@@ -80,13 +80,8 @@ MetaCore_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivati
    private$.ds_names <- ds_spec %>% pull(dataset)
 
    private$.ds_labels <- ds_spec %>% pull(label)
-   if(quiet){
-      suppressWarnings(self$validate())
-   }
-   else {
-      self$validate()
-   }
 
+   self$validate()
 
    if (inherits_only(self, c("Metacore", "R6"))) { private$.greet(quiet) }
 }
@@ -127,7 +122,7 @@ MetaCore_validate <-  function() {
          nrow(private$.derivations) == 0 &
          nrow(private$.codelist) == 0 &
          nrow(private$.supp) == 0 ){
-         cli_warn("Other checks were not preformed, because all datasets are empty",
+         cli_warn("Other checks were not performed, because all datasets are empty",
                   call. = FALSE)
       } else {
          check_columns(private$.ds_spec,
@@ -150,7 +145,7 @@ MetaCore_validate <-  function() {
       }
 
    } else {
-      cli_warn("Other checks were not preformed, because column names were incorrect",
+      cli_warn("Other checks were not performed, because column names were incorrect",
                call. = FALSE)
    }
 }
@@ -350,10 +345,11 @@ metacore <- function(
       derivations = tibble(derivation_id = integer(), derivation = character()),
       codelist = tibble(code_id = character(), name = character(), type = character(), codes = list()),
       supp = tibble(dataset = character(), variable = character(), idvar = character(), qeval = character()),
-      quiet = FALSE
+      quiet = FALSE,
+      verbose = "message"
 ) {
 
-   test <- quiet_if_true({
+  with_verbosity({
 
       is_empty_df <- as.list(environment()) %>%
          keep(is.null)
@@ -394,12 +390,11 @@ metacore <- function(
          derivations = derivations,
          codelist = codelist,
          supp = supp,
-         quiet = quiet
+         quiet = quiet,
+         verbose = verbose
       )
 
-   }, quiet = quiet)
-
-   if (quiet) invisible(test) else test
+   }, quiet, verbose)
 }
 
 
