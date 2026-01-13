@@ -10,7 +10,14 @@
 #'   and other non-error console output are suppressed, but errors are still
 #'   raised.
 #' @param where_sep_sheet Option to tell if the where is in a separate sheet,
-#'   like in older p21 specs or in a single sheet like newer p21 specs
+#'   like in older p21 specs or in a single sheet like newer p21 specs.
+#' @param verbose A character string specifying the desired verbosity level.
+#'   Must be one of:
+#'   \describe{
+#'     \item{"message"}{ (default) Messages and warnings are handled normally.}
+#'     \item{"warn"}{Messages are suppressed, but warnings are allowed.}
+#'     \item{"silent"}{Both messages and warnings are suppressed.}
+#'   }
 #'
 #' @return given a spec document it returns a metacore object
 #' @export

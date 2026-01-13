@@ -5,6 +5,13 @@
 #' @param path location of the define xml as a string
 #' @param quiet Option to quietly load in; when `TRUE`, messages and warnings
 #'   are suppressed, but errors are still raised.
+#' @param verbose A character string specifying the desired verbosity level.
+#'   Must be one of:
+#'   \describe{
+#'     \item{"message"}{ (default) Messages and warnings are handled normally.}
+#'     \item{"warn"}{Messages are suppressed, but warnings are allowed.}
+#'     \item{"silent"}{Both messages and warnings are suppressed.}
+#'   }
 #'
 #' @return Metacore/DataDef object
 #' @export
