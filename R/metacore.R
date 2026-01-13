@@ -13,6 +13,13 @@
 #' @param supp contains the idvar and qeval information for supplemental variables
 #' @param quiet Option to quietly load in, this will suppress warnings, but not
 #'   errors. Expects either `TRUE` or `FALSE`. Default behaviour is `FALSE`.
+#' @param verbose A character string specifying the desired verbosity level.
+#'   Must be one of:
+#'   \describe{
+#'     \item{"message"}{ (default) Messages and warnings are handled normally.}
+#'     \item{"warn"}{Messages are suppressed, but warnings are allowed.}
+#'     \item{"silent"}{Both messages and warnings are suppressed.}
+#'   }
 #'
 #' @family Metacore
 #' @noRd
@@ -321,34 +328,85 @@ MetaCore <- R6::R6Class("Metacore",
 #' @param supp contains the idvar and qeval information for supplemental variables
 #' @param quiet Option to quietly load in, this will suppress warnings, but not
 #'   errors. Expects either `TRUE` or `FALSE`. Default behaviour is `FALSE`.
+#' @param verbose A character string specifying the desired verbosity level.
+#'   Must be one of:
+#'   \describe{
+#'     \item{"message"}{ (default) Messages and warnings are handled normally.}
+#'     \item{"warn"}{Messages are suppressed, but warnings are allowed.}
+#'     \item{"silent"}{Both messages and warnings are suppressed.}
+#'   }
 #'
 #' @family Metacore
 #'
 #' @export
-#'
 metacore <- function(
-      ds_spec = tibble(dataset = character(), structure = character(), label = character()),
-      ds_vars = tibble(dataset = character(), variable = character(), mandatory = logical(),
-                       key_seq = integer(), order = integer(), core = character(),
-                       supp_flag = logical()),
-      var_spec = tibble(variable = character(), label = character(), length = integer(),
-                        type = character(), common = character(), format = character()),
-      value_spec = tibble(dataset = character(),
-                          variable = character(),
-                          where  = character(),
-                          type = character(),
-                          sig_dig = integer(),
-                          code_id = character(),
-                          origin = character(),
-                          derivation_id = integer()),
-      derivations = tibble(derivation_id = integer(), derivation = character()),
-      codelist = tibble(code_id = character(), name = character(), type = character(), codes = list()),
-      supp = tibble(dataset = character(), variable = character(), idvar = character(), qeval = character()),
+      ds_spec = tibble(
+         dataset = character(),
+         structure = character(),
+         label = character()
+      ),
+      ds_vars = tibble(
+         dataset = character(),
+         variable = character(),
+         keep = NULL,
+         mandatory = logical(),
+         key_seq = integer(),
+         order = integer(),
+         core = character(),
+         supp_flag = logical()
+      ),
+      var_spec = tibble(
+         variable = character(),
+         label = character(),
+         length = integer(),
+         type = character(),
+         common = character(),
+         format = character()
+      ),
+      value_spec = tibble(
+         dataset = character(),
+         variable = character(),
+         where  = character(),
+         type = character(),
+         sig_dig = integer(),
+         code_id = character(),
+         origin = character(),
+         derivation_id = integer()
+      ),
+      derivations = tibble(
+         derivation_id = integer(),
+         derivation = character()
+      ),
+      codelist = tibble(
+         code_id = character(),
+         name = character(),
+         type = character(),
+         codes = list()
+      ),
+      supp = tibble(
+         dataset = character(),
+         variable = character(),
+         idvar = character(),
+         qeval = character()
+      ),
       quiet = FALSE,
       verbose = "message"
 ) {
 
-  with_verbosity({
+   with_verbosity({
+
+      # Signal deprecation warning for ds_vars$keep column. This cannot be handled by
+      # regular `lifecycle::deprecate_*` functionality as it is a column name of an
+      # argument that has been changed, not the argument itself.
+      if ("keep" %in% names(ds_vars)) {
+         cli_warn(c("The column `ds_vars$keep` in the `ds_vars` table was deprecated
+as of 0.3.0 in favour of `ds_vars$mandatory and will be removed in a future release.
+The input for the supplied column `keep` has been mapped to the new column `mandatory`."))
+
+         ds_vars <- ds_vars %>%
+            mutate(mandatory = keep) %>%
+            select(-keep)
+      }
 
       is_empty_df <- as.list(environment()) %>%
          keep(is.null)
@@ -404,6 +462,13 @@ metacore <- function(
 #' @param simplify return a single dataframe
 #' @param quiet Option to quietly load in, this will suppress warnings, but not
 #'   errors. Expects either `TRUE` or `FALSE`. Default behaviour is `FALSE`.
+#' @param verbose A character string specifying the desired verbosity level.
+#'   Must be one of:
+#'   \describe{
+#'     \item{"message"}{ (default) Messages and warnings are handled normally.}
+#'     \item{"warn"}{Messages are suppressed, but warnings are allowed.}
+#'     \item{"silent"}{Both messages and warnings are suppressed.}
+#'   }
 #'
 #' @return a filtered subset of the metacore object
 #' @export
