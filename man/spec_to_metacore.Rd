@@ -4,17 +4,30 @@
 \alias{spec_to_metacore}
 \title{Specification document to metacore object}
 \usage{
-spec_to_metacore(path, quiet = FALSE, where_sep_sheet = TRUE)
+spec_to_metacore(
+  path,
+  quiet = deprecated(),
+  where_sep_sheet = TRUE,
+  verbose = "message"
+)
 }
 \arguments{
 \item{path}{string of file location}
 
-\item{quiet}{Option to quietly load in; when \code{TRUE}, messages, warnings,
-and other non-error console output are suppressed, but errors are still
-raised.}
+\item{quiet}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#superseded}{\figure{lifecycle-superseded.svg}{options: alt='[Superseded]'}}}{\strong{[Superseded]}} Option to quietly load in, this
+will suppress warnings, but not errors. Expects either \code{TRUE} or \code{FALSE}.
+Default behaviour is \code{FALSE}.}
 
 \item{where_sep_sheet}{Option to tell if the where is in a separate sheet,
-like in older p21 specs or in a single sheet like newer p21 specs}
+like in older p21 specs or in a single sheet like newer p21 specs.}
+
+\item{verbose}{A character string specifying the desired verbosity level.
+Must be one of:
+\describe{
+\item{"message"}{ (default) Messages and warnings are handled normally.}
+\item{"warn"}{Messages are suppressed, but warnings are allowed.}
+\item{"silent"}{Both messages and warnings are suppressed.}
+}}
 }
 \value{
 given a spec document it returns a metacore object

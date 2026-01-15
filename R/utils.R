@@ -180,7 +180,7 @@ metacore_example <- function(file = NULL) {
 #'   warning("This warning is also suppressed")
 #'   4 + 4
 #' }, quiet = TRUE)
-#' @export
+#' @noRd
 with_verbosity <- function(expr, quiet = FALSE, verbose = "message") {
    expr <- substitute(expr)
    verbose <- validate_verbose(verbose)
