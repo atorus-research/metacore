@@ -6,9 +6,9 @@
 #' be used as building blocks for bespoke specification documents.
 #'
 #' @param path string of file location
-#' @param quiet Option to quietly load in; when `TRUE`, messages, warnings,
-#'   and other non-error console output are suppressed, but errors are still
-#'   raised.
+#' @param quiet `r lifecycle::badge("superseded")` Option to quietly load in, this
+#'   will suppress warnings, but not errors. Expects either `TRUE` or `FALSE`.
+#'   Default behaviour is `FALSE`.
 #' @param where_sep_sheet Option to tell if the where is in a separate sheet,
 #'   like in older p21 specs or in a single sheet like newer p21 specs.
 #' @param verbose A character string specifying the desired verbosity level.
@@ -21,7 +21,14 @@
 #'
 #' @return given a spec document it returns a metacore object
 #' @export
-spec_to_metacore <- function(path, quiet = FALSE, where_sep_sheet = TRUE, verbose = "message") {
+spec_to_metacore <- function(path, quiet = deprecated(), where_sep_sheet = TRUE, verbose = "message") {
+
+   # Check if user has supplied `quiet` instead of `verbose`
+   if (lifecycle::is_present(quiet)) {
+      deprecate_soft(when = "0.3.0", what = "spec_to_metacore(quiet)", with = "spec_to_metacore(verbose)")
+   }
+   else quiet <- FALSE  # Else deal with deprecated argument for compatability
+
    with_verbosity({
       doc <- read_all_sheets(path)
 
