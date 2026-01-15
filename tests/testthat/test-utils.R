@@ -50,67 +50,216 @@ test_that("metacore example returns file options", {
                sort(c("ADaM_define_CDISC_pilot3.xml", "mock_spec.xlsx", "p21_mock.xlsx", "pilot_ADaM.rda",
                       "pilot_SDTM.rda", "SDTM_define.xml", "SDTM_spec_CDISC_pilot.xlsx")))
 })
-test_that("quiet_if_true returns expression result when quiet = FALSE", {
-   result <- quiet_if_true({ 1 + 1 }, quiet = FALSE)
-   expect_equal(result, 2)
-})
 
-test_that("quiet_if_true suppresses messages when quiet = TRUE", {
+test_that("with_verbosity suppresses messages when verbose = `silent`", {
    expect_silent(
-      quiet_if_true({
+      with_verbosity({
          message("this should not print")
-         10
-      }, quiet = TRUE)
+      }, verbose = "silent")
    )
 })
 
-test_that("quiet_if_true suppresses warnings when quiet = TRUE", {
+test_that("with_verbosity suppresses warnings when verbose = `silent`", {
    expect_silent(
-      quiet_if_true({
+      with_verbosity({
          warning("this should not print")
-         5
-      }, quiet = TRUE)
+      }, verbose = "silent")
    )
 })
 
-test_that("quiet_if_true suppresses cli output when quiet = TRUE", {
+test_that("with_verbosity suppresses cli output when verbose = `silent`", {
    skip_if_not_installed("cli")
 
    expect_silent(
-      quiet_if_true({
+      with_verbosity({
          cli::cli_alert_info("cli output should not print")
          cli::cli_rule("Suppressed rule")
          cli::cli_bullets(c("• Bullet should be suppressed"))
-         42
-      }, quiet = TRUE)
+      }, verbose = "silent")
    )
 })
 
-test_that("quiet_if_true does not suppress errors when quiet = TRUE", {
+test_that("with_verbosity does not suppress errors when verbose = `silent`", {
    expect_error(
-      quiet_if_true({
-         stop("this error must propagate")
-      }, quiet = TRUE),
-      "this error must propagate"
+      with_verbosity({
+         stop("This error must propagate")
+      }, verbose = "silent"),
+      "This error must propagate"
    )
 })
 
-test_that("quiet_if_true still evaluates side-effect code when quiet = TRUE", {
+test_that("with_verbosity still evaluates side-effect code when verbose = `silent`", {
    env <- new.env(parent = emptyenv())
    env$x <- 0
 
-   quiet_if_true({
+   with_verbosity({
       env$x <- 99
-   }, quiet = TRUE)
+   }, verbose = "silent")
 
    expect_equal(env$x, 99)
 })
 
-test_that("quiet_if_true evaluates expr normally when quiet = FALSE", {
-   x <- quiet_if_true({
-      message("this should print normally")
-      123
-   }, quiet = FALSE)
+test_that("with_verbosity suppresses messages when verbose = `warn`", {
+   expect_silent(
+      with_verbosity({
+         message("this should not print")
+      }, verbose = "warn")
+   )
+})
+
+test_that("with_verbosity does not suppress warnings when verbose = `warn`", {
+   expect_warning(
+      with_verbosity({
+         warning("this should print")
+      }, verbose = "warn")
+   )
+})
+
+test_that("with_verbosity suppresses cli output when verbose = `warn`", {
+   skip_if_not_installed("cli")
+
+   expect_silent(
+      with_verbosity({
+         cli::cli_alert_info("cli output should not print")
+         cli::cli_rule("Suppressed rule")
+         cli::cli_bullets(c("• Bullet should be suppressed"))
+      }, verbose = "warn")
+   )
+})
+
+test_that("with_verbosity does not suppress errors when verbose = `warn`", {
+   expect_error(
+      with_verbosity({
+         stop("This error must propagate")
+      }, verbose = "warn"),
+      "This error must propagate"
+   )
+})
+
+test_that("with_verbosity still evaluates side-effect code when verbose = `warn`", {
+   env <- new.env(parent = emptyenv())
+   env$x <- 0
+
+   with_verbosity({
+      env$x <- 99
+   }, verbose = "warn")
+
+   expect_equal(env$x, 99)
+})
+
+test_that("with_verbosity does not suppress messages when verbose = `message`", {
+   expect_message(
+      with_verbosity({
+         message("This message should print")
+      }, verbose = "message")
+   )
+})
+
+test_that("with_verbosity does not suppress warnings when verbose = `message`", {
+   expect_warning(
+      with_verbosity({
+         warning("This warning should print")
+      }, verbose = "message")
+   )
+})
+
+test_that("with_verbosity does not suppress cli output when verbose = `message`", {
+   skip_if_not_installed("cli")
+
+   expect_message(
+      with_verbosity({
+         cli::cli_alert_info("cli output should be printed")
+      }, verbose = "message"),
+      "cli output should be printed"
+   )
+
+   expect_message(
+      with_verbosity({
+         cli::cli_rule("Horizontal rule should be printed")
+      }, verbose = "message"),
+      "Horizontal rule should be printed"
+   )
+
+   expect_message(
+      with_verbosity({
+         cli::cli_bullets(c("• Bullet should be printed"))
+      }, verbose = "message"),
+      "• Bullet should be printed"
+   )
+})
+
+test_that("with_verbosity does not suppress errors when verbose = `message`", {
+   expect_error(
+      with_verbosity({
+         stop("This error must propagate")
+      }, verbose = "message"),
+      "This error must propagate"
+   )
+})
+
+test_that("with_verbosity evaluates expr normally when verbose = `message`", {
+   result <- with_verbosity({ 1 + 1 }, verbose = "message")
+   expect_equal(result, 2)
+
+   expect_message(
+      x <- with_verbosity({
+         message("This should print normally")
+         123
+      }, verbose = "message")
+   )
 
    expect_equal(x, 123)
+})
+
+test_that("validate_verbose accepts valid inputs without error", {
+   # Test each valid choice
+   expect_no_error(validate_verbose("message"))
+   expect_no_error(validate_verbose("warn"))
+   expect_no_error(validate_verbose("silent"))
+})
+
+test_that("validate_verbose allows partial matching for valid inputs", {
+   # match.arg defaults to allowing partial matching if unambiguous
+   expect_no_error(validate_verbose("mess")) # Should resolve to "message"
+   expect_no_error(validate_verbose("war"))  # Should resolve to "warn"
+   expect_no_error(validate_verbose("sil"))  # Should resolve to "silent"
+})
+
+test_that("validate_verbose throws error for invalid string input", {
+   # Test with a string that is not one of the choices
+   expect_error(
+      lifecycle::expect_deprecated(
+         spec_to_metacore(metacore_example("p21_mock.xlsx"), quiet = TRUE, verbose = "invalid")
+      )
+   )
+   # Test with another invalid string
+   expect_error(
+      spec_to_metacore(metacore_example("p21_mock.xlsx"), quiet = TRUE, verbose = "error")
+   )
+})
+
+test_that("validate_verbose throws error for incorrect data type inputs", {
+   # Numeric input
+   expect_error(
+      spec_to_metacore(metacore_example("p21_mock.xlsx"), quiet = TRUE, verbose = 1)
+   )
+   # Logical input
+   expect_error(
+      spec_to_metacore(metacore_example("p21_mock.xlsx"), quiet = TRUE, verbose = TRUE)
+   )
+   # NA_character_ input (match.arg expects a character string)
+   expect_error(
+      spec_to_metacore(metacore_example("p21_mock.xlsx"), quiet = TRUE, verbose = NA_character_)
+   )
+})
+
+test_that("validate_verbose throws error for vector input", {
+   # match.arg expects a single string by default
+   expect_error(
+      spec_to_metacore(metacore_example("p21_mock.xlsx"), quiet = TRUE, verbose = c("message", "warn"))
+   )
+   # Empty character vector
+   expect_error(
+      spec_to_metacore(metacore_example("p21_mock.xlsx"), quiet = TRUE, verbose = character(0))
+   )
 })

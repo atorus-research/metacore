@@ -565,9 +565,35 @@ test_that("Specification Reader's errors and warnings", {
 
 
 test_that("Check no value reader",{
-   empty_val_check <- spec_to_metacore("spec_no_val.xlsx", quiet = TRUE,
+   empty_val_check <- spec_to_metacore("spec_no_val.xlsx", verbose = "silent",
                     where_sep_sheet = FALSE)
    auto_val <- empty_val_check$value_spec %>%
       filter(where != "TRUE")
    expect_equal(nrow(auto_val), 0L)
+})
+
+
+test_that("spec_to_metacore(quiet) deprecation message is output when supplied by the user`", {
+   # `Deprecation when quiet = FALSE`
+   lifecycle::expect_deprecated(
+      spec <- spec_to_metacore(metacore_example("p21_mock.xlsx"), quiet = FALSE, verbose = "silent")
+   )
+
+   # `Deprecation when quiet = TRUE`
+   lifecycle::expect_deprecated(
+      spec <- spec_to_metacore(metacore_example("p21_mock.xlsx"), quiet = TRUE)
+   )
+})
+
+
+test_that("define_to_metacore(quiet) deprecation message is output when supplied by the user`", {
+   # `Deprecation when quiet = FALSE`
+   lifecycle::expect_deprecated(
+      spec <- define_to_metacore(metacore_example("ADaM_define_CDISC_pilot3.xml"), quiet = FALSE, verbose = "silent")
+   )
+
+   # `Deprecation when quiet = TRUE`
+   lifecycle::expect_deprecated(
+      spec <- define_to_metacore(metacore_example("ADaM_define_CDISC_pilot3.xml"), quiet = TRUE)
+   )
 })
