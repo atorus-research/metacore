@@ -11,8 +11,9 @@
 #'   have the same derivation
 #' @param code_list contains the code/decode information
 #' @param supp contains the idvar and qeval information for supplemental variables
-#' @param quiet Option to quietly load in, this will suppress warnings, but not
-#'   errors. Expects either `TRUE` or `FALSE`. Default behaviour is `FALSE`.
+#' @param quiet `r lifecycle::badge("superseded")` Option to quietly load in, this
+#'   will suppress warnings, but not errors. Expects either `TRUE` or `FALSE`.
+#'   Default behaviour is `FALSE`.
 #' @param verbose A character string specifying the desired verbosity level.
 #'   Must be one of:
 #'   \describe{
@@ -26,6 +27,12 @@
 #'
 #' @importFrom stringr str_to_lower
 MetaCore_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist, supp, quiet = FALSE, verbose = "message") {
+
+   deprecate_soft(
+      when = "0.3.0",
+      what = "MetaCore_initialize(quiet)",
+      with = "MetaCore_initialize(verbose)"
+   )
 
    private$.ds_spec <- ds_spec %>%
       add_labs(dataset = "Dataset Name",
@@ -326,8 +333,9 @@ MetaCore <- R6::R6Class("Metacore",
 #' @param derivations contains derivation, it allows for different variables to have the same derivation
 #' @param codelist contains the code/decode information
 #' @param supp contains the idvar and qeval information for supplemental variables
-#' @param quiet Option to quietly load in, this will suppress warnings, but not
-#'   errors. Expects either `TRUE` or `FALSE`. Default behaviour is `FALSE`.
+#' @param quiet `r lifecycle::badge("superseded")` Option to quietly load in, this
+#'   will suppress warnings, but not errors. Expects either `TRUE` or `FALSE`.
+#'   Default behaviour is `FALSE`.
 #' @param verbose A character string specifying the desired verbosity level.
 #'   Must be one of:
 #'   \describe{
@@ -348,7 +356,7 @@ metacore <- function(
       ds_vars = tibble(
          dataset = character(),
          variable = character(),
-         keep = NULL,
+         keep = NULL, # Deprecated in 0.3.0. To be removed in a future version
          mandatory = logical(),
          key_seq = integer(),
          order = integer(),
@@ -389,9 +397,15 @@ metacore <- function(
          idvar = character(),
          qeval = character()
       ),
-      quiet = FALSE,
+      quiet = deprecated(),
       verbose = "message"
 ) {
+
+   # Check if user has supplied `quiet` instead of `verbose`
+   if (lifecycle::is_present(quiet)) {
+      deprecate_soft(when = "0.3.0", what = "metacore(quiet)", with = "metacore(verbose)")
+   }
+   else quiet <- FALSE  # Else deal with deprecated argument for compatability
 
    with_verbosity({
 
@@ -460,8 +474,9 @@ The input for the supplied column `keep` has been mapped to the new column `mand
 #' @param .data the metacore object of dataframes
 #' @param dataset the specific dataset to subset by
 #' @param simplify return a single dataframe
-#' @param quiet Option to quietly load in, this will suppress warnings, but not
-#'   errors. Expects either `TRUE` or `FALSE`. Default behaviour is `FALSE`.
+#' @param quiet `r lifecycle::badge("superseded")` Option to quietly load in, this
+#'   will suppress warnings, but not errors. Expects either `TRUE` or `FALSE`.
+#'   Default behaviour is `FALSE`.
 #' @param verbose A character string specifying the desired verbosity level.
 #'   Must be one of:
 #'   \describe{
@@ -472,7 +487,13 @@ The input for the supplied column `keep` has been mapped to the new column `mand
 #'
 #' @return a filtered subset of the metacore object
 #' @export
-select_dataset <- function(.data, dataset, simplify = FALSE, quiet = FALSE, verbose = "message") {
+select_dataset <- function(.data, dataset, simplify = FALSE, quiet = deprecated(), verbose = "message") {
+
+   # Check if user has supplied `quiet` instead of `verbose`
+   if (lifecycle::is_present(quiet)) {
+      deprecate_soft(when = "0.3.0", what = "select_dataset(quiet)", with = "select_dataset(verbose)")
+   }
+   else quiet <- FALSE  # Else deal with deprecated argument for compatability
 
    with_verbosity({
       cl <- .data$clone()
