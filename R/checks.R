@@ -29,20 +29,20 @@
 #'
 #' check_inconsistent_types(metacore)
 #' @rdname checks
-check_inconsistent_labels <- function(metacore){
-   basic_check(label, metacore)
+check_inconsistent_labels <- function(metacore) {
+  basic_check(label, metacore)
 }
 
 #' @export
 #' @rdname checks
-check_inconsistent_types <- function(metacore){
-   basic_check(type, metacore)
+check_inconsistent_types <- function(metacore) {
+  basic_check(type, metacore)
 }
 
 #' @export
 #' @rdname checks
-check_inconsistent_formats <- function(metacore){
-   basic_check(format, metacore)
+check_inconsistent_formats <- function(metacore) {
+  basic_check(format, metacore)
 }
 
 #' Base code for running cross variable checks
@@ -55,32 +55,34 @@ check_inconsistent_formats <- function(metacore){
 #' @noRd
 #' @importFrom stringr str_glue
 #' @importFrom dplyr across
-basic_check <- function(col_to_check, metacore){
-   if(!is_metacore(metacore)){
-      cli_abort("Expects a metacore object", call. = FALSE)
-   }
+basic_check <- function(col_to_check, metacore) {
+  if (!is_metacore(metacore)) {
+    cli_abort("Expects a metacore object", call. = FALSE)
+  }
 
-   report_df <- metacore$var_spec %>%
-      mutate(var1 = str_remove(variable, "[[:alnum:]]+\\.")) %>%
-      group_by(var1) %>%
-      mutate(n_lab = n_distinct({{col_to_check}})) %>%
-      filter(n_lab > 1) %>%
-      mutate(across(everything(), remove_label)) %>%
-      group_by(var1, {{col_to_check}}) %>%
-      summarise(n_vars = n(),
-                ls_of_vars = list(variable),
-                .groups = "drop") %>%
-      select(variable = var1, everything())
+  report_df <- metacore$var_spec %>%
+    mutate(var1 = str_remove(variable, "[[:alnum:]]+\\.")) %>%
+    group_by(var1) %>%
+    mutate(n_lab = n_distinct({{ col_to_check }})) %>%
+    filter(n_lab > 1) %>%
+    mutate(across(everything(), remove_label)) %>%
+    group_by(var1, {{ col_to_check }}) %>%
+    summarise(
+      n_vars = n(),
+      ls_of_vars = list(variable),
+      .groups = "drop"
+    ) %>%
+    select(variable = var1, everything())
 
-   if(nrow(report_df) > 0){
-      cli_warn(str_glue("Mismatch {as_label(enexpr(col_to_check))}s detected"))
-      return(report_df)
-   } else {
-      cli_inform(str_glue("No mismatch {as_label(enexpr(col_to_check))}s detected"))
-   }
+  if (nrow(report_df) > 0) {
+    cli_warn(str_glue("Mismatch {as_label(enexpr(col_to_check))}s detected"))
+    return(report_df)
+  } else {
+    cli_inform(str_glue("No mismatch {as_label(enexpr(col_to_check))}s detected"))
+  }
 }
 
 remove_label <- function(x) {
-   attr(x, "label") <- NULL
-   x
+  attr(x, "label") <- NULL
+  x
 }
