@@ -6,11 +6,11 @@
 #' @noRd
 
 add_lab <- function(x, label) {
-   if (length(label) == 0) {
-      label  <- NULL
-   }
-   attr(x, "label") <- label
-   x
+  if (length(label) == 0) {
+    label <- NULL
+  }
+  attr(x, "label") <- label
+  x
 }
 
 #' Add Labels to Dataframe
@@ -22,22 +22,22 @@ add_lab <- function(x, label) {
 #' @importFrom dplyr filter pull
 #' @return Dataframe with labels
 #' @noRd
-add_labs <- function(.data,...) {
-   name_list <- c(...)
-   df <- tibble(col = names(name_list), lab = name_list)
-   .data %>%
-      purrr::map2(names(.data), function(x, name) {
-         label <- df %>%
-            filter(col == name) %>%
-            pull(lab) %>%
-            unname()
-         if(length(label) > 0) {
-            add_lab(x, label)
-         } else {
-            x
-         }
-      }) %>%
-      as_tibble()
+add_labs <- function(.data, ...) {
+  name_list <- c(...)
+  df <- tibble(col = names(name_list), lab = name_list)
+  .data %>%
+    purrr::map2(names(.data), function(x, name) {
+      label <- df %>%
+        filter(col == name) %>%
+        pull(lab) %>%
+        unname()
+      if (length(label) > 0) {
+        add_lab(x, label)
+      } else {
+        x
+      }
+    }) %>%
+    as_tibble()
 }
 
 
@@ -50,41 +50,36 @@ add_labs <- function(.data,...) {
 #' @param nm name of column to check (for warning and error clarification)
 #'
 check_structure <- function(.data, col, func, any_na_acceptable, nm) {
+  column <- as_string(col)
+  vec <- .data %>% pull(!!col)
+  warning_string <- NULL
+  error_message <- NULL
 
-   column <- as_string(col)
-   vec <- .data %>% pull(!!col)
-   warning_string <- NULL
-   error_message <- NULL
+  if (any(is.na(vec)) & !any_na_acceptable) {
+    error_message <- str_glue("`{column}` from the `{nm}` table contains missing values. Actual values are needed.")
+  } else if (all(is.na(vec))) {
+    warning_string <- str_glue("`{column}` from the `{nm}` table only contains missing values.")
+  } else {
+    failures <- vec %>%
+      discard(~ do.call(func, list(.))) %>%
+      unique()
 
-   if(any(is.na(vec)) & !any_na_acceptable) {
-      error_message <- str_glue("`{column}` from the `{nm}` table contains missing values. Actual values are needed.")
-   } else if (all(is.na(vec))){
-      warning_string <- str_glue("`{column}` from the `{nm}` table only contains missing values.")
-   } else {
+    all_fails <- paste(failures)
 
-      failures <-  vec %>%
-         discard(~do.call(func, list(.))) %>%
-         unique()
-
-      all_fails <- paste(failures)
-
-      if (length(failures) > 0 ) {
-
-         if (is.primitive(func)) {
-
-            assertion_func <- prim_name(func)
-            warning_string <- str_glue("{nm}${column} fails {assertion_func} check")
-
-         } else {
-            cli_warn(c(
-               "The following {qty(all_fails)} word{?s} in {nm}${column} {qty(all_fails)} {?is/are} not allowed:",
-               "i" = ansi_collapse(all_fails, last = ", ")
-            ), call. = FALSE)
-         }
+    if (length(failures) > 0) {
+      if (is.primitive(func)) {
+        assertion_func <- prim_name(func)
+        warning_string <- str_glue("{nm}${column} fails {assertion_func} check")
+      } else {
+        cli_warn(c(
+          "The following {qty(all_fails)} word{?s} in {nm}${column} {qty(all_fails)} {?is/are} not allowed:",
+          "i" = ansi_collapse(all_fails, last = ", ")
+        ), call. = FALSE)
       }
-   }
+    }
+  }
 
-   list(warning = warning_string, error = error_message)
+  list(warning = warning_string, error = error_message)
 }
 
 #' Check Words in Column
@@ -92,13 +87,13 @@ check_structure <- function(.data, col, func, any_na_acceptable, nm) {
 #' @param ... permissible words in the column
 #' @param col the column to check for specific words
 check_words <- function(..., col) {
-   accepted_words <- unlist(c(...))
-   expr <- expr(function(col) col %in% !!accepted_words)
-   make_function(body = expr, env = parent.frame())()
+  accepted_words <- unlist(c(...))
+  expr <- expr(function(col) col %in% !!accepted_words)
+  make_function(body = expr, env = parent.frame())()
 }
 
-make_function <- function(args = pairlist(), body, env = parent.frame())  {
-   eval(call("function", args, body), env)
+make_function <- function(args = pairlist(), body, env = parent.frame()) {
+  eval(call("function", args, body), env)
 }
 
 
@@ -114,11 +109,11 @@ make_function <- function(args = pairlist(), body, env = parent.frame())  {
 #' metacore_example()
 #' metacore_example("mock_spec.xlsx")
 metacore_example <- function(file = NULL) {
-   if (is.null(file)) {
-      dir(system.file("extdata", package = "metacore"))
-   } else {
-      system.file("extdata", file, package = "metacore", mustWork = TRUE)
-   }
+  if (is.null(file)) {
+    dir(system.file("extdata", package = "metacore"))
+  } else {
+    system.file("extdata", file, package = "metacore", mustWork = TRUE)
+  }
 }
 
 #' Evaluate an expression with controlled verbosity

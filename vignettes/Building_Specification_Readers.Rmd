@@ -11,8 +11,8 @@ editor_options:
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
-   collapse = TRUE,
-   comment = "#>"
+  collapse = TRUE,
+  comment = "#>"
 )
 ```
 
@@ -47,7 +47,7 @@ As we can see, the mock spec we are using here doesn't match the format. Therefo
 
 Here is a schema of how all this fits together
 
-![](../man/figures/labeled_schema.png "Metacore Schema")
+![Schema diagram showing the relationships between all metacore tables](../man/figures/labeled_schema.png "Metacore Schema")
 
 ds_spec is connected to ds_vars by the 'dataset' variable and ds_vars is connected to var_spec by the 'variable' variable, etc. For more information on the make-up of metacore objects please see the README. 
 
@@ -66,7 +66,6 @@ But, before we start any of that, we need to read in our document using the `rea
 ```{r}
 doc <- read_all_sheets(metacore_example("mock_spec.xlsx"))
 doc %>% map(head)
-
 ```
 
 Let's start with making the ds_spec (dataset specification) table using `spec_type_to_ds_spec`. The ds_spec table is made of 3 columns: the dataset name, the dataset structure, and the dataset label. If we look at our specification document, it looks like all this information is in the Domains tab. Now we know what we need, we can start building the table by trying the `spec_type_to_ds_spec` function.
@@ -88,10 +87,13 @@ If we look at the default input for cols, `"label" = "[L|l]abel|[D|d]escription"
 We only need the Domain `Name`, `Label`, and `Data Structure` columns. So we can update the expressions to be more specific.
 
 ```{r}
-ds_spec <- spec_type_to_ds_spec(doc, 
-                                cols = c("dataset" = "Name", 
-                                         "structure" = "Data Structure",  
-                                         "label" = "Label"))
+ds_spec <- spec_type_to_ds_spec(doc,
+  cols = c(
+    "dataset" = "Name",
+    "structure" = "Data Structure",
+    "label" = "Label"
+  )
+)
 head(ds_spec)
 ```
 
@@ -124,13 +126,19 @@ This error means it is trying to match the sheet entitled Variable, the variable
 ```{r}
 doc$Variables %>% head()
 
-ds_vars<- spec_type_to_ds_vars(doc, cols = c("dataset" = "Domain",
-                                             "variable" = "[V|v]ariable [N|n]ame",
-                                             "order" = "[V|v]ariable [O|o]rder",
-                                             "mandatory" = "[M|m]andatory"),
-                               key_seq_cols = c("dataset" = "Domain Name",
-                                                "key_seq" = "Key"),
-                               sheet = "[V|v]ar|Domains") 
+ds_vars <- spec_type_to_ds_vars(doc,
+  cols = c(
+    "dataset" = "Domain",
+    "variable" = "[V|v]ariable [N|n]ame",
+    "order" = "[V|v]ariable [O|o]rder",
+    "mandatory" = "[M|m]andatory"
+  ),
+  key_seq_cols = c(
+    "dataset" = "Domain Name",
+    "key_seq" = "Key"
+  ),
+  sheet = "[V|v]ar|Domains"
+)
 
 head(ds_vars)
 ```
@@ -152,20 +160,22 @@ The next table we have is var_spec, the table of variable level metadata. var_sp
 Looking back at our specification we see this will also be built using the Variable tab. So, we know we need to edit the regular expression for the variable to make it more specific. Additionally, if you look at the default for `cols` you see there is a dataset input. This is because some standards aren't 100% consistent, some variables (e.g. visit) have different lengths depending on the dataset. **So to accommodate this some of the variables in var_spec are in the ds.variable format**. These builders will do this conversion for you , but the dataset is needed. The other thing the builders can automatically deal with is the common variable. If given a dataset column, the builder function will automatically figure out which variables are common to all dataset. This is good because we don't have a common variable in our specs.
 
 ```{r}
-var_spec <- spec_type_to_var_spec(doc, cols = c("variable" = "Variable Name",
-                                                "length" = "[L|l]ength",
-                                                "label" = "[L|l]abel",
-                                                "type" = "[T|t]ype",
-                                                "dataset" = "[D|d]ataset|[D|d]omain",
-                                                "format" = "Format"))
+var_spec <- spec_type_to_var_spec(doc, cols = c(
+  "variable" = "Variable Name",
+  "length" = "[L|l]ength",
+  "label" = "[L|l]abel",
+  "type" = "[T|t]ype",
+  "dataset" = "[D|d]ataset|[D|d]omain",
+  "format" = "Format"
+))
 head(var_spec)
 ```
 
 There is one issue here: the format column is also the codelist names. This is because the information came from the "Controlled Term or Format" column of my spec document. So the final step of preparing var_spec table is to remove the controlled terms. It is easy here because all the formats end in a full stop (.), but the controlled terms don't.
 
 ```{r}
-var_spec <- var_spec %>% 
-   mutate(format = if_else(str_detect(format, "\\."), format, ""))
+var_spec <- var_spec %>%
+  mutate(format = if_else(str_detect(format, "\\."), format, ""))
 ```
 
 The next dataset is value_spec, which contains the value level metadata. It is made up of 8 columns:
@@ -189,28 +199,38 @@ The next dataset is value_spec, which contains the value level metadata. It is m
 By default, `spec_type_to_value_spec` is set up to have the where information on a different sheet because that is the format of a P21 spec, but in our spec we don't have that. In fact, we don't have any value level metadata in our spec. But, that is fine - the default builders will just pull what information it can from the variable tab. Additionally this spec doesn't have a predecessor column, so we can just use the method column. 
 
 ```{r}
-value_spec <- spec_type_to_value_spec(doc, cols = c("dataset" = "VLM Name|Domain",
-                                                    "variable" = "VLM Name|Variable Name",
-                                                    "origin" = "[O|o]rigin",
-                                                    "type" = "[T|t]ype",
-                                                    "code_id" = "Controlled Term",
-                                                    "where" = "Parameter Code",
-                                                    "derivation_id" = "Method",
-                                                    "predecessor" = "Method"),
-                                      where_sep_sheet = FALSE)
+value_spec <- spec_type_to_value_spec(doc,
+  cols = c(
+    "dataset" = "VLM Name|Domain",
+    "variable" = "VLM Name|Variable Name",
+    "origin" = "[O|o]rigin",
+    "type" = "[T|t]ype",
+    "code_id" = "Controlled Term",
+    "where" = "Parameter Code",
+    "derivation_id" = "Method",
+    "predecessor" = "Method"
+  ),
+  where_sep_sheet = FALSE
+)
 head(value_spec)
 ```
 
 The derivation table is relatively simple by comparison. It just has two columns, the derivation id and the derivation. But, the derivation comes from the supplied derivation, predecessor, or comment column depending on the origin. In this mock we don't have a predecessor column so we can set to comment as well.  
 
 ```{r}
-derivation <- spec_type_to_derivations(doc, cols = c("derivation_id" = "Name",
-                                                     "derivation" = "[D|d]efinition|[D|d]escription"), 
-                                       var_cols = c("dataset" = "Domain Name",
-                                                    "variable" = "Variable Name|VLM",
-                                                    "origin" = "[O|o]rigin",
-                                                    "predecessor" = "Comment",
-                                                    "comment" = "Comment")) 
+derivation <- spec_type_to_derivations(doc,
+  cols = c(
+    "derivation_id" = "Name",
+    "derivation" = "[D|d]efinition|[D|d]escription"
+  ),
+  var_cols = c(
+    "dataset" = "Domain Name",
+    "variable" = "Variable Name|VLM",
+    "origin" = "[O|o]rigin",
+    "predecessor" = "Comment",
+    "comment" = "Comment"
+  )
+)
 head(derivation)
 ```
 
@@ -219,12 +239,16 @@ The final table is codelist. This table contains all the code/decode pairs, all 
 By default the `spec_type_to_codelist` function expects codelists and external dictionaries. But, in the specification we only have codelist so `dict_cols` needs to be set to null.
 
 ```{r}
-codelist <- spec_type_to_codelist(doc, codelist_cols = c("code_id" = "Codelist Code",
-                                                         "name" = "Codelist Name",
-                                                         "code" = "Coded Value",
-                                                         "decode" = "Decoded Value"),
-                                  simplify = TRUE,
-                                  dict_cols = NULL)
+codelist <- spec_type_to_codelist(doc,
+  codelist_cols = c(
+    "code_id" = "Codelist Code",
+    "name" = "Codelist Name",
+    "code" = "Coded Value",
+    "decode" = "Decoded Value"
+  ),
+  simplify = TRUE,
+  dict_cols = NULL
+)
 head(codelist)
 ```
 

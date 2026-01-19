@@ -21,7 +21,6 @@ DatasetMeta <- R6::R6Class("DatasetMeta",
         }, quiet, verbose)
      }
   ),
-
   public = list(
      initialize = function(metacore, quiet = deprecated(), verbose = "message") {
         super$initialize(
@@ -43,27 +42,31 @@ DatasetMeta <- R6::R6Class("DatasetMeta",
         private$.greet(quiet, verbose)
      },
 
-     print = function() {
-        tables <- ls(envir = self)
+      private$.greet(quiet)
+    },
+    print = function() {
+      tables <- ls(envir = self)
 
-        cli_par()
-        cli_rule(left = "Dataset specification object for {private$.name} ({private$.label})")
-        cli_text("The dataset contains {private$.num_vars} variable{?s}")
-        cli_text("Dataset key{?s}: {ansi_collapse(private$.key_vars, last = ', ')}")
-        cli_end()
+      cli_par()
+      cli_rule(left = "Dataset specification object for {private$.name} ({private$.label})")
+      cli_text("The dataset contains {private$.num_vars} variable{?s}")
+      cli_text("Dataset key{?s}: {ansi_collapse(private$.key_vars, last = ', ')}")
+      cli_end()
 
-        cli_par()
-        cli_text("The structure of the specification object is:")
-        for (table in tables) {
-           obj <- get(table, envir = self)
-           if (!is.list(obj)) { next }
-           cli_bullets(c(">" = "{table}: {typeof(table)} [{dim(obj)[1]} x {dim(obj)[2]}] {ansi_collapse(names(obj), last = ', ')}"))
+      cli_par()
+      cli_text("The structure of the specification object is:")
+      for (table in tables) {
+        obj <- get(table, envir = self)
+        if (!is.list(obj)) {
+          next
         }
-        cli_end()
+        cli_bullets(c(">" = "{table}: {typeof(table)} [{dim(obj)[1]} x {dim(obj)[2]}] {ansi_collapse(names(obj), last = ', ')}"))
+      }
+      cli_end()
 
-        cli_div()
-        cli_text("To inspect the specification object use {.fn View} in the console.")
-        cli_end()
-     }
+      cli_div()
+      cli_text("To inspect the specification object use {.fn View} in the console.")
+      cli_end()
+    }
   )
 )

@@ -21,8 +21,10 @@ test_that("Test label Checks", {
    expect_message(check_inconsistent_labels(metacore),
                   "No mismatch labels detected")
 
-   expect_error(check_inconsistent_labels("metacore"),
-                "Expects a metacore object")
+  expect_error(
+    check_inconsistent_labels("metacore"),
+    "Expects a metacore object"
+  )
 })
 
 test_that("Check formats and types", {
@@ -45,6 +47,5 @@ test_that("Check formats and types", {
       type_df <- check_inconsistent_types(metacore)
    )
 
-   expect_equal(type_df, man_types)
+  expect_equal(type_df, man_types)
 })
-

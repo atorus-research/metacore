@@ -1,25 +1,27 @@
 test_df <- data.frame(
-   a = c("blah", NA, NA),
-   b = c("SpecificWord", "Incorrect", "Dummy")
+  a = c("blah", NA, NA),
+  b = c("SpecificWord", "Incorrect", "Dummy")
 )
 
 test_that("check_structure function works", {
   # error when NA not permissible
 
-  expect_equal(check_structure(test_df, "a", is.character, FALSE, "test_df")$error,
-               "`a` from the `test_df` table contains missing values. Actual values are needed.")
+  expect_equal(
+    check_structure(test_df, "a", is.character, FALSE, "test_df")$error,
+    "`a` from the `test_df` table contains missing values. Actual values are needed."
+  )
 
-  expect_equal(check_structure(test_df, "a", is.logical, TRUE, "test_df")$warning,
-               "test_df$a fails is.logical check"
-               )
+  expect_equal(
+    check_structure(test_df, "a", is.logical, TRUE, "test_df")$warning,
+    "test_df$a fails is.logical check"
+  )
 
   expect_null(check_structure(test_df, "b", check_words("SpecificWord", "Incorrect", "Dummy"), TRUE, "test_df")$warning)
   expect_warning(check_structure(test_df, "b", check_words("SpecificWord"), TRUE, "test_df"))
-
 })
 
 test_that("check_words creates function", {
-   expect_true(is.function(check_words("word")))
+  expect_true(is.function(check_words("word")))
 })
 
 
@@ -46,9 +48,13 @@ test_that("add labels adds NULL to missing labels", {
 })
 
 test_that("metacore example returns file options", {
-  expect_equal(sort(metacore_example()),
-               sort(c("ADaM_define_CDISC_pilot3.xml", "mock_spec.xlsx", "p21_mock.xlsx", "pilot_ADaM.rda",
-                      "pilot_SDTM.rda", "SDTM_define.xml", "SDTM_spec_CDISC_pilot.xlsx")))
+  expect_equal(
+    sort(metacore_example()),
+    sort(c(
+      "ADaM_define_CDISC_pilot3.xml", "mock_spec.xlsx", "p21_mock.xlsx", "pilot_ADaM.rda",
+      "pilot_SDTM.rda", "SDTM_define.xml", "SDTM_spec_CDISC_pilot.xlsx"
+    ))
+  )
 })
 
 test_that("with_verbosity suppresses messages when verbose = `silent`", {
@@ -96,7 +102,7 @@ test_that("with_verbosity still evaluates side-effect code when verbose = `silen
       env$x <- 99
    }, verbose = "silent")
 
-   expect_equal(env$x, 99)
+  expect_equal(env$x, 99)
 })
 
 test_that("with_verbosity suppresses messages when verbose = `warn`", {
@@ -208,7 +214,7 @@ test_that("with_verbosity evaluates expr normally when verbose = `message`", {
       }, verbose = "message")
    )
 
-   expect_equal(x, 123)
+  expect_equal(x, 123)
 })
 
 test_that("validate_verbose accepts valid inputs without error", {
