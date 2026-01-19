@@ -217,7 +217,7 @@ with_verbosity <- function(expr, quiet = FALSE, verbose = "message") {
       )
       if (warning_count > 0) {
          cli_inform(c("i" = cli::col_red(
-"Operation performed with {warning_count} suppressed warnings. Set {.arg verbose = \"warn\"} to show.")))
+"Operation performed with {warning_count} suppressed warning{?s}. Set {.arg verbose = \"warn\"} to show.")))
       }
       return(result)
 
