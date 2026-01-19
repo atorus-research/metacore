@@ -10,39 +10,39 @@
 DatasetMeta <- R6::R6Class("DatasetMeta",
   inherit = MetaCore,
   private = list(
-     .name  = NA,
-     .label = NA,
-     .num_vars = NA,
-     .key_vars = NA,
-
-     .greet = function(quiet, verbose) {
-        with_verbosity({
-           cli_alert_success("{private$.name} dataset successfully selected")
-        }, quiet, verbose)
-     }
+    .name = NA,
+    .label = NA,
+    .num_vars = NA,
+    .key_vars = NA,
+    .greet = function(quiet, verbose) {
+      with_verbosity(
+        {
+          cli_alert_success("{private$.name} dataset successfully selected")
+        },
+        quiet,
+        verbose
+      )
+    }
   ),
   public = list(
-     initialize = function(metacore, quiet = deprecated(), verbose = "message") {
-        super$initialize(
-           ds_spec = metacore$ds_spec,
-           ds_vars = metacore$ds_vars,
-           var_spec = metacore$var_spec,
-           value_spec = metacore$value_spec,
-           derivations = metacore$derivations,
-           codelist = metacore$codelist,
-           supp = metacore$supp
-        )
-        private$.name  = metacore$ds_spec$dataset[1]
-        private$.label = metacore$ds_spec$label[1]
-        private$.num_vars = metacore$ds_vars |> nrow()
-        private$.key_vars = metacore$ds_vars |>
-           filter(!is.na(key_seq)) |>
-           pull(variable)
+    initialize = function(metacore, quiet = deprecated(), verbose = "message") {
+      super$initialize(
+        ds_spec = metacore$ds_spec,
+        ds_vars = metacore$ds_vars,
+        var_spec = metacore$var_spec,
+        value_spec = metacore$value_spec,
+        derivations = metacore$derivations,
+        codelist = metacore$codelist,
+        supp = metacore$supp
+      )
+      private$.name <- metacore$ds_spec$dataset[1]
+      private$.label <- metacore$ds_spec$label[1]
+      private$.num_vars <- metacore$ds_vars |> nrow()
+      private$.key_vars <- metacore$ds_vars |>
+        filter(!is.na(key_seq)) |>
+        pull(variable)
 
-        private$.greet(quiet, verbose)
-     },
-
-      private$.greet(quiet)
+      private$.greet(quiet, verbose)
     },
     print = function() {
       tables <- ls(envir = self)

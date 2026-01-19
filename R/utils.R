@@ -149,18 +149,24 @@ metacore_example <- function(file = NULL) {
 #'
 #' @examples
 #' # Example: Suppress messages but allow warnings
-#' with_verbosity({
-#'   message("This message will be suppressed.")
-#'   warning("This warning will be shown!")
-#'   1 + 1
-#' }, verbose = "warn")
+#' with_verbosity(
+#'   {
+#'     message("This message will be suppressed.")
+#'     warning("This warning will be shown!")
+#'     1 + 1
+#'   },
+#'   verbose = "warn"
+#' )
 #'
 #' # Example: Suppress everything (equivalent to quiet = TRUE)
-#' with_verbosity({
-#'   message("This message will be suppressed.")
-#'   warning("This warning will also be suppressed.")
-#'   2 + 2
-#' }, verbose = "silent")
+#' with_verbosity(
+#'   {
+#'     message("This message will be suppressed.")
+#'     warning("This warning will also be suppressed.")
+#'     2 + 2
+#'   },
+#'   verbose = "silent"
+#' )
 #'
 #' # Example: Default behavior (messages and warnings shown)
 #' with_verbosity({
@@ -169,58 +175,62 @@ metacore_example <- function(file = NULL) {
 #'   3 + 3
 #' })
 #'
-#' Example: Display messages and collapse warnings into a single message
-#' with_verbosity({
-#'   message("This message will be shown.")
-#'   warning("This warning will be collapsed")
-#'   warning("This warning will also be collapsed")
-#'   4 + 4
-#' }, verbose = "collapse")
+#' # Example: Display messages and collapse warnings into a single message
+#' with_verbosity(
+#'   {
+#'     message("This message will be shown.")
+#'     warning("This warning will be collapsed")
+#'     warning("This warning will also be collapsed")
+#'     4 + 4
+#'   },
+#'   verbose = "collapse"
+#' )
 #'
 #' # Example: Using quiet = TRUE
-#' with_verbosity({
-#'   message("This message is suppressed")
-#'   warning("This warning is also suppressed")
-#'   5 + 5
-#' }, quiet = TRUE)
+#' with_verbosity(
+#'   {
+#'     message("This message is suppressed")
+#'     warning("This warning is also suppressed")
+#'     5 + 5
+#'   },
+#'   quiet = TRUE
+#' )
 #' @noRd
 with_verbosity <- function(expr, quiet = FALSE, verbose = "message") {
-   expr <- substitute(expr)
-   verbose <- validate_verbose(verbose)
+  expr <- substitute(expr)
+  verbose <- validate_verbose(verbose)
 
-   if (quiet | verbose == "silent") {
-      return(withCallingHandlers(
-         eval(expr, parent.frame()),
-         message = function(m) invokeRestart("muffleMessage"),
-         warning = function(w) invokeRestart("muffleWarning")
-      ))
-
-   } else if (verbose == "warn") {
-      return(withCallingHandlers(
-         eval(expr, parent.frame()),
-         message = function(m) invokeRestart("muffleMessage")
-      ))
-
-   } else if (verbose == "collapse") {
-      warning_count <- 0
-      result <- withCallingHandlers(
-         eval(expr, parent.frame()),
-         warning = function(w) {
-            warning_count <<- warning_count + 1
-            invokeRestart("muffleWarning")
-         }
-      )
-      if (warning_count > 0) {
-         cli_inform(c("i" = cli::col_red(
-"Operation performed with {warning_count} suppressed warning{?s}. Set {.arg verbose = \"warn\"} to show.")))
+  if (quiet | verbose == "silent") {
+    return(withCallingHandlers(
+      eval(expr, parent.frame()),
+      message = function(m) invokeRestart("muffleMessage"),
+      warning = function(w) invokeRestart("muffleWarning")
+    ))
+  } else if (verbose == "warn") {
+    return(withCallingHandlers(
+      eval(expr, parent.frame()),
+      message = function(m) invokeRestart("muffleMessage")
+    ))
+  } else if (verbose == "collapse") {
+    warning_count <- 0
+    result <- withCallingHandlers(
+      eval(expr, parent.frame()),
+      warning = function(w) {
+        warning_count <<- warning_count + 1
+        invokeRestart("muffleWarning")
       }
-      return(result)
-
-   } else if (verbose == "message") {
-      return(
-         eval(expr, envir = parent.frame())
-      )
-   }
+    )
+    if (warning_count > 0) {
+      cli_inform(c("i" = cli::col_red(
+        "Operation performed with {warning_count} suppressed warning{?s}. Set {.arg verbose = \"warn\"} to show."
+      )))
+    }
+    return(result)
+  } else if (verbose == "message") {
+    return(
+      eval(expr, envir = parent.frame())
+    )
+  }
 }
 
 #' Validate verbose parameter
@@ -241,13 +251,13 @@ with_verbosity <- function(expr, quiet = FALSE, verbose = "message") {
 #' @keywords internal validation
 #' @noRd
 validate_verbose <- function(verbose, arg = rlang::caller_arg(verbose), call = rlang::caller_env()) {
-   choices <- c("message", "warn", "collapse", "silent")
-   tryCatch(
-      match.arg(verbose, choices),
-      error = function(e) {
-         cli_abort(c(
-            "x" = "{.arg {arg}} should be one of: {cli::ansi_collapse(choices, last = ', ')}"
-         ), call = call)
-      }
-   )
+  choices <- c("message", "warn", "collapse", "silent")
+  tryCatch(
+    match.arg(verbose, choices),
+    error = function(e) {
+      cli_abort(c(
+        "x" = "{.arg {arg}} should be one of: {cli::ansi_collapse(choices, last = ', ')}"
+      ), call = call)
+    }
+  )
 }

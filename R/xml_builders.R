@@ -16,15 +16,16 @@
 #'
 #' @return Metacore/DataDef object
 #' @export
-define_to_metacore <- function(path, quiet = deprecated(), verbose = "message"){
+define_to_metacore <- function(path, quiet = deprecated(), verbose = "message") {
+  # Check if user has supplied `quiet` instead of `verbose`
+  if (lifecycle::is_present(quiet)) {
+    deprecate_soft(when = "0.3.0", what = "spec_to_metacore(quiet)", with = "spec_to_metacore(verbose)")
+  } else {
+    quiet <- FALSE
+  } # Else deal with deprecated argument for compatability
 
-   # Check if user has supplied `quiet` instead of `verbose`
-   if (lifecycle::is_present(quiet)) {
-      deprecate_soft(when = "0.3.0", what = "spec_to_metacore(quiet)", with = "spec_to_metacore(verbose)")
-   }
-   else quiet <- FALSE  # Else deal with deprecated argument for compatability
-
-   with_verbosity({
+  with_verbosity(
+    {
       xml <- read_xml(path)
       xml_ns_strip(xml)
 
@@ -48,7 +49,10 @@ define_to_metacore <- function(path, quiet = deprecated(), verbose = "message"){
         codelist = code_list,
         quiet = quiet
       )
-   }, quiet, verbose)
+    },
+    quiet,
+    verbose
+  )
 }
 
 #' XML to Data Set Spec

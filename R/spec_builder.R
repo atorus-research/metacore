@@ -22,45 +22,47 @@
 #' @return given a spec document it returns a metacore object
 #' @export
 spec_to_metacore <- function(path, quiet = deprecated(), where_sep_sheet = TRUE, verbose = "message") {
+  # Check if user has supplied `quiet` instead of `verbose`
+  if (lifecycle::is_present(quiet)) {
+    deprecate_soft(when = "0.3.0", what = "spec_to_metacore(quiet)", with = "spec_to_metacore(verbose)")
+  } else {
+    quiet <- FALSE
+  } # Else deal with deprecated argument for compatability
 
-   # Check if user has supplied `quiet` instead of `verbose`
-   if (lifecycle::is_present(quiet)) {
-      deprecate_soft(when = "0.3.0", what = "spec_to_metacore(quiet)", with = "spec_to_metacore(verbose)")
-   }
-   else quiet <- FALSE  # Else deal with deprecated argument for compatability
-
-   with_verbosity({
+  with_verbosity(
+    {
       doc <- read_all_sheets(path)
 
       if (spec_type(path) == "by_type") {
+        ds_spec <- spec_type_to_ds_spec(doc)
+        ds_vars <- spec_type_to_ds_vars(doc)
+        var_spec <- spec_type_to_var_spec(doc)
+        value_spec <- spec_type_to_value_spec(doc, where_sep_sheet = where_sep_sheet)
+        derivations <- spec_type_to_derivations(doc)
+        code_list <- spec_type_to_codelist(doc)
 
-         ds_spec     <- spec_type_to_ds_spec(doc)
-         ds_vars     <- spec_type_to_ds_vars(doc)
-         var_spec    <- spec_type_to_var_spec(doc)
-         value_spec  <- spec_type_to_value_spec(doc, where_sep_sheet = where_sep_sheet)
-         derivations <- spec_type_to_derivations(doc)
-         code_list   <- spec_type_to_codelist(doc)
-
-         test <- metacore(
-            ds_spec,
-            ds_vars,
-            var_spec,
-            value_spec,
-            derivations,
-            codelist = code_list,
-            quiet = quiet,
-            verbose = verbose
-         )
-
+        test <- metacore(
+          ds_spec,
+          ds_vars,
+          var_spec,
+          value_spec,
+          derivations,
+          codelist = code_list,
+          quiet = quiet,
+          verbose = verbose
+        )
       } else {
-         cli_abort(
-            "This specification format is not currently supported. You will need to write your own reader",
-            call. = FALSE
-         )
+        cli_abort(
+          "This specification format is not currently supported. You will need to write your own reader",
+          call. = FALSE
+        )
       }
 
       if (quiet) invisible(test) else test
-   }, quiet, verbose)
+    },
+    quiet,
+    verbose
+  )
 }
 
 
@@ -98,12 +100,12 @@ spec_type <- function(path) {
 #' @export
 #'
 #' @return a list of datasets
-read_all_sheets <- function(path){
-   sheets <- excel_sheets(path)
-   all_dat <- sheets %>%
-      map(~read_excel(path, sheet = ., col_types = "text", progress = FALSE))
-   names(all_dat) <- sheets
-   all_dat
+read_all_sheets <- function(path) {
+  sheets <- excel_sheets(path)
+  all_dat <- sheets %>%
+    map(~ read_excel(path, sheet = ., col_types = "text", progress = FALSE))
+  names(all_dat) <- sheets
+  all_dat
 }
 
 

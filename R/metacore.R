@@ -27,77 +27,94 @@
 #'
 #' @importFrom stringr str_to_lower
 MetaCore_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist, supp, quiet = FALSE, verbose = "message") {
+  deprecate_soft(
+    when = "0.3.0",
+    what = "MetaCore_initialize(quiet)",
+    with = "MetaCore_initialize(verbose)"
+  )
 
-   deprecate_soft(
-      when = "0.3.0",
-      what = "MetaCore_initialize(quiet)",
-      with = "MetaCore_initialize(verbose)"
-   )
+  private$.ds_spec <- ds_spec %>%
+    add_labs(
+      dataset = "Dataset Name",
+      structure = "Value Structure",
+      label = "Dataset Label"
+    )
 
-   private$.ds_spec <- ds_spec %>%
-      add_labs(dataset = "Dataset Name",
-               structure = "Value Structure",
-               label = "Dataset Label")
+  private$.ds_vars <- ds_vars %>%
+    add_labs(
+      dataset = "Dataset Name",
+      variable = "Variable Name",
+      key_seq = "Sequence Key",
+      order = "Variable Order",
+      mandatory = "Mandatory (Boolean)",
+      core = "ADaM core (Expected, Required, Permissible)",
+      supp_flag = "Supplemental Flag"
+    )
 
-   private$.ds_vars <- ds_vars %>%
-      add_labs(dataset = "Dataset Name",
-               variable = "Variable Name",
-               key_seq = "Sequence Key",
-               order = "Variable Order",
-               mandatory = "Mandatory (Boolean)",
-               core = "ADaM core (Expected, Required, Permissible)",
-               supp_flag = "Supplemental Flag")
+  private$.var_spec <- var_spec %>%
+    add_labs(
+      variable = "Variable Name",
+      length = "Variable Length",
+      label = "Variable Label",
+      type = "Variable Class",
+      common = "Common Across ADaM",
+      format = "Variable Format"
+    )
 
-   private$.var_spec <- var_spec %>%
-      add_labs(variable = "Variable Name",
-               length = "Variable Length",
-               label = "Variable Label",
-               type = "Variable Class",
-               common = "Common Across ADaM",
-               format = "Variable Format")
-
-   private$.value_spec <- value_spec %>%
-      add_labs(type = "Value Type",
-               orgin = "Origin of Value",
-               code_id = "ID of the Code List",
-               dataset = "Dataset Name",
-               variable = "Variable Name",
-               where = "Value of the Variable",
-               derivation_id = "ID of Derivation") %>%
-      mutate(origin = str_to_lower(.data$origin))
+  private$.value_spec <- value_spec %>%
+    add_labs(
+      type = "Value Type",
+      orgin = "Origin of Value",
+      code_id = "ID of the Code List",
+      dataset = "Dataset Name",
+      variable = "Variable Name",
+      where = "Value of the Variable",
+      derivation_id = "ID of Derivation"
+    ) %>%
+    mutate(origin = str_to_lower(.data$origin))
 
 
-   private$.derivations <- derivations %>%
-      add_labs(derivation_id = "ID of Derivation",
-               derivation = "Derivation")
+  private$.derivations <- derivations %>%
+    add_labs(
+      derivation_id = "ID of Derivation",
+      derivation = "Derivation"
+    )
 
-   private$.codelist <- codelist %>%
-      add_labs(code_id = "ID of the Code List",
-               names = "Name of the Code List",
-               type = "Code List/Permitted Values/External Library",
-               codes = "List of Codes")
+  private$.codelist <- codelist %>%
+    add_labs(
+      code_id = "ID of the Code List",
+      names = "Name of the Code List",
+      type = "Code List/Permitted Values/External Library",
+      codes = "List of Codes"
+    )
 
-   private$.codelist <- codelist %>%
-      add_labs(code_id = "ID of the Code List",
-               names = "Name of the Code List",
-               type = "Code List/Permitted Values/External Library",
-               codes = "List of Codes")
+  private$.codelist <- codelist %>%
+    add_labs(
+      code_id = "ID of the Code List",
+      names = "Name of the Code List",
+      type = "Code List/Permitted Values/External Library",
+      codes = "List of Codes"
+    )
 
-   private$.supp <- supp %>%
-      add_labs(dataset = "Dataset Name",
-               variable = "Variable Name",
-               idvar = "Identifying Variable",
-               qeval = "Evaluator")
+  private$.supp <- supp %>%
+    add_labs(
+      dataset = "Dataset Name",
+      variable = "Variable Name",
+      idvar = "Identifying Variable",
+      qeval = "Evaluator"
+    )
 
-   private$.ds_len <- ds_spec %>% nrow()
+  private$.ds_len <- ds_spec %>% nrow()
 
-   private$.ds_names <- ds_spec %>% pull(dataset)
+  private$.ds_names <- ds_spec %>% pull(dataset)
 
-   private$.ds_labels <- ds_spec %>% pull(label)
+  private$.ds_labels <- ds_spec %>% pull(label)
 
-   self$validate()
+  self$validate()
 
-   if (inherits_only(self, c("Metacore", "R6"))) { private$.greet(quiet) }
+  if (inherits_only(self, c("Metacore", "R6"))) {
+    private$.greet(quiet)
+  }
 }
 
 
@@ -125,35 +142,28 @@ MetaCore_print <- function(...) {
 #' @family Metacore
 #' @noRd
 #'
-MetaCore_validate <-  function() {
-   if(var_name_check(private)){
-
-      if(nrow(private$.ds_spec) == 0 &
-         nrow(private$.ds_vars) == 0 &
-         nrow(private$.var_spec) == 0 &
-         nrow(private$.value_spec) == 0 &
-         nrow(private$.derivations) == 0 &
-         nrow(private$.codelist) == 0 &
-         nrow(private$.supp) == 0 ){
-         cli_warn("Other checks were not performed, because all datasets are empty",
-                  call. = FALSE)
-      } else {
-         check_columns(private$.ds_spec,
-                       private$.ds_vars,
-                       private$.var_spec,
-                       private$.value_spec,
-                       private$.derivations,
-                       private$.codelist,
-                       private$.supp
-         )
-
-         ds_vars_check(private$.ds_vars, private$.var_spec)
-         value_check(private$.ds_vars, private$.value_spec)
-         derivation_check(private$.value_spec, private$.derivations)
-         codelist_check(private$.value_spec, private$.codelist)
-         if(nrow(private$.supp) == 0){
-            supp_check(private$.ds_vars, private$.supp)
-         }
+MetaCore_validate <- function() {
+  if (var_name_check(private)) {
+    if (nrow(private$.ds_spec) == 0 &
+      nrow(private$.ds_vars) == 0 &
+      nrow(private$.var_spec) == 0 &
+      nrow(private$.value_spec) == 0 &
+      nrow(private$.derivations) == 0 &
+      nrow(private$.codelist) == 0 &
+      nrow(private$.supp) == 0) {
+      cli_warn("Other checks were not performed, because all datasets are empty",
+        call. = FALSE
+      )
+    } else {
+      check_columns(
+        private$.ds_spec,
+        private$.ds_vars,
+        private$.var_spec,
+        private$.value_spec,
+        private$.derivations,
+        private$.codelist,
+        private$.supp
+      )
 
       ds_vars_check(private$.ds_vars, private$.var_spec)
       value_check(private$.ds_vars, private$.value_spec)
@@ -162,11 +172,12 @@ MetaCore_validate <-  function() {
       if (nrow(private$.supp) == 0) {
         supp_check(private$.ds_vars, private$.supp)
       }
-
-   } else {
-      cli_warn("Other checks were not performed, because column names were incorrect",
-               call. = FALSE)
-   }
+    }
+  } else {
+    cli_warn("Other checks were not performed, because column names were incorrect",
+      call. = FALSE
+    )
+  }
 }
 
 
@@ -249,82 +260,79 @@ MetaCore_filter <- function(value) {
 #' @noRd
 #
 MetaCore <- R6::R6Class("Metacore",
-                        public = list(
-                           initialize = MetaCore_initialize,
-                           print = MetaCore_print,
-                           validate =  MetaCore_validate,
-                           metacore_filter = MetaCore_filter
-                        ),
-
-                        private = list(
-                           .ds_spec = tibble(
-                              dataset = character(),
-                              structure = character(),
-                              label = character()
-                           ),
-                           .ds_vars = tibble(
-                              dataset = character(),
-                              variable = character(),
-                              mandatory = logical(),
-                              key_seq = integer(),
-                              order = integer(),
-                              core = character(),
-                              supp_flag = logical()
-                           ),
-                           .var_spec = tibble(
-                              variable = character(),
-                              label = character(),
-                              length = integer(),
-                              type = character(),
-                              common = character(),
-                              format = character()
-                           ),
-                           .value_spec = tibble(
-                              dataset = character(),
-                              variable = character(),
-                              where  = character(),
-                              type = character(),
-                              sig_dig = integer(),
-                              code_id = character(),
-                              origin = character(),
-                              derivation_id = integer()
-                           ),
-                           .derivations = tibble(
-                              derivation_id = integer(),
-                              derivation = character()
-                           ),
-                           # code_type == df | permitted_val | external_lib
-                           .codelist = tibble(
-                              code_id = character(),
-                              name = character(),
-                              type = character(),
-                              codes = list()
-                           ),
-                           .supp = tibble(
-                              dataset = character(),
-                              variable = character(),
-                              idvar = character(),
-                              qeval = character()
-                           ),
-                           .ds_len = NA,
-                           .ds_names = list(),
-                           .ds_labels = list(),
-
-                           .greet = function(quiet = FALSE) {
-                              cli_alert_success("Metadata successfully imported")
-                              cli_inform(c("i" = "To use the {.obj Metacore} object with {.pkg metatools} package, first subset a dataset using {.fn metacore::select_dataset}"))
-                           }
-                        ),
-
-                        active = list(
-                           ds_spec = readonly('ds_spec'),
-                           ds_vars =  readonly('ds_vars'),
-                           var_spec = readonly('var_spec'),
-                           value_spec = readonly('value_spec'),
-                           derivations = readonly('derivations'),
-                           codelist = readonly('codelist'),
-                           supp = readonly('supp')
-                        )
+  public = list(
+    initialize = MetaCore_initialize,
+    print = MetaCore_print,
+    validate = MetaCore_validate,
+    metacore_filter = MetaCore_filter
+  ),
+  private = list(
+    .ds_spec = tibble(
+      dataset = character(),
+      structure = character(),
+      label = character()
+    ),
+    .ds_vars = tibble(
+      dataset = character(),
+      variable = character(),
+      mandatory = logical(),
+      key_seq = integer(),
+      order = integer(),
+      core = character(),
+      supp_flag = logical()
+    ),
+    .var_spec = tibble(
+      variable = character(),
+      label = character(),
+      length = integer(),
+      type = character(),
+      common = character(),
+      format = character()
+    ),
+    .value_spec = tibble(
+      dataset = character(),
+      variable = character(),
+      where = character(),
+      type = character(),
+      sig_dig = integer(),
+      code_id = character(),
+      origin = character(),
+      derivation_id = integer()
+    ),
+    .derivations = tibble(
+      derivation_id = integer(),
+      derivation = character()
+    ),
+    # code_type == df | permitted_val | external_lib
+    .codelist = tibble(
+      code_id = character(),
+      name = character(),
+      type = character(),
+      codes = list()
+    ),
+    .supp = tibble(
+      dataset = character(),
+      variable = character(),
+      idvar = character(),
+      qeval = character()
+    ),
+    .ds_len = NA,
+    .ds_names = list(),
+    .ds_labels = list(),
+    .greet = function(quiet = FALSE) {
+      cli_alert_success("Metadata successfully imported")
+      cli_inform(c("i" = "To use the {.obj Metacore} object with {.pkg metatools} package, first subset a dataset using {.fn metacore::select_dataset}"))
+    }
+  ),
+  active = list(
+    ds_spec = readonly("ds_spec"),
+    ds_vars = readonly("ds_vars"),
+    var_spec = readonly("var_spec"),
+    value_spec = readonly("value_spec"),
+    derivations = readonly("derivations"),
+    codelist = readonly("codelist"),
+    supp = readonly("supp")
+  )
 )
 
 
@@ -351,79 +359,77 @@ MetaCore <- R6::R6Class("Metacore",
 #' @family Metacore
 #'
 #' @export
-metacore <- function(
-      ds_spec = tibble(
-         dataset = character(),
-         structure = character(),
-         label = character()
-      ),
-      ds_vars = tibble(
-         dataset = character(),
-         variable = character(),
-         keep = NULL, # Deprecated in 0.3.0. To be removed in a future version
-         mandatory = logical(),
-         key_seq = integer(),
-         order = integer(),
-         core = character(),
-         supp_flag = logical()
-      ),
-      var_spec = tibble(
-         variable = character(),
-         label = character(),
-         length = integer(),
-         type = character(),
-         common = character(),
-         format = character()
-      ),
-      value_spec = tibble(
-         dataset = character(),
-         variable = character(),
-         where  = character(),
-         type = character(),
-         sig_dig = integer(),
-         code_id = character(),
-         origin = character(),
-         derivation_id = integer()
-      ),
-      derivations = tibble(
-         derivation_id = integer(),
-         derivation = character()
-      ),
-      codelist = tibble(
-         code_id = character(),
-         name = character(),
-         type = character(),
-         codes = list()
-      ),
-      supp = tibble(
-         dataset = character(),
-         variable = character(),
-         idvar = character(),
-         qeval = character()
-      ),
-      quiet = deprecated(),
-      verbose = "message"
-) {
+metacore <- function(ds_spec = tibble(
+                       dataset = character(),
+                       structure = character(),
+                       label = character()
+                     ),
+                     ds_vars = tibble(
+                       dataset = character(),
+                       variable = character(),
+                       keep = NULL, # Deprecated in 0.3.0. To be removed in a future version
+                       mandatory = logical(),
+                       key_seq = integer(),
+                       order = integer(),
+                       core = character(),
+                       supp_flag = logical()
+                     ),
+                     var_spec = tibble(
+                       variable = character(),
+                       label = character(),
+                       length = integer(),
+                       type = character(),
+                       common = character(),
+                       format = character()
+                     ),
+                     value_spec = tibble(
+                       dataset = character(),
+                       variable = character(),
+                       where = character(),
+                       type = character(),
+                       sig_dig = integer(),
+                       code_id = character(),
+                       origin = character(),
+                       derivation_id = integer()
+                     ),
+                     derivations = tibble(
+                       derivation_id = integer(),
+                       derivation = character()
+                     ),
+                     codelist = tibble(
+                       code_id = character(),
+                       name = character(),
+                       type = character(),
+                       codes = list()
+                     ),
+                     supp = tibble(
+                       dataset = character(),
+                       variable = character(),
+                       idvar = character(),
+                       qeval = character()
+                     ),
+                     quiet = deprecated(),
+                     verbose = "message") {
+  # Check if user has supplied `quiet` instead of `verbose`
+  if (lifecycle::is_present(quiet)) {
+    deprecate_soft(when = "0.3.0", what = "metacore(quiet)", with = "metacore(verbose)")
+  } else {
+    quiet <- FALSE
+  } # Else deal with deprecated argument for compatability
 
-   # Check if user has supplied `quiet` instead of `verbose`
-   if (lifecycle::is_present(quiet)) {
-      deprecate_soft(when = "0.3.0", what = "metacore(quiet)", with = "metacore(verbose)")
-   }
-   else quiet <- FALSE  # Else deal with deprecated argument for compatability
-
-   with_verbosity({
-
+  with_verbosity(
+    {
       # Signal deprecation warning for ds_vars$keep column. This cannot be handled by
       # regular `lifecycle::deprecate_*` functionality as it is a column name of an
       # argument that has been changed, not the argument itself.
       if ("keep" %in% names(ds_vars)) {
-         cli_warn(c("The column `ds_vars$keep` in the `ds_vars` table was deprecated
+        cli_warn(c("The column `ds_vars$keep` in the `ds_vars` table was deprecated
 as of 0.3.0 in favour of `ds_vars$mandatory and will be removed in a future release.
 The input for the supplied column `keep` has been mapped to the new column `mandatory`."))
 
-         ds_vars <- ds_vars %>%
-            mutate(mandatory = keep) %>%
-            select(-keep)
+        ds_vars <- ds_vars %>%
+          mutate(mandatory = keep) %>%
+          select(-keep)
       }
 
       is_empty_df <- as.list(environment()) %>%
@@ -458,21 +464,20 @@ The input for the supplied column `keep` has been mapped to the new column `mand
       }
 
       MetaCore$new(
-         ds_spec  = ds_spec,
-         ds_vars  = ds_vars,
-         var_spec = var_spec,
-         value_spec = value_spec,
-         derivations = derivations,
-         codelist = codelist,
-         supp = supp,
-         quiet = quiet,
-         verbose = verbose
+        ds_spec = ds_spec,
+        ds_vars = ds_vars,
+        var_spec = var_spec,
+        value_spec = value_spec,
+        derivations = derivations,
+        codelist = codelist,
+        supp = supp,
+        quiet = quiet,
+        verbose = verbose
       )
     },
-    quiet = quiet
+    quiet,
+    verbose
   )
-
-   }, quiet, verbose)
 }
 
 
@@ -495,31 +500,35 @@ The input for the supplied column `keep` has been mapped to the new column `mand
 #' @return a filtered subset of the metacore object
 #' @export
 select_dataset <- function(.data, dataset, simplify = FALSE, quiet = deprecated(), verbose = "message") {
+  # Check if user has supplied `quiet` instead of `verbose`
+  if (lifecycle::is_present(quiet)) {
+    deprecate_soft(when = "0.3.0", what = "select_dataset(quiet)", with = "select_dataset(verbose)")
+  } else {
+    quiet <- FALSE
+  } # Else deal with deprecated argument for compatability
 
-   # Check if user has supplied `quiet` instead of `verbose`
-   if (lifecycle::is_present(quiet)) {
-      deprecate_soft(when = "0.3.0", what = "select_dataset(quiet)", with = "select_dataset(verbose)")
-   }
-   else quiet <- FALSE  # Else deal with deprecated argument for compatability
-
-   with_verbosity({
+  with_verbosity(
+    {
       cl <- .data$clone()
       cl$metacore_filter(dataset)
 
       if (simplify) {
-         test <- list(
-            cl$ds_vars,
-            cl$var_spec,
-            cl$value_spec,
-            cl$derivations,
-            select(cl$codelist, code_id, codes),
-            cl$supp
-         ) %>%
-            reduce(left_join)
+        test <- list(
+          cl$ds_vars,
+          cl$var_spec,
+          cl$value_spec,
+          cl$derivations,
+          select(cl$codelist, code_id, codes),
+          cl$supp
+        ) %>%
+          reduce(left_join)
       } else {
-         test <- DatasetMeta$new(metacore = cl, quiet = quiet)
+        test <- DatasetMeta$new(metacore = cl, quiet = quiet)
       }
-   }, quiet, verbose)
+    },
+    quiet,
+    verbose
+  )
 }
 
 
