@@ -174,11 +174,19 @@ metacore_example <- function(file = NULL) {
 #'   3 + 3
 #' })
 #'
+#' Example: Display messages and collapse warnings into a single message
+#' with_verbosity({
+#'   message("This message will be shown.")
+#'   warning("This warning will be collapsed")
+#'   warning("This warning will also be collapsed")
+#'   4 + 4
+#' }, verbose = "collapse")
+#'
 #' # Example: Using quiet = TRUE
 #' with_verbosity({
 #'   message("This message is suppressed")
 #'   warning("This warning is also suppressed")
-#'   4 + 4
+#'   5 + 5
 #' }, quiet = TRUE)
 #' @noRd
 with_verbosity <- function(expr, quiet = FALSE, verbose = "message") {
@@ -197,6 +205,21 @@ with_verbosity <- function(expr, quiet = FALSE, verbose = "message") {
          eval(expr, parent.frame()),
          message = function(m) invokeRestart("muffleMessage")
       ))
+
+   } else if (verbose == "collapse") {
+      warning_count <- 0
+      result <- withCallingHandlers(
+         eval(expr, parent.frame()),
+         warning = function(w) {
+            warning_count <<- warning_count + 1
+            invokeRestart("muffleWarning")
+         }
+      )
+      if (warning_count > 0) {
+         cli_inform(c("i" = cli::col_red(
+"Operation performed with {warning_count} suppressed warnings. Set {.arg verbose = \"warn\"} to show.")))
+      }
+      return(result)
 
    } else if (verbose == "message") {
       return(
@@ -223,7 +246,7 @@ with_verbosity <- function(expr, quiet = FALSE, verbose = "message") {
 #' @keywords internal validation
 #' @noRd
 validate_verbose <- function(verbose, arg = rlang::caller_arg(verbose), call = rlang::caller_env()) {
-   choices <- c("message", "warn", "silent")
+   choices <- c("message", "warn", "collapse", "silent")
    tryCatch(
       match.arg(verbose, choices),
       error = function(e) {
