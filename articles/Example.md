@@ -99,7 +99,7 @@ subset$ds_spec
 #>   <chr>   <chr>                  <chr>       
 #> 1 DM      One record per subject Demographics
 
-# a simplified dataframe 
+# a simplified dataframe
 subset_t <- test %>% select_dataset("DM", simplify = TRUE)
 #> Joining with `by = join_by(variable)`
 #> Joining with `by = join_by(dataset, variable, type)`

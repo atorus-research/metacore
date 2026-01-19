@@ -33,9 +33,9 @@ otherwise abort with errors.
 load(metacore_example("pilot_ADaM.rda"))
 adsl <- select_dataset(metacore, "ADSL", quiet = TRUE)
 if (FALSE) { # \dontrun{
-verify_DatasetMeta("DUMMY")   # Expect error
-verify_DatasetMeta(metacore)  # Expect error
+verify_DatasetMeta("DUMMY") # Expect error
+verify_DatasetMeta(metacore) # Expect error
 } # }
-verify_DatasetMeta(adsl)      # Expect valid, i.e., return TRUE
+verify_DatasetMeta(adsl) # Expect valid, i.e., return TRUE
 #> [1] TRUE
 ```

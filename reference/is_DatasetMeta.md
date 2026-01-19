@@ -23,10 +23,10 @@ is_DatasetMeta(x)
 ``` r
 load(metacore_example("pilot_ADaM.rda"))
 adsl <- select_dataset(metacore, "ADSL", quiet = TRUE)
-is_DatasetMeta("DUMMY")   # Expect FALSE
+is_DatasetMeta("DUMMY") # Expect FALSE
 #> [1] FALSE
-is_DatasetMeta(metacore)  # Expect FALSE
+is_DatasetMeta(metacore) # Expect FALSE
 #> [1] FALSE
-is_DatasetMeta(adsl)      # Expect TRUE
+is_DatasetMeta(adsl) # Expect TRUE
 #> [1] TRUE
 ```

@@ -243,10 +243,13 @@ columns .</p>
 <code>Data Structure</code> columns. So we can update the expressions to
 be more specific.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">ds_spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spec_type_to_ds_spec.html">spec_type_to_ds_spec</a></span><span class="op">(</span><span class="va">doc</span>, </span>
-<span>                                cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"dataset"</span> <span class="op">=</span> <span class="st">"Name"</span>, </span>
-<span>                                         <span class="st">"structure"</span> <span class="op">=</span> <span class="st">"Data Structure"</span>,  </span>
-<span>                                         <span class="st">"label"</span> <span class="op">=</span> <span class="st">"Label"</span><span class="op">)</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">ds_spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spec_type_to_ds_spec.html">spec_type_to_ds_spec</a></span><span class="op">(</span><span class="va">doc</span>,</span>
+<span>  cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>    <span class="st">"dataset"</span> <span class="op">=</span> <span class="st">"Name"</span>,</span>
+<span>    <span class="st">"structure"</span> <span class="op">=</span> <span class="st">"Data Structure"</span>,</span>
+<span>    <span class="st">"label"</span> <span class="op">=</span> <span class="st">"Label"</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">ds_spec</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 3</span></span></span>
 <span><span class="co">#&gt;   dataset structure                                                    label    </span></span>
@@ -314,13 +317,19 @@ the variable and the domain sheet.</p>
 <span><span class="co">#&gt; <span style="color: #949494;">#   `Controlled Term or Format` &lt;chr&gt;, `Computational Method` &lt;chr&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   `Definition / Comments` &lt;chr&gt;, `Additional Information` &lt;chr&gt;</span></span></span>
 <span></span>
-<span><span class="va">ds_vars</span><span class="op">&lt;-</span> <span class="fu"><a href="../reference/spec_type_to_ds_vars.html">spec_type_to_ds_vars</a></span><span class="op">(</span><span class="va">doc</span>, cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"dataset"</span> <span class="op">=</span> <span class="st">"Domain"</span>,</span>
-<span>                                             <span class="st">"variable"</span> <span class="op">=</span> <span class="st">"[V|v]ariable [N|n]ame"</span>,</span>
-<span>                                             <span class="st">"order"</span> <span class="op">=</span> <span class="st">"[V|v]ariable [O|o]rder"</span>,</span>
-<span>                                             <span class="st">"mandatory"</span> <span class="op">=</span> <span class="st">"[M|m]andatory"</span><span class="op">)</span>,</span>
-<span>                               key_seq_cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"dataset"</span> <span class="op">=</span> <span class="st">"Domain Name"</span>,</span>
-<span>                                                <span class="st">"key_seq"</span> <span class="op">=</span> <span class="st">"Key"</span><span class="op">)</span>,</span>
-<span>                               sheet <span class="op">=</span> <span class="st">"[V|v]ar|Domains"</span><span class="op">)</span> </span>
+<span><span class="va">ds_vars</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spec_type_to_ds_vars.html">spec_type_to_ds_vars</a></span><span class="op">(</span><span class="va">doc</span>,</span>
+<span>  cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>    <span class="st">"dataset"</span> <span class="op">=</span> <span class="st">"Domain"</span>,</span>
+<span>    <span class="st">"variable"</span> <span class="op">=</span> <span class="st">"[V|v]ariable [N|n]ame"</span>,</span>
+<span>    <span class="st">"order"</span> <span class="op">=</span> <span class="st">"[V|v]ariable [O|o]rder"</span>,</span>
+<span>    <span class="st">"mandatory"</span> <span class="op">=</span> <span class="st">"[M|m]andatory"</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  key_seq_cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>    <span class="st">"dataset"</span> <span class="op">=</span> <span class="st">"Domain Name"</span>,</span>
+<span>    <span class="st">"key_seq"</span> <span class="op">=</span> <span class="st">"Key"</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  sheet <span class="op">=</span> <span class="st">"[V|v]ar|Domains"</span></span>
+<span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">ds_vars</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 7</span></span></span>
@@ -360,12 +369,14 @@ column, the builder function will automatically figure out which
 variables are common to all dataset. This is good because we don’t have
 a common variable in our specs.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">var_spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spec_type_to_var_spec.html">spec_type_to_var_spec</a></span><span class="op">(</span><span class="va">doc</span>, cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"variable"</span> <span class="op">=</span> <span class="st">"Variable Name"</span>,</span>
-<span>                                                <span class="st">"length"</span> <span class="op">=</span> <span class="st">"[L|l]ength"</span>,</span>
-<span>                                                <span class="st">"label"</span> <span class="op">=</span> <span class="st">"[L|l]abel"</span>,</span>
-<span>                                                <span class="st">"type"</span> <span class="op">=</span> <span class="st">"[T|t]ype"</span>,</span>
-<span>                                                <span class="st">"dataset"</span> <span class="op">=</span> <span class="st">"[D|d]ataset|[D|d]omain"</span>,</span>
-<span>                                                <span class="st">"format"</span> <span class="op">=</span> <span class="st">"Format"</span><span class="op">)</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">var_spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spec_type_to_var_spec.html">spec_type_to_var_spec</a></span><span class="op">(</span><span class="va">doc</span>, cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>  <span class="st">"variable"</span> <span class="op">=</span> <span class="st">"Variable Name"</span>,</span>
+<span>  <span class="st">"length"</span> <span class="op">=</span> <span class="st">"[L|l]ength"</span>,</span>
+<span>  <span class="st">"label"</span> <span class="op">=</span> <span class="st">"[L|l]abel"</span>,</span>
+<span>  <span class="st">"type"</span> <span class="op">=</span> <span class="st">"[T|t]ype"</span>,</span>
+<span>  <span class="st">"dataset"</span> <span class="op">=</span> <span class="st">"[D|d]ataset|[D|d]omain"</span>,</span>
+<span>  <span class="st">"format"</span> <span class="op">=</span> <span class="st">"Format"</span></span>
+<span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">var_spec</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 6</span></span></span>
 <span><span class="co">#&gt;   variable length label                            type    format common</span></span>
@@ -383,8 +394,8 @@ var_spec table is to remove the controlled terms. It is easy here
 because all the formats end in a full stop (.), but the controlled terms
 don’t.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">var_spec</span> <span class="op">&lt;-</span> <span class="va">var_spec</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
-<span>   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>format <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/if_else.html" class="external-link">if_else</a></span><span class="op">(</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_detect.html" class="external-link">str_detect</a></span><span class="op">(</span><span class="va">format</span>, <span class="st">"\\."</span><span class="op">)</span>, <span class="va">format</span>, <span class="st">""</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">var_spec</span> <span class="op">&lt;-</span> <span class="va">var_spec</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>format <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/if_else.html" class="external-link">if_else</a></span><span class="op">(</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_detect.html" class="external-link">str_detect</a></span><span class="op">(</span><span class="va">format</span>, <span class="st">"\\."</span><span class="op">)</span>, <span class="va">format</span>, <span class="st">""</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>The next dataset is value_spec, which contains the value level
 metadata. It is made up of 8 columns:</p>
 <ul>
@@ -405,15 +416,19 @@ builders will just pull what information it can from the variable tab.
 Additionally this spec doesn’t have a predecessor column, so we can just
 use the method column.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">value_spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spec_type_to_value_spec.html">spec_type_to_value_spec</a></span><span class="op">(</span><span class="va">doc</span>, cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"dataset"</span> <span class="op">=</span> <span class="st">"VLM Name|Domain"</span>,</span>
-<span>                                                    <span class="st">"variable"</span> <span class="op">=</span> <span class="st">"VLM Name|Variable Name"</span>,</span>
-<span>                                                    <span class="st">"origin"</span> <span class="op">=</span> <span class="st">"[O|o]rigin"</span>,</span>
-<span>                                                    <span class="st">"type"</span> <span class="op">=</span> <span class="st">"[T|t]ype"</span>,</span>
-<span>                                                    <span class="st">"code_id"</span> <span class="op">=</span> <span class="st">"Controlled Term"</span>,</span>
-<span>                                                    <span class="st">"where"</span> <span class="op">=</span> <span class="st">"Parameter Code"</span>,</span>
-<span>                                                    <span class="st">"derivation_id"</span> <span class="op">=</span> <span class="st">"Method"</span>,</span>
-<span>                                                    <span class="st">"predecessor"</span> <span class="op">=</span> <span class="st">"Method"</span><span class="op">)</span>,</span>
-<span>                                      where_sep_sheet <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">value_spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spec_type_to_value_spec.html">spec_type_to_value_spec</a></span><span class="op">(</span><span class="va">doc</span>,</span>
+<span>  cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>    <span class="st">"dataset"</span> <span class="op">=</span> <span class="st">"VLM Name|Domain"</span>,</span>
+<span>    <span class="st">"variable"</span> <span class="op">=</span> <span class="st">"VLM Name|Variable Name"</span>,</span>
+<span>    <span class="st">"origin"</span> <span class="op">=</span> <span class="st">"[O|o]rigin"</span>,</span>
+<span>    <span class="st">"type"</span> <span class="op">=</span> <span class="st">"[T|t]ype"</span>,</span>
+<span>    <span class="st">"code_id"</span> <span class="op">=</span> <span class="st">"Controlled Term"</span>,</span>
+<span>    <span class="st">"where"</span> <span class="op">=</span> <span class="st">"Parameter Code"</span>,</span>
+<span>    <span class="st">"derivation_id"</span> <span class="op">=</span> <span class="st">"Method"</span>,</span>
+<span>    <span class="st">"predecessor"</span> <span class="op">=</span> <span class="st">"Method"</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  where_sep_sheet <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">value_spec</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 8</span></span></span>
 <span><span class="co">#&gt;   dataset variable origin      type    code_id derivation_id where sig_dig</span></span>
@@ -430,13 +445,19 @@ comes from the supplied derivation, predecessor, or comment column
 depending on the origin. In this mock we don’t have a predecessor column
 so we can set to comment as well.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">derivation</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spec_type_to_derivations.html">spec_type_to_derivations</a></span><span class="op">(</span><span class="va">doc</span>, cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"derivation_id"</span> <span class="op">=</span> <span class="st">"Name"</span>,</span>
-<span>                                                     <span class="st">"derivation"</span> <span class="op">=</span> <span class="st">"[D|d]efinition|[D|d]escription"</span><span class="op">)</span>, </span>
-<span>                                       var_cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"dataset"</span> <span class="op">=</span> <span class="st">"Domain Name"</span>,</span>
-<span>                                                    <span class="st">"variable"</span> <span class="op">=</span> <span class="st">"Variable Name|VLM"</span>,</span>
-<span>                                                    <span class="st">"origin"</span> <span class="op">=</span> <span class="st">"[O|o]rigin"</span>,</span>
-<span>                                                    <span class="st">"predecessor"</span> <span class="op">=</span> <span class="st">"Comment"</span>,</span>
-<span>                                                    <span class="st">"comment"</span> <span class="op">=</span> <span class="st">"Comment"</span><span class="op">)</span><span class="op">)</span> </span>
+<code class="sourceCode R"><span><span class="va">derivation</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spec_type_to_derivations.html">spec_type_to_derivations</a></span><span class="op">(</span><span class="va">doc</span>,</span>
+<span>  cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>    <span class="st">"derivation_id"</span> <span class="op">=</span> <span class="st">"Name"</span>,</span>
+<span>    <span class="st">"derivation"</span> <span class="op">=</span> <span class="st">"[D|d]efinition|[D|d]escription"</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  var_cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>    <span class="st">"dataset"</span> <span class="op">=</span> <span class="st">"Domain Name"</span>,</span>
+<span>    <span class="st">"variable"</span> <span class="op">=</span> <span class="st">"Variable Name|VLM"</span>,</span>
+<span>    <span class="st">"origin"</span> <span class="op">=</span> <span class="st">"[O|o]rigin"</span>,</span>
+<span>    <span class="st">"predecessor"</span> <span class="op">=</span> <span class="st">"Comment"</span>,</span>
+<span>    <span class="st">"comment"</span> <span class="op">=</span> <span class="st">"Comment"</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">derivation</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 2</span></span></span>
 <span><span class="co">#&gt;   derivation_id derivation                                                      </span></span>
@@ -460,12 +481,16 @@ and others to be character.</p>
 codelists and external dictionaries. But, in the specification we only
 have codelist so <code>dict_cols</code> needs to be set to null.</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">codelist</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spec_type_to_codelist.html">spec_type_to_codelist</a></span><span class="op">(</span><span class="va">doc</span>, codelist_cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"code_id"</span> <span class="op">=</span> <span class="st">"Codelist Code"</span>,</span>
-<span>                                                         <span class="st">"name"</span> <span class="op">=</span> <span class="st">"Codelist Name"</span>,</span>
-<span>                                                         <span class="st">"code"</span> <span class="op">=</span> <span class="st">"Coded Value"</span>,</span>
-<span>                                                         <span class="st">"decode"</span> <span class="op">=</span> <span class="st">"Decoded Value"</span><span class="op">)</span>,</span>
-<span>                                  simplify <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>                                  dict_cols <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">codelist</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spec_type_to_codelist.html">spec_type_to_codelist</a></span><span class="op">(</span><span class="va">doc</span>,</span>
+<span>  codelist_cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>    <span class="st">"code_id"</span> <span class="op">=</span> <span class="st">"Codelist Code"</span>,</span>
+<span>    <span class="st">"name"</span> <span class="op">=</span> <span class="st">"Codelist Name"</span>,</span>
+<span>    <span class="st">"code"</span> <span class="op">=</span> <span class="st">"Coded Value"</span>,</span>
+<span>    <span class="st">"decode"</span> <span class="op">=</span> <span class="st">"Decoded Value"</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  simplify <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  dict_cols <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">codelist</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 4</span></span></span>
 <span><span class="co">#&gt;   code_id name    type        codes           </span></span>
@@ -479,8 +504,10 @@ have codelist so <code>dict_cols</code> needs to be set to null.</p>
 <p>Now we have all the tables we need we can make the metacore
 object</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/metacore.html">metacore</a></span><span class="op">(</span><span class="va">ds_spec</span>, <span class="va">ds_vars</span>, <span class="va">var_spec</span>, <span class="va">value_spec</span>,</span>
-<span>         <span class="va">derivation</span>, <span class="va">codelist</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/metacore.html">metacore</a></span><span class="op">(</span></span>
+<span>  <span class="va">ds_spec</span>, <span class="va">ds_vars</span>, <span class="va">var_spec</span>, <span class="va">value_spec</span>,</span>
+<span>  <span class="va">derivation</span>, <span class="va">codelist</span></span>
+<span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning: `core` from the `ds_vars` table only contains missing values.</span></span>
 <span><span class="co">#&gt; Warning: `supp_flag` from the `ds_vars` table only contains missing</span></span>
 <span><span class="co">#&gt; values.</span></span>

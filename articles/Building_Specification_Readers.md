@@ -197,10 +197,13 @@ We only need the Domain `Name`, `Label`, and `Data Structure` columns.
 So we can update the expressions to be more specific.
 
 ``` r
-ds_spec <- spec_type_to_ds_spec(doc, 
-                                cols = c("dataset" = "Name", 
-                                         "structure" = "Data Structure",  
-                                         "label" = "Label"))
+ds_spec <- spec_type_to_ds_spec(doc,
+  cols = c(
+    "dataset" = "Name",
+    "structure" = "Data Structure",
+    "label" = "Label"
+  )
+)
 head(ds_spec)
 #> # A tibble: 4 × 3
 #>   dataset structure                                                    label    
@@ -278,13 +281,19 @@ doc$Variables %>% head()
 #> #   `Controlled Term or Format` <chr>, `Computational Method` <chr>,
 #> #   `Definition / Comments` <chr>, `Additional Information` <chr>
 
-ds_vars<- spec_type_to_ds_vars(doc, cols = c("dataset" = "Domain",
-                                             "variable" = "[V|v]ariable [N|n]ame",
-                                             "order" = "[V|v]ariable [O|o]rder",
-                                             "mandatory" = "[M|m]andatory"),
-                               key_seq_cols = c("dataset" = "Domain Name",
-                                                "key_seq" = "Key"),
-                               sheet = "[V|v]ar|Domains") 
+ds_vars <- spec_type_to_ds_vars(doc,
+  cols = c(
+    "dataset" = "Domain",
+    "variable" = "[V|v]ariable [N|n]ame",
+    "order" = "[V|v]ariable [O|o]rder",
+    "mandatory" = "[M|m]andatory"
+  ),
+  key_seq_cols = c(
+    "dataset" = "Domain Name",
+    "key_seq" = "Key"
+  ),
+  sheet = "[V|v]ar|Domains"
+)
 
 head(ds_vars)
 #> # A tibble: 6 × 7
@@ -331,12 +340,14 @@ automatically figure out which variables are common to all dataset. This
 is good because we don’t have a common variable in our specs.
 
 ``` r
-var_spec <- spec_type_to_var_spec(doc, cols = c("variable" = "Variable Name",
-                                                "length" = "[L|l]ength",
-                                                "label" = "[L|l]abel",
-                                                "type" = "[T|t]ype",
-                                                "dataset" = "[D|d]ataset|[D|d]omain",
-                                                "format" = "Format"))
+var_spec <- spec_type_to_var_spec(doc, cols = c(
+  "variable" = "Variable Name",
+  "length" = "[L|l]ength",
+  "label" = "[L|l]abel",
+  "type" = "[T|t]ype",
+  "dataset" = "[D|d]ataset|[D|d]omain",
+  "format" = "Format"
+))
 head(var_spec)
 #> # A tibble: 6 × 6
 #>   variable length label                            type    format common
@@ -357,8 +368,8 @@ because all the formats end in a full stop (.), but the controlled terms
 don’t.
 
 ``` r
-var_spec <- var_spec %>% 
-   mutate(format = if_else(str_detect(format, "\\."), format, ""))
+var_spec <- var_spec %>%
+  mutate(format = if_else(str_detect(format, "\\."), format, ""))
 ```
 
 The next dataset is value_spec, which contains the value level metadata.
@@ -389,15 +400,19 @@ Additionally this spec doesn’t have a predecessor column, so we can just
 use the method column.
 
 ``` r
-value_spec <- spec_type_to_value_spec(doc, cols = c("dataset" = "VLM Name|Domain",
-                                                    "variable" = "VLM Name|Variable Name",
-                                                    "origin" = "[O|o]rigin",
-                                                    "type" = "[T|t]ype",
-                                                    "code_id" = "Controlled Term",
-                                                    "where" = "Parameter Code",
-                                                    "derivation_id" = "Method",
-                                                    "predecessor" = "Method"),
-                                      where_sep_sheet = FALSE)
+value_spec <- spec_type_to_value_spec(doc,
+  cols = c(
+    "dataset" = "VLM Name|Domain",
+    "variable" = "VLM Name|Variable Name",
+    "origin" = "[O|o]rigin",
+    "type" = "[T|t]ype",
+    "code_id" = "Controlled Term",
+    "where" = "Parameter Code",
+    "derivation_id" = "Method",
+    "predecessor" = "Method"
+  ),
+  where_sep_sheet = FALSE
+)
 head(value_spec)
 #> # A tibble: 6 × 8
 #>   dataset variable origin      type    code_id derivation_id where sig_dig
@@ -417,13 +432,19 @@ on the origin. In this mock we don’t have a predecessor column so we can
 set to comment as well.
 
 ``` r
-derivation <- spec_type_to_derivations(doc, cols = c("derivation_id" = "Name",
-                                                     "derivation" = "[D|d]efinition|[D|d]escription"), 
-                                       var_cols = c("dataset" = "Domain Name",
-                                                    "variable" = "Variable Name|VLM",
-                                                    "origin" = "[O|o]rigin",
-                                                    "predecessor" = "Comment",
-                                                    "comment" = "Comment")) 
+derivation <- spec_type_to_derivations(doc,
+  cols = c(
+    "derivation_id" = "Name",
+    "derivation" = "[D|d]efinition|[D|d]escription"
+  ),
+  var_cols = c(
+    "dataset" = "Domain Name",
+    "variable" = "Variable Name|VLM",
+    "origin" = "[O|o]rigin",
+    "predecessor" = "Comment",
+    "comment" = "Comment"
+  )
+)
 head(derivation)
 #> # A tibble: 6 × 2
 #>   derivation_id derivation                                                      
@@ -451,12 +472,16 @@ external dictionaries. But, in the specification we only have codelist
 so `dict_cols` needs to be set to null.
 
 ``` r
-codelist <- spec_type_to_codelist(doc, codelist_cols = c("code_id" = "Codelist Code",
-                                                         "name" = "Codelist Name",
-                                                         "code" = "Coded Value",
-                                                         "decode" = "Decoded Value"),
-                                  simplify = TRUE,
-                                  dict_cols = NULL)
+codelist <- spec_type_to_codelist(doc,
+  codelist_cols = c(
+    "code_id" = "Codelist Code",
+    "name" = "Codelist Name",
+    "code" = "Coded Value",
+    "decode" = "Decoded Value"
+  ),
+  simplify = TRUE,
+  dict_cols = NULL
+)
 head(codelist)
 #> # A tibble: 6 × 4
 #>   code_id name    type        codes           
@@ -472,8 +497,10 @@ head(codelist)
 Now we have all the tables we need we can make the metacore object
 
 ``` r
-metacore(ds_spec, ds_vars, var_spec, value_spec,
-         derivation, codelist)
+metacore(
+  ds_spec, ds_vars, var_spec, value_spec,
+  derivation, codelist
+)
 #> Warning: `core` from the `ds_vars` table only contains missing values.
 #> Warning: `supp_flag` from the `ds_vars` table only contains missing
 #> values.
