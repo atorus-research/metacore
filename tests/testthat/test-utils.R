@@ -215,6 +215,7 @@ test_that("validate_verbose accepts valid inputs without error", {
    # Test each valid choice
    expect_no_error(validate_verbose("message"))
    expect_no_error(validate_verbose("warn"))
+   expect_no_error(validate_verbose("collapse"))
    expect_no_error(validate_verbose("silent"))
 })
 
@@ -222,6 +223,7 @@ test_that("validate_verbose allows partial matching for valid inputs", {
    # match.arg defaults to allowing partial matching if unambiguous
    expect_no_error(validate_verbose("mess")) # Should resolve to "message"
    expect_no_error(validate_verbose("war"))  # Should resolve to "warn"
+   expect_no_error(validate_verbose("col"))  # Should resolve to "collapse"
    expect_no_error(validate_verbose("sil"))  # Should resolve to "silent"
 })
 
@@ -261,5 +263,27 @@ test_that("validate_verbose throws error for vector input", {
    # Empty character vector
    expect_error(
       spec_to_metacore(metacore_example("p21_mock.xlsx"), quiet = TRUE, verbose = character(0))
+   )
+})
+
+test_that("with_verbosity collapses warnings into a single message", {
+   # Test single warning
+   expect_message(
+      res <- with_verbosity({
+         warning("This warning should be collapsed")
+         1 + 1
+      }, verbose = "collapse"),
+      regexp = cli_inform("Operation performed with 1 suppressed warning. Set `verbose = \"warn\"` to show.")
+   )
+
+   # Test multiple warnings
+   expect_message(
+      with_verbosity({
+         warning("This warning should be collapsed")
+         warning("This warning should be collapsed")
+         warning("This warning should be collapsed")
+         1 + 1
+      }, verbose = "collapse"),
+      regexp = cli_inform("Operation performed with 3 suppressed warnings. Set `verbose = \"warn\"` to show.")
    )
 })

@@ -379,3 +379,16 @@ test_that("select_dataset(quiet) deprecation message is output when supplied by 
       select_dataset(spec, "AE", quiet = TRUE)
    )
 })
+
+test_that("select_dataset(simplify = TRUE) returns expected structure", {
+   spec <- spec_to_metacore(metacore_example("p21_mock.xlsx"), verbose = "silent")
+   ae <- select_dataset(spec, "AE", verbose = "silent")
+   ae_simple <- select_dataset(spec, "AE", simplify = TRUE, verbose = "silent")
+
+   expected_names <- c("dataset", "variable", "order", "mandatory", "key_seq", "core", "supp_flag",
+                       "length", "label", "type", "format", "common", "origin", "code_id", "sig_dig",
+                       "derivation_id", "where", "derivation", "codes", "idvar", "qeval")
+
+   expect_equal(names(ae_simple), expected_names)
+   expect_equal(nrow(ae_simple), nrow(ae$ds_vars))
+})
