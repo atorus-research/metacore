@@ -25,14 +25,14 @@ Source:
 [`DESCRIPTION`](https://github.com/atorus-research/metacore/blob/main/DESCRIPTION)
 
 Hobby L, Fillmore C, Denney B, Gans M, Tarasiewicz A, Stackhouse M,
-Senior T (2025). *metacore: A Centralized Metadata Object Focus on
+Senior T (2026). *metacore: A Centralized Metadata Object Focus on
 Clinical Trial Data Programming Workflows*. R package version 0.3.0,
 <https://atorus-research.github.io/metacore/>.
 
     @Manual{,
       title = {metacore: A Centralized Metadata Object Focus on Clinical Trial Data Programming Workflows},
       author = {Liam Hobby and Christina Fillmore and Bill Denney and Maya Gans and Ashley Tarasiewicz and Mike Stackhouse and Tamara Senior},
-      year = {2025},
+      year = {2026},
       note = {R package version 0.3.0},
       url = {https://atorus-research.github.io/metacore/},
     }

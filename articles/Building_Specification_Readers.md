@@ -55,7 +55,10 @@ object has 7 tables and their general purpose are as follows:
 
 Here is a schema of how all this fits together
 
-![](../reference/figures/labeled_schema.png "Metacore Schema")
+![Schema diagram showing the relationships between all metacore
+tables](../reference/figures/labeled_schema.png "Metacore Schema")
+
+Schema diagram showing the relationships between all metacore tables
 
 ds_spec is connected to ds_vars by the ‘dataset’ variable and ds_vars is
 connected to var_spec by the ‘variable’ variable, etc. For more

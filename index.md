@@ -1,4 +1,4 @@
-# metacore [![](reference/figures/metacore.PNG)](https://github.com/atorus-research/metacore)
+# metacore [![Metacore Package Hex Sticker](reference/figures/metacore.PNG)](https://github.com/atorus-research/metacore)
 
 Programming for clinical trial data analysis tends to be very
 standardized. With data standards such as
@@ -57,9 +57,14 @@ remember. They are as follows:
 
 Here is a schema of how all this fits together:
 
-![](reference/figures/schema-colors.png "man/figures/Metacore Schema")
+![Schema diagram showing the relationships between all metacore tables
+(variable names not
+included)](reference/figures/schema-colors.png "man/figures/Metacore Schema")
 
-### ds_spec ![](reference/figures/labeled-ds_spec.png)
+Schema diagram showing the relationships between all metacore tables
+(variable names not included)
+
+### ds_spec ![Diagram of ds_spec table structure](reference/figures/labeled-ds_spec.png)
 
 This table covers the basic information about each dataset. There is
 only a single row per dataset, with the following information:
@@ -70,7 +75,7 @@ only a single row per dataset, with the following information:
 
 - *label*: Dataset label
 
-### ds_vars ![](reference/figures/labeled-ds_vars.png)
+### ds_vars ![Diagram of ds_vars table structure](reference/figures/labeled-ds_vars.png)
 
 This table contains the information that bridges between purely dataset
 level and purely variable level. There is one row per dataset per
@@ -99,7 +104,7 @@ variable:
 - *supp_flag*: Logical to determine if the variable is in the
   supplemental datasets
 
-### var_spec ![](reference/figures/labeled-var_spec.png)
+### var_spec ![Diagram of var_spec table structure](reference/figures/labeled-var_spec.png)
 
 This table contains the purely variable level information. The goal is
 there is a single row per variable, which is common across all datasets.
@@ -124,7 +129,7 @@ variable column.
 
 - *format*: Variable format
 
-### value_spec ![](reference/figures/labeled-value_spec.png)
+### value_spec ![Diagram of value_spec table structure](reference/figures/labeled-value_spec.png)
 
 This table contains the information the information at the value level.
 There will be at least one row per dataset/variable combination. There
@@ -152,7 +157,7 @@ are as follows:
 - *derivation_id*: ID for the derivation to match with the
   **derivation** table
 
-### derivations ![](reference/figures/labeled-derivation.png)
+### derivations ![Diagram of derivation table structure](reference/figures/labeled-derivation.png)
 
 This table has all the derivation information, with one row per
 derivation ID and the following information:
@@ -161,7 +166,7 @@ derivation ID and the following information:
 
 - *derivation*: Text describing the derivation
 
-### codelist ![](reference/figures/labeled-code_list.png)
+### codelist ![Diagram of codelist table structure](reference/figures/labeled-code_list.png)
 
 This table contains the code lists, permitted value lists, and external
 libraries nested within a tibble. There is only a single row per
@@ -178,7 +183,7 @@ list/library, with the following information:
 - *type*: An indicator of if the information in the code column is a
   code/decode table, permitted value, or external library
 
-### supp ![](reference/figures/labeled-supp.png)
+### supp ![Diagram of supp table structure](reference/figures/labeled-supp.png)
 
 This table contains the information needed to create supplemental
 tables. If you want to add a variable which will go into a supplemental
@@ -201,7 +206,10 @@ single row per dataset/variable, with the following information:
 To get more information about the metacore objects and how to build a
 specification reader, please see our vignettes.
 
-![](reference/figures/labeled_schema.png "man/figures/Metacore Schema")
+![Schema diagram showing the relationships between all metacore
+tables](reference/figures/labeled_schema.png "man/figures/Metacore Schema")
+
+Schema diagram showing the relationships between all metacore tables
 
 ## Future Development
 

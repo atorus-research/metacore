@@ -56,7 +56,7 @@
 </nav><div class="container template-home">
 <div class="row">
   <main id="main" class="col-md-9"><div class="section level1">
-<div class="page-header"><h1 id="metacore-">metacore <a href="https://github.com/atorus-research/metacore" class="external-link"><img src="reference/figures/metacore.PNG" align="right" style="height:139px;"></a>
+<div class="page-header"><h1 id="metacore-">metacore <a href="https://github.com/atorus-research/metacore" class="external-link"><img src="reference/figures/metacore.PNG" align="right" style="height:139px;" alt="Metacore Package Hex Sticker"></a>
 <a class="anchor" aria-label="anchor" href="#metacore-"></a>
 </h1></div>
 <!-- badges: start -->
@@ -84,9 +84,10 @@
 <li><p><strong>supp</strong>: Contains information specific to supplemental variables</p></li>
 </ul>
 <p>Here is a schema of how all this fits together:</p>
-<p><img src="reference/figures/schema-colors.png" title="man/figures/Metacore Schema"></p>
-<div class="section level3">
-<h3 id="ds_spec-">ds_spec <img src="reference/figures/labeled-ds_spec.png" align="right" style="height:150px;"><a class="anchor" aria-label="anchor" href="#ds_spec-"></a>
+<figure><img src="reference/figures/schema-colors.png" title="man/figures/Metacore Schema" alt="Schema diagram showing the relationships between all metacore tables (variable names not included)"><figcaption aria-hidden="true">
+Schema diagram showing the relationships between all metacore tables (variable names not included)
+</figcaption></figure><div class="section level3">
+<h3 id="ds_spec-">ds_spec <img src="reference/figures/labeled-ds_spec.png" align="right" style="height:150px;" alt="Diagram of ds_spec table structure"><a class="anchor" aria-label="anchor" href="#ds_spec-"></a>
 </h3>
 <p>This table covers the basic information about each dataset. There is only a single row per dataset, with the following information:</p>
 <ul>
@@ -96,7 +97,7 @@
 </ul>
 </div>
 <div class="section level3">
-<h3 id="ds_vars-">ds_vars <img src="reference/figures/labeled-ds_vars.png" align="right" style="height:150px;"><a class="anchor" aria-label="anchor" href="#ds_vars-"></a>
+<h3 id="ds_vars-">ds_vars <img src="reference/figures/labeled-ds_vars.png" align="right" style="height:150px;" alt="Diagram of ds_vars table structure"><a class="anchor" aria-label="anchor" href="#ds_vars-"></a>
 </h3>
 <p>This table contains the information that bridges between purely dataset level and purely variable level. There is one row per dataset per variable:</p>
 <ul>
@@ -110,7 +111,7 @@
 </ul>
 </div>
 <div class="section level3">
-<h3 id="var_spec-">var_spec <img src="reference/figures/labeled-var_spec.png" align="right" style="height:150px;"><a class="anchor" aria-label="anchor" href="#var_spec-"></a>
+<h3 id="var_spec-">var_spec <img src="reference/figures/labeled-var_spec.png" align="right" style="height:150px;" alt="Diagram of var_spec table structure"><a class="anchor" aria-label="anchor" href="#var_spec-"></a>
 </h3>
 <p>This table contains the purely variable level information. The goal is there is a single row per variable, which is common across all datasets. This helps ensure variables follow the CDISC standard. But, this isn’t always possible, so if information for a given variable differs across datasets, the variable will be recorded as dataset.variable in the variable column.</p>
 <ul>
@@ -123,7 +124,7 @@
 </ul>
 </div>
 <div class="section level3">
-<h3 id="value_spec-">value_spec <img src="reference/figures/labeled-value_spec.png" align="right" style="height:150px;"><a class="anchor" aria-label="anchor" href="#value_spec-"></a>
+<h3 id="value_spec-">value_spec <img src="reference/figures/labeled-value_spec.png" align="right" style="height:150px;" alt="Diagram of value_spec table structure"><a class="anchor" aria-label="anchor" href="#value_spec-"></a>
 </h3>
 <p>This table contains the information the information at the value level. There will be at least one row per dataset/variable combination. There is more than one row per dataset/variable combination if the combination has values which have differing metadata. For instance LBORRES that are different data types depending on the value. The information contained are as follows:</p>
 <ul>
@@ -138,7 +139,7 @@
 </ul>
 </div>
 <div class="section level3">
-<h3 id="derivations-">derivations <img src="reference/figures/labeled-derivation.png" align="right" style="height:150px;"><a class="anchor" aria-label="anchor" href="#derivations-"></a>
+<h3 id="derivations-">derivations <img src="reference/figures/labeled-derivation.png" align="right" style="height:150px;" alt="Diagram of derivation table structure"><a class="anchor" aria-label="anchor" href="#derivations-"></a>
 </h3>
 <p>This table has all the derivation information, with one row per derivation ID and the following information:</p>
 <ul>
@@ -147,7 +148,7 @@
 </ul>
 </div>
 <div class="section level3">
-<h3 id="codelist-">codelist <img src="reference/figures/labeled-code_list.png" align="right" style="height:150px;"><a class="anchor" aria-label="anchor" href="#codelist-"></a>
+<h3 id="codelist-">codelist <img src="reference/figures/labeled-code_list.png" align="right" style="height:150px;" alt="Diagram of codelist table structure"><a class="anchor" aria-label="anchor" href="#codelist-"></a>
 </h3>
 <p>This table contains the code lists, permitted value lists, and external libraries nested within a tibble. There is only a single row per list/library, with the following information:</p>
 <ul>
@@ -158,7 +159,7 @@
 </ul>
 </div>
 <div class="section level3">
-<h3 id="supp-">supp <img src="reference/figures/labeled-supp.png" align="right" style="height:150px;"><a class="anchor" aria-label="anchor" href="#supp-"></a>
+<h3 id="supp-">supp <img src="reference/figures/labeled-supp.png" align="right" style="height:150px;" alt="Diagram of supp table structure"><a class="anchor" aria-label="anchor" href="#supp-"></a>
 </h3>
 <p>This table contains the information needed to create supplemental tables. If you want to add a variable which will go into a supplemental qualifier then you can create as normal (i.e. label information going to the <strong>var_spec</strong> table and derivation and origin going into the <strong>value_spec</strong> table), but you need to flag it as supplemental in the <strong>ds_vars</strong> table and add a row to the <strong>supp</strong> table. There is only a single row per dataset/variable, with the following information:</p>
 <ul>
@@ -168,7 +169,9 @@
 <li><p><em>qeval</em>: Evaluator for the supplemental variable</p></li>
 </ul>
 <p>To get more information about the metacore objects and how to build a specification reader, please see our vignettes.</p>
-<p><img src="reference/figures/labeled_schema.png" title="man/figures/Metacore Schema"></p>
+<figure><img src="reference/figures/labeled_schema.png" title="man/figures/Metacore Schema" alt="Schema diagram showing the relationships between all metacore tables"><figcaption aria-hidden="true">
+Schema diagram showing the relationships between all metacore tables
+</figcaption></figure>
 </div>
 </div>
 <div class="section level2">
@@ -219,10 +222,10 @@
 <div class="dev-status">
 <h2 data-toc-skip>Dev status</h2>
 <ul class="list-unstyled">
-<li><a href="https://RValidationHub.slack.com" class="external-link"><img src="https://img.shields.io/badge/Slack-RValidationHub-blue?style=flat&amp;logo=slack"></a></li>
+<li><a href="https://RValidationHub.slack.com" class="external-link"><img src="https://img.shields.io/badge/Slack-RValidationHub-blue?style=flat&amp;logo=slack" alt="Slack Status"></a></li>
 <li><a href="https://github.com/atorus-research/xportr/actions?workflow=R-CMD-check" class="external-link"><img src="https://github.com/atorus-research/metacore/workflows/R-CMD-check/badge.svg" alt="R build status"></a></li>
-<li><a href="https://app.codecov.io/gh/atorus-research/metacore" class="external-link"><img src="https://img.shields.io/codecov/c/github/atorus-research/metacore"></a></li>
-<li><a href="https://github.com/atorus-research/metacore/blob/master/LICENSE" class="external-link"><img src="https://img.shields.io/badge/License-MIT-blue.svg"></a></li>
+<li><a href="https://app.codecov.io/gh/atorus-research/metacore" class="external-link"><img src="https://img.shields.io/codecov/c/github/atorus-research/metacore" alt="Codecov Coverage"></a></li>
+<li><a href="https://github.com/atorus-research/metacore/blob/master/LICENSE" class="external-link"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="MIT License"></a></li>
 <li><a href="https://lifecycle.r-lib.org/articles/stages.html#experimental-1" class="external-link"><img src="https://img.shields.io/badge/lifecycle-experimental-orange.svg" alt="Lifecycle: experimental"></a></li>
 <li><a href="https://CRAN.R-project.org/package=metacore" class="external-link"><img src="https://www.r-pkg.org/badges/version/metacore" alt="CRAN status"></a></li>
 <li><a href="https://github.com/atorus-research/metacore/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/atorus-research/metacore/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></li>
