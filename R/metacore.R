@@ -305,9 +305,7 @@ MetaCore <- R6::R6Class("Metacore",
                            .ds_labels = list(),
 
                            .greet = function(quiet = FALSE) {
-                              cli_text()
                               cli_alert_success("Metadata successfully imported")
-                              if (quiet) cli_inform(c("i" = col_red("Dataset metadata imported with suppressed warnings")))
                               cli_inform(c("i" = "To use the {.obj Metacore} object with {.pkg metatools} package, first subset a dataset using {.fn metacore::select_dataset}"))
                            }
                         ),

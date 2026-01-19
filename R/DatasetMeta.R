@@ -17,9 +17,7 @@ DatasetMeta <- R6::R6Class("DatasetMeta",
 
      .greet = function(quiet, verbose) {
         with_verbosity({
-           cli_par()
            cli_alert_success("{private$.name} dataset successfully selected")
-           cli_end()
         }, quiet, verbose)
      }
   ),
