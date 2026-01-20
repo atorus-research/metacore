@@ -11,14 +11,30 @@
 #'   have the same derivation
 #' @param code_list contains the code/decode information
 #' @param supp contains the idvar and qeval information for supplemental variables
-#' @param quiet Option to quietly load in, this will suppress warnings, but not
-#'   errors. Expects either `TRUE` or `FALSE`. Default behaviour is `FALSE`.
+#' @param quiet `r lifecycle::badge("superseded")` Option to quietly load in, this
+#'   will suppress warnings, but not errors. Expects either `TRUE` or `FALSE`.
+#'   Default behaviour is `FALSE`.
+#' @param verbose A character string specifying the desired verbosity level.
+#'   Must be one of:
+#'   \describe{
+#'     \item{"message"}{(default) Messages and warnings are handled normally.}
+#'     \item{"warn"}{Messages are suppressed, but warnings are allowed.}
+#'     \item{"collapse"}{Warnings are collapsed into a single message indicating the
+#'     number of suppressed warnings.}
+#'     \item{"silent"}{Both messages and warnings are suppressed.}
+#'   }
 #'
 #' @family Metacore
 #' @noRd
 #'
 #' @importFrom stringr str_to_lower
-MetaCore_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist, supp, quiet = FALSE) {
+MetaCore_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist, supp, quiet = FALSE, verbose = "message") {
+  deprecate_soft(
+    when = "0.3.0",
+    what = "MetaCore_initialize(quiet)",
+    with = "MetaCore_initialize(verbose)"
+  )
+
   private$.ds_spec <- ds_spec %>%
     add_labs(
       dataset = "Dataset Name",
@@ -95,12 +111,8 @@ MetaCore_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivati
   private$.ds_names <- ds_spec %>% pull(dataset)
 
   private$.ds_labels <- ds_spec %>% pull(label)
-  if (quiet) {
-    suppressWarnings(self$validate())
-  } else {
-    self$validate()
-  }
 
+  self$validate()
 
   if (inherits_only(self, c("Metacore", "R6"))) {
     private$.greet(quiet)
@@ -141,7 +153,7 @@ MetaCore_validate <- function() {
       nrow(private$.derivations) == 0 &
       nrow(private$.codelist) == 0 &
       nrow(private$.supp) == 0) {
-      cli_warn("Other checks were not preformed, because all datasets are empty",
+      cli_warn("Other checks were not performed, because all datasets are empty",
         call. = FALSE
       )
     } else {
@@ -164,7 +176,7 @@ MetaCore_validate <- function() {
       }
     }
   } else {
-    cli_warn("Other checks were not preformed, because column names were incorrect",
+    cli_warn("Other checks were not performed, because column names were incorrect",
       call. = FALSE
     )
   }
@@ -310,11 +322,8 @@ MetaCore <- R6::R6Class("Metacore",
     .ds_names = list(),
     .ds_labels = list(),
     .greet = function(quiet = FALSE) {
-      cli_par()
       cli_alert_success("Metadata successfully imported")
-      if (quiet) cli_inform(c("i" = col_red("Dataset metadata imported with suppressed warnings")))
       cli_inform(c("i" = "To use the {.obj Metacore} object with {.pkg metatools} package, first subset a dataset using {.fn metacore::select_dataset}"))
-      cli_end()
     }
   ),
   active = list(
@@ -338,22 +347,44 @@ MetaCore <- R6::R6Class("Metacore",
 #' @param derivations contains derivation, it allows for different variables to have the same derivation
 #' @param codelist contains the code/decode information
 #' @param supp contains the idvar and qeval information for supplemental variables
-#' @param quiet Option to quietly load in, this will suppress warnings, but not
-#'   errors. Expects either `TRUE` or `FALSE`. Default behaviour is `FALSE`.
+#' @param quiet `r lifecycle::badge("superseded")` Option to quietly load in, this
+#'   will suppress warnings, but not errors. Expects either `TRUE` or `FALSE`.
+#'   Default behaviour is `FALSE`.
+#' @param verbose A character string specifying the desired verbosity level.
+#'   Must be one of:
+#'   \describe{
+#'     \item{"message"}{ (default) Messages and warnings are handled normally.}
+#'     \item{"warn"}{Messages are suppressed, but warnings are allowed.}
+#'     \item{"collapse"}{Warnings are collapsed into a single message indicating the
+#'     number of suppressed warnings.}
+#'     \item{"silent"}{Both messages and warnings are suppressed.}
+#'   }
 #'
 #' @family Metacore
 #'
 #' @export
-#'
-metacore <- function(ds_spec = tibble(dataset = character(), structure = character(), label = character()),
+metacore <- function(ds_spec = tibble(
+                       dataset = character(),
+                       structure = character(),
+                       label = character()
+                     ),
                      ds_vars = tibble(
-                       dataset = character(), variable = character(), mandatory = logical(),
-                       key_seq = integer(), order = integer(), core = character(),
+                       dataset = character(),
+                       variable = character(),
+                       keep = NULL, # Deprecated in 0.3.0. To be removed in a future version
+                       mandatory = logical(),
+                       key_seq = integer(),
+                       order = integer(),
+                       core = character(),
                        supp_flag = logical()
                      ),
                      var_spec = tibble(
-                       variable = character(), label = character(), length = integer(),
-                       type = character(), common = character(), format = character()
+                       variable = character(),
+                       label = character(),
+                       length = integer(),
+                       type = character(),
+                       common = character(),
+                       format = character()
                      ),
                      value_spec = tibble(
                        dataset = character(),
@@ -365,12 +396,46 @@ metacore <- function(ds_spec = tibble(dataset = character(), structure = charact
                        origin = character(),
                        derivation_id = integer()
                      ),
-                     derivations = tibble(derivation_id = integer(), derivation = character()),
-                     codelist = tibble(code_id = character(), name = character(), type = character(), codes = list()),
-                     supp = tibble(dataset = character(), variable = character(), idvar = character(), qeval = character()),
-                     quiet = FALSE) {
-  test <- quiet_if_true(
+                     derivations = tibble(
+                       derivation_id = integer(),
+                       derivation = character()
+                     ),
+                     codelist = tibble(
+                       code_id = character(),
+                       name = character(),
+                       type = character(),
+                       codes = list()
+                     ),
+                     supp = tibble(
+                       dataset = character(),
+                       variable = character(),
+                       idvar = character(),
+                       qeval = character()
+                     ),
+                     quiet = deprecated(),
+                     verbose = "message") {
+  # Check if user has supplied `quiet` instead of `verbose`
+  if (lifecycle::is_present(quiet)) {
+    deprecate_soft(when = "0.3.0", what = "metacore(quiet)", with = "metacore(verbose)")
+  } else {
+    quiet <- FALSE
+  } # Else deal with deprecated argument for compatability
+
+  with_verbosity(
     {
+      # Signal deprecation warning for ds_vars$keep column. This cannot be handled by
+      # regular `lifecycle::deprecate_*` functionality as it is a column name of an
+      # argument that has been changed, not the argument itself.
+      if ("keep" %in% names(ds_vars)) {
+        cli_warn(c("The column `ds_vars$keep` in the `ds_vars` table was deprecated
+as of 0.3.0 in favour of `ds_vars$mandatory and will be removed in a future release.
+The input for the supplied column `keep` has been mapped to the new column `mandatory`."))
+
+        ds_vars <- ds_vars %>%
+          mutate(mandatory = keep) %>%
+          select(-keep)
+      }
+
       is_empty_df <- as.list(environment()) %>%
         keep(is.null)
 
@@ -410,13 +475,13 @@ metacore <- function(ds_spec = tibble(dataset = character(), structure = charact
         derivations = derivations,
         codelist = codelist,
         supp = supp,
-        quiet = quiet
+        quiet = quiet,
+        verbose = verbose
       )
     },
-    quiet = quiet
+    quiet,
+    verbose
   )
-
-  if (quiet) invisible(test) else test
 }
 
 
@@ -425,19 +490,36 @@ metacore <- function(ds_spec = tibble(dataset = character(), structure = charact
 #' @param .data the metacore object of dataframes
 #' @param dataset the specific dataset to subset by
 #' @param simplify return a single dataframe
-#' @param quiet Option to quietly load in, this will suppress warnings, but not
-#'   errors. Expects either `TRUE` or `FALSE`. Default behaviour is `FALSE`.
+#' @param quiet `r lifecycle::badge("superseded")` Option to quietly load in, this
+#'   will suppress warnings, but not errors. Expects either `TRUE` or `FALSE`.
+#'   Default behaviour is `FALSE`.
+#' @param verbose A character string specifying the desired verbosity level.
+#'   Must be one of:
+#'   \describe{
+#'     \item{"message"}{(default) Messages and warnings are handled normally.}
+#'     \item{"warn"}{Messages are suppressed, but warnings are allowed.}
+#'     \item{"collapse"}{Warnings are collapsed into a single message indicating the
+#'     number of suppressed warnings.}
+#'     \item{"silent"}{Both messages and warnings are suppressed.}
+#'   }
 #'
 #' @return a filtered subset of the metacore object
 #' @export
-select_dataset <- function(.data, dataset, simplify = FALSE, quiet = FALSE) {
-  cl <- .data$clone()
-  cl$metacore_filter(dataset)
+select_dataset <- function(.data, dataset, simplify = FALSE, quiet = deprecated(), verbose = "message") {
+  # Check if user has supplied `quiet` instead of `verbose`
+  if (lifecycle::is_present(quiet)) {
+    deprecate_soft(when = "0.3.0", what = "select_dataset(quiet)", with = "select_dataset(verbose)")
+  } else {
+    quiet <- FALSE
+  } # Else deal with deprecated argument for compatability
 
-  if (simplify) {
-    test <- quiet_if_true(
-      {
-        list(
+  with_verbosity(
+    {
+      cl <- .data$clone()
+      cl$metacore_filter(dataset)
+
+      if (simplify) {
+        test <- list(
           cl$ds_vars,
           cl$var_spec,
           cl$value_spec,
@@ -446,17 +528,13 @@ select_dataset <- function(.data, dataset, simplify = FALSE, quiet = FALSE) {
           cl$supp
         ) %>%
           reduce(left_join)
-      },
-      quiet = quiet
-    )
-  } else {
-    test <- quiet_if_true(
-      DatasetMeta$new(metacore = cl, quiet = quiet),
-      quiet = quiet
-    )
-  }
-
-  if (quiet) invisible(test) else test
+      } else {
+        test <- DatasetMeta$new(metacore = cl, quiet = quiet)
+      }
+    },
+    quiet,
+    verbose
+  )
 }
 
 

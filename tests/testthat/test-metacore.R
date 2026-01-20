@@ -78,8 +78,8 @@ test_that("Can pass metacore NULL df's", {
 })
 
 test_that("subsetting works", {
-  test <- spec_to_metacore(metacore_example("p21_mock.xlsx"), quiet = TRUE)
-  subset <- test %>% select_dataset("DM", quiet = TRUE)
+  test <- spec_to_metacore(metacore_example("p21_mock.xlsx"), verbose = "silent")
+  subset <- test %>% select_dataset("DM", verbose = "silent")
   expect_equal(unique(subset$ds_spec$dataset), "DM")
 })
 
@@ -131,7 +131,7 @@ test_that("load metacore fails with no path and rdss in wd", {
 })
 
 test_that("pulling out control terminology works", {
-  test <- spec_to_metacore(metacore_example("p21_mock.xlsx"), quiet = TRUE)
+  test <- spec_to_metacore(metacore_example("p21_mock.xlsx"), verbose = "silent")
   # Testing Errors
   ## Not specific enough
   expect_error(get_control_term(test, QVAL))
@@ -150,7 +150,7 @@ test_that("pulling out control terminology works", {
 })
 
 test_that("get_keys works", {
-  test <- spec_to_metacore(metacore_example("p21_mock.xlsx"), quiet = TRUE)
+  test <- spec_to_metacore(metacore_example("p21_mock.xlsx"), verbose = "silent")
   # Testing Errors
   ## Domain not in ds_vars table
   expect_error(get_keys(test, DS))
@@ -167,17 +167,17 @@ test_that("get_keys works", {
   )
 })
 
-test_that("spec_to_metacore() is silent when quiet = TRUE", {
+test_that("spec_to_metacore() is silent when verbose = `silent`", {
   test <- metacore_example("p21_mock.xlsx")
 
   expect_silent({
-    out <- spec_to_metacore(test, quiet = TRUE)
+    out <- spec_to_metacore(test, verbose = "silent")
   })
 
   expect_true(inherits(out, "Metacore"))
 })
 
-test_that("spec_to_metacore() quiet = TRUE is silent and returns Metacore", {
+test_that("spec_to_metacore() verbose = `silent` is silent and returns Metacore", {
   path_try <- try(metacore_example("p21_mock.xlsx"), silent = TRUE)
   if (inherits(path_try, "try-error") || path_try == "") {
     skip("p21_mock.xlsx example spec not available")
@@ -185,12 +185,12 @@ test_that("spec_to_metacore() quiet = TRUE is silent and returns Metacore", {
   path <- path_try
 
   expect_silent({
-    mc_q <- spec_to_metacore(path, quiet = TRUE)
+    mc_q <- spec_to_metacore(path, verbose = "silent")
     expect_true(inherits(mc_q, "Metacore"))
   })
 })
 
-test_that("spec_to_metacore() quiet = TRUE returns invisibly", {
+test_that("spec_to_metacore() verbose = `silent` returns invisibly", {
   path_try <- try(metacore_example("p21_mock.xlsx"), silent = TRUE)
   if (inherits(path_try, "try-error") || path_try == "") {
     skip("p21_mock.xlsx example spec not available")
@@ -198,7 +198,7 @@ test_that("spec_to_metacore() quiet = TRUE returns invisibly", {
   path <- path_try
 
   expect_invisible(
-    spec_to_metacore(path, quiet = TRUE)
+    spec <- spec_to_metacore(path, verbose = "silent")
   )
 })
 
@@ -221,7 +221,7 @@ test_that("spec_to_metacore() returns structurally similar objects for quiet TRU
   }
   path <- path_try
 
-  mc_q <- suppressWarnings(spec_to_metacore(path, quiet = TRUE))
+  mc_q <- suppressWarnings(spec_to_metacore(path, verbose = "silent"))
   mc_n <- suppressWarnings(spec_to_metacore(path, quiet = FALSE))
 
   expect_true(inherits(mc_q, "Metacore"))
@@ -232,15 +232,15 @@ test_that("spec_to_metacore() returns structurally similar objects for quiet TRU
 })
 
 
-test_that("select_dataset() is silent when quiet = TRUE", {
-  test <- spec_to_metacore(metacore_example("p21_mock.xlsx"), quiet = TRUE)
-  subset <- test %>% select_dataset("DM", quiet = TRUE)
+test_that("select_dataset() is silent when verbose = `silent`", {
+  test <- spec_to_metacore(metacore_example("p21_mock.xlsx"), verbose = "silent")
+  subset <- test %>% select_dataset("DM", verbose = "silent")
   expect_silent({
-    subset <- test %>% select_dataset("DM", quiet = TRUE)
+    subset <- test %>% select_dataset("DM", verbose = "silent")
   })
 })
 
-test_that("metacore() quiet = TRUE is silent and returns Metacore object", {
+test_that("metacore() verbose = `silent` is silent and returns Metacore object", {
   # simplest small valid inputs
   ds_spec <- tibble::tibble(dataset = "AE", structure = "OneRowPerRecord", label = "Adverse Events")
   ds_vars <- tibble::tibble(
@@ -263,13 +263,13 @@ test_that("metacore() quiet = TRUE is silent and returns Metacore object", {
   expect_silent({
     mc_q <- metacore(
       ds_spec, ds_vars, var_spec, value_spec, derivations, codelist, supp,
-      quiet = TRUE
+      verbose = "silent"
     )
     expect_true(inherits(mc_q, "Metacore"))
   })
 })
 
-test_that("metacore() quiet = TRUE returns invisibly", {
+test_that("metacore() verbose = `silent` returns invisibly", {
   ds_spec <- tibble::tibble(dataset = "AE", structure = "Row", label = "AE")
   ds_vars <- tibble::tibble(
     dataset = "AE", variable = "AETERM", keep = TRUE,
@@ -286,12 +286,12 @@ test_that("metacore() quiet = TRUE returns invisibly", {
   )
 
   expect_invisible(
-    metacore(
+    spec <- metacore(
       ds_spec, ds_vars, var_spec, value_spec,
       derivations = tibble::tibble(),
       codelist = tibble::tibble(),
       supp = tibble::tibble(),
-      quiet = TRUE
+      verbose = "silent"
     )
   )
 })
@@ -325,7 +325,7 @@ test_that("metacore() quiet = FALSE returns a Metacore object", {
   expect_true(inherits(mc, "Metacore"))
 })
 
-test_that("metacore() quiet TRUE/FALSE paths produce similar structure", {
+test_that("metacore() verbose message/silent paths produce similar structure", {
   ds_spec <- tibble::tibble(dataset = "AE", structure = "Row", label = "AE")
   ds_vars <- tibble::tibble(
     dataset = "AE", variable = "AETERM", keep = TRUE,
@@ -344,16 +344,88 @@ test_that("metacore() quiet TRUE/FALSE paths produce similar structure", {
   mc_q <- suppressWarnings(
     metacore(ds_spec, ds_vars, var_spec, value_spec,
       tibble::tibble(), tibble::tibble(), tibble::tibble(),
-      quiet = TRUE
+      verbose = "silent"
     )
   )
 
   mc_n <- suppressWarnings(
     metacore(ds_spec, ds_vars, var_spec, value_spec,
       tibble::tibble(), tibble::tibble(), tibble::tibble(),
-      quiet = FALSE
+      verbose = "message"
     )
   )
 
   expect_identical(names(mc_q$data), names(mc_n$data))
+})
+
+test_that("metacore(quiet) deprecation message is output when supplied by the user`", {
+  # `Deprecation when quiet = FALSE`
+  lifecycle::expect_deprecated(
+    specs <- metacore(
+      ds_spec = data.frame(
+        dataset = "ADSL",
+        structure = NA_character_,
+        label = "Subject-Level Analysis Dataset"
+      ),
+      ds_vars = data.frame(
+        dataset = "ADSL",
+        variable = c("STUDYID", "USUBJID"),
+        key_seq = NA_integer_,
+        order = NA_integer_,
+        keep = NA_character_,
+        core = NA_character_,
+        supp_flag = NA
+      ),
+      quiet = FALSE
+    )
+  )
+
+  # `Deprecation when quiet = TRUE`
+  lifecycle::expect_deprecated(
+    specs <- metacore(
+      ds_spec = data.frame(
+        dataset = "ADSL",
+        structure = NA_character_,
+        label = "Subject-Level Analysis Dataset"
+      ),
+      ds_vars = data.frame(
+        dataset = "ADSL",
+        variable = c("STUDYID", "USUBJID"),
+        key_seq = NA_integer_,
+        order = NA_integer_,
+        keep = NA_character_,
+        core = NA_character_,
+        supp_flag = NA
+      ),
+      quiet = TRUE
+    )
+  )
+})
+
+test_that("select_dataset(quiet) deprecation message is output when supplied by the user`", {
+  spec <- spec_to_metacore(metacore_example("p21_mock.xlsx"), verbose = "silent")
+  # `Deprecation when quiet = FALSE`
+  lifecycle::expect_deprecated(
+    select_dataset(spec, "AE", quiet = FALSE, verbose = "silent")
+  )
+
+  # `Deprecation when quiet = TRUE`
+  lifecycle::expect_deprecated(
+    select_dataset(spec, "AE", quiet = TRUE)
+  )
+})
+
+test_that("select_dataset(simplify = TRUE) returns expected structure", {
+  spec <- spec_to_metacore(metacore_example("p21_mock.xlsx"), verbose = "silent")
+  ae <- select_dataset(spec, "AE", verbose = "silent")
+  ae_simple <- select_dataset(spec, "AE", simplify = TRUE, verbose = "silent")
+
+  expected_names <- c(
+    "dataset", "variable", "order", "mandatory", "key_seq", "core", "supp_flag",
+    "length", "label", "type", "format", "common", "origin", "code_id", "sig_dig",
+    "derivation_id", "where", "derivation", "codes", "idvar", "qeval"
+  )
+
+  expect_equal(names(ae_simple), expected_names)
+  expect_equal(nrow(ae_simple), nrow(ae$ds_vars))
 })

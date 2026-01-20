@@ -6,48 +6,65 @@
 #' be used as building blocks for bespoke specification documents.
 #'
 #' @param path string of file location
-#' @param quiet Option to quietly load in; when `TRUE`, messages, warnings,
-#'   and other non-error console output are suppressed, but errors are still
-#'   raised.
+#' @param quiet `r lifecycle::badge("superseded")` Option to quietly load in, this
+#'   will suppress warnings, but not errors. Expects either `TRUE` or `FALSE`.
+#'   Default behaviour is `FALSE`.
 #' @param where_sep_sheet Option to tell if the where is in a separate sheet,
-#'   like in older p21 specs or in a single sheet like newer p21 specs
+#'   like in older p21 specs or in a single sheet like newer p21 specs.
+#' @param verbose A character string specifying the desired verbosity level.
+#'   Must be one of:
+#'   \describe{
+#'     \item{"message"}{(default) Messages and warnings are handled normally.}
+#'     \item{"warn"}{Messages are suppressed, but warnings are allowed.}
+#'     \item{"collapse"}{Warnings are collapsed into a single message indicating the
+#'     number of suppressed warnings.}
+#'     \item{"silent"}{Both messages and warnings are suppressed.}
+#'   }
 #'
 #' @return given a spec document it returns a metacore object
 #' @export
-spec_to_metacore <- function(path, quiet = FALSE, where_sep_sheet = TRUE) {
-  doc <- quiet_if_true(read_all_sheets(path), quiet = quiet)
-
-  if (quiet_if_true(spec_type(path), quiet = quiet) == "by_type") {
-    ds_spec <- quiet_if_true(spec_type_to_ds_spec(doc), quiet = quiet)
-    ds_vars <- quiet_if_true(spec_type_to_ds_vars(doc), quiet = quiet)
-    var_spec <- quiet_if_true(spec_type_to_var_spec(doc), quiet = quiet)
-    value_spec <- quiet_if_true(
-      spec_type_to_value_spec(doc, where_sep_sheet = where_sep_sheet),
-      quiet = quiet
-    )
-    derivations <- quiet_if_true(spec_type_to_derivations(doc), quiet = quiet)
-    code_list <- quiet_if_true(spec_type_to_codelist(doc), quiet = quiet)
-
-    test <- quiet_if_true(
-      metacore(
-        ds_spec,
-        ds_vars,
-        var_spec,
-        value_spec,
-        derivations,
-        codelist = code_list,
-        quiet = quiet
-      ),
-      quiet = quiet
-    )
+spec_to_metacore <- function(path, quiet = deprecated(), where_sep_sheet = TRUE, verbose = "message") {
+  # Check if user has supplied `quiet` instead of `verbose`
+  if (lifecycle::is_present(quiet)) {
+    deprecate_soft(when = "0.3.0", what = "spec_to_metacore(quiet)", with = "spec_to_metacore(verbose)")
   } else {
-    cli_abort(
-      "This specification format is not currently supported. You will need to write your own reader",
-      call. = FALSE
-    )
-  }
+    quiet <- FALSE
+  } # Else deal with deprecated argument for compatability
 
-  if (quiet) invisible(test) else test
+  with_verbosity(
+    {
+      doc <- read_all_sheets(path)
+
+      if (spec_type(path) == "by_type") {
+        ds_spec <- spec_type_to_ds_spec(doc)
+        ds_vars <- spec_type_to_ds_vars(doc)
+        var_spec <- spec_type_to_var_spec(doc)
+        value_spec <- spec_type_to_value_spec(doc, where_sep_sheet = where_sep_sheet)
+        derivations <- spec_type_to_derivations(doc)
+        code_list <- spec_type_to_codelist(doc)
+
+        test <- metacore(
+          ds_spec,
+          ds_vars,
+          var_spec,
+          value_spec,
+          derivations,
+          codelist = code_list,
+          quiet = quiet,
+          verbose = verbose
+        )
+      } else {
+        cli_abort(
+          "This specification format is not currently supported. You will need to write your own reader",
+          call. = FALSE
+        )
+      }
+
+      if (quiet) invisible(test) else test
+    },
+    quiet,
+    verbose
+  )
 }
 
 
@@ -88,7 +105,7 @@ spec_type <- function(path) {
 read_all_sheets <- function(path) {
   sheets <- excel_sheets(path)
   all_dat <- sheets %>%
-    map(~ read_excel(path, sheet = ., col_types = "text"))
+    map(~ read_excel(path, sheet = ., col_types = "text", progress = FALSE))
   names(all_dat) <- sheets
   all_dat
 }

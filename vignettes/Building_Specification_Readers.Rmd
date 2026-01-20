@@ -255,9 +255,9 @@ head(codelist)
 Now we have all the tables we need we can make the metacore object
 
 ```{r}
-metacore(
-  ds_spec, ds_vars, var_spec, value_spec,
-  derivation, codelist
+metacore(ds_spec, ds_vars, var_spec, value_spec,
+  derivation, codelist,
+  verbose = "message"
 )
 ```
 

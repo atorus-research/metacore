@@ -1,13 +1,17 @@
 ADaM
 AE
+Atorus
 Bugfix
 CDISC
 CMD
 DataDef
 DatasetMeta
+GSK
 Hotfix
+JPT
 LBORRES
 Lifecycle
+ORCID
 README
 SDTM
 VLM
@@ -19,6 +23,7 @@ codelists
 dplyr
 ds
 favour
+funder
 github
 hgb
 idvar

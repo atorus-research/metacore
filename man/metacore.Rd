@@ -6,8 +6,9 @@
 \usage{
 metacore(
   ds_spec = tibble(dataset = character(), structure = character(), label = character()),
-  ds_vars = tibble(dataset = character(), variable = character(), mandatory = logical(),
-    key_seq = integer(), order = integer(), core = character(), supp_flag = logical()),
+  ds_vars = tibble(dataset = character(), variable = character(), keep = NULL, mandatory
+    = logical(), key_seq = integer(), order = integer(), core = character(), supp_flag =
+    logical()),
   var_spec = tibble(variable = character(), label = character(), length = integer(), type
     = character(), common = character(), format = character()),
   value_spec = tibble(dataset = character(), variable = character(), where = character(),
@@ -18,7 +19,8 @@ metacore(
     = list()),
   supp = tibble(dataset = character(), variable = character(), idvar = character(), qeval
     = character()),
-  quiet = FALSE
+  quiet = deprecated(),
+  verbose = "message"
 )
 }
 \arguments{
@@ -36,8 +38,19 @@ metacore(
 
 \item{supp}{contains the idvar and qeval information for supplemental variables}
 
-\item{quiet}{Option to quietly load in, this will suppress warnings, but not
-errors. Expects either \code{TRUE} or \code{FALSE}. Default behaviour is \code{FALSE}.}
+\item{quiet}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#superseded}{\figure{lifecycle-superseded.svg}{options: alt='[Superseded]'}}}{\strong{[Superseded]}} Option to quietly load in, this
+will suppress warnings, but not errors. Expects either \code{TRUE} or \code{FALSE}.
+Default behaviour is \code{FALSE}.}
+
+\item{verbose}{A character string specifying the desired verbosity level.
+Must be one of:
+\describe{
+\item{"message"}{ (default) Messages and warnings are handled normally.}
+\item{"warn"}{Messages are suppressed, but warnings are allowed.}
+\item{"collapse"}{Warnings are collapsed into a single message indicating the
+number of suppressed warnings.}
+\item{"silent"}{Both messages and warnings are suppressed.}
+}}
 }
 \description{
 R6 Class wrapper to create your own metacore object

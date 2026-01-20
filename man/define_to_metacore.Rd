@@ -4,13 +4,24 @@
 \alias{define_to_metacore}
 \title{Define XML to DataDef Object}
 \usage{
-define_to_metacore(path, quiet = FALSE)
+define_to_metacore(path, quiet = deprecated(), verbose = "message")
 }
 \arguments{
 \item{path}{location of the define xml as a string}
 
-\item{quiet}{Option to quietly load in; when \code{TRUE}, messages and warnings
-are suppressed, but errors are still raised.}
+\item{quiet}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#superseded}{\figure{lifecycle-superseded.svg}{options: alt='[Superseded]'}}}{\strong{[Superseded]}} Option to quietly load in, this
+will suppress warnings, but not errors. Expects either \code{TRUE} or \code{FALSE}.
+Default behaviour is \code{FALSE}.}
+
+\item{verbose}{A character string specifying the desired verbosity level.
+Must be one of:
+\describe{
+\item{"message"}{ (default) Messages and warnings are handled normally.}
+\item{"warn"}{Messages are suppressed, but warnings are allowed.}
+\item{"collapse"}{Warnings are collapsed into a single message indicating the
+number of suppressed warnings.}
+\item{"silent"}{Both messages and warnings are suppressed.}
+}}
 }
 \value{
 Metacore/DataDef object

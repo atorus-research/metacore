@@ -4,7 +4,13 @@
 \alias{select_dataset}
 \title{Select metacore object to single dataset}
 \usage{
-select_dataset(.data, dataset, simplify = FALSE, quiet = FALSE)
+select_dataset(
+  .data,
+  dataset,
+  simplify = FALSE,
+  quiet = deprecated(),
+  verbose = "message"
+)
 }
 \arguments{
 \item{.data}{the metacore object of dataframes}
@@ -13,8 +19,19 @@ select_dataset(.data, dataset, simplify = FALSE, quiet = FALSE)
 
 \item{simplify}{return a single dataframe}
 
-\item{quiet}{Option to quietly load in, this will suppress warnings, but not
-errors. Expects either \code{TRUE} or \code{FALSE}. Default behaviour is \code{FALSE}.}
+\item{quiet}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#superseded}{\figure{lifecycle-superseded.svg}{options: alt='[Superseded]'}}}{\strong{[Superseded]}} Option to quietly load in, this
+will suppress warnings, but not errors. Expects either \code{TRUE} or \code{FALSE}.
+Default behaviour is \code{FALSE}.}
+
+\item{verbose}{A character string specifying the desired verbosity level.
+Must be one of:
+\describe{
+\item{"message"}{(default) Messages and warnings are handled normally.}
+\item{"warn"}{Messages are suppressed, but warnings are allowed.}
+\item{"collapse"}{Warnings are collapsed into a single message indicating the
+number of suppressed warnings.}
+\item{"silent"}{Both messages and warnings are suppressed.}
+}}
 }
 \value{
 a filtered subset of the metacore object

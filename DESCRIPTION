@@ -27,6 +27,7 @@ Depends:
 Imports: 
     cli,
     dplyr,
+    lifecycle,
     magrittr,
     purrr,
     R6,

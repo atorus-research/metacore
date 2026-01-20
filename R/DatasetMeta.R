@@ -14,19 +14,18 @@ DatasetMeta <- R6::R6Class("DatasetMeta",
     .label = NA,
     .num_vars = NA,
     .key_vars = NA,
-    .greet = function(quiet) {
-      cli_par()
-      cli_alert_success("{private$.name} dataset successfully selected")
-      if (quiet) {
-        cli_inform(c(
-          "i" = col_red("Dataset metadata specification subsetted with suppressed warnings")
-        ))
-      }
-      cli_end()
+    .greet = function(quiet, verbose) {
+      with_verbosity(
+        {
+          cli_alert_success("{private$.name} dataset successfully selected")
+        },
+        quiet,
+        verbose
+      )
     }
   ),
   public = list(
-    initialize = function(metacore, quiet = FALSE) {
+    initialize = function(metacore, quiet = deprecated(), verbose = "message") {
       super$initialize(
         ds_spec = metacore$ds_spec,
         ds_vars = metacore$ds_vars,
@@ -43,7 +42,7 @@ DatasetMeta <- R6::R6Class("DatasetMeta",
         filter(!is.na(key_seq)) |>
         pull(variable)
 
-      private$.greet(quiet)
+      private$.greet(quiet, verbose)
     },
     print = function() {
       tables <- ls(envir = self)

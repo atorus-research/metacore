@@ -3,13 +3,30 @@
 #' Given a path, this function converts the define xml to a DataDef/Metacore object.
 #'
 #' @param path location of the define xml as a string
-#' @param quiet Option to quietly load in; when `TRUE`, messages and warnings
-#'   are suppressed, but errors are still raised.
+#' @param quiet `r lifecycle::badge("superseded")` Option to quietly load in, this
+#'   will suppress warnings, but not errors. Expects either `TRUE` or `FALSE`.
+#'   Default behaviour is `FALSE`.
+#' @param verbose A character string specifying the desired verbosity level.
+#'   Must be one of:
+#'   \describe{
+#'     \item{"message"}{ (default) Messages and warnings are handled normally.}
+#'     \item{"warn"}{Messages are suppressed, but warnings are allowed.}
+#'     \item{"collapse"}{Warnings are collapsed into a single message indicating the
+#'     number of suppressed warnings.}
+#'     \item{"silent"}{Both messages and warnings are suppressed.}
+#'   }
 #'
 #' @return Metacore/DataDef object
 #' @export
-define_to_metacore <- function(path, quiet = FALSE) {
-  test <- quiet_if_true(
+define_to_metacore <- function(path, quiet = deprecated(), verbose = "message") {
+  # Check if user has supplied `quiet` instead of `verbose`
+  if (lifecycle::is_present(quiet)) {
+    deprecate_soft(when = "0.3.0", what = "spec_to_metacore(quiet)", with = "spec_to_metacore(verbose)")
+  } else {
+    quiet <- FALSE
+  } # Else deal with deprecated argument for compatability
+
+  with_verbosity(
     {
       xml <- read_xml(path)
       xml_ns_strip(xml)
@@ -35,10 +52,9 @@ define_to_metacore <- function(path, quiet = FALSE) {
         quiet = quiet
       )
     },
-    quiet = quiet
+    quiet,
+    verbose
   )
-
-  if (quiet) invisible(test) else test
 }
 
 #' XML to Data Set Spec
