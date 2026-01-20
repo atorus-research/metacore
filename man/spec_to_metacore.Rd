@@ -24,8 +24,10 @@ like in older p21 specs or in a single sheet like newer p21 specs.}
 \item{verbose}{A character string specifying the desired verbosity level.
 Must be one of:
 \describe{
-\item{"message"}{ (default) Messages and warnings are handled normally.}
+\item{"message"}{(default) Messages and warnings are handled normally.}
 \item{"warn"}{Messages are suppressed, but warnings are allowed.}
+\item{"collapse"}{Warnings are collapsed into a single message indicating the
+number of suppressed warnings.}
 \item{"silent"}{Both messages and warnings are suppressed.}
 }}
 }

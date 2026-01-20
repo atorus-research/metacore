@@ -11,6 +11,8 @@
 #'   \describe{
 #'     \item{"message"}{ (default) Messages and warnings are handled normally.}
 #'     \item{"warn"}{Messages are suppressed, but warnings are allowed.}
+#'     \item{"collapse"}{Warnings are collapsed into a single message indicating the
+#'     number of suppressed warnings.}
 #'     \item{"silent"}{Both messages and warnings are suppressed.}
 #'   }
 #'

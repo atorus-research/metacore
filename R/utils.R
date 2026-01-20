@@ -132,8 +132,10 @@ metacore_example <- function(file = NULL) {
 #'   `quiet` is `FALSE`.
 #'   Must be one of:
 #'   \describe{
-#'     \item{"message"}{ (default) Messages and warnings are handled normally.}
+#'     \item{"message"}{(default) Messages and warnings are handled normally.}
 #'     \item{"warn"}{Messages are suppressed, but warnings are allowed.}
+#'     \item{"collapse"}{Warnings are collapsed into a single message indicating the
+#'     number of suppressed warnings.}
 #'     \item{"silent"}{Both messages and warnings are suppressed (equivalent
 #'       to `quiet = TRUE`).}
 #'   }
@@ -236,11 +238,11 @@ with_verbosity <- function(expr, quiet = FALSE, verbose = "message") {
 #' Validate verbose parameter
 #'
 #' Internal function to validate the `verbose` parameter ensuring user has supplied
-#' one of the permitted values: "message", "warn", or "silent". Throws an error
-#' if the parameter is invalid.
+#' one of the permitted values: "message", "warn", "collapse", or "silent". Throws an
+#' error if the parameter is invalid.
 #'
 #' @param verbose Verbosity level to validate. Expected a character string of
-#' one of: "message", "warn", "silent".
+#' one of: "message", "warn", "collapse", silent".
 #' @param arg The name of the argument being validated, used for error messages.
 #'   Defaults to `rlang::caller_arg(verbose)`.
 #' @param call The call environment from which the validation originated, used
