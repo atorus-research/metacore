@@ -6,7 +6,7 @@ DataDef/Metacore object.
 ## Usage
 
 ``` r
-define_to_metacore(path, quiet = FALSE)
+define_to_metacore(path, quiet = deprecated(), verbose = "message")
 ```
 
 ## Arguments
@@ -17,8 +17,31 @@ define_to_metacore(path, quiet = FALSE)
 
 - quiet:
 
-  Option to quietly load in; when `TRUE`, messages and warnings are
-  suppressed, but errors are still raised.
+  **\[superseded\]** Option to quietly load in, this will suppress
+  warnings, but not errors. Expects either `TRUE` or `FALSE`. Default
+  behaviour is `FALSE`.
+
+- verbose:
+
+  A character string specifying the desired verbosity level. Must be one
+  of:
+
+  "message"
+
+  :   (default) Messages and warnings are handled normally.
+
+  "warn"
+
+  :   Messages are suppressed, but warnings are allowed.
+
+  "collapse"
+
+  :   Warnings are collapsed into a single message indicating the number
+      of suppressed warnings.
+
+  "silent"
+
+  :   Both messages and warnings are suppressed.
 
 ## Value
 

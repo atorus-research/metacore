@@ -504,9 +504,9 @@ have codelist so <code>dict_cols</code> needs to be set to null.</p>
 <p>Now we have all the tables we need we can make the metacore
 object</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/metacore.html">metacore</a></span><span class="op">(</span></span>
-<span>  <span class="va">ds_spec</span>, <span class="va">ds_vars</span>, <span class="va">var_spec</span>, <span class="va">value_spec</span>,</span>
-<span>  <span class="va">derivation</span>, <span class="va">codelist</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/metacore.html">metacore</a></span><span class="op">(</span><span class="va">ds_spec</span>, <span class="va">ds_vars</span>, <span class="va">var_spec</span>, <span class="va">value_spec</span>,</span>
+<span>  <span class="va">derivation</span>, <span class="va">codelist</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="st">"message"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning: `core` from the `ds_vars` table only contains missing values.</span></span>
 <span><span class="co">#&gt; Warning: `supp_flag` from the `ds_vars` table only contains missing</span></span>
@@ -597,8 +597,6 @@ object</p>
 <span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Metadata successfully imported</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> To use the Metacore object with <span style="color: #0000BB;">metatools</span> package, first subset a dataset</span></span>
 <span><span class="co">#&gt;   using `metacore::select_dataset()`</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── Metacore object contains metadata for 4 datasets ────────────────────────────</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; → ADDS (Disposition Analysis)</span></span>

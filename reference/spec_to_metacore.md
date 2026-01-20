@@ -9,7 +9,12 @@ specification documents.
 ## Usage
 
 ``` r
-spec_to_metacore(path, quiet = FALSE, where_sep_sheet = TRUE)
+spec_to_metacore(
+  path,
+  quiet = deprecated(),
+  where_sep_sheet = TRUE,
+  verbose = "message"
+)
 ```
 
 ## Arguments
@@ -20,13 +25,36 @@ spec_to_metacore(path, quiet = FALSE, where_sep_sheet = TRUE)
 
 - quiet:
 
-  Option to quietly load in; when `TRUE`, messages, warnings, and other
-  non-error console output are suppressed, but errors are still raised.
+  **\[superseded\]** Option to quietly load in, this will suppress
+  warnings, but not errors. Expects either `TRUE` or `FALSE`. Default
+  behaviour is `FALSE`.
 
 - where_sep_sheet:
 
   Option to tell if the where is in a separate sheet, like in older p21
-  specs or in a single sheet like newer p21 specs
+  specs or in a single sheet like newer p21 specs.
+
+- verbose:
+
+  A character string specifying the desired verbosity level. Must be one
+  of:
+
+  "message"
+
+  :   (default) Messages and warnings are handled normally.
+
+  "warn"
+
+  :   Messages are suppressed, but warnings are allowed.
+
+  "collapse"
+
+  :   Warnings are collapsed into a single message indicating the number
+      of suppressed warnings.
+
+  "silent"
+
+  :   Both messages and warnings are suppressed.
 
 ## Value
 

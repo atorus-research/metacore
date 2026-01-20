@@ -44,7 +44,13 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">select_dataset</span><span class="op">(</span><span class="va">.data</span>, <span class="va">dataset</span>, simplify <span class="op">=</span> <span class="cn">FALSE</span>, quiet <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">select_dataset</span><span class="op">(</span></span>
+<span>  <span class="va">.data</span>,</span>
+<span>  <span class="va">dataset</span>,</span>
+<span>  simplify <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  quiet <span class="op">=</span> <span class="fu">deprecated</span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="st">"message"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -64,8 +70,28 @@
 
 
 <dt id="arg-quiet">quiet<a class="anchor" aria-label="anchor" href="#arg-quiet"></a></dt>
-<dd><p>Option to quietly load in, this will suppress warnings, but not
-errors. Expects either <code>TRUE</code> or <code>FALSE</code>. Default behaviour is <code>FALSE</code>.</p></dd>
+<dd><p><a href="https://lifecycle.r-lib.org/articles/stages.html#superseded" class="external-link"><img src="figures/lifecycle-superseded.svg" alt="[Superseded]"></a> Option to quietly load in, this
+will suppress warnings, but not errors. Expects either <code>TRUE</code> or <code>FALSE</code>.
+Default behaviour is <code>FALSE</code>.</p></dd>
+
+
+<dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
+<dd><p>A character string specifying the desired verbosity level.
+Must be one of:</p><dl><dt>"message"</dt>
+<dd><p>(default) Messages and warnings are handled normally.</p></dd>
+
+<dt>"warn"</dt>
+<dd><p>Messages are suppressed, but warnings are allowed.</p></dd>
+
+<dt>"collapse"</dt>
+<dd><p>Warnings are collapsed into a single message indicating the
+number of suppressed warnings.</p></dd>
+
+<dt>"silent"</dt>
+<dd><p>Both messages and warnings are suppressed.</p></dd>
+
+
+</dl></dd>
 
 </dl></div>
     <div class="section level2">

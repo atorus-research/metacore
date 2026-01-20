@@ -92,7 +92,6 @@ subset <- test %>% select_dataset("DM")
 #> Warning: `idvar` from the `supp` table only contains missing values.
 #> Warning: `qeval` from the `supp` table only contains missing values.
 #> ✔ DM dataset successfully selected
-#> 
 subset$ds_spec
 #> # A tibble: 1 × 3
 #>   dataset structure              label       

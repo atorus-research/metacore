@@ -497,9 +497,9 @@ head(codelist)
 Now we have all the tables we need we can make the metacore object
 
 ``` r
-metacore(
-  ds_spec, ds_vars, var_spec, value_spec,
-  derivation, codelist
+metacore(ds_spec, ds_vars, var_spec, value_spec,
+  derivation, codelist,
+  verbose = "message"
 )
 #> Warning: `core` from the `ds_vars` table only contains missing values.
 #> Warning: `supp_flag` from the `ds_vars` table only contains missing
@@ -590,8 +590,6 @@ metacore(
 #> ✔ Metadata successfully imported
 #> ℹ To use the Metacore object with metatools package, first subset a dataset
 #>   using `metacore::select_dataset()`
-#> 
-#> 
 #> ── Metacore object contains metadata for 4 datasets ────────────────────────────
 #> 
 #> → ADDS (Disposition Analysis)
