@@ -764,7 +764,7 @@ create_tbl <- function(doc, cols) {
       }) %>%
       paste0(collapse = "\n") %>%
       paste0("Unable to identify a sheet with all columns.\n", .) %>%
-      (call. <- FALSE)
+      cli_abort(call. = FALSE)
   } else if (length(matches) == 1) {
     # Check names and write a better warning message if names don't work
     ds_nm <- matches[[1]] %>% names()
