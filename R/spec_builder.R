@@ -754,27 +754,27 @@ create_tbl <- function(doc, cols) {
     sheets_to_error <- mismatch_per_sheet %>%
       keep(names(.) %in% closest_sheets)
 
-    # Look for missing where column
+    # 1. Check for "where" columns
     has_where_col <- sheets_to_error %>%
-      map_lgl(~ any(str_detect(names(.x), regex("^where", ignore_case = TRUE)))) %>%
+      map_lgl(~ any(stringr::str_detect(names(.x), stringr::regex("^where", ignore_case = TRUE)))) %>%
       any()
 
-    # Generate base error message
-    error_msg <- sheets_to_error %>%
-      map2_chr(names(sheets_to_error), function(vars, sheet_name) {
-        paste0(
-          "Sheet '", sheet_name, "' is the closest match, but missing: ",
-          paste(names(vars), collapse = ", ")
-        )
-      }) %>%
-      paste0(collapse = "\n")
+    # 2. Generate the formatted list of sheet matches
+    sheet_details <- sheets_to_error %>%
+      purrr::imap_chr(~ {
+        paste0("Sheet '", .y, "' is missing: ", paste(names(.x), collapse = ", "))
+      })
 
-    # Check for "where" columns to add a helpful tip
-    if (has_where_col) {
-      error_msg <- paste0(error_msg, "\n\nTip: A 'where' column was detected; check if 'where_sep_sheet' is set correctly.")
-    }
-
-    cli_abort(error_msg, call. = FALSE)
+    # 3. Use cli_abort with bullets to replace the standard Error: prefix
+    cli_abort(
+      c(
+        "x" = "Unable to identify a sheet with all columns.",
+        "i" = "Closest matches identified:",
+        "*" = sheet_details,
+        if (has_where_col) c("!" = "Tip: A 'where' column was detected. Check if {.arg where_sep_sheet} is set correctly.")
+      ),
+      call = NULL
+    )
   } else if (length(matches) == 1) {
     # Check names and write a better warning message if names don't work
     ds_nm <- matches[[1]] %>% names()
