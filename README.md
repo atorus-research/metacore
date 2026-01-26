@@ -6,9 +6,9 @@
 <!-- badges: start -->
 [<img src="https://img.shields.io/badge/Slack-RValidationHub-blue?style=flat&logo=slack" alt="Slack Status">](https://RValidationHub.slack.com)
 [![CRAN status](https://www.r-pkg.org/badges/version/metacore)](https://CRAN.R-project.org/package=metacore)
-[<img src="https://img.shields.io/codecov/c/github/atorus-research/metacore" alt="Codecov Coverage">](https://app.codecov.io/gh/atorus-research/metacore)
-[![Total Downloads](http://cranlogs.r-pkg.org/badges/grand-total/metacore?color=green)](https://cran.r-project.org/package=metacore)
+[![Codecov test coverage](https://codecov.io/gh/atorus-research/metacore/graph/badge.svg)](https://app.codecov.io/gh/atorus-research/metacore)
 [![R-CMD-check](https://github.com/atorus-research/metacore/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/atorus-research/metacore/actions/workflows/R-CMD-check.yaml)
+[![Total Downloads](http://cranlogs.r-pkg.org/badges/grand-total/metacore?color=green)](https://cran.r-project.org/package=metacore)
 [<img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="MIT License">](https://github.com/atorus-research/metacore/blob/master/LICENSE)
 <!-- badges: end -->
 
