@@ -754,17 +754,27 @@ create_tbl <- function(doc, cols) {
     sheets_to_error <- mismatch_per_sheet %>%
       keep(names(.) %in% closest_sheets)
 
-    # Write out the error
-    sheets_to_error %>%
+    # Look for missing where column
+    has_where_col <- sheets_to_error %>%
+      map_lgl(~ any(str_detect(names(.x), regex("^where", ignore_case = TRUE)))) %>%
+      any()
+
+    # Generate base error message
+    error_msg <- sheets_to_error %>%
       map2_chr(names(sheets_to_error), function(vars, sheet_name) {
         paste0(
-          "Sheet '", sheet_name, "' is the closest match, but unable to match the following column(s)\n",
-          paste(names(vars), collapse = "\n")
+          "Sheet '", sheet_name, "' is the closest match, but missing: ",
+          paste(names(vars), collapse = ", ")
         )
       }) %>%
-      paste0(collapse = "\n") %>%
-      paste0("Unable to identify a sheet with all columns.\n", .) %>%
-      cli_abort(call. = FALSE)
+      paste0(collapse = "\n")
+
+    # Check for "where" columns to add a helpful tip
+    if (has_where_col) {
+      error_msg <- paste0(error_msg, "\n\nTip: A 'where' column was detected; check if 'where_sep_sheet' is set correctly.")
+    }
+
+    cli_abort(error_msg, call. = FALSE)
   } else if (length(matches) == 1) {
     # Check names and write a better warning message if names don't work
     ds_nm <- matches[[1]] %>% names()
