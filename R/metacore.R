@@ -90,14 +90,6 @@ MetaCore_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivati
       codes = "List of Codes"
     )
 
-  private$.codelist <- codelist %>%
-    add_labs(
-      code_id = "ID of the Code List",
-      names = "Name of the Code List",
-      type = "Code List/Permitted Values/External Library",
-      codes = "List of Codes"
-    )
-
   private$.supp <- supp %>%
     add_labs(
       dataset = "Dataset Name",
