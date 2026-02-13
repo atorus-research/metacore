@@ -155,15 +155,15 @@ MetaCore_validate <- function() {
         private$.var_spec,
         private$.value_spec,
         private$.derivations,
-        private$.codelist,
-        private$.supp
+        private$.codelist
       )
 
       ds_vars_check(private$.ds_vars, private$.var_spec)
       value_check(private$.ds_vars, private$.value_spec)
       derivation_check(private$.value_spec, private$.derivations)
       codelist_check(private$.value_spec, private$.codelist)
-      if (nrow(private$.supp) == 0) {
+      if (nrow(private$.supp) > 0) {
+        check_columns(supp = private$.supp)
         supp_check(private$.ds_vars, private$.supp)
       }
     }
