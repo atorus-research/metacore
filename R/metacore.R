@@ -66,7 +66,7 @@ MetaCore_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivati
   private$.value_spec <- value_spec %>%
     add_labs(
       type = "Value Type",
-      orgin = "Origin of Value",
+      origin = "Origin of Value",
       code_id = "ID of the Code List",
       dataset = "Dataset Name",
       variable = "Variable Name",
