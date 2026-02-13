@@ -76,6 +76,8 @@ test_that("check cross-reference tests", {
       "supp"
     ))
 
+  dfs$ds_vars <- dfs$ds_vars %>%
+     mutate(supp_flag = TRUE)
   dfs$var_spec <- dfs$var_spec %>%
     mutate(variable = "B")
   dfs$derivations <- dfs$derivations %>%
@@ -118,7 +120,7 @@ test_that("is_DatasetMeta returns FALSE if a non-DatasetMeta object is supplied"
   expect_false(is_DatasetMeta(metacore))
 })
 
-dataset_meta <- select_dataset(metacore, "ADSL", quiet = TRUE)
+dataset_meta <- select_dataset(metacore, "ADSL", verbose = "silent")
 test_that("is_DatasetMeta returns TRUE if a DatasetMeta object is supplied", {
   expect_true(is_DatasetMeta(dataset_meta))
 })
