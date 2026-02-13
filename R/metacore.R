@@ -66,7 +66,7 @@ MetaCore_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivati
   private$.value_spec <- value_spec %>%
     add_labs(
       type = "Value Type",
-      orgin = "Origin of Value",
+      origin = "Origin of Value",
       code_id = "ID of the Code List",
       dataset = "Dataset Name",
       variable = "Variable Name",
@@ -80,14 +80,6 @@ MetaCore_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivati
     add_labs(
       derivation_id = "ID of Derivation",
       derivation = "Derivation"
-    )
-
-  private$.codelist <- codelist %>%
-    add_labs(
-      code_id = "ID of the Code List",
-      names = "Name of the Code List",
-      type = "Code List/Permitted Values/External Library",
-      codes = "List of Codes"
     )
 
   private$.codelist <- codelist %>%
@@ -163,15 +155,15 @@ MetaCore_validate <- function() {
         private$.var_spec,
         private$.value_spec,
         private$.derivations,
-        private$.codelist,
-        private$.supp
+        private$.codelist
       )
 
       ds_vars_check(private$.ds_vars, private$.var_spec)
       value_check(private$.ds_vars, private$.value_spec)
       derivation_check(private$.value_spec, private$.derivations)
       codelist_check(private$.value_spec, private$.codelist)
-      if (nrow(private$.supp) == 0) {
+      if (nrow(private$.supp) > 0) {
+        check_columns(supp = private$.supp)
         supp_check(private$.ds_vars, private$.supp)
       }
     }
