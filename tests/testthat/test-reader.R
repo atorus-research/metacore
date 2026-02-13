@@ -560,6 +560,42 @@ test_that("codelist reader tests", {
   expect_equal(spec_codelist, ref_codelist)
 })
 
+test_that("Test permitted values within codelist", {
+  types <- c("code_decode", "permitted_val", "external_library")
+  ref <- tibble::tribble(~code, "Screen Failure", "Placebo", "Xanomeline Low Dose", "Xanomeline High Dose")
+
+  pv <- spec_type_to_codelist(
+    spec,
+    codelist_cols = c(
+      "code_id" = "ID",
+      "name" = "[N|n]ame",
+      "code" = "^[C|c]ode|^[T|t]erm",
+      "decode" = "[D|d]ecode"
+    ),
+    permitted_val_cols = c(
+      "code_id" = "ID",
+      "name" = "[N|n]ame",
+      "code" = "^[C|c]ode|^[T|t]erm"
+    ),
+    sheets = NULL, simplify = FALSE
+  )
+
+  # Check permitted val in types of codelists generated
+  expect_equal(
+    pv %>% pull(type) %>% unique(),
+    types
+  )
+
+  # Check permitted vals of pv
+  vals <- pv %>%
+    filter(type == "permitted_val", code_id == "ARM") %>%
+    pull(codes)
+  expect_equal(
+    vals[[1]],
+    ref
+  )
+})
+
 test_that("Specification Reader's errors and warnings", {
   # Check the name-checks work for each
   expect_error(spec_type_to_ds_spec(spec, cols = c("foo")))
@@ -647,17 +683,17 @@ test_that("Informative error when where_sep_sheet=TRUE but WhereClause sheet mis
 })
 
 test_that("spec_to_metacore provides detailed information for failed regular expressions", {
-   expect_error(
-      spec_to_metacore(
-         "spec_failed_regex.xlsx",
-         where_sep_sheet = FALSE,
-         verbose = "silent"
-      ),
-      regexp = cli_inform(c(
-         "!" = "Unable to rename the following columns in Variables",
-         "x" = "variable matches 3 columns: Variable, Variable A, Variable B",
-         "x" = "mandatory matches 2 columns: Keep, Mandatory",
-         "i" = "Please check your regular expression for `spec_type_to_ds_vars`"
-      ))
-   )
+  expect_error(
+    spec_to_metacore(
+      "spec_failed_regex.xlsx",
+      where_sep_sheet = FALSE,
+      verbose = "silent"
+    ),
+    regexp = cli_inform(c(
+      "!" = "Unable to rename the following columns in Variables",
+      "x" = "variable matches 3 columns: Variable, Variable A, Variable B",
+      "x" = "mandatory matches 2 columns: Keep, Mandatory",
+      "i" = "Please check your regular expression for `spec_type_to_ds_vars`"
+    ))
+  )
 })

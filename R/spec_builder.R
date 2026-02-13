@@ -592,7 +592,7 @@ spec_type_to_codelist <- function(doc, codelist_cols = c(
     pv_out <- create_tbl(doc, permitted_val_cols, context = as.character(sys.call(0)[[1]])) %>%
       mutate(type = "permitted_val") %>%
       group_by(code_id) %>%
-      nest(codes = c(code, decode))
+      nest(codes = c(code))
     cd_out <- bind_rows(cd_out, pv_out)
   }
   # Add dictionary if avaliable
