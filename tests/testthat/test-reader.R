@@ -612,3 +612,36 @@ test_that("define_to_metacore(quiet) deprecation message is output when supplied
     spec <- define_to_metacore(metacore_example("ADaM_define_CDISC_pilot3.xml"), quiet = TRUE)
   )
 })
+
+test_that("Informative error when where_sep_sheet=TRUE but WhereClause sheet missing", {
+  # This should trigger the helpful error message about where_sep_sheet
+  expect_error(
+    spec_to_metacore(
+      "spec_no_val.xlsx", # Use relative path like the existing test
+      where_sep_sheet = TRUE, # This is the default, but being explicit
+      verbose = "silent"
+    ),
+    regexp = "where.*where_sep_sheet",
+    ignore.case = TRUE
+  )
+
+  # Verify the error message contains helpful context
+  err <- tryCatch(
+    spec_to_metacore(
+      "spec_no_val.xlsx",
+      where_sep_sheet = TRUE,
+      verbose = "silent"
+    ),
+    error = function(e) conditionMessage(e)
+  )
+
+  # Check that the error message mentions:
+  # 1. That columns couldn't be matched
+  expect_match(err, "Unable to identify a sheet|Could not find matching columns", ignore.case = TRUE)
+
+  # 2. Provides the helpful tip about where_sep_sheet
+  expect_match(err, "where_sep_sheet", ignore.case = TRUE)
+
+  # 3. Shows which sheet was closest
+  expect_match(err, "Sheet|Closest", ignore.case = TRUE)
+})
