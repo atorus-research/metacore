@@ -77,7 +77,7 @@ test_that("check cross-reference tests", {
     ))
 
   dfs$ds_vars <- dfs$ds_vars %>%
-     mutate(supp_flag = TRUE)
+    mutate(supp_flag = TRUE)
   dfs$var_spec <- dfs$var_spec %>%
     mutate(variable = "B")
   dfs$derivations <- dfs$derivations %>%
