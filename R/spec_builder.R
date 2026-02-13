@@ -286,6 +286,7 @@ spec_type_to_var_spec <- function(doc, cols = c(
     doc <- doc[sheet_ls]
   }
   out <- create_tbl(doc, cols, context = as.character(sys.call(0)[[1]]))
+
   if (!"dataset" %in% names(out)) {
     dups <- out %>%
       distinct() %>%

@@ -645,3 +645,19 @@ test_that("Informative error when where_sep_sheet=TRUE but WhereClause sheet mis
   # 3. Shows which sheet was closest
   expect_match(err, "Sheet|Closest", ignore.case = TRUE)
 })
+
+test_that("spec_to_metacore provides detailed information for failed regular expressions", {
+   expect_error(
+      spec_to_metacore(
+         "spec_failed_regex.xlsx",
+         where_sep_sheet = FALSE,
+         verbose = "silent"
+      ),
+      regexp = cli_inform(c(
+         "!" = "Unable to rename the following columns in Variables",
+         "x" = "variable matches 3 columns: Variable, Variable A, Variable B",
+         "x" = "mandatory matches 2 columns: Keep, Mandatory",
+         "i" = "Please check your regular expression for `spec_type_to_ds_vars`"
+      ))
+   )
+})
