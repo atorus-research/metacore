@@ -4,13 +4,15 @@
 \alias{create_tbl}
 \title{Create table}
 \usage{
-create_tbl(doc, cols)
+create_tbl(doc, cols, context)
 }
 \arguments{
 \item{doc}{list of sheets from a excel doc}
 
 \item{cols}{vector of regex to get a datasets base on which columns it has.
 If the vector is named it will also rename the columns}
+
+\item{context}{Provides the calling context for better error messaging to the user}
 }
 \value{
 dataset (or list of datasets if not specific enough)

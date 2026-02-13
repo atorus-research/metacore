@@ -148,7 +148,7 @@ spec_type_to_ds_spec <- function(doc, cols = c(
   missing <- col_vars()$.ds_spec %>%
     discard(~ . %in% names(cols))
 
-  create_tbl(doc, cols) %>%
+  create_tbl(doc, cols, context = as.character(sys.call(0)[[1]])) %>%
     distinct() %>%
     `is.na<-`(missing)
 }
@@ -206,14 +206,13 @@ spec_type_to_ds_vars <- function(doc, cols = c(
     sheet_ls <- str_subset(names(doc), sheet)
     doc <- doc[sheet_ls]
   }
+
   # Get base doc
-  out <- doc %>%
-    create_tbl(cols)
+  out <- create_tbl(doc, cols, context = as.character(sys.call(0)[[1]]))
 
   # Getting the key seq values
   if (key_seq_sep_sheet) {
-    key_seq_df <- doc %>%
-      create_tbl(key_seq_cols) %>%
+    key_seq_df <- create_tbl(doc, key_seq_cols, context = as.character(sys.call(0)[[1]])) %>%
       mutate(
         key_seq = str_split(key_seq, ",\\s"),
         key_seq = map(key_seq, function(x) {
@@ -286,7 +285,7 @@ spec_type_to_var_spec <- function(doc, cols = c(
     sheet_ls <- str_subset(names(doc), sheet)
     doc <- doc[sheet_ls]
   }
-  out <- create_tbl(doc, cols)
+  out <- create_tbl(doc, cols, context = as.character(sys.call(0)[[1]]))
   if (!"dataset" %in% names(out)) {
     dups <- out %>%
       distinct() %>%
@@ -408,7 +407,7 @@ spec_type_to_value_spec <- function(doc, cols = c(
     doc <- doc[sheet_ls]
   }
 
-  out <- create_tbl(doc, cols)
+  out <- create_tbl(doc, cols, context = as.character(sys.call(0)[[1]]))
 
   # Does a var sheet exsist?
   if (!is.null(var_sheet)) {
@@ -443,7 +442,7 @@ spec_type_to_value_spec <- function(doc, cols = c(
   }
 
   if (where_sep_sheet & "where" %in% names(out)) {
-    where_df <- create_tbl(doc, where_cols) %>%
+    where_df <- create_tbl(doc, where_cols, context = as.character(sys.call(0)[[1]])) %>%
       mutate(
         where_new = pmap_chr(., function(...) {
           # Without c_across this gets a little weird
@@ -576,7 +575,7 @@ spec_type_to_codelist <- function(doc, codelist_cols = c(
   }
 
   # Create the base table with codes and decodes (min req output)
-  cd_out <- create_tbl(doc, codelist_cols) %>%
+  cd_out <- create_tbl(doc, codelist_cols, context = as.character(sys.call(0)[[1]])) %>%
     group_by(code_id) %>%
     mutate(type = case_when(
       simplify & all(code == decode) ~ "permitted_val",
@@ -589,7 +588,7 @@ spec_type_to_codelist <- function(doc, codelist_cols = c(
     ))
   # If available get a permitted value sheet
   if (!is.null(permitted_val_cols)) {
-    pv_out <- create_tbl(doc, permitted_val_cols) %>%
+    pv_out <- create_tbl(doc, permitted_val_cols, context = as.character(sys.call(0)[[1]])) %>%
       mutate(type = "permitted_val") %>%
       group_by(code_id) %>%
       nest(codes = c(code, decode))
@@ -597,7 +596,7 @@ spec_type_to_codelist <- function(doc, codelist_cols = c(
   }
   # Add dictionary if avaliable
   if (!is.null(dict_cols)) {
-    dic_out <- create_tbl(doc, dict_cols) %>%
+    dic_out <- create_tbl(doc, dict_cols, context = as.character(sys.call(0)[[1]])) %>%
       mutate(type = "external_library") %>%
       group_by(code_id) %>%
       nest(codes = c(dictionary, version))
@@ -703,7 +702,7 @@ spec_type_to_derivations <- function(doc, cols = c(
     sheet_ls <- str_subset(names(doc), sheet)
     doc <- doc[sheet_ls]
   }
-  out <- create_tbl(doc, cols)
+  out <- create_tbl(doc, cols, context = as.character(sys.call(0)[[1]]))
 
   # Get missing columns
   missing <- col_vars()$.derivations %>%
@@ -726,10 +725,11 @@ spec_type_to_derivations <- function(doc, cols = c(
 #' @param doc list of sheets from a excel doc
 #' @param cols vector of regex to get a datasets base on which columns it has.
 #'   If the vector is named it will also rename the columns
+#' @param context Provides the calling context for better error messaging to the user
 #'
 #' @return dataset (or list of datasets if not specific enough)
 #' @export
-create_tbl <- function(doc, cols) {
+create_tbl <- function(doc, cols, context) {
   matches <- doc %>%
     keep(function(x) {
       cols %>%
@@ -773,7 +773,7 @@ create_tbl <- function(doc, cols) {
         "*" = sheet_details,
         if (has_where_col) c("!" = "Tip: A 'where' column was detected. Check if {.arg where_sep_sheet} is set correctly.")
       ),
-      call = NULL
+      .call = NULL
     )
   } else if (length(matches) == 1) {
     # Check names and write a better warning message if names don't work
@@ -795,14 +795,15 @@ create_tbl <- function(doc, cols) {
       } else {
         errors <- NULL
         for (i in 1:length(nm_test)) {
-          errors <- c(errors, str_glue("{names(nm_test[i])} matches {length(nm_test[[i]])} columns: {nm_test[i]}"))
+          errors <- c(errors, str_glue("{names(nm_test[i])} matches {length(nm_test[[i]])} columns: {paste(nm_test[[i]], collapse = ', ')}"))
         }
+
         msg <- c(
           "Unable to rename the following columns in {names(matches)}",
           set_names(errors, rep("x", length(errors))),
-          "i" = "Please check your regular expression"
+          "i" = str_glue("Please check your regular expression for `{context}`")
         )
-        cli_abort(msg, .call = FALSE)
+        cli_abort(msg, .call = NULL)
       }
     }
 
