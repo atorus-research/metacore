@@ -306,12 +306,40 @@ all_message <- function() {
 #' @param codelist codelist information
 #' @param supp supp information
 #'
-check_columns <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist, supp) {
+check_columns <- function(ds_spec = NULL, ds_vars = NULL, var_spec = NULL, value_spec = NULL,
+                          derivations = NULL, codelist = NULL, supp = NULL) {
+  # Create a list of the actual dataframes passed
+  actual_datasets <- list(
+    ds_spec = ds_spec,
+    ds_vars = ds_vars,
+    var_spec = var_spec,
+    value_spec = value_spec,
+    derivations = derivations,
+    codelist = codelist,
+    supp = supp
+  )
+
+  # Filter out NULL entries (datasets not supplied) and get names
+  actual_datasets <- actual_datasets[!sapply(actual_datasets, is.null)]
+  ds_names <- names(actual_datasets)
+
+  # Filter out all_message() tibble to include only the required checks
+  filtered_checks <- all_message() %>%
+    filter(dataset %in% ds_names)
+
+  # Apply filtered checks to the supplied dataframes
   messages <- purrr::pmap(
-    all_message(),
-    ~ check_structure(
-      get(..1), sym(..2), ..3, ..4, ..1
-    )
+    filtered_checks,
+    function(dataset, var, test, any_na_acceptable) {
+      current_ds <- actual_datasets[[dataset]]
+      check_structure(
+        .data = current_ds,
+        col = sym(var),
+        func = test,
+        any_na_acceptable = any_na_acceptable,
+        nm = dataset
+      )
+    }
   )
 
   # errors
