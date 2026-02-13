@@ -137,3 +137,83 @@ test_that("is_DatasetMeta throws an error if a non-DatasetMeta object is supplie
 test_that("is_DatasetMeta returns TRUE if a DatasetMeta object is supplied", {
   expect_true(verify_DatasetMeta(dataset_meta))
 })
+
+test_that("check_columns handles multiple datasets including 'supp' correctly", {
+  # Create dummy dataframes that conform to all_message specifications
+  ds_spec_test <- tribble(
+    ~dataset, ~structure, ~label,
+    "ADSL", "flat", "Subject-Level Data"
+  )
+  ds_vars_test <- tribble(
+    ~dataset, ~variable, ~key_seq, ~order, ~mandatory, ~core, ~supp_flag,
+    "ADSL", "USUBJID", 1, 1, TRUE, "Expected", FALSE
+  )
+  var_spec_test <- tribble(
+    ~variable, ~type, ~length, ~label, ~format, ~common,
+    "USUBJID", "Char", 8, "Unique Subject ID", "$8.", TRUE
+  )
+  supp_test <- tribble(
+    ~dataset, ~variable, ~idvar, ~qeval,
+    "ADSL", "AGE", "USUBJID", "AGE"
+  )
+
+  # Expect no errors or warnings for valid data, including the 'supp' dataset
+  expect_silent(check_columns(
+    ds_spec = ds_spec_test,
+    ds_vars = ds_vars_test,
+    var_spec = var_spec_test,
+    supp = supp_test
+  ))
+
+  # Example: Test for a missing column to ensure `check_structure` works
+  ds_spec_bad <- tribble(
+    ~dataset, ~structure,
+    "ADSL", "flat"
+  )
+  expect_error(
+    check_columns(ds_spec = ds_spec_bad)
+  )
+})
+
+test_that("check_columns handles multiple datasets excluding 'supp' correctly", {
+  # Create dummy dataframes that conform to all_message specifications
+  ds_spec_test <- tribble(
+    ~dataset, ~structure, ~label,
+    "ADSL", "flat", "Subject-Level Data"
+  )
+  ds_vars_test <- tribble(
+    ~dataset, ~variable, ~key_seq, ~order, ~mandatory, ~core, ~supp_flag,
+    "ADSL", "USUBJID", 1, 1, TRUE, "Expected", FALSE
+  )
+  var_spec_test <- tribble(
+    ~variable, ~type, ~length, ~label, ~format, ~common,
+    "USUBJID", "Char", 8, "Unique Subject ID", "$8.", TRUE
+  )
+
+  ds_vars_bad <- tribble(
+    ~dataset, ~variable, ~idvar, ~qeval
+  )
+
+  # Example: Empty supp dataset, check_columns called manually
+  expect_warning(
+    check_columns(supp = ds_vars_bad),
+    regexp = cli::cli_inform(c(
+      "*" = "`dataset` from the `supp` table only contains missing values.",
+      "*" = "`variable` from the `supp` table only contains missing values.",
+      "*" = "`idvar` from the `supp` table only contains missing values.",
+      "*" = "`qeval` from the `supp` table only contains missing values."
+    ))
+  )
+
+  # Example: Empty supp dataset, not included in check_columns call
+  ds_vars_bad <- tribble(
+    ~dataset, ~variable, ~idvar, ~qeval
+  )
+  expect_silent(
+    check_columns(
+      ds_spec = ds_spec_test,
+      ds_vars = ds_vars_test,
+      var_spec = var_spec_test
+    )
+  )
+})
