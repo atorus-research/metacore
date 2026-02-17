@@ -7,7 +7,7 @@ to build spec readers can use it.
 ## Usage
 
 ``` r
-create_tbl(doc, cols)
+create_tbl(doc, cols, context)
 ```
 
 ## Arguments
@@ -20,6 +20,10 @@ create_tbl(doc, cols)
 
   vector of regex to get a datasets base on which columns it has. If the
   vector is named it will also rename the columns
+
+- context:
+
+  Provides the calling context for better error messaging to the user
 
 ## Value
 

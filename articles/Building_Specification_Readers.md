@@ -28,8 +28,8 @@ messages can be helpful.
 spec_to_metacore(metacore_example("mock_spec.xlsx"))
 #> Error in `create_tbl()`:
 #> ! Unable to rename the following columns in Domains
-#> ✖ label matches 2 columns: c("Label", "Description")
-#> ℹ Please check your regular expression
+#> ✖ label matches 2 columns: Label, Description
+#> ℹ Please check your regular expression for `spec_type_to_ds_spec`
 ```
 
 As we can see, the mock spec we are using here doesn’t match the format.
@@ -173,8 +173,8 @@ what we get.
 spec_type_to_ds_spec(doc)
 #> Error in `create_tbl()`:
 #> ! Unable to rename the following columns in Domains
-#> ✖ label matches 2 columns: c("Label", "Description")
-#> ℹ Please check your regular expression
+#> ✖ label matches 2 columns: Label, Description
+#> ℹ Please check your regular expression for `spec_type_to_ds_spec`
 ```
 
 The error tells us there is an issue with the label column in the
@@ -250,9 +250,9 @@ can try with just the defaults again.
 spec_type_to_ds_vars(doc)
 #> Error in `create_tbl()`:
 #> ! Unable to rename the following columns in Variables
-#> ✖ variable matches 2 columns: c("Variable Name", "Variable Order")
-#> ✖ order matches 2 columns: c("Variable Order", "Sort Order")
-#> ℹ Please check your regular expression
+#> ✖ variable matches 2 columns: Variable Name, Variable Order
+#> ✖ order matches 2 columns: Variable Order, Sort Order
+#> ℹ Please check your regular expression for `spec_type_to_ds_vars`
 ```
 
 This error means it is trying to match the sheet entitled Variable, the

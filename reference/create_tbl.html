@@ -50,7 +50,7 @@ build spec readers can use it.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">create_tbl</span><span class="op">(</span><span class="va">doc</span>, <span class="va">cols</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">create_tbl</span><span class="op">(</span><span class="va">doc</span>, <span class="va">cols</span>, <span class="va">context</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -64,6 +64,10 @@ build spec readers can use it.</p>
 <dt id="arg-cols">cols<a class="anchor" aria-label="anchor" href="#arg-cols"></a></dt>
 <dd><p>vector of regex to get a datasets base on which columns it has.
 If the vector is named it will also rename the columns</p></dd>
+
+
+<dt id="arg-context">context<a class="anchor" aria-label="anchor" href="#arg-context"></a></dt>
+<dd><p>Provides the calling context for better error messaging to the user</p></dd>
 
 </dl></div>
     <div class="section level2">

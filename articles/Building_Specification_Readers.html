@@ -91,8 +91,8 @@ messages can be helpful.</p>
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/spec_to_metacore.html">spec_to_metacore</a></span><span class="op">(</span><span class="fu"><a href="../reference/metacore_example.html">metacore_example</a></span><span class="op">(</span><span class="st">"mock_spec.xlsx"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `create_tbl()`:</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Unable to rename the following columns in Domains</span></span>
-<span><span class="co">#&gt; <span style="color: #BB0000;">✖</span> label matches 2 columns: c("Label", "Description")</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Please check your regular expression</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BB0000;">✖</span> label matches 2 columns: Label, Description</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Please check your regular expression for `spec_type_to_ds_spec`</span></span></code></pre></div>
 <p>As we can see, the mock spec we are using here doesn’t match the
 format. Therefore we will have to build a bespoke reader. Before we
 start, it is important to understand the structure of the metacore
@@ -224,8 +224,8 @@ default and see what we get.</p>
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/spec_type_to_ds_spec.html">spec_type_to_ds_spec</a></span><span class="op">(</span><span class="va">doc</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `create_tbl()`:</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Unable to rename the following columns in Domains</span></span>
-<span><span class="co">#&gt; <span style="color: #BB0000;">✖</span> label matches 2 columns: c("Label", "Description")</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Please check your regular expression</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BB0000;">✖</span> label matches 2 columns: Label, Description</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Please check your regular expression for `spec_type_to_ds_spec`</span></span></code></pre></div>
 <p>The error tells us there is an issue with the label column in the
 Domains table. Meaning, we need to change the default vector for the
 cols input because the default regular expression isn’t specific enough.
@@ -288,9 +288,9 @@ can try with just the defaults again.</p>
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/spec_type_to_ds_vars.html">spec_type_to_ds_vars</a></span><span class="op">(</span><span class="va">doc</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `create_tbl()`:</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Unable to rename the following columns in Variables</span></span>
-<span><span class="co">#&gt; <span style="color: #BB0000;">✖</span> variable matches 2 columns: c("Variable Name", "Variable Order")</span></span>
-<span><span class="co">#&gt; <span style="color: #BB0000;">✖</span> order matches 2 columns: c("Variable Order", "Sort Order")</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Please check your regular expression</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BB0000;">✖</span> variable matches 2 columns: Variable Name, Variable Order</span></span>
+<span><span class="co">#&gt; <span style="color: #BB0000;">✖</span> order matches 2 columns: Variable Order, Sort Order</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Please check your regular expression for `spec_type_to_ds_vars`</span></span></code></pre></div>
 <p>This error means it is trying to match the sheet entitled Variable,
 the variable column matches to two different columns. This is the same
 error we had before. We just need to have a quick look at the columns
