@@ -245,11 +245,25 @@ var_name_check <- function(envrionment) {
 }
 
 
-#' Column Data Check <- lol horrible name
+#' Define Column Validation Specifications
 #'
-#' @return a data frame of the datasets, column
+#' @description
+#' This internal function defines a comprehensive set of validation rules for
+#' various data frame columns used within the package. It specifies the expected
+#' dataset, variable, validation test, and whether `NA` values are acceptable
+#' for each column.
+#'
+#' @details
+#' The returned tibble contains the following columns:
+#' \itemize{
+#'   \item `dataset`: The name of the dataset (e.g., "ds_spec", "ds_vars") to which the rule applies.
+#'   \item `var`: The name of the column within that dataset to be validated.
+#'   \item `test`: A function or condition to apply for validation (e.g., `is.character`, `is.numeric`, `check_words`, or a custom anonymous function).
+#'   \item `any_na_acceptable`: A logical value indicating whether `NA` values are permitted in the column (`TRUE`) or not (`FALSE`).
+#' }
+#'
+#' @return A `tibble` (or data frame) detailing the column validation specifications.
 #' @noRd
-#'
 all_message <- function() {
   tribble(
     ~dataset, ~var, ~test, ~any_na_acceptable,
@@ -294,24 +308,74 @@ all_message <- function() {
 }
 
 
-#' Check all data frames include the correct types of columns
+#' Validate Data Frame Column Types and Content
 #'
-#' This function checks for vector types and accepted words
+#' @description
+#' Performs comprehensive validation of columns across multiple input data frames.
+#' Checks for correct vector types, acceptable values, and `NA` presence based on
+#' predefined specifications from `all_message()`. The function is designed to ensure
+#' that data frames conform to expected structures for downstream processing.
 #'
-#' @param ds_spec dataset specification
-#' @param ds_vars dataset variables
-#' @param var_spec variable specification
-#' @param value_spec value specification
-#' @param derivations derivation information
-#' @param codelist codelist information
-#' @param supp supp information
+#' @param ds_spec An optional data frame containing dataset specifications.
+#' @param ds_vars An optional data frame containing dataset variable information.
+#' @param var_spec An optional data frame containing variable specifications.
+#' @param value_spec An optional data frame containing value specifications.
+#' @param derivations An optional data frame containing derivation information.
+#' @param codelist An optional data frame containing codelist information.
+#' @param supp An optional data frame containing supplementary information.
 #'
-check_columns <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist, supp) {
+#' @details
+#' The function takes any combination of the specified data frames as input.
+#' It dynamically selects validation rules from `all_message()` relevant to
+#' the provided data frames. For each relevant column in each provided data frame,
+#' it applies the specified validation test (`func`) and checks for `NA` values
+#' based on `any_na_acceptable`.
+#'
+#' If any validation check fails (e.g., incorrect column type, unacceptable values,
+#' or mandatory `NA`s), the function will either stop execution with a `cli_abort`
+#' error message (for critical issues) or issue `cli_warn` warnings (for less
+#' critical issues).
+#'
+#' This function relies on `check_structure` to perform the actual column-level checks.
+#'
+#' @return Invisible `NULL`. The function is primarily called for its side
+#'   effects: it throws errors or warnings if data validation fails. If all
+#'   checks pass, it returns invisibly.
+#' @noRd
+check_columns <- function(ds_spec = NULL, ds_vars = NULL, var_spec = NULL, value_spec = NULL,
+                          derivations = NULL, codelist = NULL, supp = NULL) {
+  # Create a list of the actual dataframes passed
+  actual_datasets <- list(
+    ds_spec = ds_spec,
+    ds_vars = ds_vars,
+    var_spec = var_spec,
+    value_spec = value_spec,
+    derivations = derivations,
+    codelist = codelist,
+    supp = supp
+  )
+
+  # Filter out NULL entries (datasets not supplied) and get names
+  actual_datasets <- actual_datasets[!sapply(actual_datasets, is.null)]
+  ds_names <- names(actual_datasets)
+
+  # Filter out all_message() tibble to include only the required checks
+  filtered_checks <- all_message() %>%
+    filter(dataset %in% ds_names)
+
+  # Apply filtered checks to the supplied dataframes
   messages <- purrr::pmap(
-    all_message(),
-    ~ check_structure(
-      get(..1), sym(..2), ..3, ..4, ..1
-    )
+    filtered_checks,
+    function(dataset, var, test, any_na_acceptable) {
+      current_ds <- actual_datasets[[dataset]]
+      check_structure(
+        .data = current_ds,
+        col = sym(var),
+        func = test,
+        any_na_acceptable = any_na_acceptable,
+        nm = dataset
+      )
+    }
   )
 
   # errors
