@@ -4,8 +4,6 @@
 
 - [`MetaCore_filter()`](https://atorus-research.github.io/metacore/reference/MetaCore_filter.md)
   : Select method to subset by a single dataframe
-- [`check_columns()`](https://atorus-research.github.io/metacore/reference/check_columns.md)
-  : Check all data frames include the correct types of columns
 - [`check_structure()`](https://atorus-research.github.io/metacore/reference/check_structure.md)
   : Column Validation Function
 - [`check_words()`](https://atorus-research.github.io/metacore/reference/check_words.md)

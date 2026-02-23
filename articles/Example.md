@@ -52,10 +52,6 @@ test <- metacore(ds_spec2, ds_vars, var_spec, value_spec, derivations, code_list
 #> values.
 #> Warning: `common` from the `var_spec` table only contains missing
 #> values.
-#> Warning: `dataset` from the `supp` table only contains missing values.
-#> Warning: `variable` from the `supp` table only contains missing values.
-#> Warning: `idvar` from the `supp` table only contains missing values.
-#> Warning: `qeval` from the `supp` table only contains missing values.
 #> Warning: The following derivations are never used:
 #> ℹ MT.SUPPAE.QVAL MT.SUPPDM.QVAL
 #> Warning: The following codelists are never used:
@@ -87,10 +83,6 @@ subset <- test %>% select_dataset("DM")
 #> values.
 #> Warning: `where` from the `value_spec` table only contains missing
 #> values.
-#> Warning: `dataset` from the `supp` table only contains missing values.
-#> Warning: `variable` from the `supp` table only contains missing values.
-#> Warning: `idvar` from the `supp` table only contains missing values.
-#> Warning: `qeval` from the `supp` table only contains missing values.
 #> ✔ DM dataset successfully selected
 subset$ds_spec
 #> # A tibble: 1 × 3

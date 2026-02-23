@@ -506,10 +506,6 @@ metacore(ds_spec, ds_vars, var_spec, value_spec,
 #> values.
 #> Warning: `sig_dig` from the `value_spec` table only contains missing
 #> values.
-#> Warning: `dataset` from the `supp` table only contains missing values.
-#> Warning: `variable` from the `supp` table only contains missing values.
-#> Warning: `idvar` from the `supp` table only contains missing values.
-#> Warning: `qeval` from the `supp` table only contains missing values.
 #> Warning: The following variables have derivation ids not found in the derivations table:
 #> ℹ ASTDT, ASTTM, ASTDTM, AENDT, AENTM, AENDTM, AFTRTSTC, ALTRTSTC, APFTRSTC,
 #>   ASTDT, AFTRTST, AFTRTSTC, ALTRTST, ALTRTSTC, ASTDT, ASTTM, ASTDTM, AENDT,
