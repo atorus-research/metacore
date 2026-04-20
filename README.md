@@ -4,12 +4,17 @@
 # metacore <a href='https://github.com/atorus-research/metacore'><img src="man/figures/metacore.PNG" align="right" style="height:139px;" alt="Metacore Package Hex Sticker"/></a>
 
 <!-- badges: start -->
+
 [<img src="https://img.shields.io/badge/Slack-RValidationHub-blue?style=flat&logo=slack" alt="Slack Status">](https://RValidationHub.slack.com)
-[![CRAN status](https://www.r-pkg.org/badges/version/metacore)](https://CRAN.R-project.org/package=metacore)
-[![Codecov test coverage](https://codecov.io/gh/atorus-research/metacore/graph/badge.svg)](https://app.codecov.io/gh/atorus-research/metacore)
-[![R-CMD-check](https://github.com/atorus-research/metacore/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/atorus-research/metacore/actions/workflows/R-CMD-check.yaml)
-[![Total Downloads](http://cranlogs.r-pkg.org/badges/grand-total/metacore?color=green)](https://cran.r-project.org/package=metacore)
+[![R build
+status](https://github.com/atorus-research/metacore/workflows/R-CMD-check/badge.svg)](https://github.com/atorus-research/xportr/actions?workflow=R-CMD-check)
+[<img src="https://img.shields.io/codecov/c/github/atorus-research/metacore" alt="Codecov Coverage">](https://app.codecov.io/gh/atorus-research/metacore)
 [<img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="MIT License">](https://github.com/atorus-research/metacore/blob/master/LICENSE)
+[![Lifecycle:
+experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental-1)
+[![CRAN
+status](https://www.r-pkg.org/badges/version/metacore)](https://CRAN.R-project.org/package=metacore)
+[![R-CMD-check](https://github.com/atorus-research/metacore/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/atorus-research/metacore/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 Programming for clinical trial data analysis tends to be very
@@ -107,7 +112,13 @@ variable:
 - *order*: Order sets the order of the columns to appear in the dataset.
   This is also a numeric value
 
-- *keep*: Logical value about if the variable needs to be kept
+- *mandatory (previously `keep`)*: Boolean specifying whether a variable
+  can have blank values. From the CDISC Define-XML v2.1 documentation:
+  Required items that have Mandatory set to “Yes” cannot have blank
+  values. Variables in SDTM domains that have `core = "Required"` should
+  have `mandatory = TRUE`. Note that `keep` was deprecated in v0.3.0 in
+  favour of `mandatory` to better align the package and CDISC
+  terminology.
 
 - *core*: ADaM core, which should be one of the following values:
   “Expected”, “Required”, “Permissible”, “Conditionally Required”,

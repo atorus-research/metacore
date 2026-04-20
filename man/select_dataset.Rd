@@ -21,7 +21,8 @@ select_dataset(
 
 \item{quiet}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#superseded}{\figure{lifecycle-superseded.svg}{options: alt='[Superseded]'}}}{\strong{[Superseded]}} Option to quietly load in, this
 will suppress warnings, but not errors. Expects either \code{TRUE} or \code{FALSE}.
-Default behaviour is \code{FALSE}.}
+Default behaviour is \code{FALSE}. As of v0.3.0 this argument is deprecated in favour
+of \code{verbose}.}
 
 \item{verbose}{A character string specifying the desired verbosity level.
 Must be one of:
