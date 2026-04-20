@@ -42,6 +42,11 @@ rsconnect/
 inst/doc
 tests/testthat/temp_data/*
 
+# Reverse dependency checks (revdepcheck output)
+revdep/
+
+# Build ignore file (non-standard, tool-specific)
+.Rbuildignore
 docs
 doc
 Meta
