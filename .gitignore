@@ -46,7 +46,6 @@ tests/testthat/temp_data/*
 revdep/
 
 # Build ignore file (non-standard, tool-specific)
-.Rbuildignore
 docs
 doc
 Meta

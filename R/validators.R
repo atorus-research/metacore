@@ -91,16 +91,14 @@ derivation_check <- function(value_spec, derivations) {
       "i" = ansi_collapse(variables, last = ", ")
     ), call. = FALSE)
   }
-  # Check the derivations in deriavtion that aren't  in value spec
+  # Check the derivations in derivation that aren't in value spec
   not_in_deriv <- anti_join(derivations, deriv_vars, by = c("derivation_id"))
   if (nrow(not_in_deriv) != 0) {
-    deriv <- not_in_deriv %>%
-      mutate(message = paste0(.data$derivation_id)) %>%
-      pull(.data$message)
-    cli_warn(c(
-      "The following derivations are never used:",
-      "i" = ansi_collapse(deriv, last = ", ")
-    ), call. = FALSE)
+     deriv <- not_in_deriv$derivation_id
+     cli_warn(c(
+        "The following derivations are never used:",
+        "i" = paste(deriv, collapse = ", ")
+     ), call. = FALSE)
   }
 }
 
@@ -131,12 +129,12 @@ codelist_check <- function(value_spec, codelist) {
   # Check the code_ids in codelist that aren't in value spec
   not_in_cl <- anti_join(codelist, code_vars, by = c("code_id"))
   if (nrow(not_in_cl)) {
-    cl_nm <- not_in_cl %>%
-      pull(.data$name)
-    cli_warn(c(
-      "The following codelists are never used:",
-      "i" = ansi_collapse(cl_nm, last = ", ")
-    ), call. = FALSE)
+     cl_nm <- not_in_cl %>%
+        pull(.data$name)
+     cli_warn(c(
+        "The following codelists are never used:",
+        "i" = paste(cl_nm, collapse = ", ")
+     ), call. = FALSE)
   }
 }
 

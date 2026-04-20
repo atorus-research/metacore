@@ -1,0 +1,16 @@
+^metacore\.Rproj$
+^\.Rproj\.user$
+^dev$
+^LICENSE\.md$
+^README\.Rmd$
+^codecov\.yml$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
+^\.github$
+cran-comments.md
+^doc$
+^Meta$
+^CRAN-RELEASE$
+^CRAN-SUBMISSION$
+^revdep$
