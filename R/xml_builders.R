@@ -22,7 +22,7 @@
 define_to_metacore <- function(path, quiet = deprecated(), verbose = "message") {
   # Check if user has supplied `quiet` instead of `verbose`
   if (lifecycle::is_present(quiet)) {
-    deprecate_soft(when = "0.3.0", what = "spec_to_metacore(quiet)", with = "spec_to_metacore(verbose)")
+    deprecate_soft(when = "0.3.0", what = "define_to_metacore(quiet)", with = "define_to_metacore(verbose)")
   } else {
     quiet <- FALSE
   } # Else deal with deprecated argument for compatability
