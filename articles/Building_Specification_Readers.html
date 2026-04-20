@@ -271,7 +271,8 @@ dataset</p></li>
 dataset</p></li>
 <li><p>mandatory: from Define-XML v2.1. A Boolean value indicating if
 NULL values are permitted. <code>mandatory = TRUE</code> indicates that
-NULL values are not permitted.</p></li>
+NULL values are not permitted. <em>(This variable was renamed from
+<code>keep</code> to <code>mandatory</code> in v0.3.0).</em></p></li>
 <li><p>core: ADaM core (Expected, Required, Permissible)</p></li>
 <li><p>supp_flag: boolean to determine if the variable is in the
 supplementals</p></li>
@@ -323,6 +324,7 @@ the variable and the domain sheet.</p>
 <span>    <span class="st">"variable"</span> <span class="op">=</span> <span class="st">"[V|v]ariable [N|n]ame"</span>,</span>
 <span>    <span class="st">"order"</span> <span class="op">=</span> <span class="st">"[V|v]ariable [O|o]rder"</span>,</span>
 <span>    <span class="st">"mandatory"</span> <span class="op">=</span> <span class="st">"[M|m]andatory"</span></span>
+<span>    <span class="co"># Note that in version 0.3.0 `keep` was renamed to `mandatory` to better align with CDISC terminology. See below for details.</span></span>
 <span>  <span class="op">)</span>,</span>
 <span>  key_seq_cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
 <span>    <span class="st">"dataset"</span> <span class="op">=</span> <span class="st">"Domain Name"</span>,</span>
@@ -341,6 +343,11 @@ the variable and the domain sheet.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> ADAE    SITEID      30 <span style="color: #BB0000;">NA</span>             <span style="color: #BB0000;">NA</span> <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>       </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> ADAE    AGE         40 <span style="color: #BB0000;">NA</span>             <span style="color: #BB0000;">NA</span> <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>       </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> ADAE    SEX         50 <span style="color: #BB0000;">NA</span>             <span style="color: #BB0000;">NA</span> <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span></span></span></code></pre></div>
+<p><strong>Important note on <code>mandatory</code></strong> : In
+version 0.3.0 <code>keep</code> was renamed to <code>mandatory</code> to
+better align with CDISC terminology. If you are using {metacore} version
+0.2.1 or earlier, please make the following updates:
+<code>"mandatory"</code> -&gt; <code>"keep"</code>:</p>
 <p>The next table we have is var_spec, the table of variable level
 metadata. var_spec is separate from ds_vars because, in accordance with
 CDISC standards, labels and lengths should be the same for a given

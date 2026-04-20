@@ -72,7 +72,8 @@ be used as building blocks for bespoke specification documents.</p>
 <dt id="arg-quiet">quiet<a class="anchor" aria-label="anchor" href="#arg-quiet"></a></dt>
 <dd><p><a href="https://lifecycle.r-lib.org/articles/stages.html#superseded" class="external-link"><img src="figures/lifecycle-superseded.svg" alt="[Superseded]"></a> Option to quietly load in, this
 will suppress warnings, but not errors. Expects either <code>TRUE</code> or <code>FALSE</code>.
-Default behaviour is <code>FALSE</code>.</p></dd>
+Default behaviour is <code>FALSE</code>. From v0.3.0 this argument is deprecated in favour of
+<code>verbose</code>.</p></dd>
 
 
 <dt id="arg-where-sep-sheet">where_sep_sheet<a class="anchor" aria-label="anchor" href="#arg-where-sep-sheet"></a></dt>
@@ -104,6 +105,36 @@ number of suppressed warnings.</p></dd>
     <p>given a spec document it returns a metacore object</p>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Run `spec_to_metacore` with `verbose = "collapse"`</span></span></span>
+<span class="r-in"><span><span class="va">spec_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="metacore_example.html">metacore_example</a></span><span class="op">(</span><span class="st">"p21_mock.xlsx"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">metacore</span> <span class="op">&lt;-</span> <span class="fu">spec_to_metacore</span><span class="op">(</span></span></span>
+<span class="r-in"><span>path <span class="op">=</span> <span class="va">spec_path</span>,</span></span>
+<span class="r-in"><span>verbose <span class="op">=</span> <span class="st">"collapse"</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Metadata successfully imported</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> To use the Metacore object with <span style="color: #0000BB;">metatools</span> package, first subset a dataset</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   using `metacore::select_dataset()`</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> <span style="color: #BB0000;">Operation performed with 5 suppressed warnings. Set `verbose = "warn"` to</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   <span style="color: #BB0000;">show.</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Run `spec_to_metacore` with `verbose = "warn"`</span></span></span>
+<span class="r-in"><span><span class="va">metacore</span> <span class="op">&lt;-</span> <span class="fu">spec_to_metacore</span><span class="op">(</span></span></span>
+<span class="r-in"><span>path <span class="op">=</span> <span class="va">spec_path</span>,</span></span>
+<span class="r-in"><span>verbose <span class="op">=</span> <span class="st">"warn"</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>The following word in value_spec$origin is not allowed:</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> edt</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>`core` from the `ds_vars` table only contains missing values.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>`supp_flag` from the `ds_vars` table only contains missing values.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>The following derivations are never used:</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> SUPPAE.QVAL, SUPPDM.QVAL</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>The following codelists are never used:</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> DRUG DICTIONARY, MEDICAL HISTORY DICTIONARY</span>
+<span class="r-in"><span></span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

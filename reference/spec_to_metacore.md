@@ -27,7 +27,8 @@ spec_to_metacore(
 
   **\[superseded\]** Option to quietly load in, this will suppress
   warnings, but not errors. Expects either `TRUE` or `FALSE`. Default
-  behaviour is `FALSE`.
+  behaviour is `FALSE`. From v0.3.0 this argument is deprecated in
+  favour of `verbose`.
 
 - where_sep_sheet:
 
@@ -59,3 +60,33 @@ spec_to_metacore(
 ## Value
 
 given a spec document it returns a metacore object
+
+## Examples
+
+``` r
+# Run `spec_to_metacore` with `verbose = "collapse"`
+spec_path <- metacore_example("p21_mock.xlsx")
+metacore <- spec_to_metacore(
+path = spec_path,
+verbose = "collapse"
+)
+#> ✔ Metadata successfully imported
+#> ℹ To use the Metacore object with metatools package, first subset a dataset
+#>   using `metacore::select_dataset()`
+#> ℹ Operation performed with 5 suppressed warnings. Set `verbose = "warn"` to
+#>   show.
+
+# Run `spec_to_metacore` with `verbose = "warn"`
+metacore <- spec_to_metacore(
+path = spec_path,
+verbose = "warn"
+)
+#> Warning: The following word in value_spec$origin is not allowed:
+#> ℹ edt
+#> Warning: `core` from the `ds_vars` table only contains missing values.
+#> Warning: `supp_flag` from the `ds_vars` table only contains missing values.
+#> Warning: The following derivations are never used:
+#> ℹ SUPPAE.QVAL, SUPPDM.QVAL
+#> Warning: The following codelists are never used:
+#> ℹ DRUG DICTIONARY, MEDICAL HISTORY DICTIONARY
+```

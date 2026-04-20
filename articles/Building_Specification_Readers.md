@@ -230,7 +230,8 @@ The ds_vars table has 7 columns:
 
 - mandatory: from Define-XML v2.1. A Boolean value indicating if NULL
   values are permitted. `mandatory = TRUE` indicates that NULL values
-  are not permitted.
+  are not permitted. *(This variable was renamed from `keep` to
+  `mandatory` in v0.3.0).*
 
 - core: ADaM core (Expected, Required, Permissible)
 
@@ -287,6 +288,7 @@ ds_vars <- spec_type_to_ds_vars(doc,
     "variable" = "[V|v]ariable [N|n]ame",
     "order" = "[V|v]ariable [O|o]rder",
     "mandatory" = "[M|m]andatory"
+    # Note that in version 0.3.0 `keep` was renamed to `mandatory` to better align with CDISC terminology. See below for details.
   ),
   key_seq_cols = c(
     "dataset" = "Domain Name",
@@ -306,6 +308,11 @@ head(ds_vars)
 #> 5 ADAE    AGE         40 NA             NA NA    NA       
 #> 6 ADAE    SEX         50 NA             NA NA    NA
 ```
+
+**Important note on `mandatory`** : In version 0.3.0 `keep` was renamed
+to `mandatory` to better align with CDISC terminology. If you are using
+{metacore} version 0.2.1 or earlier, please make the following updates:
+`"mandatory"` -\> `"keep"`:
 
 The next table we have is var_spec, the table of variable level
 metadata. var_spec is separate from ds_vars because, in accordance with

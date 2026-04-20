@@ -19,7 +19,8 @@ define_to_metacore(path, quiet = deprecated(), verbose = "message")
 
   **\[superseded\]** Option to quietly load in, this will suppress
   warnings, but not errors. Expects either `TRUE` or `FALSE`. Default
-  behaviour is `FALSE`.
+  behaviour is `FALSE`. As of v0.3.0 this argument is deprecated in
+  favour of `verbose`.
 
 - verbose:
 

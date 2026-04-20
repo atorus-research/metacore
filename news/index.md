@@ -2,14 +2,41 @@
 
 ## Metacore 0.3.0
 
-- Added extended function of `quiet` argument in
-  [`spec_to_metacore()`](https://atorus-research.github.io/metacore/reference/spec_to_metacore.md),
-  [`define_to_metacore()`](https://atorus-research.github.io/metacore/reference/define_to_metacore.md),
-  and `select_dataset` functions to suppress optional messages, notes
-  and warnings
-  [\#122](https://github.com/atorus-research/metacore/issues/122)
+One of the primary goals of these updates is to make the package less
+“noisy”, reducing the number of messages and warnings produced by the
+package and providing users more options for controlling them.
+
+- `verbose` argument added to `metacore`, `spec_to_metacore`,
+  `define_to_metacore`, and `select_dataset` to expand the user’s
+  ability to selectively suppress messages and warnings
+  [\#135](https://github.com/atorus-research/metacore/pull/138). Permits
+  the options:
+  - **silent**: Suppresses both messages and warnings.
+  - **collapse**: Warnings are collapsed into a single message that
+    indicates the number of warnings suppressed.
+  - **warn**: Warnings are permitted but messages are suppressed.
+  - **message**: Both warnings and messages are permitted.
+- `quiet` argument in `metacore`, `spec_to_metacore`,
+  `define_to_metacore`, and `select_dataset` functions soft deprecated
+  in favour of `verbose`. Default functionality of `quiet = TRUE` now
+  achieves the same result as `verbose = "silent"` to suppress optional
+  messages, notes and warnings
+  [\#126](https://github.com/atorus-research/metacore/pull/126).
 - `keep` variable in `ds_vars` table has been changed to `mandatory` to
-  better reflect the CDISC standard terminology.
+  better reflect the CDISC standard terminology. In the function
+  `metacore` the input for the supplied column `keep` is still available
+  but a deprecation warning has been attached to its usage. Users
+  supplying `keep` will not encounter an error as this has been mapped
+  to the new column `mandatory`.
+  [\#128](https://github.com/atorus-research/metacore/pull/128).
+- Cleaned up some of the validation procedures for `supp` columns.
+  Validation of the `supp` table is now only performed if it contains
+  greater than zero rows to reduce the number of warnings produced when
+  reading in specs.
+  [\#144](https://github.com/atorus-research/metacore/pull/144).
+- Various functions have had the appearance and UX of their error
+  messages improved to provide additional context and guidance for the
+  users.
 
 ## Metacore 0.2.1
 

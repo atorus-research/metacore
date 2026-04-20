@@ -39,10 +39,24 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.3.0" id="metacore-030">Metacore 0.3.0<a class="anchor" aria-label="anchor" href="#metacore-030"></a></h2>
-<ul><li>Added extended function of <code>quiet</code> argument in <code><a href="../reference/spec_to_metacore.html">spec_to_metacore()</a></code>, <code><a href="../reference/define_to_metacore.html">define_to_metacore()</a></code>, and <code>select_dataset</code> functions to suppress optional messages, notes and warnings <a href="https://github.com/atorus-research/metacore/issues/122" class="external-link">#122</a>
-</li>
+<p>One of the primary goals of these updates is to make the package less “noisy”, reducing the number of messages and warnings produced by the package and providing users more options for controlling them.</p>
+<ul><li>
+<code>verbose</code> argument added to <code>metacore</code>, <code>spec_to_metacore</code>, <code>define_to_metacore</code>, and <code>select_dataset</code> to expand the user’s ability to selectively suppress messages and warnings <a href="https://github.com/atorus-research/metacore/pull/138" class="external-link">#135</a>. Permits the options:
+<ul><li>
+<strong>silent</strong>: Suppresses both messages and warnings.</li>
 <li>
-<code>keep</code> variable in <code>ds_vars</code> table has been changed to <code>mandatory</code> to better reflect the CDISC standard terminology.</li>
+<strong>collapse</strong>: Warnings are collapsed into a single message that indicates the number of warnings suppressed.</li>
+<li>
+<strong>warn</strong>: Warnings are permitted but messages are suppressed.</li>
+<li>
+<strong>message</strong>: Both warnings and messages are permitted.</li>
+</ul></li>
+<li>
+<code>quiet</code> argument in <code>metacore</code>, <code>spec_to_metacore</code>, <code>define_to_metacore</code>, and <code>select_dataset</code> functions soft deprecated in favour of <code>verbose</code>. Default functionality of <code>quiet = TRUE</code> now achieves the same result as <code>verbose = "silent"</code> to suppress optional messages, notes and warnings <a href="https://github.com/atorus-research/metacore/pull/126" class="external-link">#126</a>.</li>
+<li>
+<code>keep</code> variable in <code>ds_vars</code> table has been changed to <code>mandatory</code> to better reflect the CDISC standard terminology. In the function <code>metacore</code> the input for the supplied column <code>keep</code> is still available but a deprecation warning has been attached to its usage. Users supplying <code>keep</code> will not encounter an error as this has been mapped to the new column <code>mandatory</code>. <a href="https://github.com/atorus-research/metacore/pull/128" class="external-link">#128</a>.</li>
+<li>Cleaned up some of the validation procedures for <code>supp</code> columns. Validation of the <code>supp</code> table is now only performed if it contains greater than zero rows to reduce the number of warnings produced when reading in specs. <a href="https://github.com/atorus-research/metacore/pull/144" class="external-link">#144</a>.</li>
+<li>Various functions have had the appearance and UX of their error messages improved to provide additional context and guidance for the users.</li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.2.1" id="metacore-021">Metacore 0.2.1<a class="anchor" aria-label="anchor" href="#metacore-021"></a></h2><p class="text-muted">CRAN release: 2025-07-21</p>

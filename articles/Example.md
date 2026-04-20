@@ -53,9 +53,9 @@ test <- metacore(ds_spec2, ds_vars, var_spec, value_spec, derivations, code_list
 #> Warning: `common` from the `var_spec` table only contains missing
 #> values.
 #> Warning: The following derivations are never used:
-#> ℹ MT.SUPPAE.QVAL MT.SUPPDM.QVAL
+#> ℹ MT.SUPPAE.QVAL, MT.SUPPDM.QVAL
 #> Warning: The following codelists are never used:
-#> ℹ DRUG DICTIONARY MEDICAL HISTORY DICTIONARY
+#> ℹ DRUG DICTIONARY, MEDICAL HISTORY DICTIONARY
 #> ✔ Metadata successfully imported
 #> ℹ To use the Metacore object with metatools package, first subset a dataset
 #>   using `metacore::select_dataset()`
