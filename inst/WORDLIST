@@ -4,7 +4,6 @@ Atorus
 Bugfix
 CDISC
 CMD
-Codecov
 DataDef
 DatasetMeta
 GSK
@@ -15,6 +14,7 @@ Lifecycle
 ORCID
 README
 SDTM
+UX
 VLM
 XPT
 behaviour
