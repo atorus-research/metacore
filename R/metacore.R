@@ -341,7 +341,8 @@ MetaCore <- R6::R6Class("Metacore",
 #' @param supp contains the idvar and qeval information for supplemental variables
 #' @param quiet `r lifecycle::badge("superseded")` Option to quietly load in, this
 #'   will suppress warnings, but not errors. Expects either `TRUE` or `FALSE`.
-#'   Default behaviour is `FALSE`.
+#'   Default behaviour is `FALSE`. As of v0.3.0 this argument is deprecated in favour
+#'   of `verbose`.
 #' @param verbose A character string specifying the desired verbosity level.
 #'   Must be one of:
 #'   \describe{
@@ -484,7 +485,8 @@ The input for the supplied column `keep` has been mapped to the new column `mand
 #' @param simplify return a single dataframe
 #' @param quiet `r lifecycle::badge("superseded")` Option to quietly load in, this
 #'   will suppress warnings, but not errors. Expects either `TRUE` or `FALSE`.
-#'   Default behaviour is `FALSE`.
+#'   Default behaviour is `FALSE`. As of v0.3.0 this argument is deprecated in favour
+#'   of `verbose`.
 #' @param verbose A character string specifying the desired verbosity level.
 #'   Must be one of:
 #'   \describe{
