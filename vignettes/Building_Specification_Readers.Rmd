@@ -131,7 +131,7 @@ ds_vars <- spec_type_to_ds_vars(doc,
     "dataset" = "Domain",
     "variable" = "[V|v]ariable [N|n]ame",
     "order" = "[V|v]ariable [O|o]rder",
-    "mandatory" = "[M|m]andatory"
+    "keep" = "[M|m]andatory"
   ),
   key_seq_cols = c(
     "dataset" = "Domain Name",
