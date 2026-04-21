@@ -72,9 +72,13 @@ remember. They are as follows:
 
 Here is a schema of how all this fits together:
 
-![Schema diagram showing the relationships between all metacore tables
-(variable names not
-included)](man/figures/schema-colors.png "man/figures/Metacore Schema")
+<figure>
+<img src="man/figures/schema-colors.png"
+title="man/figures/Metacore Schema"
+alt="Schema diagram showing the relationships between all metacore tables (variable names not included)" />
+<figcaption aria-hidden="true">Schema diagram showing the relationships
+between all metacore tables (variable names not included)</figcaption>
+</figure>
 
 ### ds_spec <img src="man/figures/labeled-ds_spec.png" align="right" style="height:150px;" alt="Diagram of ds_spec table structure"/>
 
@@ -224,8 +228,13 @@ single row per dataset/variable, with the following information:
 To get more information about the metacore objects and how to build a
 specification reader, please see our vignettes.
 
-![Schema diagram showing the relationships between all metacore
-tables](man/figures/labeled_schema.png "man/figures/Metacore Schema")
+<figure>
+<img src="man/figures/labeled_schema.png"
+title="man/figures/Metacore Schema"
+alt="Schema diagram showing the relationships between all metacore tables" />
+<figcaption aria-hidden="true">Schema diagram showing the relationships
+between all metacore tables</figcaption>
+</figure>
 
 ## Future Development
 
