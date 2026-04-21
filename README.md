@@ -6,8 +6,6 @@
 <!-- badges: start -->
 
 [<img src="https://img.shields.io/badge/Slack-RValidationHub-blue?style=flat&logo=slack" alt="Slack Status">](https://RValidationHub.slack.com)
-[![R build
-status](https://github.com/atorus-research/metacore/workflows/R-CMD-check/badge.svg)](https://github.com/atorus-research/xportr/actions?workflow=R-CMD-check)
 [<img src="https://img.shields.io/codecov/c/github/atorus-research/metacore" alt="Codecov Coverage">](https://app.codecov.io/gh/atorus-research/metacore)
 [<img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="MIT License">](https://github.com/atorus-research/metacore/blob/master/LICENSE)
 [![Lifecycle:
