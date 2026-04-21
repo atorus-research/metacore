@@ -8,7 +8,8 @@
 #' @param path string of file location
 #' @param quiet `r lifecycle::badge("superseded")` Option to quietly load in, this
 #'   will suppress warnings, but not errors. Expects either `TRUE` or `FALSE`.
-#'   Default behaviour is `FALSE`.
+#'   Default behaviour is `FALSE`. From v0.3.0 this argument is deprecated in favour of
+#'   `verbose`.
 #' @param where_sep_sheet Option to tell if the where is in a separate sheet,
 #'   like in older p21 specs or in a single sheet like newer p21 specs.
 #' @param verbose A character string specifying the desired verbosity level.
@@ -22,6 +23,21 @@
 #'   }
 #'
 #' @return given a spec document it returns a metacore object
+#'
+#' @examples
+#' # Run `spec_to_metacore` with `verbose = "collapse"`
+#' spec_path <- metacore_example("p21_mock.xlsx")
+#' metacore <- spec_to_metacore(
+#'   path = spec_path,
+#'   verbose = "collapse"
+#' )
+#'
+#' # Run `spec_to_metacore` with `verbose = "warn"`
+#' metacore <- spec_to_metacore(
+#'   path = spec_path,
+#'   verbose = "warn"
+#' )
+#'
 #' @export
 spec_to_metacore <- function(path, quiet = deprecated(), where_sep_sheet = TRUE, verbose = "message") {
   # Check if user has supplied `quiet` instead of `verbose`

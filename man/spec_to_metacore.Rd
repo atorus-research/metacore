@@ -16,7 +16,8 @@ spec_to_metacore(
 
 \item{quiet}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#superseded}{\figure{lifecycle-superseded.svg}{options: alt='[Superseded]'}}}{\strong{[Superseded]}} Option to quietly load in, this
 will suppress warnings, but not errors. Expects either \code{TRUE} or \code{FALSE}.
-Default behaviour is \code{FALSE}.}
+Default behaviour is \code{FALSE}. From v0.3.0 this argument is deprecated in favour of
+\code{verbose}.}
 
 \item{where_sep_sheet}{Option to tell if the where is in a separate sheet,
 like in older p21 specs or in a single sheet like newer p21 specs.}
@@ -39,4 +40,19 @@ This function takes the location of an excel specification document and reads
 it in as a meta core object. At the moment it only supports specification in
 the format of pinnacle 21 specifications. But, the section level spec builder can
 be used as building blocks for bespoke specification documents.
+}
+\examples{
+# Run `spec_to_metacore` with `verbose = "collapse"`
+spec_path <- metacore_example("p21_mock.xlsx")
+metacore <- spec_to_metacore(
+path = spec_path,
+verbose = "collapse"
+)
+
+# Run `spec_to_metacore` with `verbose = "warn"`
+metacore <- spec_to_metacore(
+path = spec_path,
+verbose = "warn"
+)
+
 }
