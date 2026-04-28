@@ -4,29 +4,23 @@
 \alias{get_control_term}
 \title{Get Control Term}
 \usage{
-get_control_term(metacode, variable, dataset = NULL)
+get_control_term(metacode, variable, dataset = NULL, where = NULL)
 }
 \arguments{
-\item{metacode}{metacore object}
+\item{metacode}{A metacore object}
 
-\item{variable}{A variable name to get the controlled terms for. This can
-either be a string or just the name of the variable}
+\item{variable}{A variable name (bare or string)}
 
-\item{dataset}{A dataset name. This is not required if there is only one set
-of control terminology across all datasets}
+\item{dataset}{Optional dataset name (bare or string)}
+
+\item{where}{Optional VLM condition matching \code{value_spec$where}}
 }
 \value{
-a vector for permitted values and a 2-column tibble for codelists
+A vector, a tibble, a named list of tibbles (VLM), or NULL
 }
 \description{
 Returns the control term (a vector for permitted values and a tibble for code
-lists) for a given variable. The dataset can be optionally specified if there
-is different control terminology for different datasets
-}
-\examples{
-\dontrun{
-meta_ex <- spec_to_metacore(metacore_example("p21_mock.xlsx"))
-get_control_term(meta_ex, QVAL, SUPPAE)
-get_control_term(meta_ex, "QVAL", "SUPPAE")
-}
+lists) for a given variable. If the variable has value-level metadata (VLM),
+all matching control terminology is returned together with the value-level
+information. A specific VLM condition can be selected via \code{where}.
 }
