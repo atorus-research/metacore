@@ -535,8 +535,9 @@ select_dataset <- function(.data, dataset, simplify = FALSE, quiet = deprecated(
 #' Get Control Term
 #'
 #' Returns the control term (a vector for permitted values and a tibble for code
-#' lists) for a given variable. The dataset can be optionally specified if there
-#' is different control terminology for different datasets
+#' lists) for a given variable. If the variable has value-level metadata (VLM),
+#' all matching control terminology is returned together with the value-level
+#' information.
 #'
 #' @param metacode metacore object
 #' @param variable A variable name to get the controlled terms for. This can
@@ -544,54 +545,72 @@ select_dataset <- function(.data, dataset, simplify = FALSE, quiet = deprecated(
 #' @param dataset A dataset name. This is not required if there is only one set
 #'   of control terminology across all datasets
 #'
-#' @return a vector for permitted values and a 2-column tibble for codelists
+#' @return
+#' A vector for a single permitted-value control term, a tibble for VLM control
+#' terms, or NULL if no control terminology exists
 #' @export
 #'
-#' @importFrom rlang as_label enexpr as_name
-#'
-#' @examples
-#' \dontrun{
-#' meta_ex <- spec_to_metacore(metacore_example("p21_mock.xlsx"))
-#' get_control_term(meta_ex, QVAL, SUPPAE)
-#' get_control_term(meta_ex, "QVAL", "SUPPAE")
-#' }
+#' @importFrom rlang ensym as_string
 get_control_term <- function(metacode, variable, dataset = NULL) {
-  var_str <- ifelse(str_detect(as_label(enexpr(variable)), "\""),
-    as_name(variable), as_label(enexpr(variable))
-  )
-  dataset_val <- ifelse(str_detect(as_label(enexpr(dataset)), "\""),
-    as_name(dataset), as_label(enexpr(dataset))
-  ) # to make the filter more explicit
-  if (!var_str %in% metacode$value_spec$variable) {
-    cli_abort("{var_str} not found in the value_spec table. Please check the variable name")
-  }
-  if (dataset_val == "NULL") {
-    var_code_id <- metacode$value_spec %>%
-      filter(variable == var_str) %>%
-      pull(code_id) %>%
-      unique()
-  } else {
-    subset_data <- metacode$value_spec %>%
-      filter(dataset == dataset_val)
-    if (nrow(subset_data) == 0) {
-      cli_abort("{dataset_val} not found in the value_spec table. Please check the dataset name")
+  var_str <- rlang::as_string(rlang::ensym(variable))
+  dataset_str <- if (is.null(dataset)) NULL else rlang::as_string(rlang::ensym(dataset))
+
+  value_spec <- metacode$value_spec %>%
+    dplyr::filter(.data$variable == var_str)
+
+  if (!is.null(dataset_str)) {
+    value_spec <- value_spec %>%
+      dplyr::filter(.data$dataset == dataset_str)
+
+    if (nrow(value_spec) == 0) {
+      cli::cli_abort("{.val {dataset_str}} not found in `value_spec` for {.val {var_str}}.")
     }
-    var_code_id <- subset_data %>%
-      filter(variable == var_str) %>%
-      pull(code_id) %>%
-      unique()
   }
-  if (length(var_code_id) > 1) {
-    cli_abort("{var_str} does not have a unique control term, consider spcificing a dataset")
+
+  if (nrow(value_spec) == 0) {
+    cli::cli_abort("{.val {var_str}} not found in `value_spec`.")
   }
+
+  has_vlm <- any(!is.na(value_spec$where) & value_spec$where != "")
+  code_ids <- unique(stats::na.omit(value_spec$code_id))
+
+  if (length(code_ids) == 0) {
+    cli::cli_inform("{.val {var_str}} has no control terminology")
+    return(NULL)
+  }
+
+  # VLM case: return all matching control terms with value-level context
+  if (has_vlm) {
+    ct_tbl <- metacode$codelist %>%
+      dplyr::filter(.data$code_id %in% code_ids) %>%
+      dplyr::select(.data$code_id, .data$codes)
+
+    out <- value_spec %>%
+      dplyr::filter(!is.na(.data$code_id)) %>%
+      dplyr::distinct(.data$dataset, .data$variable, .data$where, .data$derivation_id, .data$code_id) %>%
+      dplyr::left_join(ct_tbl, by = "code_id") %>%
+      dplyr::arrange(.data$dataset, .data$variable, .data$where, .data$code_id)
+
+    return(out)
+  }
+
+  # Non-VLM case: keep the single-CT behavior
+  if (length(code_ids) > 1) {
+    cli::cli_abort(
+      "{.val {var_str}} does not have a unique control term; specify a dataset."
+    )
+  }
+
   ct <- metacode$codelist %>%
-    filter(code_id == var_code_id) %>%
-    pull(codes)
+    dplyr::filter(.data$code_id == code_ids[1]) %>%
+    dplyr::pull(.data$codes)
+
   if (length(ct) == 0) {
-    cli_inform("{var_str} has no control terminology")
-  } else {
-    return(ct[[1]])
+    cli::cli_inform("{.val {var_str}} has no control terminology")
+    return(NULL)
   }
+
+  ct[[1]]
 }
 
 
