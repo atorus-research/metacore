@@ -537,80 +537,144 @@ select_dataset <- function(.data, dataset, simplify = FALSE, quiet = deprecated(
 #' Returns the control term (a vector for permitted values and a tibble for code
 #' lists) for a given variable. If the variable has value-level metadata (VLM),
 #' all matching control terminology is returned together with the value-level
-#' information.
+#' information. A specific VLM condition can be selected via `where`.
 #'
-#' @param metacode metacore object
-#' @param variable A variable name to get the controlled terms for. This can
-#'   either be a string or just the name of the variable
-#' @param dataset A dataset name. This is not required if there is only one set
-#'   of control terminology across all datasets
+#' @param metacode A metacore object
+#' @param variable A variable name (bare or string)
+#' @param dataset Optional dataset name (bare or string)
+#' @param where Optional VLM condition matching `value_spec$where`
 #'
 #' @return
-#' A vector for a single permitted-value control term, a tibble for VLM control
-#' terms, or NULL if no control terminology exists
+#' A vector, a tibble, a named list of tibbles (VLM), or NULL
 #' @export
 #'
-#' @importFrom rlang ensym as_string
-get_control_term <- function(metacode, variable, dataset = NULL) {
-  var_str <- rlang::as_string(rlang::ensym(variable))
-  dataset_str <- if (is.null(dataset)) NULL else rlang::as_string(rlang::ensym(dataset))
+get_control_term <- function(metacode, variable, dataset = NULL, where = NULL) {
+   var_str <- as_string(ensym(variable))
+   dataset_str <- if (is.null(dataset)) NULL else as_string(ensym(dataset))
+   where_str <- if (is.null(where)) NULL else as_string(ensym(where))
 
-  value_spec <- metacode$value_spec %>%
-    dplyr::filter(.data$variable == var_str)
+   value_spec <- metacode$value_spec %>%
+      filter(.data$variable == var_str)
 
-  if (!is.null(dataset_str)) {
-    value_spec <- value_spec %>%
-      dplyr::filter(.data$dataset == dataset_str)
+   if (!is.null(dataset_str)) {
+      value_spec <- value_spec %>%
+         filter(.data$dataset == dataset_str)
 
-    if (nrow(value_spec) == 0) {
-      cli::cli_abort("{.val {dataset_str}} not found in `value_spec` for {.val {var_str}}.")
-    }
-  }
+      if (nrow(value_spec) == 0) {
+         cli_abort("{.val {dataset_str}} not found in `value_spec` for {.val {var_str}}.")
+      }
+   }
 
-  if (nrow(value_spec) == 0) {
-    cli::cli_abort("{.val {var_str}} not found in `value_spec`.")
-  }
+   if (nrow(value_spec) == 0) {
+      cli_abort("{.val {var_str}} not found in `value_spec`.")
+   }
 
-  has_vlm <- any(!is.na(value_spec$where) & value_spec$where != "")
-  code_ids <- unique(stats::na.omit(value_spec$code_id))
+   # Apply VLM filter if provided
+   if (!is.null(where_str)) {
+      value_spec <- value_spec %>%
+         filter(.data$where == where_str)
 
-  if (length(code_ids) == 0) {
-    cli::cli_inform("{.val {var_str}} has no control terminology")
-    return(NULL)
-  }
+      if (nrow(value_spec) == 0) {
+         cli_abort(
+            "No VLM condition matching {.val {where_str}} for {.val {var_str}}."
+         )
+      }
+   }
 
-  # VLM case: return all matching control terms with value-level context
-  if (has_vlm) {
-    ct_tbl <- metacode$codelist %>%
-      dplyr::filter(.data$code_id %in% code_ids) %>%
-      dplyr::select(.data$code_id, .data$codes)
+   has_vlm <- any(!is.na(value_spec$where) & value_spec$where != "TRUE")
+   code_ids <- unique(stats::na.omit(value_spec$code_id))
 
-    out <- value_spec %>%
-      dplyr::filter(!is.na(.data$code_id)) %>%
-      dplyr::distinct(.data$dataset, .data$variable, .data$where, .data$derivation_id, .data$code_id) %>%
-      dplyr::left_join(ct_tbl, by = "code_id") %>%
-      dplyr::arrange(.data$dataset, .data$variable, .data$where, .data$code_id)
+   if (length(code_ids) == 0) {
+      cli_inform("{.val {var_str}} has no control terminology")
+      return(NULL)
+   }
 
-    return(out)
-  }
+   # If user specified `where`, we should now behave like non-VLM (single result)
+   if (!is.null(where_str)) {
+      if (length(code_ids) > 1) {
+         cli_abort(
+            "Condition {.val {where_str}} does not resolve to a single control term."
+         )
+      }
 
-  # Non-VLM case: keep the single-CT behavior
-  if (length(code_ids) > 1) {
-    cli::cli_abort(
-      "{.val {var_str}} does not have a unique control term; specify a dataset."
-    )
-  }
+      ct <- metacode$codelist %>%
+         filter(.data$code_id == code_ids[1]) %>%
+         pull(.data$codes)
 
-  ct <- metacode$codelist %>%
-    dplyr::filter(.data$code_id == code_ids[1]) %>%
-    dplyr::pull(.data$codes)
+      if (length(ct) == 0) {
+         cli_inform("{.val {var_str}} has no control terminology")
+         return(NULL)
+      }
 
-  if (length(ct) == 0) {
-    cli::cli_inform("{.val {var_str}} has no control terminology")
-    return(NULL)
-  }
+      obj <- ct[[1]]
 
-  ct[[1]]
+      if (inherits(obj, "data.frame")) {
+         return(obj)
+      }
+
+      cli::cli_abort(c(
+         "x" = "Unexpected codelist structure encountered.",
+         "i" = "Failed at VLM condition: {.val {where_val}}",
+         "i" = "Your codelist should be a dataframe with columns {.val code} and {.val decode}."
+      ))
+   }
+
+   # VLM case: return named list
+   if (has_vlm) {
+      ct_tbl <- metacode$codelist %>%
+         dplyr::filter(.data$code_id %in% code_ids) %>%
+         dplyr::select(.data$code_id, .data$codes)
+
+      vlm_map <- value_spec %>%
+         dplyr::filter(!is.na(.data$code_id)) %>%
+         dplyr::distinct(.data$dataset, .data$where, .data$code_id) %>%
+         dplyr::left_join(ct_tbl, by = "code_id")
+
+      if (nrow(vlm_map) == 1) {
+         return(vlm_map$codes[[1]])
+      }
+
+      ds_list <- vlm_map$dataset
+
+      out <- purrr::map2(
+         vlm_map$codes,
+         vlm_map$where,
+         function(x, where_val) {
+
+            if (inherits(x, "data.frame")) {
+               return(x)
+            }
+
+            cli::cli_abort(c(
+               "x" = "Unexpected codelist structure encountered.",
+               "i" = "Failed at VLM condition: {.val {where_val}}",
+               "i" = "Your codelist should be a dataframe with columns {.val code} and {.val decode}."
+            ))
+         }
+      )
+
+      names(out) <- make.unique(str_glue("{ds_list}: {vlm_map$where}"))
+
+      return(out)
+   }
+
+   # Non-VLM case
+   if (length(code_ids) > 1) {
+      cli::cli_abort(
+         "{.val {var_str}} does not have a unique control term; specify a dataset."
+      )
+   }
+
+   ct <- metacode$codelist %>%
+      dplyr::filter(.data$code_id == code_ids[1]) %>%
+      dplyr::pull(.data$codes)
+
+   if (length(ct) == 0) {
+      cli::cli_inform("{.val {var_str}} has no control terminology")
+      return(NULL)
+   }
+
+   ct[[1]]
 }
 
 
