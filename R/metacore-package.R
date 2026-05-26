@@ -13,7 +13,7 @@
 #'   str_split str_starts str_glue regex
 #' @importFrom rlang !! as_string expr ensym set_names sym prim_name inherits_only
 #' @importFrom purrr keep discard reduce compact map map_chr map_lgl map_dfr map_int
-#'   map2_lgl map2_chr pmap_chr safely
+#'   map2_lgl map2_chr pmap pmap_chr safely
 #' @importFrom stats var na.omit
 #' @importFrom readxl excel_sheets read_excel
 #' @importFrom tibble tibble as_tibble

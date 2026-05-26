@@ -4,7 +4,7 @@
 \alias{get_control_term}
 \title{Get Control Term}
 \usage{
-get_control_term(metacode, variable, dataset = NULL, where = NULL)
+get_control_term(metacode, variable = NULL, dataset = NULL, where = NULL)
 }
 \arguments{
 \item{metacode}{A metacore object}
@@ -13,14 +13,15 @@ get_control_term(metacode, variable, dataset = NULL, where = NULL)
 
 \item{dataset}{Optional dataset name (bare or string)}
 
-\item{where}{Optional VLM condition matching \code{value_spec$where}}
+\item{where}{Optional VLM condition matching \code{value_spec$where}, or \code{"all"}
+to retrieve all control terminology for variables with multiple VLM conditions}
 }
 \value{
-A vector, a tibble, a named list of tibbles (VLM), or NULL
+A vector, a tibble, or NULL
 }
 \description{
 Returns the control term (a vector for permitted values and a tibble for code
 lists) for a given variable. If the variable has value-level metadata (VLM),
-all matching control terminology is returned together with the value-level
-information. A specific VLM condition can be selected via \code{where}.
+a specific VLM condition can be selected via the \code{where} parameter, or
+\code{where = "all"} can be used to retrieve all controlled terminology.
 }
