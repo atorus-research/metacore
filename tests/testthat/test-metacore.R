@@ -130,23 +130,102 @@ test_that("load metacore fails with no path and rdss in wd", {
   unlink(my_temp_dir)
 })
 
-test_that("pulling out control terminology works", {
-  test <- spec_to_metacore(metacore_example("p21_mock.xlsx"), verbose = "silent")
-  # Testing Errors
-  ## Not specific enough
-  expect_error(get_control_term(test, QVAL))
-  ## Wrong Dataset name
-  expect_error(get_control_term(test, QVAL, LB))
-  ## Wrong variable name
-  expect_error(get_control_term(test, QVA))
-  expect_equal(
-    get_control_term(test, QVAL, SUPPAE),
-    tibble(code = c("N", "Y"), decode = c("No", "Yes"))
-  )
-  expect_equal(
-    get_control_term(test, "QVAL", "SUPPAE"),
-    tibble(code = c("N", "Y"), decode = c("No", "Yes"))
-  )
+test_that("get_control_term: Missing variable argument", {
+   # Test when variable is missing entirely
+   expect_error(get_control_term(p21_spec), "must be provided")
+})
+
+test_that("get_control_term: Variable not found in value_spec", {
+   # Test with non-existent variable
+   expect_error(get_control_term(p21_spec, NONEXISTENT), "not found in `value_spec`")
+   expect_error(get_control_term(p21_spec, "NONEXISTENT"), "not found in `value_spec`")
+})
+
+test_that("get_control_term: Dataset filtering - valid dataset", {
+   # Test with both bare and string dataset specification
+   result1 <- get_control_term(p21_spec, QVAL, "SUPPAE")
+   result2 <- get_control_term(p21_spec, "QVAL", "SUPPAE")
+
+   expect_equal(result1, tibble(code = c("N", "Y"), decode = c("No", "Yes")))
+   expect_equal(result2, result1)
+})
+
+test_that("get_control_term: Dataset filtering - invalid dataset", {
+   # Dataset doesn't exist for this variable
+   expect_error(get_control_term(p21_spec, QVAL, "INVALIDDS"), "not found in `value_spec`")
+})
+
+test_that("get_control_term: VLM where filter - valid condition", {
+   result <- get_control_term(vlm_spec, AVALCAT1, where = "PARAMCD EQ ADURD")
+   expect_type(result, "list")
+})
+
+test_that("get_control_term: multiple where conditions get unique names when where = `all`", {
+   result <- get_control_term(vlm_spec, AVALCAT1, where = "all")
+   # Should return a named list with unique names
+   expect_true(is.list(result))
+   expect_true(length(unique(names(result))) == length(names(result)))
+})
+
+test_that("get_control_term: VLM where filter - invalid condition", {
+   # Test with non-existent where condition
+   expect_error(get_control_term(p21_spec, QVAL, "SUPPAE", where = "INVALID_WHERE"),
+                "No VLM condition matching")
+})
+
+test_that("get_control_term: VLM where filter - multiple code_ids raises error", {
+   expect_error(get_control_term(vlm_spec, TESTVAR1, "DUMMY", where = "PARAMCD EQ TESTA"),
+                "does not resolve to a single\\s+codelist")
+})
+
+test_that("get_control_term: No control terminology (all code_ids NA)", {
+   expect_message(get_control_term(suppae_spec, STUDYID), "has no controlled terminology")
+})
+
+test_that("get_control_term: VLM with single code_id returns dataframe", {
+   result <- get_control_term(vlm_spec, TESTVAR2)
+   expect_true(is.data.frame(result))
+   expect_equal(nrow(result), 2)
+})
+
+test_that("get_control_term: VLM with multiple conditions returns error when where = NULL", {
+   expect_error(get_control_term(vlm_spec, AVALCA1N), "does not have a unique\\s+codelist")
+})
+
+test_that("get_control_term: VLM with multiple conditions returns named list when where = `all`", {
+   result <- get_control_term(vlm_spec, AVALCA1N, where = "all")
+   expect_true(is.list(result))
+   expect_true(length(result) > 1)
+   expect_true(all(sapply(result, is.data.frame)))
+})
+
+test_that("get_control_term: Non-VLM with multiple code_ids requires dataset", {
+   # Should error without dataset specification
+   expect_error(get_control_term(p21_spec, QVAL), "does not have a unique codelist")
+
+   # Should succeed with dataset
+   result <- get_control_term(p21_spec, QVAL, "SUPPAE")
+   expect_true(is.data.frame(result))
+})
+
+test_that("get_control_term: Non-VLM with single code_id returns dataframe", {
+   result <- get_control_term(p21_spec, AESEV)
+   expect_true(is.data.frame(result))
+   expect_equal(nrow(result), 3)
+})
+
+test_that("get_control_term: Invalid codelist structure triggers error", {
+   codelist <- tibble(
+      code_id = "DUMMYCODEA",
+      name = "Bad",
+      type = "Codelist",
+      codes = list(c("A", "B"))  # Not a dataframe!
+   )
+
+   bad_spec <- metacore(vlm_spec$ds_spec, vlm_spec$ds_vars, vlm_spec$var_spec, vlm_spec$value_spec,
+                        vlm_spec$derivations, codelist, vlm_spec$supp, verbose = "silent")
+
+   expect_error(get_control_term(bad_spec, TESTVAR2), "Unexpected codelist structure")
 })
 
 test_that("get_keys works", {
