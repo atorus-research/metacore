@@ -550,102 +550,103 @@ select_dataset <- function(.data, dataset, simplify = FALSE, quiet = deprecated(
 #' @export
 #'
 get_control_term <- function(metacode, variable = NULL, dataset = NULL, where = NULL) {
+  if (missing(variable)) {
+    cli_abort("{.var variable} must be provided.")
+  }
 
-   if (missing(variable)) {
-      cli_abort("{.var variable} must be provided.")
-   }
+  # Capture NSE or string safely
+  var_str <- as_name(ensym(variable))
+  dataset_str <- if (!missing(dataset) && !is.null(dataset)) {
+    as_name(ensym(dataset))
+  }
+  where_str <- where
 
-   # Capture NSE or string safely
-   var_str <- as_name(ensym(variable))
-   dataset_str <- if (!missing(dataset) && !is.null(dataset)) {
-      as_name(ensym(dataset))
-   }
-   where_str <- where
+  # Filter value_spec by variable and optionally dataset
+  value_spec <- metacode$value_spec %>%
+    filter(variable == var_str)
 
-   # Filter value_spec by variable and optionally dataset
-   value_spec <- metacode$value_spec %>%
-      filter(variable == var_str)
+  if (nrow(value_spec) == 0) {
+    cli_abort("Variable {.val {var_str}} not found in `value_spec`.")
+  }
 
-   if (nrow(value_spec) == 0) {
-      cli_abort("Variable {.val {var_str}} not found in `value_spec`.")
-   }
+  if (!is.null(dataset_str)) {
+    value_spec <- filter(value_spec, dataset == dataset_str)
+  }
 
-   if (!is.null(dataset_str)) {
-      value_spec <- filter(value_spec, dataset == dataset_str)
-   }
+  if (length(unique(value_spec$dataset)) > 1) {
+    cli_abort("{.val {var_str}} does not have a unique codelist. Please specify a dataset.")
+  }
 
-   if (length(unique(value_spec$dataset)) > 1) {
-      cli_abort("{.val {var_str}} does not have a unique codelist. Please specify a dataset.")
-   }
+  if (nrow(value_spec) == 0) {
+    cli_abort("Dataset {.val {dataset_str}} not found in `value_spec` for variable {.val {var_str}}.")
+  }
 
-   if (nrow(value_spec) == 0) {
-      cli_abort("Dataset {.val {dataset_str}} not found in `value_spec` for variable {.val {var_str}}.")
-   }
+  # Apply VLM filter if provided
+  if (!is.null(where)) {
+    if (where != "all") {
+      value_spec <- value_spec %>%
+        filter(where == where_str)
 
-   # Apply VLM filter if provided
-   if (!is.null(where)) {
-      if (where != "all") {
-         value_spec <- value_spec %>%
-            filter(where == where_str)
-
-         if (nrow(value_spec) == 0) {
-            cli_abort("No VLM condition matching {.val {where_str}} for {.val {var_str}}.")
-         }
+      if (nrow(value_spec) == 0) {
+        cli_abort("No VLM condition matching {.val {where_str}} for {.val {var_str}}.")
       }
-   }
+    }
+  }
 
-   code_ids <- unique(stats::na.omit(value_spec$code_id))
+  code_ids <- unique(stats::na.omit(value_spec$code_id))
 
-   if (length(code_ids) == 0) {
-      cli_inform("Variable {.val {var_str}} has no controlled terminology")
-      return(invisible())
-   }
+  if (length(code_ids) == 0) {
+    cli_inform("Variable {.val {var_str}} has no controlled terminology")
+    return(invisible())
+  }
 
-   ct_tbl <- metacode$codelist %>%
-      filter(code_id %in% code_ids) %>%
-      select(code_id, codes)
+  ct_tbl <- metacode$codelist %>%
+    filter(code_id %in% code_ids) %>%
+    select(code_id, codes)
 
-   vlm_map <- value_spec %>%
-      filter(!is.na(code_id)) %>%
-      distinct(dataset, where, code_id) %>%
-      left_join(ct_tbl, by = "code_id")
+  vlm_map <- value_spec %>%
+    filter(!is.na(code_id)) %>%
+    distinct(dataset, where, code_id) %>%
+    left_join(ct_tbl, by = "code_id")
 
-   codes <- pmap(vlm_map, function(dataset, where, code_id, codes) {
-      if (!inherits(codes, "data.frame")) {
-         cli_abort(c(
-            "x" = "Unexpected codelist structure encountered for {.val {code_id}}.",
-            "i" = "Your codelist should be a dataframe with columns {.val code} and {.val decode}."
-         ), call = rlang::env_parent())
-      }
-      codes
-   })
-
-
-   # Base case: Single codelist returned
-   if (length(codes) == 1) return(codes[[1]])
-
-   # Guard 1: Non-VLM case. Variable appears in multiple datasets
-   if (length(code_ids) > 1 && is.null(where_str) && length(unique(vlm_map$dataset)) > 1) {
-      cli_abort("{.val {var_str}} does not have a unique codelist. Please specify a dataset.")
-   }
-
-   # Guard 2: Multiple codelists. User supplied where clause does not resolve uniquely
-   if (length(codes) > 1 && !is.null(where_str) && where_str != "all") {
-      cli_abort(c("x" = "VLM {.var where} condition {.val {where}} does not resolve to a single codelist."))
-   }
-
-   # Guard 3: Multiple codelists. No where supplied
-   if (is.null(where_str)) {
+  codes <- pmap(vlm_map, function(dataset, where, code_id, codes) {
+    if (!inherits(codes, "data.frame")) {
       cli_abort(c(
-         "x" = "{.val {var_str}} contains value-level metadata and does not have a unique codelist. Please specify a {.var where}.",
-         "i" = "Possible values for {.var where} are {.val {vlm_map$where}}.",
-         "i" = "To return all possible codelists definied by VLM set {.var where} = {.val all}."
-      ))
-   }
+        "x" = "Unexpected codelist structure encountered for {.val {code_id}}.",
+        "i" = "Your codelist should be a dataframe with columns {.val code} and {.val decode}."
+      ), call = rlang::env_parent())
+    }
+    codes
+  })
 
-   # VLM case: multiple codelists returned and guard clauses passed checks
-   names(codes) <- make.unique(str_glue("{vlm_map$dataset}: {vlm_map$where}"))
-   return(codes)
+
+  # Base case: Single codelist returned
+  if (length(codes) == 1) {
+    return(codes[[1]])
+  }
+
+  # Guard 1: Non-VLM case. Variable appears in multiple datasets
+  if (length(code_ids) > 1 && is.null(where_str) && length(unique(vlm_map$dataset)) > 1) {
+    cli_abort("{.val {var_str}} does not have a unique codelist. Please specify a dataset.")
+  }
+
+  # Guard 2: Multiple codelists. User supplied where clause does not resolve uniquely
+  if (length(codes) > 1 && !is.null(where_str) && where_str != "all") {
+    cli_abort(c("x" = "VLM {.var where} condition {.val {where}} does not resolve to a single codelist."))
+  }
+
+  # Guard 3: Multiple codelists. No where supplied
+  if (is.null(where_str)) {
+    cli_abort(c(
+      "x" = "{.val {var_str}} contains value-level metadata and does not have a unique codelist. Please specify a {.var where}.",
+      "i" = "Possible values for {.var where} are {.val {vlm_map$where}}.",
+      "i" = "To return all possible codelists definied by VLM set {.var where} = {.val all}."
+    ))
+  }
+
+  # VLM case: multiple codelists returned and guard clauses passed checks
+  names(codes) <- make.unique(str_glue("{vlm_map$dataset}: {vlm_map$where}"))
+  return(codes)
 }
 
 
