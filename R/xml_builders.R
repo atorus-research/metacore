@@ -35,13 +35,14 @@ define_to_metacore <- function(path, quiet = deprecated(), verbose = "message") 
       define_version <- xml_find_all(xml, "//MetaDataVersion") %>%
         xml_attr("DefineVersion") %>%
         as.numeric_version()
-
+      browser()
       ds_spec <- xml_to_ds_spec(xml)
       ds_vars <- xml_to_ds_vars(xml)
       var_spec <- xml_to_var_spec(xml)
       value_spec <- xml_to_value_spec(xml)
-      code_list <- xml_to_codelist(xml)
+      codelist <- xml_to_codelist(xml)
       derivations <- xml_to_derivations(xml)
+      supp <- xml_to_supp(xml)
 
       metacore(
         ds_spec,
@@ -49,8 +50,9 @@ define_to_metacore <- function(path, quiet = deprecated(), verbose = "message") 
         var_spec,
         value_spec,
         derivations,
-        codelist = code_list,
-        quiet = quiet
+        codelist,
+        supp,
+        quiet
       )
     },
     quiet,
