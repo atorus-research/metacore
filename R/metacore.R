@@ -28,18 +28,36 @@
 #' @noRd
 #'
 #' @importFrom stringr str_to_lower
-MetaCore_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist, supp, quiet = FALSE, verbose = "message") {
+MetaCore_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist, supp, study_level = NULL, documents = NULL, quiet = FALSE, verbose = "message") {
   deprecate_soft(
     when = "0.3.0",
     what = "MetaCore_initialize(quiet)",
     with = "MetaCore_initialize(verbose)"
   )
 
+  # Back-fill any columns introduced for Define.xml generation that the caller
+  # did not supply, so they are optional and existing callers keep working.
+  protos <- col_protos()
+  ds_spec <- fill_cols(ds_spec, protos$.ds_spec)
+  ds_vars <- fill_cols(ds_vars, protos$.ds_vars)
+  var_spec <- fill_cols(var_spec, protos$.var_spec)
+  value_spec <- fill_cols(value_spec, protos$.value_spec)
+  derivations <- fill_cols(derivations, protos$.derivations)
+  codelist <- fill_cols(codelist, protos$.codelist)
+  supp <- fill_cols(supp, protos$.supp)
+  study_level <- fill_cols(study_level, protos$.study_level)
+  documents <- fill_cols(documents, protos$.documents)
+
   private$.ds_spec <- ds_spec %>%
     add_labs(
       dataset = "Dataset Name",
       structure = "Value Structure",
-      label = "Dataset Label"
+      label = "Dataset Label",
+      class = "Dataset Class",
+      repeating = "Repeating (Boolean)",
+      reference = "Reference Data (Boolean)",
+      purpose = "Dataset Purpose",
+      archive_location_id = "Archive Location ID"
     )
 
   private$.ds_vars <- ds_vars %>%
@@ -50,7 +68,8 @@ MetaCore_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivati
       order = "Variable Order",
       mandatory = "Mandatory (Boolean)",
       core = "ADaM core (Expected, Required, Permissible)",
-      supp_flag = "Supplemental Flag"
+      supp_flag = "Supplemental Flag",
+      role = "Variable Role"
     )
 
   private$.var_spec <- var_spec %>%
@@ -60,7 +79,8 @@ MetaCore_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivati
       label = "Variable Label",
       type = "Variable Class",
       common = "Common Across ADaM",
-      format = "Variable Format"
+      format = "Variable Format",
+      sas_field_name = "SAS Field Name"
     )
 
   private$.value_spec <- value_spec %>%
@@ -71,7 +91,8 @@ MetaCore_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivati
       dataset = "Dataset Name",
       variable = "Variable Name",
       where = "Value of the Variable",
-      derivation_id = "ID of Derivation"
+      derivation_id = "ID of Derivation",
+      where_label = "Where Clause Label"
     ) %>%
     mutate(origin = str_to_lower(.data$origin))
 
@@ -79,7 +100,11 @@ MetaCore_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivati
   private$.derivations <- derivations %>%
     add_labs(
       derivation_id = "ID of Derivation",
-      derivation = "Derivation"
+      derivation = "Derivation",
+      method_name = "Method Name",
+      method_type = "Method Type",
+      document_id = "Document ID",
+      pages = "Document Page References"
     )
 
   private$.codelist <- codelist %>%
@@ -144,7 +169,9 @@ MetaCore_validate <- function() {
       nrow(private$.value_spec) == 0 &
       nrow(private$.derivations) == 0 &
       nrow(private$.codelist) == 0 &
-      nrow(private$.supp) == 0) {
+      nrow(private$.supp) == 0 &
+      nrow(private$.study_level) == 0 &
+      nrow(private$.documents) == 0) {
       cli_warn("Other checks were not performed, because all datasets are empty",
         call. = FALSE
       )
@@ -264,7 +291,12 @@ MetaCore <- R6::R6Class("Metacore",
     .ds_spec = tibble(
       dataset = character(),
       structure = character(),
-      label = character()
+      label = character(),
+      class = character(),
+      repeating = logical(),
+      reference = logical(),
+      purpose = character(),
+      archive_location_id = character()
     ),
     .ds_vars = tibble(
       dataset = character(),
@@ -273,7 +305,8 @@ MetaCore <- R6::R6Class("Metacore",
       key_seq = integer(),
       order = integer(),
       core = character(),
-      supp_flag = logical()
+      supp_flag = logical(),
+      role = character()
     ),
     .var_spec = tibble(
       variable = character(),
@@ -281,7 +314,8 @@ MetaCore <- R6::R6Class("Metacore",
       length = integer(),
       type = character(),
       common = character(),
-      format = character()
+      format = character(),
+      sas_field_name = character()
     ),
     .value_spec = tibble(
       dataset = character(),
@@ -291,11 +325,16 @@ MetaCore <- R6::R6Class("Metacore",
       sig_dig = integer(),
       code_id = character(),
       origin = character(),
-      derivation_id = integer()
+      derivation_id = integer(),
+      where_label = character()
     ),
     .derivations = tibble(
       derivation_id = integer(),
-      derivation = character()
+      derivation = character(),
+      method_name = character(),
+      method_type = character(),
+      document_id = character(),
+      pages = character()
     ),
     # code_type == df | permitted_val | external_lib
     .codelist = tibble(
@@ -309,6 +348,20 @@ MetaCore <- R6::R6Class("Metacore",
       variable = character(),
       idvar = character(),
       qeval = character()
+    ),
+    .study_level = tibble(
+      study_name = character(),
+      study_description = character(),
+      protocol_name = character(),
+      standard_name = character(),
+      standard_version = character(),
+      define_version = character(),
+      language = character()
+    ),
+    .documents = tibble(
+      document_id = character(),
+      title = character(),
+      href = character()
     ),
     .ds_len = NA,
     .ds_names = list(),
@@ -325,7 +378,9 @@ MetaCore <- R6::R6Class("Metacore",
     value_spec = readonly("value_spec"),
     derivations = readonly("derivations"),
     codelist = readonly("codelist"),
-    supp = readonly("supp")
+    supp = readonly("supp"),
+    study_level = readonly("study_level"),
+    documents = readonly("documents")
   )
 )
 
@@ -339,6 +394,12 @@ MetaCore <- R6::R6Class("Metacore",
 #' @param derivations contains derivation, it allows for different variables to have the same derivation
 #' @param codelist contains the code/decode information
 #' @param supp contains the idvar and qeval information for supplemental variables
+#' @param study_level contains study-level metadata used when generating a
+#'   Define.xml (study name, description, protocol, standard and Define-XML
+#'   versions, language). Optional; a single-row table.
+#' @param documents contains references to external documents (e.g. the Analysis
+#'   Data Reviewer's Guide) used for Define.xml page references. Optional; one
+#'   row per document with `document_id`, `title` and `href`.
 #' @param quiet `r lifecycle::badge("superseded")` Option to quietly load in, this
 #'   will suppress warnings, but not errors. Expects either `TRUE` or `FALSE`.
 #'   Default behaviour is `FALSE`. As of v0.3.0 this argument is deprecated in favour
@@ -405,6 +466,8 @@ metacore <- function(ds_spec = tibble(
                        idvar = character(),
                        qeval = character()
                      ),
+                     study_level = NULL,
+                     documents = NULL,
                      quiet = deprecated(),
                      verbose = "message") {
   # Check if user has supplied `quiet` instead of `verbose`
@@ -468,6 +531,8 @@ The input for the supplied column `keep` has been mapped to the new column `mand
         derivations = derivations,
         codelist = codelist,
         supp = supp,
+        study_level = study_level,
+        documents = documents,
         quiet = quiet,
         verbose = verbose
       )

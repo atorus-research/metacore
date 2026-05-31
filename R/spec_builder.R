@@ -161,7 +161,7 @@ spec_type_to_ds_spec <- function(doc, cols = c(
   }
 
   # Get missing columns
-  missing <- col_vars()$.ds_spec %>%
+  missing <- reader_cols()$.ds_spec %>%
     discard(~ . %in% names(cols))
 
   create_tbl(doc, cols, context = as.character(sys.call(0)[[1]])) %>%
@@ -241,7 +241,7 @@ spec_type_to_ds_vars <- function(doc, cols = c(
   }
 
   # Get missing columns
-  missing <- col_vars()$.ds_vars %>%
+  missing <- reader_cols()$.ds_vars %>%
     discard(~ . %in% names(out))
 
   out %>%
@@ -346,7 +346,7 @@ spec_type_to_var_spec <- function(doc, cols = c(
   }
 
   # Get missing columns
-  missing <- col_vars()$.var_spec %>%
+  missing <- reader_cols()$.var_spec %>%
     discard(~ . %in% names(out))
   out %>%
     `is.na<-`(missing) %>%
@@ -493,7 +493,7 @@ spec_type_to_value_spec <- function(doc, cols = c(
   }
 
   # Get missing columns
-  missing <- col_vars()$.value_spec %>%
+  missing <- reader_cols()$.value_spec %>%
     discard(~ . %in% names(out))
 
   out %>%
@@ -620,7 +620,7 @@ spec_type_to_codelist <- function(doc, codelist_cols = c(
     cd_out <- bind_rows(cd_out, dic_out)
   }
   # Get missing columns
-  missing <- col_vars()$.codelist %>%
+  missing <- reader_cols()$.codelist %>%
     discard(~ . %in% names(cd_out))
 
   cd_out %>%
@@ -722,7 +722,7 @@ spec_type_to_derivations <- function(doc, cols = c(
   out <- create_tbl(doc, cols, context = as.character(sys.call(0)[[1]]))
 
   # Get missing columns
-  missing <- col_vars()$.derivations %>%
+  missing <- reader_cols()$.derivations %>%
     discard(~ . %in% names(out))
 
 

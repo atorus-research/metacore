@@ -77,7 +77,7 @@ value_check <- function(ds_vars, value_spec) {
 #' @return writes warning to console if there is an issue
 #' @noRd
 derivation_check <- function(value_spec, derivations) {
-  deriv_vars <- value_spec %>%
+   deriv_vars <- value_spec %>%
     filter(!is.na(.data$derivation_id)) %>%
     distinct(.data$variable, .data$derivation_id)
 
@@ -190,6 +190,83 @@ supp_check <- function(ds_vars, supp) {
 #' @return list of column names by dataset
 #' @noRd
 col_vars <- function() {
+  protos <- col_protos()
+  # study_level and documents are study-wide tables that are not name-validated
+  # against the per-dataset tables, so they are excluded here
+  protos$.study_level <- NULL
+  protos$.documents <- NULL
+  lapply(protos, names)
+}
+
+
+#' Column prototypes for every metacore table
+#'
+#' Single source of truth for the columns (and their types) of each table held
+#' in a metacore object. Each element is a zero-row tibble used both to validate
+#' column names (via [col_vars()]) and to back-fill missing columns when a
+#' metacore object is initialised (via [fill_cols()]). New, optional columns
+#' added here are automatically tolerated on existing objects.
+#'
+#' @return named list of zero-row prototype tibbles, one per table
+#' @noRd
+col_protos <- function() {
+  list(
+    .ds_spec = tibble(
+      dataset = character(), structure = character(), label = character(),
+      class = character(), repeating = logical(), reference = logical(),
+      purpose = character(), archive_location_id = character()
+    ),
+    .ds_vars = tibble(
+      dataset = character(), variable = character(), key_seq = integer(),
+      order = integer(), mandatory = logical(), core = character(),
+      supp_flag = logical(), role = character()
+    ),
+    .var_spec = tibble(
+      variable = character(), length = integer(), label = character(),
+      type = character(), common = character(), format = character(),
+      sas_field_name = character()
+    ),
+    .value_spec = tibble(
+      dataset = character(), variable = character(), type = character(),
+      origin = character(), sig_dig = integer(), code_id = character(),
+      where = character(), derivation_id = character(), where_label = character()
+    ),
+    .derivations = tibble(
+      derivation_id = character(), derivation = character(),
+      method_name = character(), method_type = character(),
+      document_id = character(), pages = character()
+    ),
+    .codelist = tibble(
+      code_id = character(), name = character(), type = character(), codes = list()
+    ),
+    .supp = tibble(
+      dataset = character(), variable = character(), idvar = character(),
+      qeval = character()
+    ),
+    .study_level = tibble(
+      study_name = character(), study_description = character(),
+      protocol_name = character(), standard_name = character(),
+      standard_version = character(), define_version = character(),
+      language = character()
+    ),
+    .documents = tibble(
+      document_id = character(), title = character(), href = character()
+    )
+  )
+}
+
+
+#' Columns emitted by the specification readers
+#'
+#' The readers populate the original (pre Define.xml-generation) set of columns.
+#' Any additional columns introduced for Define.xml generation are back-filled
+#' with `NA` when the metacore object is built, so the readers themselves do not
+#' need to emit them. Keeping this list separate from [col_vars()] decouples the
+#' reader output from schema growth.
+#'
+#' @return named list of column-name vectors, one per reader table
+#' @noRd
+reader_cols <- function() {
   list(
     .ds_spec = c("dataset", "structure", "label"),
     .ds_vars = c("dataset", "variable", "key_seq", "order", "mandatory", "core", "supp_flag"),
@@ -202,6 +279,29 @@ col_vars <- function() {
 }
 
 
+#' Back-fill missing columns against a prototype
+#'
+#' Adds any columns present in `proto` but absent from `.data`, using the
+#' prototype's type and filling with `NA`. Existing columns are left untouched.
+#' A `NULL` input returns the empty prototype. This makes newly added schema
+#' columns optional for callers building metacore objects.
+#'
+#' @param .data a data frame (or `NULL`)
+#' @param proto a zero-row prototype tibble from [col_protos()]
+#' @return `.data` with all prototype columns present
+#' @noRd
+fill_cols <- function(.data, proto) {
+  if (is.null(.data)) {
+    return(proto)
+  }
+  missing <- setdiff(names(proto), names(.data))
+  for (col in missing) {
+    .data[[col]] <- proto[[col]][seq_len(nrow(.data))]
+  }
+  .data
+}
+
+
 #' Check Variable names
 #'
 #' @param envrionment the private environment of the object
@@ -211,8 +311,9 @@ col_vars <- function() {
 var_name_check <- function(envrionment) {
   # Set the name as they should be
   col_names <- col_vars()
-  # Get the tables and table names from the environment
-  tbl_name <- ls(envrionment, all.names = TRUE)
+  # Only check the known per-dataset tables; other private members (e.g.
+  # .study_level, .documents, .ds_len) are not name-validated here
+  tbl_name <- names(col_names)
   tbls <- map(tbl_name, get, envir = envrionment)
   # Checks is names match the table above, returns T if so F else. If the names
   # don't match, will also produce a warning of what the names should be
@@ -302,6 +403,21 @@ all_message <- function() {
     "supp", "variable", is.character, FALSE,
     "supp", "idvar", is.character, TRUE,
     "supp", "qeval", is.character, TRUE,
+    # Columns added to support Define.xml 2.0 generation. All optional (NA
+    # allowed) and appended after the original columns so that tables rebuilt
+    # from this spec keep the new columns last.
+    "ds_spec", "class", is.character, TRUE,
+    "ds_spec", "repeating", is.logical, TRUE,
+    "ds_spec", "reference", is.logical, TRUE,
+    "ds_spec", "purpose", is.character, TRUE,
+    "ds_spec", "archive_location_id", is.character, TRUE,
+    "ds_vars", "role", is.character, TRUE,
+    "var_spec", "sas_field_name", is.character, TRUE,
+    "value_spec", "where_label", is.character, TRUE,
+    "derivations", "method_name", is.character, TRUE,
+    "derivations", "method_type", is.character, TRUE,
+    "derivations", "document_id", is.character, TRUE,
+    "derivations", "pages", is.character, TRUE,
   )
 }
 
@@ -360,7 +476,7 @@ check_columns <- function(ds_spec = NULL, ds_vars = NULL, var_spec = NULL, value
   # Filter out all_message() tibble to include only the required checks
   filtered_checks <- all_message() %>%
     filter(dataset %in% ds_names)
-
+  browser()
   # Apply filtered checks to the supplied dataframes
   messages <- purrr::pmap(
     filtered_checks,

@@ -50,8 +50,13 @@ add_labs <- function(.data, ...) {
 #' @param nm name of column to check (for warning and error clarification)
 #'
 check_structure <- function(.data, col, func, any_na_acceptable, nm) {
-  column <- as_string(col)
-  vec <- .data %>% pull(!!col)
+
+   tryCatch({
+      column <- as_string(col)
+      vec <- .data %>% pull(!!col)
+   }, error = function(e) {
+     browser()
+   })
   warning_string <- NULL
   error_message <- NULL
 

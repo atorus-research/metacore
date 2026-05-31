@@ -33,7 +33,9 @@ DatasetMeta <- R6::R6Class("DatasetMeta",
         value_spec = metacore$value_spec,
         derivations = metacore$derivations,
         codelist = metacore$codelist,
-        supp = metacore$supp
+        supp = metacore$supp,
+        study_level = metacore$study_level,
+        documents = metacore$documents
       )
       private$.name <- metacore$ds_spec$dataset[1]
       private$.label <- metacore$ds_spec$label[1]
