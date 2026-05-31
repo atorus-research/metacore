@@ -16,9 +16,9 @@ editor:
 ```{r echo=FALSE, }
 #| label: setup
 suppressMessages({
-   library(metacore)
-   library(dplyr)
-   library(tibble)
+  library(metacore)
+  library(dplyr)
+  library(tibble)
 })
 ```
 
@@ -41,7 +41,7 @@ traceability, and compliance across clinical trial datasets.
 
 ## Getting started with `get_control_term()`
 
-The `get_control_term()` function is the primary tool for retrieving
+The `get_control_term()` function is the primary tool for retrieving
 controlled terminology metadata from a metacore object. Let's start with
 the basics.
 
@@ -80,7 +80,7 @@ validation or mapping routines:
 ```{r eval=TRUE}
 # Example: Create a mapping for recoding
 severity_mapping <- severity_codes %>%
-  tibble::deframe()  # Convert to named vector for dplyr::recode()
+  tibble::deframe() # Convert to named vector for dplyr::recode()
 
 print(severity_mapping)
 ```
@@ -142,17 +142,17 @@ condition's codelist you want using the `where` parameter:
 ```{r eval=TRUE}
 # This example uses a VLM test specification
 vlm_meta <- spec_to_metacore(
-     "../tests/testthat/vlm_test_spec.xlsx",
-     where_sep_sheet = FALSE,
-     verbose = "silent"
+  "../tests/testthat/vlm_test_spec.xlsx",
+  where_sep_sheet = FALSE,
+  verbose = "silent"
 )
 
 adex_spec <- select_dataset(vlm_meta, "ADEX", verbose = "silent")
 
 # Get the codelist for AVALCAT1 when PARAMCD equals a specific condition
 avalca1n_duration <- get_control_term(
-  adex_spec, 
-  "AVALCA1N", 
+  adex_spec,
+  "AVALCA1N",
   where = "PARAMCD EQ ADURD"
 )
 avalca1n_duration
@@ -164,7 +164,9 @@ to the `value_spec` table of your metacore object:
 
 ```{r eval=TRUE}
 # See available VLM conditions
-adex_spec$value_spec |> filter(variable == "AVALCA1N") |> pull(where)
+adex_spec$value_spec |>
+  filter(variable == "AVALCA1N") |>
+  pull(where)
 ```
 
 #### **Handling Multiple VLM Conditions**
@@ -239,7 +241,9 @@ get_control_term(adex_spec, "AVALCA1N", where = "INVALID WHERE")
 to see a list of possible `where` conditions
 
 ```{r eval=TRUE}
-adex_spec$value_spec |> filter(variable == "AVALCA1N") |> pull(where)
+adex_spec$value_spec |>
+  filter(variable == "AVALCA1N") |>
+  pull(where)
 ```
 
 ## Summary
