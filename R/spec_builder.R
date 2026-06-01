@@ -40,47 +40,48 @@
 #'
 #' @export
 spec_to_metacore <- function(path, quiet = deprecated(), where_sep_sheet = TRUE, verbose = "message") {
-  # Check if user has supplied `quiet` instead of `verbose`
-  if (lifecycle::is_present(quiet)) {
-    deprecate_soft(when = "0.3.0", what = "spec_to_metacore(quiet)", with = "spec_to_metacore(verbose)")
-  } else {
-    quiet <- FALSE
-  } # Else deal with deprecated argument for compatability
+   # Check if user has supplied `quiet` instead of `verbose`
+   if (lifecycle::is_present(quiet)) {
+      deprecate_soft(when = "0.3.0", what = "spec_to_metacore(quiet)", with = "spec_to_metacore(verbose)")
+   } else {
+      quiet <- FALSE
+   } # Else deal with deprecated argument for compatibility
 
-  with_verbosity(
-    {
-      doc <- read_all_sheets(path)
+   with_verbosity(
+      {
+         doc <- read_all_sheets(path)
 
-      if (spec_type(path) == "by_type") {
-        ds_spec <- spec_type_to_ds_spec(doc)
-        ds_vars <- spec_type_to_ds_vars(doc)
-        var_spec <- spec_type_to_var_spec(doc)
-        value_spec <- spec_type_to_value_spec(doc, where_sep_sheet = where_sep_sheet)
-        derivations <- spec_type_to_derivations(doc)
-        code_list <- spec_type_to_codelist(doc)
+         if (spec_type(path) == "by_type") {
+            ds_spec <- spec_type_to_ds_spec(doc)
+            ds_vars <- spec_type_to_ds_vars(doc)
+            var_spec <- spec_type_to_var_spec(doc)
+            value_spec <- spec_type_to_value_spec(doc, where_sep_sheet = where_sep_sheet)
+            derivations <- spec_type_to_derivations(doc)
+            codelist <- spec_type_to_codelist(doc)
+            documents <- spec_type_to_documents(doc)
 
-        test <- metacore(
-          ds_spec,
-          ds_vars,
-          var_spec,
-          value_spec,
-          derivations,
-          codelist = code_list,
-          quiet = quiet,
-          verbose = verbose
-        )
-      } else {
-        cli_abort(
-          "This specification format is not currently supported. You will need to write your own reader",
-          call. = FALSE
-        )
-      }
+            mc <- metacore(
+               ds_spec,
+               ds_vars,
+               var_spec,
+               value_spec,
+               derivations,
+               codelist,
+               documents = documents,
+               quiet = quiet,
+               verbose = verbose
+            )
+         } else {
+            cli_abort(
+               "This specification format is not currently supported. You will need to write your own reader"
+            )
+         }
 
-      if (quiet) invisible(test) else test
-    },
-    quiet,
-    verbose
-  )
+         if (quiet) invisible(mc) else mc
+      },
+      quiet,
+      verbose
+   )
 }
 
 
@@ -92,21 +93,17 @@ spec_to_metacore <- function(path, quiet = deprecated(), where_sep_sheet = TRUE,
 #' @export
 #'
 spec_type <- function(path) {
-  sheets <- excel_sheets(path)
-  if (!any(sheets %>% str_detect("[D|d]omains?|[D|d]atasets?"))) {
-    cli_abort("File does not contain a Domain/Datasets tab, which is needed. Please either modify the spec document or write a reader (see documentation for more information)",
-      call. = FALSE
-    )
-  } else if (any(sheets %>% str_detect("ADSL|DM"))) {
-    type <- "by_ds"
-  } else if (any(sheets %>% str_detect("[V|v]ariables?"))) {
-    type <- "by_type"
-  } else {
-    cli_abort("File in an unknown format. Please either modify the spec document or write a reader (see documentation for more information)",
-      call. = FALSE
-    )
-  }
-  type
+   sheets <- excel_sheets(path)
+   if (!any(sheets |> str_detect("[D|d]omains?|[D|d]atasets?"))) {
+      cli_abort("File does not contain a Domain/Datasets tab, which is needed. Please either modify the spec document or write a reader (see documentation for more information)")
+   } else if (any(sheets |> str_detect("ADSL|DM"))) {
+      type <- "by_ds"
+   } else if (any(sheets |> str_detect("[V|v]ariables?"))) {
+      type <- "by_type"
+   } else {
+      cli_abort("File in an unknown format. Please either modify the spec document or write a reader (see documentation for more information)")
+   }
+   type
 }
 
 
@@ -119,11 +116,11 @@ spec_type <- function(path) {
 #'
 #' @return a list of datasets
 read_all_sheets <- function(path) {
-  sheets <- excel_sheets(path)
-  all_dat <- sheets %>%
-    map(~ read_excel(path, sheet = ., col_types = "text", progress = FALSE))
-  names(all_dat) <- sheets
-  all_dat
+   sheets <- excel_sheets(path)
+   all_dat <- sheets |>
+      map(~ read_excel(path, sheet = ., col_types = "text", progress = FALSE))
+   names(all_dat) <- sheets
+   all_dat
 }
 
 
@@ -142,31 +139,38 @@ read_all_sheets <- function(path) {
 #' @export
 #'
 #' @family spec builders
-spec_type_to_ds_spec <- function(doc, cols = c(
-                                   "dataset" = "[N|n]ame|[D|d]ataset|[D|d]omain",
-                                   "structure" = "[S|s]tructure",
-                                   "label" = "[L|l]abel|[D|d]escription"
-                                 ), sheet = NULL) {
-  name_check <- names(cols) %in% c("dataset", "structure", "label") %>%
-    all()
-  if (!name_check | is.null(names(cols))) {
-    cli_abort(c(
-      "Supplied column vector must be named using the following names:",
-      "'dataset', 'structure', 'label'"
-    ))
-  }
-  if (!is.null(sheet)) {
-    sheet_ls <- str_subset(names(doc), sheet)
-    doc <- doc[sheet_ls]
-  }
+spec_type_to_ds_spec <- function(
+      doc,
+      cols = c(
+         "dataset" = "[N|n]ame|[D|d]ataset|[D|d]omain",
+         "structure" = "[S|s]tructure",
+         "label" = "[L|l]abel|[D|d]escription",
+         "class" = "[C|c]lass",
+         "repeating" = "[R|r]epeating",
+         "reference" = "[R|r]eference [D|d]ata",
+         "purpose" = "[P|p]urpose"
+      ),
+      sheet = NULL
+) {
+   ds_spec_names <- c("dataset", "structure", "label", "class", "repeating", "reference", "purpose")
+   ds_spec_optional <- c("class", "repeating", "reference", "purpose")
 
-  # Get missing columns
-  missing <- reader_cols()$.ds_spec %>%
-    discard(~ . %in% names(cols))
+   name_check <- all(names(cols) %in% ds_spec_names)
+   if (!name_check | is.null(names(cols))) {
+      cli_abort(c(
+         "x" = "Incorrect column names supplied for {.var ds_spec}",
+         "i" = "The column vector {.arg cols} must be named with a subset of {.val {ds_spec_names}}",
+         "i" = "The columns {.val {ds_spec_optional}} are optional"
+      ))
+   }
+   if (!is.null(sheet)) {
+      sheet_ls <- str_subset(names(doc), sheet)
+      doc <- doc[sheet_ls]
+   }
 
-  create_tbl(doc, cols, context = as.character(sys.call(0)[[1]])) %>%
-    distinct() %>%
-    `is.na<-`(missing)
+   create_tbl(doc, cols, ds_spec_optional, context = "spec_type_to_ds_spec") |>
+      distinct() |>
+      reorder_by_schema("ds_spec")
 }
 
 #' Spec to ds_vars
@@ -190,69 +194,77 @@ spec_type_to_ds_spec <- function(doc, cols = c(
 #' @export
 #'
 #' @family spec builders
-spec_type_to_ds_vars <- function(doc, cols = c(
-                                   "dataset" = "[D|d]ataset|[D|d]omain",
-                                   "variable" = "[V|v]ariable [[N|n]ame]?|[V|v]ariables?",
-                                   "order" = "[V|v]ariable [O|o]rder|[O|o]rder",
-                                   "mandatory" = "[K|k]eep|[M|m]andatory"
-                                 ),
-                                 key_seq_sep_sheet = TRUE,
-                                 key_seq_cols = c(
-                                   "dataset" = "Dataset",
-                                   "key_seq" = "Key Variables"
-                                 ),
-                                 sheet = "[V|v]ar|Datasets") {
-  name_check <- names(cols) %in% c(
-    "variable", "dataset", "order",
-    "mandatory", "key_seq", "core", "supp_flag"
-  ) %>%
-    all()
+spec_type_to_ds_vars <- function(
+      doc,
+      cols = c(
+         "dataset" = "[D|d]ataset|[D|d]omain",
+         "variable" = "[V|v]ariable [[N|n]ame]?|[V|v]ariables?",
+         "order" = "[V|v]ariable [O|o]rder|[O|o]rder",
+         "core" = "[C|c]ore|CDISC [C|c]ore",
+         "mandatory" = "[K|k]eep|[M|m]andatory",
+         "role" = "[R|r]ole"
+      ),
+      key_seq_sep_sheet = TRUE,
+      key_seq_cols = c(
+         "dataset" = "Dataset",
+         "key_seq" = "Key Variables"
+      ),
+      sheet = "[V|v]ar|Datasets"
+) {
 
-  name_check_extra <- names(key_seq_cols) %in% c("dataset", "key_seq") %>%
-    all() %>%
-    ifelse(key_seq_sep_sheet, ., TRUE) # Adding it cause we only want to check when sep sheet is true
+   ds_vars_names <- c("dataset", "variable", "order", "mandatory", "key_seq", "core", "supp_flag", "role")
+   ds_vars_optional <- c("core", "role")
 
-  # Testing for names of vectors
-  if (any(!name_check, !name_check_extra, is.null(names(cols)))) {
-    cli_abort("Supplied column vector must be named using the following names:
-              'variable', 'dataset', 'order', 'mandatory', 'core', 'key_seq', 'supp_flag'")
-  }
-  # Subsetting sheets
-  if (!is.null(sheet)) {
-    sheet_ls <- str_subset(names(doc), sheet)
-    doc <- doc[sheet_ls]
-  }
+   name_check <- all(names(cols) %in% ds_vars_names)
 
-  # Get base doc
-  out <- create_tbl(doc, cols, context = as.character(sys.call(0)[[1]]))
+   name_check_extra <- ifelse(
+      key_seq_sep_sheet,
+      key_seq_sep_sheet,
+      all(names(key_seq_cols) %in% c("dataset", "key_seq"))
+   )
 
-  # Getting the key seq values
-  if (key_seq_sep_sheet) {
-    key_seq_df <- create_tbl(doc, key_seq_cols, context = as.character(sys.call(0)[[1]])) %>%
+   # Testing for names of vectors
+   if (any(!name_check, !name_check_extra, is.null(names(cols)))) {
+      cli_abort(c(
+         "x" = "Incorrect column names supplied for {.var ds_vars}",
+         "i" = "The column vector {.arg cols} must be named with a subset of {.val {ds_vars_names}}",
+         "i" = "The columns {.val {ds_vars_optional}} are optional"
+      ))
+   }
+
+   # Sub-setting sheets
+   if (!is.null(sheet)) {
+      sheet_ls <- str_subset(names(doc), sheet)
+      doc <- doc[sheet_ls]
+   }
+
+   # Get base doc
+   out <- create_tbl(doc, cols, ds_vars_optional, context = as.character(sys.call(0)[[1]]))
+
+   # Getting the key seq values
+   if (key_seq_sep_sheet) {
+      key_seq_df <- create_tbl(doc, key_seq_cols, ds_vars_optional, context = as.character(sys.call(0)[[1]])) |>
+         mutate(
+            key_seq = str_split(key_seq, ",\\s"),
+            key_seq = map(key_seq, function(x) {
+               tibble(variable = x) |>
+                  mutate(key_seq = row_number())
+            })
+         ) |>
+         unnest(key_seq)
+
+      out <- left_join(out, key_seq_df, by = c("dataset", "variable"))
+   }
+
+   out |>
+      distinct() |>
       mutate(
-        key_seq = str_split(key_seq, ",\\s"),
-        key_seq = map(key_seq, function(x) {
-          tibble(variable = x) %>%
-            mutate(key_seq = row_number())
-        })
-      ) %>%
-      unnest(key_seq)
-    out <- left_join(out, key_seq_df, by = c("dataset", "variable"))
-  }
-
-  # Get missing columns
-  missing <- reader_cols()$.ds_vars %>%
-    discard(~ . %in% names(out))
-
-  out %>%
-    distinct() %>%
-    `is.na<-`(missing) %>%
-    mutate(
-      key_seq = as.integer(.data$key_seq),
-      mandatory = yn_to_tf(.data$mandatory),
-      core = as.character(.data$core),
-      order = as.numeric(.data$order)
-    )
+         key_seq = as.integer(.data$key_seq),
+         mandatory = yn_to_tf(.data$mandatory),
+         core = as.character(.data$core),
+         order = as.numeric(.data$order)
+      ) |>
+      reorder_by_schema("ds_vars")
 }
 
 
@@ -272,87 +284,85 @@ spec_type_to_ds_vars <- function(doc, cols = c(
 #' @export
 #'
 #' @family spec builders
-spec_type_to_var_spec <- function(doc, cols = c(
-                                    "variable" = "[N|n]ame|[V|v]ariables?",
-                                    "length" = "[L|l]ength",
-                                    "label" = "[L|l]abel",
-                                    "type" = "[T|t]ype",
-                                    "dataset" = "[D|d]ataset|[D|d]omain",
-                                    "format" = "[F|f]ormat"
-                                  ),
-                                  sheet = "[V|v]ar") {
-  # Check the names
-  name_check <- names(cols) %in% c(
-    "variable", "length", "label",
-    "type", "dataset", "common", "format"
-  ) %>%
-    all()
-  if (!name_check | is.null(names(cols))) {
-    cli_abort(paste(
-      "Supplied column vector must be named using the following names:",
-      "'variable', 'length', 'label', 'type', 'dataset', 'common', 'format'",
-      "If common is not avaliable it can be excluded and will be automatically filled in.",
-      "Additionally, dataset is only used to clarify if information differs by domain."
-    ))
-  }
+spec_type_to_var_spec <- function(
+      doc,
+      cols = c(
+         "variable" = "[N|n]ame|[V|v]ariables?",
+         "length" = "[L|l]ength",
+         "label" = "[L|l]abel",
+         "type" = "[T|t]ype",
+         "dataset" = "[D|d]ataset|[D|d]omain",
+         "format" = "[F|f]ormat"
+      ),
+      sheet = "[V|v]ar") {
 
-  # Check if sheet is specified
-  if (!is.null(sheet)) {
-    sheet_ls <- str_subset(names(doc), sheet)
-    doc <- doc[sheet_ls]
-  }
-  out <- create_tbl(doc, cols, context = as.character(sys.call(0)[[1]]))
+   var_spec_names <- c("variable", "length", "label", "type", "dataset", "common", "format")
+   var_spec_optional <- c("common")
 
-  if (!"dataset" %in% names(out)) {
-    dups <- out %>%
-      distinct() %>%
-      group_by(variable) %>%
-      summarise(n = n(), .groups = "drop") %>%
-      filter(n > 1)
-    if (nrow(dups) > 0) {
-      x <- dups %>% pull(variable)
+   # Check the names
+   name_check <- all(names(cols) %in% var_spec_names)
+   if (!name_check | is.null(names(cols))) {
       cli_abort(c(
-        col_red("The following variables are repeated with different metadata for different datasets:"),
-        "i" = ansi_collapse(x),
-        "i" = "Please add 'dataset' = [Name of dataset column] to your named cols vector to correct this."
-      ), call. = FALSE)
-    }
-  } else {
-    if (!"common" %in% names(cols)) {
-      # Get the variable common to all datasets can only be calculated with ds present
-      common_vars <- out %>%
-        group_by(dataset) %>%
-        select(dataset, variable) %>%
-        group_split(.keep = FALSE) %>%
-        reduce(inner_join, by = "variable") %>%
-        mutate(common = TRUE)
-      out <- out %>%
-        left_join(common_vars, by = "variable") %>%
-        replace_na(list(common = FALSE))
-    }
+         "x" = "Incorrect column names supplied for {.var var_spec}",
+         "i" = "The column vector {.arg cols} must be named with {.val {var_spec_names}}",
+         "i" = "The columns {.val {var_spec_optional}} are optional",
+         "i" = "Additionally, dataset is only used to clarify if information differs by domain."
+      ))
+   }
 
-    # Remove any multiples and add ds if different metadata for different ds's
-    out <- out %>%
-      group_by(variable) %>%
-      mutate(
-        unique = n_distinct(length, label, type),
-        variable = if_else(unique == 1, variable,
-          paste0(dataset, ".", variable)
-        ),
-        length = as.numeric(length)
-      ) %>%
-      distinct(variable, length, label, type, .keep_all = TRUE) %>%
-      select(-dataset, -unique)
-  }
+   # Filter sheets if specified
+   if (!is.null(sheet)) {
+      doc <- doc[str_subset(names(doc), sheet)]
+   }
 
-  # Get missing columns
-  missing <- reader_cols()$.var_spec %>%
-    discard(~ . %in% names(out))
-  out %>%
-    `is.na<-`(missing) %>%
-    distinct() %>%
-    ungroup() %>%
-    mutate(length = as.integer(length))
+   out <- create_tbl(doc, cols, var_spec_optional, context = "spec_type_to_var_spec")
+
+   # Check for duplicate variables without dataset column
+   if (!"dataset" %in% names(out)) {
+      dups <- out |>
+         distinct() |>
+         count(variable) |>
+         filter(n > 1) |>
+         pull(variable)
+
+      if (length(dups) > 0) {
+         cli_abort(c(
+            col_red("The following variables are repeated with different metadata for different datasets:"),
+            "i" = ansi_collapse(dups),
+            "i" = "Please add 'dataset' = [Name of dataset column] to your named cols vector to correct this."
+         ))
+      }
+   } else {
+      # Add common flag if not already in cols
+      if (!"common" %in% names(cols)) {
+         common_vars <- out |>
+            distinct(dataset, variable) |>
+            tidyr::pivot_wider(names_from = dataset, values_from = dataset, values_fill = NA) |>
+            filter(if_all(-variable, ~ !is.na(.))) |>
+            mutate(common = TRUE) |>
+            select(variable, common)
+
+         out <- out |>
+            left_join(common_vars, by = "variable") |>
+            replace_na(list(common = FALSE))
+      }
+
+      # Remove duplicates and qualify variables with dataset if different metadata
+      out <- out |>
+         group_by(variable) |>
+         mutate(
+            unique = n_distinct(length, label, type),
+            variable = if_else(unique == 1, variable, paste0(dataset, ".", variable)),
+            length = as.integer(length)
+         ) |>
+         distinct(variable, length, label, type, .keep_all = TRUE) |>
+         select(-dataset, -unique)
+   }
+
+   out |>
+      distinct() |>
+      ungroup() |>
+      reorder_by_schema("var_spec")
 }
 
 #' Spec to value_spec
@@ -382,132 +392,109 @@ spec_type_to_var_spec <- function(doc, cols = c(
 #' @export
 #'
 #' @family spec builders
-spec_type_to_value_spec <- function(doc, cols = c(
-                                      "dataset" = "[D|d]ataset|[D|d]omain",
-                                      "variable" = "[N|n]ame|[V|v]ariables?",
-                                      "origin" = "[O|o]rigin",
-                                      "type" = "[T|t]ype",
-                                      "code_id" = "[C|c]odelist|Controlled Term",
-                                      "sig_dig" = "[S|s]ignificant",
-                                      "where" = "[W|w]here",
-                                      "derivation_id" = "[M|m]ethod",
-                                      "predecessor" = "[P|p]redecessor"
-                                    ),
-                                    sheet = NULL,
-                                    where_sep_sheet = TRUE,
-                                    where_cols = c(
-                                      "id" = "ID",
-                                      "where" = c("Variable", "Comparator", "Value")
-                                    ),
-                                    var_sheet = "[V|v]ar") {
-  name_check <- names(cols) %in% c(
-    "variable", "origin", "code_id", "sig_dig",
-    "type", "dataset", "where", "derivation_id",
-    "predecessor"
-  ) %>%
-    all()
+spec_type_to_value_spec <- function(
+      doc,
+      cols = c(
+         "dataset" = "[D|d]ataset|[D|d]omain",
+         "variable" = "[N|n]ame|[V|v]ariables?",
+         "origin" = "[O|o]rigin",
+         "type" = "[T|t]ype",
+         "code_id" = "[C|c]odelist|Controlled Term",
+         "sig_dig" = "[S|s]ignificant",
+         "where" = "[W|w]here",
+         "where_label" = "[L|l]abel|[D|d]escription",
+         "derivation_id" = "[M|m]ethod",
+         "predecessor" = "[P|p]redecessor"
+      ),
+      sheet = NULL,
+      where_sep_sheet = TRUE,
+      where_cols = c(
+         "id" = "ID",
+         "where" = c("Variable", "Comparator", "Value")
+      ),
+      var_sheet = "[V|v]ar"
+) {
 
-  if (!name_check | is.null(names(cols))) {
-    cli_abort(c(
-      "Supplied column vector must be named using the following names:",
-      "i" = "'dataset', 'variable', 'origin', 'code_id', 'type', 'where', 'sig_dig', 'derivation_id','predecessor'",
-      "i" = paste(
-        "If derivation_id is not avaliable it can be excluded and dataset.variable will be used.",
-        "If the where information is on a seperate sheet, put the column with cross ref as where."
-      )
-    ), call = FALSE)
-  }
+   value_spec_names <- c("dataset", "variable", "origin", "type", "code_id", "sig_dig", "where", "where_label", "derivation_id", "predecessor")
+   value_spec_optional <- c("predecessor", "where_label")
 
-  # Select a subset of sheets if specified
-  if (!is.null(sheet)) {
-    sheet_ls <- str_subset(names(doc), sheet)
-    doc <- doc[sheet_ls]
-  }
+   name_check <- all(names(cols) %in% value_spec_names)
 
-  out <- create_tbl(doc, cols, context = as.character(sys.call(0)[[1]]))
+   if (!name_check | is.null(names(cols))) {
+      cli_abort(c(
+         "x" = "Incorrect column names supplied for {.var value_spec}",
+         "i" = "The column vector {.arg cols} must be named with a subset of {.val {value_spec_names}}",
+         "i" = "The columns {.val {value_spec_optional}} are optional",
+         "i" = "If {.val derivation_id} is not avaliable it can be excluded and dataset.variable will be used.",
+         "i" = "If the where information is on a seperate sheet, put the column with cross ref as where."
+      ))
+   }
 
-  # Does a var sheet exsist?
-  if (!is.null(var_sheet)) {
-    var_sheet <- names(doc) %>%
-      keep(~ str_detect(., var_sheet))
-  }
+   # Select a subset of sheets if specified
+   if (!is.null(sheet)) {
+      sheet_ls <- str_subset(names(doc), sheet)
+      doc <- doc[sheet_ls]
+   }
 
-  # If so, add any variables not in the value sheet
-  if (length(var_sheet) > 0) {
-    var_out <- doc[var_sheet] %>%
-      map_dfr(function(x) {
-        var_out <- x %>%
-          select_rename_w_dups(cols) %>%
-          mutate(where = "TRUE")
-        if (nrow(out) > 0) {
-          var_out %>%
-            anti_join(out, by = c("dataset", "variable"))
-        } else {
-          var_out
-        }
-      })
+   out <- create_tbl(doc, cols, value_spec_optional, context = spec_type_to_value_spec)
 
-    # THIS ISN'T VERY PRETTY, IF SOMEONE HAS A BETTER IDEA PLEASE FIX
-    # Needed in cause the value sheet is empty
-    if (nrow(out) > 0 & nrow(var_out) > 0) {
+   # Does a var sheet exist?
+   if (!is.null(var_sheet)) {
+      var_sheet <- names(doc) |>
+         keep(~ str_detect(., var_sheet))
+   }
+
+   # If so, add any variables not in the value sheet
+   if (length(var_sheet) > 0) {
+      var_out <- doc[var_sheet] |>
+         map_dfr(~ .x %>%
+                    select_rename_w_dups(cols) |>
+                    mutate(where = NA_character_)
+         ) |>
+         anti_join(out, by = c("dataset", "variable"))
+
       out <- bind_rows(out, var_out)
-    } else if (nrow(var_out) > 0) {
-      out <- var_out
-    } else {
-      out
-    }
-  }
+   }
 
-  if (where_sep_sheet & "where" %in% names(out)) {
-    where_df <- create_tbl(doc, where_cols, context = as.character(sys.call(0)[[1]])) %>%
+   if (where_sep_sheet && "where" %in% names(out)) {
+      where_df <- create_tbl(doc, where_cols, context = spec_type_to_value_spec) |>
+         tidyr::unite("where_new", starts_with("where"), sep = " ", na.rm = TRUE, remove = FALSE) |>
+         select(id, where_new)
+
+      out <- out |>
+         left_join(where_df, by = c("where" = "id")) |>
+         select(-where, where = where_new)
+
+   } else if (where_sep_sheet) {
+      cli_warn(c(
+         "x" = "where column needed to cross-reference where information from separate sheet"
+      ))
+   }
+
+   if (!"derivation_id" %in% names(cols)) {
+      out <- out |>
+         mutate(
+            derivation_id = if_else(
+               str_to_lower(.data$origin) == "assigned",
+               paste0(dataset, ".", variable),
+               paste0("pred.", dataset, ".", variable)
+            )
+         )
+   }
+
+   out |>
+      distinct() |>
       mutate(
-        where_new = pmap_chr(., function(...) {
-          # Without c_across this gets a little weird
-          # Use pmap and steal out the arg names
-          vars <- list(...)
-          # Filter down to only args that start with where
-          wheres <- as.character(vars[which(str_starts(names(vars), "where"))])
-          # collapse it together
-          paste(wheres, collapse = " ")
-        })
-      ) %>%
-      select(id, where_new)
-    out <- out %>%
-      left_join(where_df, by = c("where" = "id")) %>%
-      select(-where, where = where_new)
-  } else if (where_sep_sheet) {
-    cli_warn("Not able to add where information from seperate sheet cause a where column is needed to cross-reference the information",
-      call. = FALSE
-    )
-  }
-
-  if (!"derivation_id" %in% names(cols)) {
-    out <- out %>%
-      mutate(
-        derivation_id =
-          if_else(str_to_lower(.data$origin) == "assigned",
-            paste0(dataset, ".", variable),
-            paste0("pred.", dataset, ".", variable)
-          )
-      )
-  }
-
-  # Get missing columns
-  missing <- reader_cols()$.value_spec %>%
-    discard(~ . %in% names(out))
-
-  out %>%
-    `is.na<-`(missing) %>%
-    distinct() %>%
-    mutate(
-      sig_dig = as.integer(.data$sig_dig),
-      derivation_id = case_when(
-        !is.na(.data$derivation_id) ~ .data$derivation_id,
-        str_to_lower(.data$origin) == "predecessor" ~ paste0("pred.", as.character(.data$predecessor)),
-        str_to_lower(.data$origin) == "assigned" ~ paste0(.data$dataset, ".", .data$variable)
-      )
-    ) %>%
-    select(-.data$predecessor)
+         sig_dig = as.integer(.data$sig_dig),
+         where_label = if_else(is.na(where), NA_character_, where_label),
+         derivation_id = case_when(
+            !is.na(.data$derivation_id) ~ .data$derivation_id,
+            str_to_lower(.data$origin) == "predecessor" ~ paste0("pred.", as.character(.data$predecessor)),
+            str_to_lower(.data$origin) == "assigned" ~ paste0(.data$dataset, ".", .data$variable)
+         )
+      ) |>
+      select(-.data$predecessor) |>
+      reorder_by_schema("value_spec")
 }
 
 #' Spec to codelist
@@ -536,98 +523,107 @@ spec_type_to_value_spec <- function(doc, cols = c(
 #' @export
 #'
 #' @family spec builders
-spec_type_to_codelist <- function(doc, codelist_cols = c(
-                                    "code_id" = "ID",
-                                    "name" = "[N|n]ame",
-                                    "code" = "^[C|c]ode|^[T|t]erm",
-                                    "decode" = "[D|d]ecode"
-                                  ),
-                                  permitted_val_cols = NULL,
-                                  dict_cols = c(
-                                    "code_id" = "ID",
-                                    "name" = "[N|n]ame",
-                                    "dictionary" = "[D|d]ictionary",
-                                    "version" = "[V|v]ersion"
-                                  ),
-                                  sheets = NULL, simplify = FALSE) {
-  if (is.null(codelist_cols)) {
-    cli_abort("Codelist column names must be provided", call. = FALSE)
-  } else {
-    name_check <- names(codelist_cols) %in% c("code_id", "name", "code", "decode") %>%
-      all()
-    if (!name_check | is.null(names(codelist_cols))) {
-      cli_abort("Supplied column vector for codelist_cols must be named using the following names:
-              'code_id', 'name', 'code', 'decode'",
-        call. = FALSE
-      )
-    }
-  }
+spec_type_to_codelist <- function(
+      doc,
+      codelist_cols = c(
+         "code_id" = "ID",
+         "name" = "[N|n]ame",
+         "code" = "^[C|c]ode|^[T|t]erm",
+         "decode" = "[D|d]ecode"
+      ),
+      permitted_val_cols = NULL,
+      dict_cols = c(
+         "code_id" = "ID",
+         "name" = "[N|n]ame",
+         "dictionary" = "[D|d]ictionary",
+         "version" = "[V|v]ersion"
+      ),
+      sheets = NULL,
+      simplify = FALSE
+) {
 
-  if (!is.null(permitted_val_cols)) {
-    name_check <- names(permitted_val_cols) %in% c("code_id", "name", "code") %>%
-      all()
-    if (!name_check) {
-      cli_abort("Supplied column vector for permitted_val_cols must be named using the following names:
-              'code_id', 'name', 'code'",
-        call. = FALSE
-      )
-    }
-  }
-  if (!is.null(dict_cols)) {
-    name_check <- names(dict_cols) %in% c("code_id", "name", "dictionary", "version") %>%
-      all()
-    if (!name_check) {
-      cli_abort(paste0(
-        "Supplied column vector for `dict_cols` must be named using the following names:",
-        "'code_id', 'name', 'dictionary', 'version'. If a dictionary sheet isn't avaliable",
-        "set `dict_cols` to NULL"
-      ), call. = FALSE)
-    }
-  }
+   if (is.null(codelist_cols)) {
+      cli_abort("Codelist column names must be provided as {.arg codelist_cols}")
+   }
 
-  # Select a subset of sheets if specified
-  if (!is.null(sheets)) {
-    sheet_ls <- str_subset(names(doc), sheets)
-    doc <- doc[sheet_ls]
-  }
+   codelist_names <- c("code_id", "name", "code", "decode")
+   dict_names <-  c("code_id", "name", "dictionary", "version")
+   permitted_val_names <- c("code_id", "name", "code")
 
-  # Create the base table with codes and decodes (min req output)
-  cd_out <- create_tbl(doc, codelist_cols, context = as.character(sys.call(0)[[1]])) %>%
-    group_by(code_id) %>%
-    mutate(type = case_when(
-      simplify & all(code == decode) ~ "permitted_val",
-      TRUE ~ "code_decode"
-    )) %>%
-    nest(codes = c(code, decode)) %>%
-    mutate(codes = if_else(type == "permitted_val",
-      lapply(codes, function(df) df %>% pull(code)),
-      codes
-    ))
-  # If available get a permitted value sheet
-  if (!is.null(permitted_val_cols)) {
-    pv_out <- create_tbl(doc, permitted_val_cols, context = as.character(sys.call(0)[[1]])) %>%
-      mutate(type = "permitted_val") %>%
-      group_by(code_id) %>%
-      nest(codes = c(code))
-    cd_out <- bind_rows(cd_out, pv_out)
-  }
-  # Add dictionary if avaliable
-  if (!is.null(dict_cols)) {
-    dic_out <- create_tbl(doc, dict_cols, context = as.character(sys.call(0)[[1]])) %>%
-      mutate(type = "external_library") %>%
-      group_by(code_id) %>%
-      nest(codes = c(dictionary, version))
-    cd_out <- bind_rows(cd_out, dic_out)
-  }
-  # Get missing columns
-  missing <- reader_cols()$.codelist %>%
-    discard(~ . %in% names(cd_out))
+   # Validate names of codelist columns (minimum requirement)
+   name_check <- all(names(codelist_cols) %in% codelist_names)
 
-  cd_out %>%
-    `is.na<-`(missing) %>%
-    distinct() %>%
-    filter(!is.na(code_id)) %>%
-    ungroup()
+   if (!name_check | is.null(names(codelist_cols))) {
+      cli_abort(c(
+         "x" = "Incorrect column names supplied for {.arg codelist_cols}",
+         "i" = "{.arg codelist_cols} must be named with {.val {codelist_names}}"
+      ))
+   }
+
+   # If present, validate names of permitted_val columns
+   if (!is.null(permitted_val_cols)) {
+      name_check <- all(names(permitted_val_cols) %in% permitted_val_names)
+      if (!name_check) {
+         cli_abort(c(
+            "x" = "Incorrect column names supplied for {.arg permitted_val_cols}",
+            "i" = "{.arg permitted_val_cols} must be named with {.val {permitted_val_names}}"
+         ))
+      }
+   }
+
+   # If present, validate names of dictionary columns
+   if (!is.null(dict_cols)) {
+      name_check <- all(names(dict_cols) %in% dict_names)
+      if (!name_check) {
+         cli_abort(c(
+            "x" = "Incorrect column names supplied for {.arg dict_cols}",
+            "i" = "{.arg dict_cols} must be named with {.val {dict_names}}",
+            "i" = "If a dictionary sheet isn't available set {.arg dict_cols} to NULL"
+         ))
+      }
+   }
+
+   # Select a subset of sheets if specified
+   if (!is.null(sheets)) {
+      sheet_ls <- str_subset(names(doc), sheets)
+      doc <- doc[sheet_ls]
+   }
+
+   # Create base codelist table
+   cd_out <- create_tbl(doc, codelist_cols, context = "spec_type_to_codelist") |>
+      group_by(code_id) |>
+      mutate(type = if_else(simplify & all(code == decode), "permitted_val", "code_decode")) |>
+      nest(codes = c(code, decode)) |>
+      mutate(codes = dplyr::case_match(type,
+                                       "permitted_val" ~ lapply(codes, \(df) pull(df, code)),
+                                       .default = codes
+      ))
+
+   # Add permitted values if available
+   if (!is.null(permitted_val_cols)) {
+      pv_out <- create_tbl(doc, permitted_val_cols, context = "spec_type_to_codelist") |>
+         mutate(type = "permitted_val") |>
+         group_by(code_id) |>
+         nest(codes = c(code))
+
+      cd_out <- bind_rows(cd_out, pv_out)
+   }
+
+   # Add dictionary if available
+   if (!is.null(dict_cols)) {
+      dict_out <- create_tbl(doc, dict_cols, context = "spec_type_to_codelist") |>
+         mutate(type = "external_library") |>
+         group_by(code_id) |>
+         nest(codes = c(dictionary, version))
+
+      bind_rows(cd_out, dict_out)
+   }
+
+   cd_out |>
+      distinct() |>
+      filter(!is.na(code_id)) |>
+      ungroup() |>
+      reorder_by_schema("codelist")
 }
 
 #' Spec to derivation
@@ -651,87 +647,144 @@ spec_type_to_codelist <- function(doc, codelist_cols = c(
 #'
 #' @family spec builders
 #' @importFrom purrr quietly
-spec_type_to_derivations <- function(doc, cols = c(
-                                       "derivation_id" = "ID",
-                                       "derivation" = "[D|d]efinition|[D|d]escription"
-                                     ),
-                                     sheet = "Method|Derivations?",
-                                     var_cols = c(
-                                       "dataset" = "[D|d]ataset|[D|d]omain",
-                                       "variable" = "[N|n]ame|[V|v]ariables?",
-                                       "origin" = "[O|o]rigin",
-                                       "predecessor" = "[P|p]redecessor",
-                                       "comment" = "[C|c]omment"
-                                     )) {
-  name_check <- names(cols) %in% c("derivation_id", "derivation") %>%
-    all()
-  if (!name_check | is.null(names(cols))) {
-    cli_abort(c(
-      "Supplied column vector must be named using the following names:",
-      "'derivation_id', 'derivation'"
-    ))
-  }
-
-  name_check <- names(var_cols) %in% c("dataset", "variable", "origin", "predecessor", "comment") %>%
-    all()
-  if (!name_check | is.null(names(var_cols))) {
-    cli_abort("Supplied variable column vector must be named using the following names:
-               'dataset', 'variable', 'origin', 'predecessor', 'comment'")
-  }
-  # Get the predecessor
-  ls_derivations <- quietly(create_tbl)(doc, var_cols)$result
-  if (class(ls_derivations)[1] == "list") {
-    ls_derivations <- ls_derivations %>%
-      reduce(bind_rows)
-    # Get the comments
-    if (any(str_detect(names(doc), "[C|c]omment"))) {
-      comments <- doc[str_detect(names(doc), "[C|c]omment")][[1]] %>%
-        select(matches("ID|Description"))
-      with_comments <- ls_derivations %>%
-        filter(str_to_lower(.data$origin) == "assigned") %>%
-        left_join(comments, by = c("comment" = "ID")) %>%
-        mutate(comment = .data$Description) %>%
-        select(-.data$Description)
-      ls_derivations <- ls_derivations %>%
-        filter(str_to_lower(.data$origin) != "assigned") %>%
-        bind_rows(with_comments)
-    }
-  }
-
-  other_derivations <- ls_derivations %>%
-    mutate(
-      derivation_id = case_when(
-        str_to_lower(.data$origin) == "predecessor" ~ paste0("pred.", as.character(.data$predecessor)),
-        str_to_lower(.data$origin) == "assigned" ~ paste0(.data$dataset, ".", .data$variable),
-        TRUE ~ NA_character_
+spec_type_to_derivations <- function(
+      doc,
+      cols = c(
+         "derivation_id" = "ID",
+         "derivation" = "[D|d]efinition|[D|d]escription",
+         "method_name" = "[N|n]ame",
+         "method_type" = "[T|t]ype",
+         "document_id" = "[D|d]ocument",
+         "pages" = "[P|p]ages"
       ),
-      derivation = case_when(
-        str_to_lower(.data$origin) == "predecessor" ~ as.character(.data$predecessor),
-        str_to_lower(.data$origin) == "assigned" ~ .data$comment,
-        TRUE ~ NA_character_
+      sheet = "Method|Derivations?",
+      var_cols = c(
+         "dataset" = "[D|d]ataset|[D|d]omain",
+         "variable" = "[N|n]ame|[V|v]ariables?",
+         "origin" = "[O|o]rigin",
+         "predecessor" = "[P|p]redecessor",
+         "comment" = "[C|c]omment"
       )
-    ) %>%
-    filter(!is.na(.data$derivation_id)) %>%
-    select(.data$derivation, .data$derivation_id)
+) {
 
-  # Select a subset of sheets if specified
-  if (!is.null(sheet)) {
-    sheet_ls <- str_subset(names(doc), sheet)
-    doc <- doc[sheet_ls]
-  }
-  out <- create_tbl(doc, cols, context = as.character(sys.call(0)[[1]]))
+   derivations_names <- c("derivation_id", "derivation", "method_name", "method_type", "document_id", "pages")
+   derivations_optional <- c("method_name", "method_type", "document_id", "pages")
+   var_names <- c("dataset", "variable", "origin", "predecessor", "comment")
 
-  # Get missing columns
-  missing <- reader_cols()$.derivations %>%
-    discard(~ . %in% names(out))
+   # Validate names of the derivations columns
+   name_check <- all(names(cols) %in% derivations_names)
+   if (!name_check | is.null(names(cols))) {
+      cli_abort(c(
+         "x" = "Incorrect column names supplied for {.arg cols}",
+         "i" = "{.arg cols} must be named with {.val {derivations_names}}"
+      ))
+   }
 
+   # Validate the names of the variable columns (used to join)
+   name_check <- all(names(var_cols) %in% var_names)
+   if (!name_check | is.null(names(var_cols))) {
+      cli_abort(c(
+         "x" = "Incorrect column names supplied for {.arg var_cols}",
+         "i" = "{.arg var_cols} must be named with {.val {var_names}}"
+      ))
+   }
 
-  out %>%
-    `is.na<-`(missing) %>%
-    bind_rows(other_derivations) %>%
-    distinct() %>%
-    filter(!is.na(derivation_id))
+   # Get the predecessor table
+   ls_derivations <- quietly(create_tbl)(doc, var_cols)$result
+
+   if (is.list(ls_derivations)) {
+      ls_derivations <- ls_derivations |>
+         purrr::list_rbind()
+
+      # Add comments if available
+      comment_sheets <- names(doc) |>
+         str_subset("(?i)comment")
+
+      if (length(comment_sheets) > 0) {
+         comments <- doc[[comment_sheets[1]]] |>
+            select(matches("(?i)^(id|description)$"))
+
+         ls_derivations <- ls_derivations |>
+            mutate(
+               origin_lower = str_to_lower(origin),
+               comment = if_else(
+                  origin_lower == "assigned",
+                  comments$Description[match(comment, comments$ID)],
+                  comment
+               )
+            ) |>
+            select(-origin_lower)
+      }
+   }
+
+   other_derivations <- ls_derivations |>
+      mutate(
+         origin_lower = str_to_lower(origin),
+         derivation_id = dplyr::case_match(origin_lower,
+                                           "predecessor" ~ paste0("pred.", predecessor),
+                                           "assigned" ~ paste0(dataset, ".", variable),
+                                           .default = NA_character_
+         ),
+         derivation = dplyr::case_match(origin_lower,
+                                        "predecessor" ~ as.character(predecessor),
+                                        "assigned" ~ comment,
+                                        .default = NA_character_
+         ),
+         .keep = "unused"
+      ) |>
+      filter(!is.na(derivation_id)) |>
+      select(derivation, derivation_id)
+
+   # Filter sheets if specified
+   if (!is.null(sheet)) {
+      doc <- doc[str_subset(names(doc), sheet)]
+   }
+
+   out <- create_tbl(doc, cols, derivations_optional, context = "spec_type_to_derivations")
+
+   out |>
+      bind_rows(other_derivations) |>
+      distinct() |>
+      filter(!is.na(derivation_id)) |>
+      reorder_by_schema("derivations")
 }
+
+spec_type_to_documents <- function(
+      doc,
+      cols = c(
+         "document_id" = "ID",
+         "title" = "[T|t]itle",
+         "href" = "[H|h]ref"
+      ),
+      sheet = "[D|d]ocuments?"
+) {
+
+   documents_names <- c("document_id", "title", "href")
+   documents_optional <- c("document_id", "title", "href")
+
+   name_check <- all(names(cols) %in% documents_names)
+   if (!name_check | is.null(names(cols))) {
+      cli_abort(c(
+         "x" = "Incorrect column names supplied for {.var documents}",
+         "i" = "The column vector {.arg cols} must be named with a subset of {.val {documents_names}}",
+         "i" = "The columns {.val {documents_optional}} are optional"
+      ))
+   }
+
+   if (!is.null(sheet)) {
+      sheet_ls <- str_subset(names(doc), sheet)
+      doc <- doc[sheet_ls]
+      # If no matching sheets found, return NULL (documents are optional)
+      if (length(doc) == 0) {
+         return(NULL)
+      }
+   }
+
+   create_tbl(doc, cols, documents_optional, context = "spec_type_to_documents") |>
+      distinct() |>
+      reorder_by_schema("ds_documents")
+}
+
 ### Helper Functions
 
 #' Create table
@@ -746,100 +799,124 @@ spec_type_to_derivations <- function(doc, cols = c(
 #'
 #' @return dataset (or list of datasets if not specific enough)
 #' @export
-create_tbl <- function(doc, cols, context) {
-  matches <- doc %>%
-    keep(function(x) {
-      cols %>%
-        map_lgl(~ any(str_detect(names(x), .))) %>%
-        all()
-    })
-  if (length(matches) == 0) {
-    # Get which variable can't be matches
-    mismatch_per_sheet <- doc %>%
-      map(function(x) {
-        cols %>%
-          map_lgl(~ any(str_detect(names(x), .))) %>%
-          discard(~.) # Remove the matched values
-      })
-    # Find the closest sheet by looking for the sheet(s) with the fewest mismatches
-    mis_lens <- mismatch_per_sheet %>%
-      map_int(length)
-    closest_sheets <- mis_lens %>%
-      keep(~ . == min(mis_lens)) %>%
-      names()
-    # Get the name of the sheets and which columns don't match
-    sheets_to_error <- mismatch_per_sheet %>%
-      keep(names(.) %in% closest_sheets)
+create_tbl <- function(doc, cols, optional = NULL, context = NULL) {
+   # Split cols into required (must match to identify sheet) and optional
+   # (attempted if present in the sheet, silently omitted and filled with NA
+   # if absent — backwards-compatible with specs that predate these columns).
+   required_cols <- cols[!names(cols) %in% optional]
+   optional_cols  <- cols[names(cols) %in% optional]
 
-    # 1. Check for "where" columns
-    has_where_col <- sheets_to_error %>%
-      map_lgl(~ any(stringr::str_detect(names(.x), stringr::regex("^where", ignore_case = TRUE)))) %>%
-      any()
-
-    # 2. Generate the formatted list of sheet matches
-    sheet_details <- sheets_to_error %>%
-      purrr::imap_chr(~ {
-        paste0("Sheet '", .y, "' is missing: ", paste(names(.x), collapse = ", "))
+   # Find sheets where every required column can be matched
+   matches <- doc |>
+      keep(function(x) {
+         required_cols |>
+            map_lgl(~ any(str_detect(names(x), .))) |>
+            all()
       })
 
-    # 3. Use cli_abort with bullets to replace the standard Error: prefix
-    cli_abort(
-      c(
-        "x" = "Unable to identify a sheet with all columns.",
-        "i" = "Closest matches identified:",
-        "*" = sheet_details,
-        if (has_where_col) c("!" = "Tip: A 'where' column was detected. Check if {.arg where_sep_sheet} is set correctly.")
-      ),
-      .call = NULL
-    )
-  } else if (length(matches) == 1) {
-    # Check names and write a better warning message if names don't work
-    ds_nm <- matches[[1]] %>% names()
-    nm_test <- cols %>%
-      map(~ str_detect(ds_nm, .)) %>%
-      map(~ ds_nm[.]) %>%
-      keep(~ length(.) > 1)
+   # If no matches throw error with closest matches
+   if (length(matches) == 0) {
+      mismatch_per_sheet <- doc |>
+         map(function(x) {
+            required_cols |>
+               map_lgl(~ any(str_detect(names(x), .))) |>
+               discard(~.)
+         })
+      mis_lens <- mismatch_per_sheet |> map_int(length)
+      closest_sheets <- mis_lens |> keep(~ . == min(mis_lens)) |> names()
+      sheets_to_error <- mismatch_per_sheet |> keep(names(.) %in% closest_sheets)
 
-    if (length(nm_test) > 0) {
-      # See if an exact match will
-      test_exact <- cols[names(nm_test)] %>%
-        paste0("^", ., "$") %>%
-        map_int(~ sum(str_detect(ds_nm, .))) %>%
-        keep(~ . != 1)
-      if (length(test_exact) == 0) {
-        cols[names(nm_test)] <- cols[names(nm_test)] %>%
-          paste0("^", ., "$")
-      } else {
-        errors <- NULL
-        for (i in 1:length(nm_test)) {
-          errors <- c(errors, str_glue("{names(nm_test[i])} matches {length(nm_test[[i]])} columns: {paste(nm_test[[i]], collapse = ', ')}"))
-        }
+      has_where_col <- sheets_to_error |>
+         map_lgl(~ any(str_detect(names(.x), regex("^where", ignore_case = TRUE)))) |>
+         any()
 
-        msg <- c(
-          "Unable to rename the following columns in {names(matches)}",
-          set_names(errors, rep("x", length(errors))),
-          "i" = str_glue("Please check your regular expression for `{context}`")
-        )
-        cli_abort(msg, .call = NULL)
+      sheet_details <- sheets_to_error |>
+         imap_chr(~ paste0("Sheet '", .y, "' is missing: ", paste(names(.x), collapse = ", ")))
+
+      cli_abort(
+         c(
+            "x" = "Unable to identify a sheet with all columns.",
+            "i" = "Closest matches identified:",
+            "*" = sheet_details,
+            if (has_where_col) c("!" = "Tip: A 'where' column was detected. Check if {.arg where_sep_sheet} is set correctly.")
+         )
+      )
+   }
+
+   # Else if no unique match but all columns optional return empty dataframe
+   if (length(matches) != 1 && length(required_cols) == 0) {
+      return(data.frame())
+   }
+
+   # If a match is found, build the table from the matching sheet
+   build_from_sheet <- function(sheet_data) {
+      sheet_names <- names(sheet_data)
+
+      # Determine which optional cols exist in this sheet
+      found_optional <- optional_cols |> keep(~ any(str_detect(sheet_names, .)))
+
+      # Active cols = required + whichever optional are present
+      active_cols <- c(required_cols, found_optional)
+
+      # Duplicate-match check and tightening of regex to exact anchors if needed
+      nm_test <- active_cols |>
+         map(~ str_detect(sheet_names, .)) |>
+         map(~ sheet_names[.]) |>
+         keep(~ length(.) > 1)
+
+      if (length(nm_test) > 0) {
+         test_exact <- active_cols[names(nm_test)] |>
+            paste0("^", ., "$") |>
+            map_int(~ sum(str_detect(sheet_names, .))) |>
+            keep(~ . != 1)
+         if (length(test_exact) == 0) {
+            active_cols[names(nm_test)] <- active_cols[names(nm_test)] |> paste0("^", ., "$")
+         } else {
+            errors <- NULL
+            for (i in seq_along(nm_test)) {
+               errors <- c(errors, str_glue(
+                  "{names(nm_test[i])} matches {length(nm_test[[i]])} columns: {paste(nm_test[[i]], collapse = ', ')}"
+               ))
+            }
+            context_hint <- if (!is.null(context)) {
+               str_glue("Please check your regular expression for `{context}`")
+            } else {
+               "Please check your regular expressions."
+            }
+            cli_abort(
+               c(
+                  "Unable to rename the following columns in {names(matches)}",
+                  set_names(errors, rep("x", length(errors))),
+                  "i" = context_hint
+               )
+            )
+         }
       }
-    }
 
-    # This needs to be done columnwise to allow for duplicate selection of the same column
-    select_rename_w_dups(matches[[1]], cols)
-  } else {
-    sheets_mats <- matches %>% names()
-    cli_warn(
-      c(
-        paste(
-          "Column names are not specific enough to identify a single sheet."
-        ),
-        "The following {length(sheets_mats)} match the criteria set:"
-      ),
-      ansi_collapse(sheets_mats),
-      call. = FALSE
-    )
-    matches %>% map(~ select_rename_w_dups(., cols))
-  }
+      result <- select_rename_w_dups(sheet_data, active_cols)
+
+      # Add any optional cols that were absent from the sheet as NA
+      missing_optional <- setdiff(names(optional_cols), names(found_optional))
+      for (col in missing_optional) {
+         result[[col]] <- NA_character_
+      }
+
+      result
+   }
+
+   if (length(matches) == 1) {
+      build_from_sheet(matches[[1]])
+   } else {
+      sheets_mats <- names(matches)
+      cli_warn(
+         c(
+            "Column names are not specific enough to identify a single sheet.",
+            "The following {length(sheets_mats)} match the criteria set:"
+         ),
+         ansi_collapse(sheets_mats)
+      )
+      matches |> map(build_from_sheet)
+   }
 }
 
 
@@ -851,20 +928,18 @@ create_tbl <- function(doc, cols, context) {
 #' @noRd
 #'
 yn_to_tf <- function(x) {
-  if (all(is.na(x) | str_detect(x, regex("^y$|^n$|^yes$|^no$", ignore_case = T)))) {
-    case_when(
-      str_detect(x, regex("^y$|^yes$", ignore_case = T)) ~ TRUE,
-      str_detect(x, regex("^n$|^no$", ignore_case = T)) ~ FALSE,
-      is.na(x) ~ NA
-    )
-  } else if (is.logical(x)) {
-    x
-  } else {
-    cli_warn("Keep column needs to be True or False, please correct before converting to a Metacore object",
-      call. = FALSE
-    )
-    x
-  }
+   if (all(is.na(x) | str_detect(x, regex("^y$|^n$|^yes$|^no$", ignore_case = T)))) {
+      case_when(
+         str_detect(x, regex("^y$|^yes$", ignore_case = T)) ~ TRUE,
+         str_detect(x, regex("^n$|^no$", ignore_case = T)) ~ FALSE,
+         is.na(x) ~ NA
+      )
+   } else if (is.logical(x)) {
+      x
+   } else {
+      cli_warn("Keep column needs to be True or False, please correct before converting to a Metacore object")
+      x
+   }
 }
 
 
@@ -878,16 +953,42 @@ yn_to_tf <- function(x) {
 #' @return dataset
 #' @noRd
 select_rename_w_dups <- function(.data, cols) {
-  pull_safe <- safely(~ select(.x, matches(.y, ignore.case = FALSE)))
-  cols %>%
-    map_dfr(function(col) {
-      out <- pull_safe(.data, col) %>%
-        .$result
-      if (ncol(out) == 1) {
-        out <- out %>% pull(1)
-      } else {
-        out <- NULL
-      }
-      out
-    })
+   pull_safe <- safely(~ select(.x, matches(.y, ignore.case = FALSE)))
+
+   cols |>
+      map_dfr(function(col) {
+         out <- pull_safe(.data, col) |>
+            purrr::pluck("result")
+
+         if (ncol(out) == 1) {
+            pull(out, 1)
+         } else {
+            NULL
+         }
+      })
+}
+
+
+#' Reorder columns to match column_schema order
+#'
+#' @param .data dataset to reorder
+#' @param table_name name of the table (e.g., "ds_spec", "ds_vars")
+#'
+#' @return dataset with columns in schema order
+#' @noRd
+reorder_by_schema <- function(.data, table_name) {
+  schema <- column_schema()
+  table_key <- paste0(".", table_name)
+
+  if (!table_key %in% names(schema)) {
+    return(.data)
+  }
+
+  expected_cols <- names(schema[[table_key]])
+  current_cols <- names(.data)
+
+  # Keep only columns that exist in current data, in schema order
+  cols_to_keep <- intersect(expected_cols, current_cols)
+
+  .data |> select(all_of(cols_to_keep))
 }
