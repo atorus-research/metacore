@@ -51,16 +51,12 @@ add_labs <- function(.data, ...) {
 #'
 check_structure <- function(.data, col, func, any_na_acceptable, nm) {
 
-   tryCatch({
-      column <- as_string(col)
-      vec <- .data %>% pull(!!col)
-   }, error = function(e) {
-     browser()
-   })
-  warning_string <- NULL
-  error_message <- NULL
+   column <- as_string(col)
+   vec <- .data %>% pull(!!col)
+   warning_string <- NULL
+   error_message <- NULL
 
-  if (any(is.na(vec)) & !any_na_acceptable) {
+   if (any(is.na(vec)) & !any_na_acceptable) {
     error_message <- str_glue("`{column}` from the `{nm}` table contains missing values. Actual values are needed.")
   } else if (all(is.na(vec))) {
     warning_string <- str_glue("`{column}` from the `{nm}` table only contains missing values.")

@@ -190,12 +190,12 @@ supp_check <- function(ds_vars, supp) {
 #' @return list of column names by dataset
 #' @noRd
 col_vars <- function() {
-  protos <- col_protos()
+  schema <- column_schema()
   # study_level and documents are study-wide tables that are not name-validated
   # against the per-dataset tables, so they are excluded here
-  protos$.study_level <- NULL
-  protos$.documents <- NULL
-  lapply(protos, names)
+  schema$.study_level <- NULL
+  schema$.documents <- NULL
+  lapply(schema, names)
 }
 
 
@@ -209,12 +209,12 @@ col_vars <- function() {
 #'
 #' @return named list of zero-row prototype tibbles, one per table
 #' @noRd
-col_protos <- function() {
+column_schema <- function() {
   list(
     .ds_spec = tibble(
       dataset = character(), structure = character(), label = character(),
       class = character(), repeating = logical(), reference = logical(),
-      purpose = character(), archive_location_id = character()
+      purpose = character()
     ),
     .ds_vars = tibble(
       dataset = character(), variable = character(), key_seq = integer(),
@@ -223,13 +223,12 @@ col_protos <- function() {
     ),
     .var_spec = tibble(
       variable = character(), length = integer(), label = character(),
-      type = character(), common = character(), format = character(),
-      sas_field_name = character()
+      type = character(), common = character(), format = character()
     ),
     .value_spec = tibble(
       dataset = character(), variable = character(), type = character(),
       origin = character(), sig_dig = integer(), code_id = character(),
-      where = character(), derivation_id = character(), where_label = character()
+      where = character(), where_label = character(), derivation_id = character()
     ),
     .derivations = tibble(
       derivation_id = character(), derivation = character(),
@@ -252,29 +251,6 @@ col_protos <- function() {
     .documents = tibble(
       document_id = character(), title = character(), href = character()
     )
-  )
-}
-
-
-#' Columns emitted by the specification readers
-#'
-#' The readers populate the original (pre Define.xml-generation) set of columns.
-#' Any additional columns introduced for Define.xml generation are back-filled
-#' with `NA` when the metacore object is built, so the readers themselves do not
-#' need to emit them. Keeping this list separate from [col_vars()] decouples the
-#' reader output from schema growth.
-#'
-#' @return named list of column-name vectors, one per reader table
-#' @noRd
-reader_cols <- function() {
-  list(
-    .ds_spec = c("dataset", "structure", "label"),
-    .ds_vars = c("dataset", "variable", "key_seq", "order", "mandatory", "core", "supp_flag"),
-    .var_spec = c("variable", "length", "label", "type", "common", "format"),
-    .value_spec = c("dataset", "variable", "type", "origin", "sig_dig", "code_id", "where", "derivation_id"),
-    .derivations = c("derivation_id", "derivation"),
-    .codelist = c("code_id", "name", "type", "codes"),
-    .supp = c("dataset", "variable", "idvar", "qeval")
   )
 }
 
@@ -410,9 +386,7 @@ all_message <- function() {
     "ds_spec", "repeating", is.logical, TRUE,
     "ds_spec", "reference", is.logical, TRUE,
     "ds_spec", "purpose", is.character, TRUE,
-    "ds_spec", "archive_location_id", is.character, TRUE,
     "ds_vars", "role", is.character, TRUE,
-    "var_spec", "sas_field_name", is.character, TRUE,
     "value_spec", "where_label", is.character, TRUE,
     "derivations", "method_name", is.character, TRUE,
     "derivations", "method_type", is.character, TRUE,
@@ -476,7 +450,7 @@ check_columns <- function(ds_spec = NULL, ds_vars = NULL, var_spec = NULL, value
   # Filter out all_message() tibble to include only the required checks
   filtered_checks <- all_message() %>%
     filter(dataset %in% ds_names)
-  browser()
+
   # Apply filtered checks to the supplied dataframes
   messages <- purrr::pmap(
     filtered_checks,

@@ -34,19 +34,18 @@ MetaCore_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivati
     what = "MetaCore_initialize(quiet)",
     with = "MetaCore_initialize(verbose)"
   )
-
   # Back-fill any columns introduced for Define.xml generation that the caller
   # did not supply, so they are optional and existing callers keep working.
-  protos <- col_protos()
-  ds_spec <- fill_cols(ds_spec, protos$.ds_spec)
-  ds_vars <- fill_cols(ds_vars, protos$.ds_vars)
-  var_spec <- fill_cols(var_spec, protos$.var_spec)
-  value_spec <- fill_cols(value_spec, protos$.value_spec)
-  derivations <- fill_cols(derivations, protos$.derivations)
-  codelist <- fill_cols(codelist, protos$.codelist)
-  supp <- fill_cols(supp, protos$.supp)
-  study_level <- fill_cols(study_level, protos$.study_level)
-  documents <- fill_cols(documents, protos$.documents)
+  schema <- column_schema()
+  ds_spec <- fill_cols(ds_spec, schema$.ds_spec)
+  ds_vars <- fill_cols(ds_vars, schema$.ds_vars)
+  var_spec <- fill_cols(var_spec, schema$.var_spec)
+  value_spec <- fill_cols(value_spec, schema$.value_spec)
+  derivations <- fill_cols(derivations, schema$.derivations)
+  codelist <- fill_cols(codelist, schema$.codelist)
+  supp <- fill_cols(supp, schema$.supp)
+  study_level <- fill_cols(study_level, schema$.study_level)
+  documents <- fill_cols(documents, schema$.documents)
 
   private$.ds_spec <- ds_spec %>%
     add_labs(
@@ -56,8 +55,7 @@ MetaCore_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivati
       class = "Dataset Class",
       repeating = "Repeating (Boolean)",
       reference = "Reference Data (Boolean)",
-      purpose = "Dataset Purpose",
-      archive_location_id = "Archive Location ID"
+      purpose = "Dataset Purpose"
     )
 
   private$.ds_vars <- ds_vars %>%
@@ -96,7 +94,6 @@ MetaCore_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivati
     ) %>%
     mutate(origin = str_to_lower(.data$origin))
 
-
   private$.derivations <- derivations %>%
     add_labs(
       derivation_id = "ID of Derivation",
@@ -122,6 +119,13 @@ MetaCore_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivati
       idvar = "Identifying Variable",
       qeval = "Evaluator"
     )
+
+  private$.documents <- documents %>%
+     add_labs(
+        document_id = "Document ID",
+        title = "Title",
+        href = "Href"
+     )
 
   private$.ds_len <- ds_spec %>% nrow()
 
@@ -288,81 +292,15 @@ MetaCore <- R6::R6Class("Metacore",
     metacore_filter = MetaCore_filter
   ),
   private = list(
-    .ds_spec = tibble(
-      dataset = character(),
-      structure = character(),
-      label = character(),
-      class = character(),
-      repeating = logical(),
-      reference = logical(),
-      purpose = character(),
-      archive_location_id = character()
-    ),
-    .ds_vars = tibble(
-      dataset = character(),
-      variable = character(),
-      mandatory = logical(),
-      key_seq = integer(),
-      order = integer(),
-      core = character(),
-      supp_flag = logical(),
-      role = character()
-    ),
-    .var_spec = tibble(
-      variable = character(),
-      label = character(),
-      length = integer(),
-      type = character(),
-      common = character(),
-      format = character(),
-      sas_field_name = character()
-    ),
-    .value_spec = tibble(
-      dataset = character(),
-      variable = character(),
-      where = character(),
-      type = character(),
-      sig_dig = integer(),
-      code_id = character(),
-      origin = character(),
-      derivation_id = integer(),
-      where_label = character()
-    ),
-    .derivations = tibble(
-      derivation_id = integer(),
-      derivation = character(),
-      method_name = character(),
-      method_type = character(),
-      document_id = character(),
-      pages = character()
-    ),
-    # code_type == df | permitted_val | external_lib
-    .codelist = tibble(
-      code_id = character(),
-      name = character(),
-      type = character(),
-      codes = list()
-    ),
-    .supp = tibble(
-      dataset = character(),
-      variable = character(),
-      idvar = character(),
-      qeval = character()
-    ),
-    .study_level = tibble(
-      study_name = character(),
-      study_description = character(),
-      protocol_name = character(),
-      standard_name = character(),
-      standard_version = character(),
-      define_version = character(),
-      language = character()
-    ),
-    .documents = tibble(
-      document_id = character(),
-      title = character(),
-      href = character()
-    ),
+    .ds_spec = tibble(),
+    .ds_vars = tibble(),
+    .var_spec = tibble(),
+    .value_spec = tibble(),
+    .derivations = tibble(),
+    .codelist = tibble(),
+    .supp = tibble(),
+    .study_level = tibble(),
+    .documents = tibble(),
     .ds_len = NA,
     .ds_names = list(),
     .ds_labels = list(),
@@ -417,59 +355,10 @@ MetaCore <- R6::R6Class("Metacore",
 #' @family Metacore
 #'
 #' @export
-metacore <- function(ds_spec = tibble(
-                       dataset = character(),
-                       structure = character(),
-                       label = character()
-                     ),
-                     ds_vars = tibble(
-                       dataset = character(),
-                       variable = character(),
-                       keep = NULL, # Deprecated in 0.3.0. To be removed in a future version
-                       mandatory = logical(),
-                       key_seq = integer(),
-                       order = integer(),
-                       core = character(),
-                       supp_flag = logical()
-                     ),
-                     var_spec = tibble(
-                       variable = character(),
-                       label = character(),
-                       length = integer(),
-                       type = character(),
-                       common = character(),
-                       format = character()
-                     ),
-                     value_spec = tibble(
-                       dataset = character(),
-                       variable = character(),
-                       where = character(),
-                       type = character(),
-                       sig_dig = integer(),
-                       code_id = character(),
-                       origin = character(),
-                       derivation_id = integer()
-                     ),
-                     derivations = tibble(
-                       derivation_id = integer(),
-                       derivation = character()
-                     ),
-                     codelist = tibble(
-                       code_id = character(),
-                       name = character(),
-                       type = character(),
-                       codes = list()
-                     ),
-                     supp = tibble(
-                       dataset = character(),
-                       variable = character(),
-                       idvar = character(),
-                       qeval = character()
-                     ),
-                     study_level = NULL,
-                     documents = NULL,
-                     quiet = deprecated(),
-                     verbose = "message") {
+metacore <- function(ds_spec = NULL, ds_vars = NULL, var_spec = NULL, value_spec = NULL,
+                     derivations = NULL, codelist = NULL, supp = NULL, study_level = NULL,
+                     documents = NULL, quiet = deprecated(), verbose = "message") {
+
   # Check if user has supplied `quiet` instead of `verbose`
   if (lifecycle::is_present(quiet)) {
     deprecate_soft(when = "0.3.0", what = "metacore(quiet)", with = "metacore(verbose)")
@@ -479,48 +368,29 @@ metacore <- function(ds_spec = tibble(
 
   with_verbosity(
     {
+      # Use column_schema() as single source of truth for table structures
+      schema <- column_schema()
+      if (is.null(ds_spec)) ds_spec <- schema$.ds_spec
+      if (is.null(ds_vars)) ds_vars <- schema$.ds_vars
+      if (is.null(var_spec)) var_spec <- schema$.var_spec
+      if (is.null(value_spec)) value_spec <- schema$.value_spec
+      if (is.null(derivations)) derivations <- schema$.derivations
+      if (is.null(codelist)) codelist <- schema$.codelist
+      if (is.null(supp)) supp <- schema$.supp
+      if (is.null(study_level)) study_level <- schema$.study_level
+      if (is.null(documents)) documents <- schema$.documents
+
       # Signal deprecation warning for ds_vars$keep column. This cannot be handled by
       # regular `lifecycle::deprecate_*` functionality as it is a column name of an
       # argument that has been changed, not the argument itself.
-      if ("keep" %in% names(ds_vars)) {
-        cli_warn(c("The column `ds_vars$keep` in the `ds_vars` table was deprecated
-as of 0.3.0 in favour of `ds_vars$mandatory and will be removed in a future release.
-The input for the supplied column `keep` has been mapped to the new column `mandatory`."))
+      if (!is.null(ds_vars) && "keep" %in% names(ds_vars)) {
+        cli_warn(c("The column {var ds_vars$keep} in the {.var ds_vars} table was deprecated
+as of 0.3.0 in favour of {.var ds_vars$mandatory} and will be removed in a future release.
+The input for the supplied column {.var keep} has been mapped to the new column {.var mandatory}."))
 
         ds_vars <- ds_vars %>%
           mutate(mandatory = keep) %>%
           select(-keep)
-      }
-
-      is_empty_df <- as.list(environment()) %>%
-        keep(is.null)
-
-      if (length(is_empty_df) > 0) {
-        to_replace <- all_message() %>%
-          mutate(
-            convert = map(.data$test, function(x) {
-              if (identical(x, .Primitive("is.numeric"))) {
-                numeric()
-              } else if (identical(x, .Primitive("is.logical"))) {
-                logical()
-              } else {
-                character()
-              }
-            })
-          ) %>%
-          filter(.data$dataset %in% names(is_empty_df)) %>%
-          group_by(.data$dataset) %>%
-          group_split()
-
-        replaced <- to_replace %>%
-          map(function(df) {
-            names(df$convert) <- df$var
-            df$convert %>%
-              as_tibble()
-          })
-
-        names(replaced) <- to_replace %>% map_chr(~ unique(.x$dataset))
-        list2env(replaced, environment())
       }
 
       MetaCore$new(
