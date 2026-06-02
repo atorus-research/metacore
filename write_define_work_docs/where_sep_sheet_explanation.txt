@@ -1,0 +1,53 @@
+where_sep_sheet explanation
+===========================
+
+What it controls
+----------------
+where_sep_sheet tells the reader how where clauses are stored in your Pinnacle 21
+specification Excel file. Where clauses appear in Value Level Metadata (VLM) -- the rows
+in a value spec sheet that say something like "these metadata rules apply only when
+PARAMCD = 'ALB'".
+
+
+The CDISC context: Value Level Metadata
+----------------------------------------
+In CDISC Define-XML, VLM lets you define dataset/variable metadata that applies
+conditionally. For example, in ADLB, AVAL has different significant digits, units, or
+derivations depending on which lab test parameter you're looking at. The condition that
+scopes a row of metadata is called the where clause -- essentially a filter like
+PARAMCD EQ "ALB".
+
+Pinnacle 21 (the dominant spec template tool in clinical trials) evolved how it stores
+these conditions between major template versions:
+
+  Older P21: Separate sheet (e.g. a "Where Clauses" tab) -- the value spec sheet has an
+             ID column that cross-references a row on that sheet.
+
+  Newer P21: Inline -- the where clause text appears directly in a column on the value
+             spec sheet.
+
+
+What the code does with it
+---------------------------
+where_sep_sheet = TRUE (default, matches older P21 format):
+
+  The spec_type_to_value_spec() function reads the value spec sheet and finds a "where"
+  column containing IDs (not human-readable text). It then reads the separate
+  where-clause sheet, collapses the Variable/Comparator/Value columns into a single
+  string, and does a left_join to resolve the ID to actual where clause text
+  (spec_builder.R lines 472-479).
+
+where_sep_sheet = FALSE (matches newer P21 format):
+
+  The "where" column in the value spec sheet already contains the final where clause
+  text, so no lookup join is needed -- it is used as-is.
+
+
+Practical implication
+----------------------
+If you load a newer P21 spec with where_sep_sheet = TRUE (the default), you will get a
+warning about a missing cross-reference and where clauses will likely be lost or
+incorrect.
+
+If you load an older spec with where_sep_sheet = FALSE, the IDs (like "WC.001") will be
+used literally as the where clause text instead of the resolved condition.

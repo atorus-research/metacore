@@ -1,0 +1,463 @@
+================================================================================
+ANALYSIS: Define-XML 2.0 vs 2.1 Compatibility
+================================================================================
+
+Date: 2026-06-02
+Purpose: Identify structural differences between Define-XML 2.0 and 2.1 and
+         determine what changes would be required in the metacore readers and
+         writers to support both versions.
+
+Sources consulted:
+  - tests/testthat/define2-0-0.xsl (CDISC reference stylesheet, contains
+    explicit v2.0 / v2.1 branching comments throughout)
+  - tests/testthat/define-2021.xml (current 2.0.0 test file)
+  - R/xml_builders.R, R/define_xml_writers.R (current implementation)
+
+================================================================================
+1. OVERVIEW
+================================================================================
+
+Define-XML 2.1 is an incremental extension of 2.0. It does NOT change the
+underlying ODM version (both use ODM 1.3.2) but updates the def: namespace
+from v2.0 to v2.1 and introduces new elements and attributes. All 2.1 changes
+are additive — a 2.0 document is valid 2.1 with zero changes, which means 2.1
+support can be layered on top of the current implementation without breaking
+existing behaviour.
+
+The primary theme of 2.1 is richer standards traceability: datasets, variables,
+codelists, and methods can now explicitly reference which CDISC standard (and
+which version of it) they belong to, flag non-standard content, and mark empty
+datasets.
+
+================================================================================
+2. STRUCTURAL DIFFERENCES: 2.0 vs 2.1
+================================================================================
+
+--- 2.1 Change #1: Namespace and version identifiers ---
+
+  2.0:
+    xmlns:def="http://www.cdisc.org/ns/def/v2.0"
+    def:DefineVersion="2.0.0"         (attribute on MetaDataVersion)
+
+  2.1:
+    xmlns:def="http://www.cdisc.org/ns/def/v2.1"
+    def:DefineVersion="2.1.0"
+
+  Impact: The namespace URI is embedded in every XPath query that uses the
+  def: prefix. After xml_ns_strip() this no longer matters for reading, but
+  the writer must emit the correct URI for the declared version.
+
+
+--- 2.1 Change #2: Standards block replaces MetaDataVersion attributes ---
+
+  2.0: StandardName and StandardVersion are flat attributes on MetaDataVersion:
+    <MetaDataVersion OID="..."
+                     def:DefineVersion="2.0.0"
+                     def:StandardName="CDISC ADaM"
+                     def:StandardVersion="1.1">
+
+  2.1: Those attributes are removed. Standards are now declared as child
+  elements inside a def:Standards block:
+    <MetaDataVersion OID="..." def:DefineVersion="2.1.0">
+      <def:Standards>
+        <def:Standard OID="STD.ADAM"
+                      Name="CDISC ADaM"
+                      Type="IG"           <!-- IG | CT | EXT -->
+                      Version="1.1"
+                      PublishingSet="ADaM"
+                      IsDefault="Yes"     <!-- Yes | No -->
+                      Status="Final"/>
+        <def:Standard OID="STD.CDASH" Name="CDISC CDASH" Type="IG"
+                      Version="1.1" IsDefault="No" Status="Final"/>
+      </def:Standards>
+      ...
+    </MetaDataVersion>
+
+  Individual datasets, codelists, and the MetaDataVersion itself can then
+  reference a standard by OID via @def:StandardOID.
+
+  Impact on metacore schema: The current study_level table stores
+  standard_name / standard_version as scalar columns (one standard per study).
+  2.1 requires a list of standards. A new `standards` table is needed.
+
+  Impact on readers: xml_to_standards() (new function) + define_to_metacore()
+  must call it.
+
+  Impact on writers: .create_metadata_version() must branch on the target
+  define_version: emit flat attributes for 2.0, emit the Standards child block
+  for 2.1. A new helper .create_standards() is needed for 2.1.
+
+
+--- 2.1 Change #3: Dataset Class becomes a child element, gains SubClass ---
+
+  2.0: Class is a plain string attribute on ItemGroupDef:
+    <ItemGroupDef ... def:Class="FINDINGS">
+
+  2.1: Class is a child element with its own Name attribute and optional
+  SubClass children:
+    <ItemGroupDef ...>
+      <def:Class Name="FINDINGS">
+        <def:SubClass Name="FINDINGS ABOUT EVENTS OF INTEREST"
+                      ParentClass="FINDINGS"/>
+      </def:Class>
+    </ItemGroupDef>
+
+  Impact on metacore schema: ds_spec.class (character) already captures the
+  top-level class name. A new ds_spec.subclass column is needed to hold the
+  SubClass name. ParentClass can be inferred from the class value so does not
+  need its own column.
+
+  Impact on readers: xml_to_ds_spec() currently reads @def:Class (the 2.0
+  attribute). For 2.1 it must also check for the child element
+  def:Class/@Name. Both paths should be tried so the reader works on both
+  versions.
+
+  Impact on writers: .create_item_group_defs() currently writes
+  set_attrs(igd, "def:Class" = ds$class). For 2.1 output it must instead
+  create a child def:Class element (and optionally a SubClass child).
+
+
+--- 2.1 Change #4: @def:StandardOID on ItemGroupDef and CodeList ---
+
+  2.1 adds @def:StandardOID to ItemGroupDef and CodeList, pointing to the OID
+  of a def:Standard element declared in the Standards block (Change #2).
+
+  Impact on metacore schema:
+    - ds_spec: new column standard_oid (character)
+    - codelist: new column standard_oid (character)
+
+  Impact on readers: xml_to_ds_spec() and xml_to_codelist() must read this
+  attribute.
+
+  Impact on writers: .create_item_group_defs() and .create_code_lists() must
+  emit @def:StandardOID when present.
+
+
+--- 2.1 Change #5: @def:IsNonStandard on ItemGroupDef and CodeList ---
+
+  2.1 adds a boolean flag to mark content that is not from a registered standard:
+    <ItemGroupDef ... def:IsNonStandard="Yes">
+    <CodeList ... def:IsNonStandard="Yes">
+
+  Impact on metacore schema:
+    - ds_spec: new column is_non_standard (logical)
+    - codelist: new column is_non_standard (logical)
+
+  Impact on readers/writers: same pattern as standard_oid above.
+
+
+--- 2.1 Change #6: @def:HasNoData on ItemGroupDef and ItemRef ---
+
+  2.1 adds a flag to indicate that a dataset (or variable within a dataset) has
+  no data in the submitted package:
+    <ItemGroupDef ... def:HasNoData="Yes">
+    <ItemRef ... def:HasNoData="Yes">
+
+  Impact on metacore schema:
+    - ds_spec: new column has_no_data (logical)
+    - ds_vars: new column has_no_data (logical)
+
+  Impact on readers: xml_to_ds_spec() and xml_to_ds_vars() must read this.
+
+  Impact on writers: .create_item_group_defs() must emit @def:HasNoData on
+  both the ItemGroupDef and its ItemRef children when the flag is set.
+
+
+--- 2.1 Change #7: def:Origin gains a @Source attribute ---
+
+  2.1 adds an optional @Source attribute to def:Origin to capture where the
+  data came from when the type is Collected:
+    <def:Origin Type="Collected" Source="CRF">
+
+  Valid Source values (from CDISC): "CRF", "eDT", "PK Concentration Data",
+  "Investigator", "Sponsor", "Central Laboratory", etc.
+
+  Impact on metacore schema: value_spec needs a new origin_source (character)
+  column.
+
+  Impact on readers: xml_to_value_spec() must read @Source from def:Origin.
+
+  Impact on writers: .add_origin() must emit @Source when origin_source is
+  populated.
+
+  Note: The existing origin_type() mapping in the writer already handles the
+  CRF → Collected rename that 2.1 formalised, so no change is needed there.
+
+
+--- 2.1 Change #8: Origin type rename CRF → Collected ---
+
+  2.0 used @Type="CRF". 2.1 formalises the rename to @Type="Collected" (the
+  XSL comment at line 331 explicitly notes this). The current origin_type()
+  function in the writer already maps "crf" → "CRF". For 2.1 output it should
+  map "crf" → "Collected" (or the metacore origin value should be stored as
+  "collected" uniformly and the writer capitalises it).
+
+  This is a writer-only concern; the reader already lowercases all origin
+  values on input so existing data is unaffected.
+
+
+--- 2.1 Change #9: CodeListItem/Description and EnumeratedItem/Description ---
+
+  2.1 adds an optional Description child element to individual codelist entries,
+  allowing a free-text description distinct from the decoded value:
+    <CodeListItem CodedValue="M">
+      <Decode><TranslatedText>Male</TranslatedText></Decode>
+      <Description><TranslatedText>Biological sex is male</TranslatedText></Description>
+    </CodeListItem>
+
+  Impact on metacore schema: The nested codes tibble within codelist currently
+  stores columns (code, decode) for code_decode type, and (code) for
+  permitted_val type. A new optional `description` column would be needed in
+  the nested codes tibble for 2.1.
+
+  Impact on readers: xml_to_codelist() must extract this child element.
+
+  Impact on writers: .create_code_lists() must emit Description when present.
+
+
+--- 2.1 Change #10: CodeListItem@Rank and EnumeratedItem@Rank ---
+
+  2.1 adds an optional @Rank attribute to codelist items for explicit ordering
+  beyond the OrderNumber attribute.
+
+  Impact on metacore schema: An optional `rank` column in the nested codes
+  tibble.
+
+  Impact on readers/writers: low priority; OrderNumber already handles
+  ordering for most use cases.
+
+
+--- 2.1 Change #11: MethodDef/FormalExpression (formalised in 2.1) ---
+
+  FormalExpression existed as a draft feature in 2.0 but is formally defined in
+  2.1. It allows derivation methods to carry machine-readable code:
+    <MethodDef OID="MT.ADEX.AVAL" Name="..." Type="Computation">
+      <Description>...</Description>
+      <FormalExpression Context="SAS">
+        AVAL = INPUT(EXDOSE, best.);
+      </FormalExpression>
+    </MethodDef>
+
+  Impact on metacore schema: The derivations table already has expression_context
+  and expression_code listed as Phase 4 fields in the original analysis
+  (DEFINE_XML_GENERATION_ANALYSIS.txt section 6.4). These are the right columns.
+
+  Impact on readers: xml_to_derivations() must extract FormalExpression@Context
+  and FormalExpression text content.
+
+  Impact on writers: .create_method_defs() must emit FormalExpression when
+  expression_context or expression_code is populated.
+
+
+--- 2.1 Change #12: def:ValueListDef/Description ---
+
+  2.1 allows a Description child element on def:ValueListDef to document the
+  value list as a whole:
+    <def:ValueListDef OID="VL.ADLB.AVAL">
+      <Description><TranslatedText>...</TranslatedText></Description>
+      ...
+    </def:ValueListDef>
+
+  Impact on metacore schema: This description maps naturally to a value-list-level
+  annotation. There is no obvious existing home for it. A where_list_label
+  column on value_spec grouped by (dataset, variable) could serve this, but it
+  is a low-priority / rarely-used feature.
+
+
+--- 2.1 Change #13: MetaDataVersion@def:CommentOID ---
+
+  2.1 allows the MetaDataVersion element itself to carry a comment OID:
+    <MetaDataVersion OID="..." def:CommentOID="COM.GENERAL">
+
+  Impact on metacore schema: study_level table could gain a comment_id column.
+
+  Impact on readers/writers: Minor; low priority.
+
+
+--- 2.1 Change #14: ODM@def:Context ---
+
+  2.1 adds an optional @def:Context attribute to the ODM root element, used to
+  identify the regulatory submission context (e.g. "Other", "Submission"):
+    <ODM ... def:Context="Submission">
+
+  Impact on metacore schema: study_level table could gain a context column.
+
+  Impact on readers/writers: Minor; low priority.
+
+
+================================================================================
+3. WHAT STAYS THE SAME
+================================================================================
+
+The following structures are unchanged between 2.0 and 2.1 and require no
+reader or writer modifications:
+
+  - ODM root structure (FileType, FileOID, CreationDateTime, SourceSystem)
+  - Study/GlobalVariables (StudyName, StudyDescription, ProtocolName)
+  - ItemGroupDef core attributes (OID, Name, Repeating, IsReferenceData,
+    SASDatasetName, Purpose, def:Structure, def:ArchiveLocationID)
+  - ItemRef attributes (ItemOID, OrderNumber, Mandatory, KeySequence,
+    MethodOID, Role)
+  - ItemDef structure (OID, Name, DataType, Length, SASFieldName,
+    DisplayFormat, SignificantDigits, def:CommentOID)
+  - def:Origin structure (Type, DocumentRef, PDFPageRef) — Source is new
+  - def:ValueListDef/ItemRef structure
+  - def:WhereClauseDef/RangeCheck structure
+  - CodeList core structure (OID, Name, DataType, EnumeratedItem,
+    CodeListItem, ExternalCodeList)
+  - MethodDef core structure (OID, Name, Type, Description)
+  - def:CommentDef structure
+  - def:leaf elements (location and structure unchanged)
+  - Namespace handling after xml_ns_strip() (no impact on XPath queries)
+
+
+================================================================================
+4. SUMMARY: CHANGES REQUIRED IN METACORE
+================================================================================
+
+--- Schema extensions (column_schema() in validators.R) ---
+
+  New table: standards
+    standard_oid    character  (e.g. "STD.ADAM")
+    name            character  (e.g. "CDISC ADaM")
+    type            character  (IG | CT | EXT)
+    version         character  (e.g. "1.1")
+    publishing_set  character  (e.g. "ADaM")
+    is_default      logical
+    status          character  (e.g. "Final")
+    comment_id      character  (FK to comments)
+
+  Extend ds_spec:
+    subclass        character  (def:Class/def:SubClass@Name)
+    standard_oid    character  (FK to standards.standard_oid)
+    is_non_standard logical
+    has_no_data     logical
+
+  Extend ds_vars:
+    has_no_data     logical    (ItemRef@def:HasNoData)
+
+  Extend value_spec:
+    origin_source   character  (def:Origin@Source)
+
+  Extend codelist (in the outer tibble, not the nested codes tibble):
+    standard_oid    character
+    is_non_standard logical
+
+  Extend nested codes tibble (inside codelist):
+    description     character  (CodeListItem/Description)
+    rank            integer    (CodeListItem@Rank / EnumeratedItem@Rank)
+
+  Extend derivations (already documented as Phase 4):
+    expression_context  character  (FormalExpression@Context)
+    expression_code     character  (FormalExpression text)
+
+  Extend study_level:
+    context         character  (ODM@def:Context — low priority)
+    comment_id      character  (MetaDataVersion@def:CommentOID — low priority)
+
+
+--- Reader changes (R/xml_builders.R) ---
+
+  New function: xml_to_standards()
+    Read def:Standards/def:Standard elements from MetaDataVersion.
+
+  Update define_to_metacore():
+    Call xml_to_standards() and pass result as `standards` argument.
+    Branch on DefineVersion: 2.0.x reads standard_name/version from
+    MetaDataVersion attributes; 2.1.x reads from the Standards block.
+
+  Update xml_to_ds_spec():
+    Read def:Class/@Name (child element, 2.1) in addition to @def:Class
+    (attribute, 2.0) — try child element first, fall back to attribute.
+    Read def:Class/def:SubClass/@Name → subclass.
+    Read @def:StandardOID, @def:IsNonStandard ("Yes"/"No" → logical),
+    @def:HasNoData ("Yes"/"No" → logical).
+
+  Update xml_to_ds_vars():
+    Read @def:HasNoData on ItemRef → has_no_data.
+
+  Update xml_to_value_spec():
+    Read def:Origin@Source → origin_source.
+
+  Update xml_to_codelist():
+    Read @def:IsNonStandard, @def:StandardOID on CodeList.
+    Read CodeListItem/Description and EnumeratedItem/Description.
+    Read @Rank on CodeListItem and EnumeratedItem.
+
+  Update xml_to_derivations():
+    Read FormalExpression@Context → expression_context.
+    Read FormalExpression text → expression_code.
+
+
+--- Writer changes (R/define_xml_writers.R) ---
+
+  Add define_version parameter to metacore_to_define_xml() (default "2.0.0").
+
+  Update .create_odm_root():
+    Use def namespace URI v2.0 or v2.1 based on define_version parameter.
+    Emit @def:Context when study_level$context is populated (2.1 only).
+
+  Update .create_metadata_version():
+    2.0: emit def:StandardName / def:StandardVersion as flat attributes.
+    2.1: emit def:Standards child block via new .create_standards() helper;
+         omit the flat attributes.
+
+  New helper .create_standards():
+    Build def:Standards/def:Standard elements from the `standards` table.
+
+  Update .create_item_group_defs():
+    2.0: emit @def:Class as attribute (current behaviour).
+    2.1: emit def:Class child element with @Name; add def:SubClass if subclass
+         is populated; add @def:StandardOID, @def:IsNonStandard, @def:HasNoData.
+    Both versions: add @def:HasNoData on ItemRef elements when ds_vars has_no_data.
+
+  Update .create_item_defs():
+    Update .add_origin() to emit @Source when origin_source is populated (2.1).
+
+  Update .create_code_lists():
+    Emit @def:IsNonStandard, @def:StandardOID when present (2.1).
+    Emit Description sub-element for CodeListItem/EnumeratedItem when present.
+    Emit @Rank when present.
+
+  Update .create_method_defs():
+    Emit FormalExpression child element when expression_context or
+    expression_code is populated.
+
+  Update .create_value_list_defs():
+    Emit Description child element if a value-list-level description is present.
+
+
+--- Architectural note: version dispatch ---
+
+  The cleanest approach is a single define_version parameter in
+  metacore_to_define_xml() that controls the few branching points (namespace
+  URI, Standards block vs. attributes, Class element vs. attribute). For
+  reading, the existing define_to_metacore() should inspect the
+  def:DefineVersion value and use it to determine which paths to follow for
+  Class and Standards. Since xml_ns_strip() is called early, the namespace
+  difference does not affect XPath logic — only the DefineVersion attribute
+  value needs to be checked.
+
+  Backward compatibility: all new 2.1 columns should be optional (NA by
+  default), following the same fill_cols() pattern already in place. Existing
+  2.0 metacore objects and workflows are unaffected.
+
+
+================================================================================
+5. EFFORT ESTIMATE
+================================================================================
+
+  Schema extensions:          1-2 hours
+  xml_to_standards() (new):   1-2 hours
+  Reader updates (6 funcs):   4-6 hours
+  Writer updates (6 funcs):   4-6 hours
+  Tests:                      4-6 hours
+  ----------------------------------------
+  TOTAL:                     ~14-22 hours (roughly 2-3 days)
+
+  This is substantially less effort than Phase 1+2 because the structure is
+  already in place and all changes are additive.
+
+================================================================================
+END OF ANALYSIS
+================================================================================

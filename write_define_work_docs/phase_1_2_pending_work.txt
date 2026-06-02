@@ -1,0 +1,203 @@
+================================================================================
+PENDING WORK: Phase 1 & 2 XML Reader Updates
+================================================================================
+
+Date: 2026-06-02
+Status: Phase 2 (write path) complete. Phase 1 XML reader updates incomplete.
+
+All pending items are in R/xml_builders.R unless otherwise noted.
+
+================================================================================
+1. Wire xml_to_comments() into define_to_metacore()
+================================================================================
+
+File: R/xml_builders.R
+Function: define_to_metacore() — lines 39-54
+
+Problem:
+  xml_to_comments() exists and is correct, but define_to_metacore() never calls
+  it. The `comments` table is therefore always empty when reading a Define.xml.
+
+Fix:
+  Add a call to xml_to_comments() alongside the other reader calls, then pass
+  the result to metacore() as the `comments` argument.
+
+  Current:
+    ds_spec      <- xml_to_ds_spec(xml)
+    ds_vars      <- xml_to_ds_vars(xml)
+    var_spec     <- xml_to_var_spec(xml)
+    value_spec   <- xml_to_value_spec(xml)
+    code_list    <- xml_to_codelist(xml)
+    derivations  <- xml_to_derivations(xml)
+
+    metacore(ds_spec, ds_vars, var_spec, value_spec, derivations,
+             codelist = code_list, quiet = quiet)
+
+  Required:
+    comments     <- xml_to_comments(xml)          # ADD THIS LINE
+
+    metacore(ds_spec, ds_vars, var_spec, value_spec, derivations,
+             codelist = code_list, comments = comments, quiet = quiet)
+
+
+================================================================================
+2. Preserve comment_id in xml_to_value_spec()
+================================================================================
+
+File: R/xml_builders.R
+Function: xml_to_value_spec() — lines 200-345
+
+Problem:
+  comment_id is read correctly from ItemDef@CommentOID (line 212), but two
+  issues prevent it from reaching the output:
+
+  (a) Legacy logic at line 335 repurposes comment_id as derivation_id for
+      "Assigned" origins — this is pre-refactoring behaviour that predates the
+      separate comments table and must be removed:
+
+        .data$origin == "Assigned" & !is.na(.data$comment_id) ~ .data$comment_id,
+
+  (b) The final select() at line 341 explicitly drops comment_id:
+
+        -.data$comment_id
+
+Fix:
+  (a) Remove the "Assigned" branch from the derivation_id case_when (line 335).
+      Assigned variables should have derivation_id = NA; their comment linkage
+      is now carried by comment_id.
+
+  (b) Add comment_id to the final select() instead of excluding it:
+
+    select(
+      .data$dataset, .data$variable, .data$code_id, .data$derivation_id,
+      .data$type, .data$origin, .data$where, .data$sig_dig,
+      .data$comment_id,                               # KEEP (was dropped)
+      -.data$predecessor, -.data$varname, -.data$oid
+    )
+
+
+================================================================================
+3. Read class, repeating, reference, purpose in xml_to_ds_spec()
+================================================================================
+
+File: R/xml_builders.R
+Function: xml_to_ds_spec() — lines 70-80
+
+Problem:
+  Only dataset, structure, and label are extracted from ItemGroupDef. The
+  attributes def:Class, Repeating, IsReferenceData, and Purpose are ignored,
+  leaving those columns NA after define_to_metacore().
+
+Fix:
+  Extend the map_dfr tibble to extract the missing attributes:
+
+    tibble(
+      dataset   = xml_attr(node, "Name"),
+      structure = xml_attr(node, "Structure"),
+      label     = xml_find_first(node, "./Description") %>% xml_text(),
+      class     = xml_attr(node, "Class"),                      # ADD
+      repeating = xml_attr(node, "Repeating") == "Yes",         # ADD
+      reference = xml_attr(node, "IsReferenceData") == "Yes",   # ADD
+      purpose   = xml_attr(node, "Purpose")                     # ADD
+    )
+
+  Note: After xml_ns_strip() the "def:Class" namespace prefix is stripped, so
+  the attribute is accessible as plain "Class".
+
+
+================================================================================
+4. Read role in xml_to_ds_vars()
+================================================================================
+
+File: R/xml_builders.R
+Function: xml_to_ds_vars() — lines 92-119
+
+Problem:
+  ItemRef@Role is not extracted, so ds_vars$role is always NA after reading
+  a Define.xml.
+
+Fix:
+  Add role to the tibble inside the inner map_dfr (the ItemRef loop):
+
+    tibble(
+      dataset   = xml_attr(node, "Name"),
+      oid       = xml_attr(child_node, "ItemOID"),
+      mandatory = xml_attr(child_node, "Mandatory"),
+      key_seq   = xml_attr(child_node, "KeySequence") %>% as.integer(),
+      order     = xml_attr(child_node, "OrderNumber") %>% as.integer(),
+      role      = xml_attr(child_node, "Role")                  # ADD
+    )
+
+  Also add role to the final select() so it is retained in the output.
+
+
+================================================================================
+5. Read method_name, method_type, document_id, pages in xml_to_derivations()
+================================================================================
+
+File: R/xml_builders.R
+Function: xml_to_derivations() — lines 434-459
+
+Problem:
+  Only derivation_id and derivation (description text) are extracted from
+  MethodDef. The Name, Type, and nested DocumentRef/PDFPageRef attributes are
+  ignored, so those derivations columns are always NA.
+
+Fix:
+  Extend the map_dfr tibble:
+
+    xml_find_all(doc, "//MethodDef") %>%
+      map_dfr(function(node) {
+        tibble(
+          derivation_id = xml_attr(node, "OID"),
+          derivation    = xml_find_first(node, "./Description/TranslatedText") %>%
+                            xml_text(),
+          method_name   = xml_attr(node, "Name"),                     # ADD
+          method_type   = xml_attr(node, "Type"),                     # ADD
+          document_id   = xml_find_first(node,
+                            "./Description/def:DocumentRef") %>%
+                            xml_attr("leafID"),                       # ADD
+          pages         = xml_find_first(node,
+                            "./Description/def:DocumentRef/def:PDFPageRef") %>%
+                            xml_attr("PageRefs")                      # ADD
+        )
+      })
+
+  Note: DocumentRef nesting varies across Define.xml files. The XPath above
+  should be verified against define-2021.xml and adjusted if needed.
+
+
+================================================================================
+TESTING REQUIRED AFTER FIXES
+================================================================================
+
+Once all five fixes above are applied:
+
+1. Unit test xml_to_comments():
+   - Verify that define_to_metacore() returns a metacore object with a
+     non-empty comments table when the source XML contains def:CommentDef.
+   - Test file: tests/testthat/define-2021.xml (contains 8 CommentDef elements)
+
+2. Unit test comment_id linkage:
+   - Verify that value_spec$comment_id is populated after define_to_metacore().
+   - Verify that Assigned-origin variables no longer incorrectly populate
+     derivation_id from the old comment_id logic.
+
+3. Unit test new ds_spec fields:
+   - Verify class, repeating, reference, purpose survive a define_to_metacore()
+     call on a file that contains those attributes.
+
+4. Unit test new ds_vars$role:
+   - Verify role is populated when ItemRef@Role is present.
+
+5. Unit test new derivations fields:
+   - Verify method_name, method_type, document_id, pages are populated.
+
+6. Round-trip test:
+   - define_to_metacore("define-2021.xml") |> metacore_to_define_xml() should
+     preserve all fields including comments, class, role, method_name, etc.
+   - Compare the re-generated XML against the source for structural equivalence.
+
+================================================================================
+END OF PENDING WORK
+================================================================================
