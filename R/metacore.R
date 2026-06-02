@@ -28,7 +28,7 @@
 #' @noRd
 #'
 #' @importFrom stringr str_to_lower
-MetaCore_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist, supp, study_level = NULL, documents = NULL, quiet = FALSE, verbose = "message") {
+MetaCore_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist, supp, study_level = NULL, documents = NULL, comments = NULL, quiet = FALSE, verbose = "message") {
   deprecate_soft(
     when = "0.3.0",
     what = "MetaCore_initialize(quiet)",
@@ -46,6 +46,18 @@ MetaCore_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivati
   supp <- fill_cols(supp, schema$.supp)
   study_level <- fill_cols(study_level, schema$.study_level)
   documents <- fill_cols(documents, schema$.documents)
+  comments <- fill_cols(comments, schema$.comments)
+
+  private$.study_level <- study_level |>
+     add_labs(
+        study_name = "Study Name",
+        study_description = "Study Description",
+        protocol_name = "Protocol Name",
+        standard_name = "Standard",
+        standard_version = "Standard Version",
+        define_version = "Define Version",
+        language = "Language"
+     )
 
   private$.ds_spec <- ds_spec %>%
     add_labs(
@@ -90,7 +102,8 @@ MetaCore_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivati
       variable = "Variable Name",
       where = "Value of the Variable",
       derivation_id = "ID of Derivation",
-      where_label = "Where Clause Label"
+      where_label = "Where Clause Label",
+      comment_id = "Comment ID"
     ) %>%
     mutate(origin = str_to_lower(.data$origin))
 
@@ -125,6 +138,12 @@ MetaCore_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivati
         document_id = "Document ID",
         title = "Title",
         href = "Href"
+     )
+
+  private$.comments <- comments %>%
+     add_labs(
+        comment_id = "Comment ID",
+        comment = "Comment Text"
      )
 
   private$.ds_len <- ds_spec %>% nrow()
@@ -175,7 +194,8 @@ MetaCore_validate <- function() {
       nrow(private$.codelist) == 0 &
       nrow(private$.supp) == 0 &
       nrow(private$.study_level) == 0 &
-      nrow(private$.documents) == 0) {
+      nrow(private$.documents) == 0 &
+      nrow(private$.comments) == 0) {
       cli_warn("Other checks were not performed, because all datasets are empty",
         call. = FALSE
       )
@@ -186,13 +206,17 @@ MetaCore_validate <- function() {
         private$.var_spec,
         private$.value_spec,
         private$.derivations,
-        private$.codelist
+        private$.codelist,
+        comments = private$.comments
       )
 
       ds_vars_check(private$.ds_vars, private$.var_spec)
       value_check(private$.ds_vars, private$.value_spec)
       derivation_check(private$.value_spec, private$.derivations)
       codelist_check(private$.value_spec, private$.codelist)
+      if (nrow(private$.comments) > 0) {
+        comment_check(private$.value_spec, private$.comments)
+      }
       if (nrow(private$.supp) > 0) {
         check_columns(supp = private$.supp)
         supp_check(private$.ds_vars, private$.supp)
@@ -301,6 +325,7 @@ MetaCore <- R6::R6Class("Metacore",
     .supp = tibble(),
     .study_level = tibble(),
     .documents = tibble(),
+    .comments = tibble(),
     .ds_len = NA,
     .ds_names = list(),
     .ds_labels = list(),
@@ -318,7 +343,8 @@ MetaCore <- R6::R6Class("Metacore",
     codelist = readonly("codelist"),
     supp = readonly("supp"),
     study_level = readonly("study_level"),
-    documents = readonly("documents")
+    documents = readonly("documents"),
+    comments = readonly("comments")
   )
 )
 
@@ -338,6 +364,9 @@ MetaCore <- R6::R6Class("Metacore",
 #' @param documents contains references to external documents (e.g. the Analysis
 #'   Data Reviewer's Guide) used for Define.xml page references. Optional; one
 #'   row per document with `document_id`, `title` and `href`.
+#' @param comments contains variable comments used for Define.xml CommentDef
+#'   elements. Optional; one row per comment with `comment_id` and `comment`.
+#'   Links to variables via `value_spec$comment_id`.
 #' @param quiet `r lifecycle::badge("superseded")` Option to quietly load in, this
 #'   will suppress warnings, but not errors. Expects either `TRUE` or `FALSE`.
 #'   Default behaviour is `FALSE`. As of v0.3.0 this argument is deprecated in favour
@@ -357,7 +386,7 @@ MetaCore <- R6::R6Class("Metacore",
 #' @export
 metacore <- function(ds_spec = NULL, ds_vars = NULL, var_spec = NULL, value_spec = NULL,
                      derivations = NULL, codelist = NULL, supp = NULL, study_level = NULL,
-                     documents = NULL, quiet = deprecated(), verbose = "message") {
+                     documents = NULL, comments = NULL, quiet = deprecated(), verbose = "message") {
 
   # Check if user has supplied `quiet` instead of `verbose`
   if (lifecycle::is_present(quiet)) {
@@ -379,6 +408,7 @@ metacore <- function(ds_spec = NULL, ds_vars = NULL, var_spec = NULL, value_spec
       if (is.null(supp)) supp <- schema$.supp
       if (is.null(study_level)) study_level <- schema$.study_level
       if (is.null(documents)) documents <- schema$.documents
+      if (is.null(comments)) comments <- schema$.comments
 
       # Signal deprecation warning for ds_vars$keep column. This cannot be handled by
       # regular `lifecycle::deprecate_*` functionality as it is a column name of an
@@ -403,6 +433,7 @@ The input for the supplied column {.var keep} has been mapped to the new column 
         supp = supp,
         study_level = study_level,
         documents = documents,
+        comments = comments,
         quiet = quiet,
         verbose = verbose
       )

@@ -139,6 +139,40 @@ codelist_check <- function(value_spec, codelist) {
 }
 
 
+#' Comment Check
+#'
+#' @param value_spec value spec table
+#' @param comments comments table
+#'
+#' @return writes warning to console if there is an issue
+#' @noRd
+comment_check <- function(value_spec, comments) {
+  comment_vars <- value_spec %>%
+    filter(!is.na(comment_id)) %>%
+    distinct(comment_id)
+
+  # Check comment_ids in value_spec that aren't in comments
+  not_in_comments <- anti_join(comment_vars, comments, by = "comment_id")
+  if (nrow(not_in_comments) > 0) {
+    comment_ids <- not_in_comments %>% pull(comment_id)
+    cli_warn(c(
+      "The following comment IDs are referenced but not found in the comments table:",
+      "i" = paste(comment_ids, collapse = ", ")
+    ), call. = FALSE)
+  }
+
+  # Check comment_ids in comments that aren't in value_spec
+  not_in_val <- anti_join(comments, comment_vars, by = "comment_id")
+  if (nrow(not_in_val) > 0) {
+    comment_ids <- not_in_val %>% pull(comment_id)
+    cli_warn(c(
+      "The following comments are never used:",
+      "i" = paste(comment_ids, collapse = ", ")
+    ), call. = FALSE)
+  }
+}
+
+
 #' Check Supp
 #'
 #'
@@ -191,10 +225,11 @@ supp_check <- function(ds_vars, supp) {
 #' @noRd
 col_vars <- function() {
   schema <- column_schema()
-  # study_level and documents are study-wide tables that are not name-validated
-  # against the per-dataset tables, so they are excluded here
+  # study_level, documents, and comments are study-wide tables that are not
+  # name-validated against the per-dataset tables, so they are excluded here
   schema$.study_level <- NULL
   schema$.documents <- NULL
+  schema$.comments <- NULL
   lapply(schema, names)
 }
 
@@ -223,12 +258,13 @@ column_schema <- function() {
     ),
     .var_spec = tibble(
       variable = character(), length = integer(), label = character(),
-      type = character(), common = character(), format = character()
+      type = character(), common = logical(), format = character()
     ),
     .value_spec = tibble(
       dataset = character(), variable = character(), type = character(),
       origin = character(), sig_dig = integer(), code_id = character(),
-      where = character(), where_label = character(), derivation_id = character()
+      where = character(), where_label = character(), derivation_id = character(),
+      comment_id = character()
     ),
     .derivations = tibble(
       derivation_id = character(), derivation = character(),
@@ -250,6 +286,9 @@ column_schema <- function() {
     ),
     .documents = tibble(
       document_id = character(), title = character(), href = character()
+    ),
+    .comments = tibble(
+      comment_id = character(), comment = character()
     )
   )
 }
@@ -388,10 +427,13 @@ all_message <- function() {
     "ds_spec", "purpose", is.character, TRUE,
     "ds_vars", "role", is.character, TRUE,
     "value_spec", "where_label", is.character, TRUE,
+    "value_spec", "comment_id", is.character, TRUE,
     "derivations", "method_name", is.character, TRUE,
     "derivations", "method_type", is.character, TRUE,
     "derivations", "document_id", is.character, TRUE,
     "derivations", "pages", is.character, TRUE,
+    "comments", "comment_id", is.character, FALSE,
+    "comments", "comment", is.character, TRUE,
   )
 }
 
@@ -431,7 +473,7 @@ all_message <- function() {
 #'   checks pass, it returns invisibly.
 #' @noRd
 check_columns <- function(ds_spec = NULL, ds_vars = NULL, var_spec = NULL, value_spec = NULL,
-                          derivations = NULL, codelist = NULL, supp = NULL) {
+                          derivations = NULL, codelist = NULL, supp = NULL, comments = NULL) {
   # Create a list of the actual dataframes passed
   actual_datasets <- list(
     ds_spec = ds_spec,
@@ -440,7 +482,8 @@ check_columns <- function(ds_spec = NULL, ds_vars = NULL, var_spec = NULL, value
     value_spec = value_spec,
     derivations = derivations,
     codelist = codelist,
-    supp = supp
+    supp = supp,
+    comments = comments
   )
 
   # Filter out NULL entries (datasets not supplied) and get names

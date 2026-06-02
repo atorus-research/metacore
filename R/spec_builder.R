@@ -59,6 +59,23 @@ spec_to_metacore <- function(path, quiet = deprecated(), where_sep_sheet = TRUE,
             derivations <- spec_type_to_derivations(doc)
             codelist <- spec_type_to_codelist(doc)
             documents <- spec_type_to_documents(doc)
+            comments <- spec_type_to_comments(doc)
+            supp <- create_supp_table(
+               doc,
+               where_sep_sheet = where_sep_sheet,
+               var_spec = var_spec,
+               value_spec = value_spec,
+               codelist = codelist,
+               comments = comments
+            )
+
+            # Add supplemental variables to ds_vars, var_spec, value_spec
+            ds_vars <- add_supp_to_table(supp, ds_vars, column_schema()$.ds_vars)
+            var_spec <- add_supp_to_table(supp, var_spec, column_schema()$.var_spec)
+            value_spec <- add_supp_to_table(supp, value_spec, column_schema()$.value_spec)
+
+            # Strip unneeded vars from supp
+            supp <- reorder_by_schema(supp, "supp")
 
             mc <- metacore(
                ds_spec,
@@ -67,7 +84,9 @@ spec_to_metacore <- function(path, quiet = deprecated(), where_sep_sheet = TRUE,
                value_spec,
                derivations,
                codelist,
+               supp = supp,
                documents = documents,
+               comments = comments,
                quiet = quiet,
                verbose = verbose
             )
@@ -170,6 +189,10 @@ spec_type_to_ds_spec <- function(
 
    create_tbl(doc, cols, ds_spec_optional, context = "spec_type_to_ds_spec") |>
       distinct() |>
+      mutate(
+         repeating = yn_to_tf(.data$repeating),
+         reference = yn_to_tf(.data$reference),
+      ) |>
       reorder_by_schema("ds_spec")
 }
 
@@ -343,8 +366,8 @@ spec_type_to_var_spec <- function(
             select(variable, common)
 
          out <- out |>
-            left_join(common_vars, by = "variable") |>
-            replace_na(list(common = FALSE))
+            left_join(common_vars, by = "variable")
+            # replace_na(list(common = FALSE))
       }
 
       # Remove duplicates and qualify variables with dataset if different metadata
@@ -482,7 +505,7 @@ spec_type_to_value_spec <- function(
          )
    }
 
-   out |>
+   out <- out |>
       distinct() |>
       mutate(
          sig_dig = as.integer(.data$sig_dig),
@@ -493,7 +516,29 @@ spec_type_to_value_spec <- function(
             str_to_lower(.data$origin) == "assigned" ~ paste0(.data$dataset, ".", .data$variable)
          )
       ) |>
-      select(-.data$predecessor) |>
+      select(-.data$predecessor)
+
+   # Extract comment_id from Variables sheet if available
+   var_sheets <- names(doc) |> keep(~ str_detect(., "[V|v]ar"))
+   if (length(var_sheets) > 0) {
+      comment_mapping <- doc[var_sheets] |>
+         map_dfr(~ .x %>%
+                    select(
+                       dataset = matches("[D|d]ataset|[D|d]omain"),
+                       variable = matches("[N|n]ame|[V|v]ariables?"),
+                       comment_id = matches("[C|c]omment")
+                    ) %>%
+                    filter(!is.na(comment_id), comment_id != "")
+         ) |>
+         distinct()
+
+      if (nrow(comment_mapping) > 0) {
+         out <- out |>
+            left_join(comment_mapping, by = c("dataset", "variable"))
+      }
+   }
+
+   out |>
       reorder_by_schema("value_spec")
 }
 
@@ -616,7 +661,7 @@ spec_type_to_codelist <- function(
          group_by(code_id) |>
          nest(codes = c(dictionary, version))
 
-      bind_rows(cd_out, dict_out)
+      cd_out <- bind_rows(cd_out, dict_out)
    }
 
    cd_out |>
@@ -785,6 +830,214 @@ spec_type_to_documents <- function(
       reorder_by_schema("ds_documents")
 }
 
+#' Spec to comments
+#'
+#' Creates the comments table from a Comments sheet in the specification.
+#' The Comments sheet should contain comment_id (ID column) and comment text
+#' (Description column). Comments are linked to variables via the comment_id
+#' in the value_spec table.
+#'
+#' @param doc Named list of datasets @seealso [read_all_sheets()] for exact format
+#' @param cols Named vector of column names. The column names can be regular
+#'   expressions for more flexibility. But, the names must follow the given pattern
+#' @param sheet Regular expression for the sheet name
+#'
+#' @return a dataset formatted for the metacore object (comments table)
+#' @export
+#'
+#' @family spec builders
+spec_type_to_comments <- function(
+      doc,
+      cols = c(
+         "comment_id" = "ID",
+         "comment" = "[D|d]escription"
+      ),
+      sheet = "[C|c]omments?"
+) {
+
+   comments_names <- c("comment_id", "comment")
+   comments_optional <- c()
+
+   name_check <- all(names(cols) %in% comments_names)
+   if (!name_check | is.null(names(cols))) {
+      cli_abort(c(
+         "x" = "Incorrect column names supplied for {.var comments}",
+         "i" = "The column vector {.arg cols} must be named with a subset of {.val {comments_names}}"
+      ))
+   }
+
+   if (!is.null(sheet)) {
+      sheet_ls <- str_subset(names(doc), sheet)
+      doc <- doc[sheet_ls]
+      # If no matching sheets found, return empty comments table (comments are optional)
+      if (length(doc) == 0) {
+         return(tibble(comment_id = character(), comment = character()))
+      }
+   }
+
+   create_tbl(doc, cols, comments_optional, context = "spec_type_to_comments") |>
+      distinct() |>
+      filter(!is.na(comment_id)) |>
+      reorder_by_schema("comments")
+}
+
+#' Create supp table
+#'
+#' Creates the supp table from value_spec, codelist, and comments by identifying
+#' supplemental datasets (SUPP*) and extracting their metadata. For each SUPP domain,
+#' extracts variable names from the QNAM codelist, identifying variables from the
+#' IDVAR comment, and evaluator from the QEVAL codelist.
+#'
+#' Note for future: length is populated only when VLM exists
+#'
+#' @param value_spec value_spec table from metacore object
+#' @param codelist codelist table from metacore object
+#' @param comments comments table from metacore object (optional)
+#'
+#' @return a dataset formatted for the metacore object (supp table)
+#' @export
+#'
+#' @family spec builders
+create_supp_table <- function(
+      doc,
+      cols = c(
+         "dataset" = "[D|d]ataset|[D|d]omain",
+         "where" = "[W|w]here [C|clause]",
+         "type" = "[T|t]ype",
+         "length" = "[L|l]ength",
+         "origin" = "[O|o]rigin"
+      ),
+      sheet = NULL,
+      where_sep_sheet = TRUE,
+      where_cols = c(
+         "id" = "ID",
+         "variable" = "[V|v]ariable",
+         "comparator" = "[C|c]omparator",
+         "value" = "[V|v]alue"
+      ),
+      var_spec = NULL,
+      value_spec = NULL,
+      codelist = NULL,
+      comments = NULL
+) {
+
+   names <- c("dataset", "where", "type", "length", "origin")
+
+   name_check <- all(names(cols) %in% names)
+   if (!name_check | is.null(names(cols))) {
+      cli_abort(c(
+         "x" = "Incorrect column names supplied for {.var spec}",
+         "i" = "The column vector {.arg cols} must be named with a subset of {.val {names}}"
+      ))
+   }
+
+   if (!is.null(sheet)) {
+      sheet_ls <- str_subset(names(doc), sheet)
+      doc <- doc[sheet_ls]
+      if (length(doc) == 0) {
+         return(tibble(comment_id = character(), comment = character()))
+      }
+   }
+
+   out <- create_tbl(doc, cols, context = "create_supp_table") |>
+      filter(str_detect(dataset, "^SUPP")) |>
+      mutate(dataset = gsub("^SUPP", "", dataset)) |>
+      distinct()
+
+   if (where_sep_sheet && "where" %in% names(out)) {
+      where_df <- create_tbl(doc, where_cols, context = "create_supp_table") |>
+         select(id, variable = value)
+
+      out <- out |>
+         left_join(where_df, by = c("where" = "id")) |>
+         select(dataset, variable, type, length, origin)
+
+   } else if (where_sep_sheet) {
+      cli_warn(c(
+         "x" = "where column needed to cross-reference where information from separate sheet"
+      ))
+   }
+
+   if (is.null(value_spec) || nrow(value_spec) == 0) {
+      return(tibble(dataset = character(), variable = character(), idvar = character(), qeval = character()))
+   }
+
+   supp_vars <- value_spec |>
+      filter(str_detect(dataset, "^SUPP")) |>
+      mutate(dataset = gsub("^SUPP", "", dataset)) |>
+      arrange(dataset, variable)
+
+   if (nrow(supp_vars) == 0) {
+      return(tibble(dataset = character(), variable = character(), idvar = character(), qeval = character()))
+   }
+
+   if (is.null(comments)) {
+      comments <- tibble(comment_id = character(), comment = character())
+   }
+
+   supp_qnam <- supp_vars |>
+      filter(variable == "QNAM") |>
+      select(dataset, code_id) |>
+      left_join(codelist |> select(code_id, codes), by = "code_id") |>
+      mutate(codes = map(codes, \(x) if (is.data.frame(x)) x else tibble(code = unlist(x), decode = unlist(x)))) |>
+      unnest(codes) |>
+      select(dataset, variable = code, label = decode)
+
+   qeval_lookup <- supp_vars |>
+      filter(variable == "QEVAL") |>
+      select(dataset, code_id) |>
+      left_join(codelist |> select(code_id, codes), by = "code_id") |>
+      mutate(codes = map(codes, \(x) if (is.data.frame(x)) x else tibble(code = unlist(x), decode = unlist(x)))) |>
+      unnest(codes) |>
+      select(dataset, qeval = code)
+
+   idvar_lookup <- supp_vars |>
+      filter(variable == "IDVAR") |>
+      select(dataset, comment_id) |>
+      left_join(comments |> select(comment_id, comment), by = "comment_id") |>
+      mutate(idvar = str_replace(comment, '^IDVAR="(.*)"$', "\\1")) |>
+      select(dataset, idvar)
+
+   supp_qnam |>
+      left_join(out, by = c("dataset", "variable")) |>
+      left_join(idvar_lookup, by = "dataset") |>
+      left_join(qeval_lookup, by = "dataset") |>
+      mutate(length = as.integer(length)) |>
+      distinct() |>
+      filter(!is.na(variable))
+}
+
+add_supp_to_table <- function(supp, target, target_schema) {
+   if (is.null(supp) || nrow(supp) == 0) return(target)
+
+   # Derive parent domain from SUPP dataset name (SUPPAE -> AE)
+   new_rows <- supp |>
+      mutate(dataset = str_remove(dataset, "^SUPP")) |>
+      select(any_of(names(target_schema)))
+
+   # Join key: dataset+variable for tables that carry both, variable-only for var_spec
+   join_key <- intersect(c("dataset", "variable"), names(target_schema))
+
+   to_add <- new_rows |>
+      anti_join(target, by = join_key) |>
+      distinct()
+
+   if (nrow(to_add) == 0) return(target)
+
+   # Back-fill schema columns absent from to_add with typed NAs
+   missing_cols <- setdiff(names(target_schema), names(to_add))
+   for (col in missing_cols) {
+      to_add[[col]] <- target_schema[[col]][seq_len(nrow(to_add))]
+   }
+
+   if ("supp_flag" %in% names(target_schema)) {
+      to_add <- mutate(to_add, supp_flag = TRUE)
+   }
+
+   bind_rows(target, to_add) |>
+      select(all_of(names(target_schema)))
+}
+
 ### Helper Functions
 
 #' Create table
@@ -824,14 +1077,14 @@ create_tbl <- function(doc, cols, optional = NULL, context = NULL) {
          })
       mis_lens <- mismatch_per_sheet |> map_int(length)
       closest_sheets <- mis_lens |> keep(~ . == min(mis_lens)) |> names()
-      sheets_to_error <- mismatch_per_sheet |> keep(names(.) %in% closest_sheets)
+      sheets_to_error <- mismatch_per_sheet[names(mismatch_per_sheet) %in% closest_sheets]
 
       has_where_col <- sheets_to_error |>
          map_lgl(~ any(str_detect(names(.x), regex("^where", ignore_case = TRUE)))) |>
          any()
 
       sheet_details <- sheets_to_error |>
-         imap_chr(~ paste0("Sheet '", .y, "' is missing: ", paste(names(.x), collapse = ", ")))
+         purrr::imap_chr(~ paste0("Sheet '", .y, "' is missing: ", paste(names(.x), collapse = ", ")))
 
       cli_abort(
          c(
