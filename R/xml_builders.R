@@ -422,11 +422,12 @@ xml_to_codelist <- function(doc) {
 
 #' XML to derivation table
 #'
-#' This reads in a xml document and gets all the derivations/comments. These can
-#' be cross referenced to variables using the derivation_id's
+#' Reads MethodDef elements from an XML document. Comments are extracted
+#' separately via xml_to_comments(). Derivations/methods can be cross-referenced
+#' to variables using the derivation_id.
 #' @param doc xml document
 #'
-#' @return dataframe with derivation id's and derivations
+#' @return dataframe with derivation_id's and derivation text
 #' @family xml builder
 #' @export
 #'
@@ -441,17 +442,6 @@ xml_to_derivations <- function(doc) {
       )
     })
 
-  comment <-
-    xml_find_all(doc, "//def:CommentDef") %>%
-    map_dfr(function(node) {
-      tibble(
-        derivation_id = xml_attr(node, "OID"),
-        derivation = xml_find_first(node, "./Description/TranslatedText") %>%
-          xml_text()
-      )
-    })
-
-
   predecessor <- xml_find_all(doc, "//ItemDef") %>%
     map_dfr(function(node) {
       tibble(
@@ -463,8 +453,30 @@ xml_to_derivations <- function(doc) {
 
   bind_rows(
     derivation,
-    comment,
     predecessor
   ) %>%
+    distinct()
+}
+
+
+#' XML to comments table
+#'
+#' Reads def:CommentDef elements from an XML document and builds a comments
+#' table. Comments are linked to variables via value_spec.comment_id.
+#' @param doc xml document
+#'
+#' @return dataframe with comment_id's and comment text
+#' @family xml builder
+#' @export
+#'
+xml_to_comments <- function(doc) {
+  xml_find_all(doc, "//def:CommentDef") %>%
+    map_dfr(function(node) {
+      tibble(
+        comment_id = xml_attr(node, "OID"),
+        comment = xml_find_first(node, "./Description/TranslatedText") %>%
+          xml_text()
+      )
+    }) %>%
     distinct()
 }
