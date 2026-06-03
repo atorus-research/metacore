@@ -5,20 +5,16 @@
 \title{R6 Class wrapper to create your own metacore object}
 \usage{
 metacore(
-  ds_spec = tibble(dataset = character(), structure = character(), label = character()),
-  ds_vars = tibble(dataset = character(), variable = character(), keep = NULL, mandatory
-    = logical(), key_seq = integer(), order = integer(), core = character(), supp_flag =
-    logical()),
-  var_spec = tibble(variable = character(), label = character(), length = integer(), type
-    = character(), common = character(), format = character()),
-  value_spec = tibble(dataset = character(), variable = character(), where = character(),
-    type = character(), sig_dig = integer(), code_id = character(), origin = character(),
-    derivation_id = integer()),
-  derivations = tibble(derivation_id = integer(), derivation = character()),
-  codelist = tibble(code_id = character(), name = character(), type = character(), codes
-    = list()),
-  supp = tibble(dataset = character(), variable = character(), idvar = character(), qeval
-    = character()),
+  ds_spec = NULL,
+  ds_vars = NULL,
+  var_spec = NULL,
+  value_spec = NULL,
+  derivations = NULL,
+  codelist = NULL,
+  supp = NULL,
+  study_level = NULL,
+  documents = NULL,
+  comments = NULL,
   quiet = deprecated(),
   verbose = "message"
 )
@@ -37,6 +33,18 @@ metacore(
 \item{codelist}{contains the code/decode information}
 
 \item{supp}{contains the idvar and qeval information for supplemental variables}
+
+\item{study_level}{contains study-level metadata used when generating a
+Define.xml (study name, description, protocol, standard and Define-XML
+versions, language). Optional; a single-row table.}
+
+\item{documents}{contains references to external documents (e.g. the Analysis
+Data Reviewer's Guide) used for Define.xml page references. Optional; one
+row per document with \code{document_id}, \code{title} and \code{href}.}
+
+\item{comments}{contains variable comments used for Define.xml CommentDef
+elements. Optional; one row per comment with \code{comment_id} and \code{comment}.
+Links to variables via \code{value_spec$comment_id}.}
 
 \item{quiet}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#superseded}{\figure{lifecycle-superseded.svg}{options: alt='[Superseded]'}}}{\strong{[Superseded]}} Option to quietly load in, this
 will suppress warnings, but not errors. Expects either \code{TRUE} or \code{FALSE}.

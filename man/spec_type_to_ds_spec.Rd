@@ -7,7 +7,8 @@
 spec_type_to_ds_spec(
   doc,
   cols = c(dataset = "[N|n]ame|[D|d]ataset|[D|d]omain", structure = "[S|s]tructure",
-    label = "[L|l]abel|[D|d]escription"),
+    label = "[L|l]abel|[D|d]escription", class = "[C|c]lass", repeating =
+    "[R|r]epeating", reference = "[R|r]eference [D|d]ata", purpose = "[P|p]urpose"),
   sheet = NULL
 )
 }
@@ -30,7 +31,9 @@ sheet and renames the columns
 }
 \seealso{
 Other spec builders: 
+\code{\link{create_supp_table}()},
 \code{\link{spec_type_to_codelist}()},
+\code{\link{spec_type_to_comments}()},
 \code{\link{spec_type_to_derivations}()},
 \code{\link{spec_type_to_ds_vars}()},
 \code{\link{spec_type_to_value_spec}()},

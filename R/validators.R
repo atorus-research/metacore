@@ -222,7 +222,6 @@ supp_check <- function(ds_vars, supp) {
 #' Column Names by dataset
 #'
 #' @return list of column names by dataset
-#' @noRd
 col_vars <- function() {
   schema <- column_schema()
   # study_level, documents, and comments are study-wide tables that are not
@@ -243,7 +242,6 @@ col_vars <- function() {
 #' added here are automatically tolerated on existing objects.
 #'
 #' @return named list of zero-row prototype tibbles, one per table
-#' @noRd
 column_schema <- function() {
   list(
     .ds_spec = tibble(
@@ -302,9 +300,8 @@ column_schema <- function() {
 #' columns optional for callers building metacore objects.
 #'
 #' @param .data a data frame (or `NULL`)
-#' @param proto a zero-row prototype tibble from [col_protos()]
+#' @param proto a zero-row prototype tibble from [column_schema()]
 #' @return `.data` with all prototype columns present
-#' @noRd
 fill_cols <- function(.data, proto) {
   if (is.null(.data)) {
     return(proto)

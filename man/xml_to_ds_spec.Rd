@@ -18,6 +18,7 @@ Creates a dataset specification, which has the domain name and label for each da
 \seealso{
 Other xml builder: 
 \code{\link{xml_to_codelist}()},
+\code{\link{xml_to_comments}()},
 \code{\link{xml_to_derivations}()},
 \code{\link{xml_to_ds_vars}()},
 \code{\link{xml_to_value_spec}()},

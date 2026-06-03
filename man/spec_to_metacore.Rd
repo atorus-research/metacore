@@ -45,14 +45,14 @@ be used as building blocks for bespoke specification documents.
 # Run `spec_to_metacore` with `verbose = "collapse"`
 spec_path <- metacore_example("p21_mock.xlsx")
 metacore <- spec_to_metacore(
-path = spec_path,
-verbose = "collapse"
+  path = spec_path,
+  verbose = "collapse"
 )
 
 # Run `spec_to_metacore` with `verbose = "warn"`
 metacore <- spec_to_metacore(
-path = spec_path,
-verbose = "warn"
+  path = spec_path,
+  verbose = "warn"
 )
 
 }

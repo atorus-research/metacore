@@ -8,7 +8,8 @@ spec_type_to_ds_vars(
   doc,
   cols = c(dataset = "[D|d]ataset|[D|d]omain", variable =
     "[V|v]ariable [[N|n]ame]?|[V|v]ariables?", order =
-    "[V|v]ariable [O|o]rder|[O|o]rder", mandatory = "[K|k]eep|[M|m]andatory"),
+    "[V|v]ariable [O|o]rder|[O|o]rder", core = "[C|c]ore|CDISC [C|c]ore", mandatory =
+    "[K|k]eep|[M|m]andatory", role = "[R|r]ole"),
   key_seq_sep_sheet = TRUE,
   key_seq_cols = c(dataset = "Dataset", key_seq = "Key Variables"),
   sheet = "[V|v]ar|Datasets"
@@ -40,7 +41,9 @@ sheet and renames the columns
 }
 \seealso{
 Other spec builders: 
+\code{\link{create_supp_table}()},
 \code{\link{spec_type_to_codelist}()},
+\code{\link{spec_type_to_comments}()},
 \code{\link{spec_type_to_derivations}()},
 \code{\link{spec_type_to_ds_spec}()},
 \code{\link{spec_type_to_value_spec}()},

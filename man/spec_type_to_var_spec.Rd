@@ -31,7 +31,9 @@ sheet and renames the columns. (Note: the keep column will be converted logical)
 }
 \seealso{
 Other spec builders: 
+\code{\link{create_supp_table}()},
 \code{\link{spec_type_to_codelist}()},
+\code{\link{spec_type_to_comments}()},
 \code{\link{spec_type_to_derivations}()},
 \code{\link{spec_type_to_ds_spec}()},
 \code{\link{spec_type_to_ds_vars}()},
