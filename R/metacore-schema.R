@@ -88,6 +88,27 @@ define_column_schema <- function() {
 }
 
 
+#' Columns present only in the define schema for a given table
+#'
+#' Returns the column names that exist in `define_column_schema()` but not in
+#' `base_column_schema()` for the named table. Used by the `spec_type_to_*`
+#' family to derive which columns are optional (i.e. define-specific) without
+#' maintaining a separate hardcoded list alongside the schema.
+#'
+#' @param table_name unqualified table name, e.g. `"ds_spec"` (no leading dot)
+#' @return character vector of define-only column names, or `character(0)` if
+#'   the table is identical in both schemas (or absent from both)
+#' @noRd
+define_only_cols <- function(table_name) {
+   tbl <- paste0(".", table_name)
+   define <- define_column_schema()
+   base   <- base_column_schema()
+   if (!tbl %in% names(define)) return(character())
+   if (!tbl %in% names(base))   return(names(define[[tbl]]))
+   setdiff(names(define[[tbl]]), names(base[[tbl]]))
+}
+
+
 #' Column Names by dataset
 #'
 #' @param schema Optional named list of prototype tibbles from
