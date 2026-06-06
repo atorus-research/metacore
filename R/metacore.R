@@ -543,7 +543,8 @@ select_dataset <- function(.data, dataset, simplify = FALSE, quiet = deprecated(
 #' @param variable A variable name (bare or string)
 #' @param dataset Optional dataset name (bare or string)
 #' @param where Optional VLM condition matching `value_spec$where`, or `"all"`
-#'   to retrieve all control terminology for variables with multiple VLM conditions
+#'   to retrieve all control terminology for variables with multiple VLM conditions.
+#'   Must be a String.
 #'
 #' @return A vector, a tibble, a named list of tibbles, or NULL
 #' @export
