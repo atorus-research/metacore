@@ -73,8 +73,8 @@ severity_codes <- get_control_term(metacore, "AESEV")
 severity_codes
 ```
 
-Notice that `get_control_term()` returns a tibble
-with `code` and `decode` columns. You can use this directly in your data
+Notice that `get_control_term()` returns a tibble
+with `code` and `decode` columns. You can use this directly in your data
 validation or mapping routines:
 
 ```{r eval=TRUE}
@@ -90,7 +90,7 @@ print(severity_mapping)
 When a variable appears across multiple datasets with the same codelist,
 or when you want to be explicit about which dataset's definition you're
 using, either subset your metacore object for a single dataset or
-specify the `dataset` parameter:
+specify the `dataset` parameter:
 
 ```{r eval=TRUE}
 # Option 1: Subset the specification object (recommended workflow)
@@ -137,12 +137,12 @@ For example:
 #### **Retrieving VLM Codelists**
 
 When a variable has value-level metadata, you must specify which
-condition's codelist you want using the `where` parameter:
+condition's codelist you want using the `where` parameter:
 
 ```{r eval=TRUE}
 # This example uses a VLM test specification
 vlm_meta <- spec_to_metacore(
-  "../tests/testthat/vlm_test_spec.xlsx",
+  metacore_example("vlm_test_spec.xlsx"),
   where_sep_sheet = FALSE,
   verbose = "silent"
 )
@@ -158,7 +158,7 @@ avalca1n_duration <- get_control_term(
 avalca1n_duration
 ```
 
-The `where` parameter accepts conditions that match the value-level
+The `where` parameter accepts conditions that match the value-level
 metadata definition from your specification. This information is mapped
 to the `value_spec` table of your metacore object:
 
@@ -172,7 +172,7 @@ adex_spec$value_spec |>
 #### **Handling Multiple VLM Conditions**
 
 If you try to retrieve a VLM variable without specifying
-a `where` condition, `get_control_term()` will alert you to the
+a `where` condition, `get_control_term()` will alert you to the
 available options:
 
 ```{r eval=TRUE, error=TRUE}
@@ -180,7 +180,7 @@ available options:
 avalca1n_duration <- get_control_term(adex_spec, "AVALCA1N")
 ```
 
-To see all possible codelists for a VLM variable, use `where = "all"`:
+To see all possible codelists for a VLM variable, use `where = "all"`:
 
 ```{r eval=TRUE}
 # Retrieve all codelists for this variable
