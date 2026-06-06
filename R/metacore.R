@@ -556,8 +556,9 @@ get_control_term <- function(metacode, variable = NULL, dataset = NULL, where = 
 
   # Capture NSE or string safely
   var_str <- as_name(ensym(variable))
-  dataset_str <- if (!missing(dataset) && !is.null(dataset)) {
-    as_name(ensym(dataset))
+  dataset_str <- NULL
+  if (!missing(dataset) && !is.null(dataset)) {
+    dataset_str <- as_name(ensym(dataset))
   }
   where_str <- where
 
