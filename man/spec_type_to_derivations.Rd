@@ -4,13 +4,41 @@
 \alias{spec_type_to_derivations}
 \title{Spec to derivation}
 \usage{
-spec_type_to_derivations(
-  doc,
-  cols = c(derivation_id = "ID", derivation = "[D|d]efinition|[D|d]escription"),
+# Default (define_fields = FALSE):
+spec_type_to_derivations(doc,
+  cols = c(
+    "derivation_id" = "ID",
+    "derivation"    = "[D|d]efinition|[D|d]escription"
+  ),
   sheet = "Method|Derivations?",
-  var_cols = c(dataset = "[D|d]ataset|[D|d]omain", variable = "[N|n]ame|[V|v]ariables?",
-    origin = "[O|o]rigin", predecessor = "[P|p]redecessor", comment = "[C|c]omment")
-)
+  var_cols = c(
+    "dataset"     = "[D|d]ataset|[D|d]omain",
+    "variable"    = "[N|n]ame|[V|v]ariables?",
+    "origin"      = "[O|o]rigin",
+    "predecessor" = "[P|p]redecessor",
+    "comment"     = "[C|c]omment"
+  ),
+  define_fields = FALSE)
+
+# With define_fields = TRUE, additional cols are appended automatically:
+spec_type_to_derivations(doc,
+  cols = c(
+    "derivation_id" = "ID",
+    "derivation"    = "[D|d]efinition|[D|d]escription",
+    "method_name"   = "[N|n]ame",
+    "method_type"   = "[T|t]ype",
+    "document_id"   = "[D|d]ocument",
+    "pages"         = "[P|p]ages"
+  ),
+  sheet = "Method|Derivations?",
+  var_cols = c(
+    "dataset"     = "[D|d]ataset|[D|d]omain",
+    "variable"    = "[N|n]ame|[V|v]ariables?",
+    "origin"      = "[O|o]rigin",
+    "predecessor" = "[P|p]redecessor",
+    "comment"     = "[C|c]omment"
+  ),
+  define_fields = TRUE)
 }
 \arguments{
 \item{doc}{Named list of datasets @seealso \code{\link[=read_all_sheets]{read_all_sheets()}} for exact
@@ -38,8 +66,11 @@ correct sheet and renames the columns. The derivation will be used for
 \seealso{
 Other spec builders: 
 \code{\link{spec_type_to_codelist}()},
+\code{\link{spec_type_to_comments}()},
+\code{\link{spec_type_to_documents}()},
 \code{\link{spec_type_to_ds_spec}()},
 \code{\link{spec_type_to_ds_vars}()},
+\code{\link{spec_type_to_supp}()},
 \code{\link{spec_type_to_value_spec}()},
 \code{\link{spec_type_to_var_spec}()}
 }

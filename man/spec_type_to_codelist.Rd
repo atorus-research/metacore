@@ -48,9 +48,12 @@ correct sheet and renames the columns.
 }
 \seealso{
 Other spec builders: 
+\code{\link{spec_type_to_comments}()},
 \code{\link{spec_type_to_derivations}()},
+\code{\link{spec_type_to_documents}()},
 \code{\link{spec_type_to_ds_spec}()},
 \code{\link{spec_type_to_ds_vars}()},
+\code{\link{spec_type_to_supp}()},
 \code{\link{spec_type_to_value_spec}()},
 \code{\link{spec_type_to_var_spec}()}
 }

@@ -12,7 +12,7 @@
 #'   str_subset str_length str_replace_na str_replace_all str_extract str_c str_trim
 #'   str_split str_starts regex
 #' @importFrom rlang !! as_string expr set_names sym prim_name inherits_only
-#' @importFrom purrr keep discard reduce compact map map_chr map_lgl map_dfr map_int
+#' @importFrom purrr keep discard reduce compact imap map map_chr map_lgl map_dfr map_int
 #'   map2_lgl map2_chr pmap_chr safely
 #' @importFrom stats var na.omit
 #' @importFrom readxl excel_sheets read_excel

@@ -4,13 +4,16 @@
 \alias{spec_type_to_var_spec}
 \title{Spec to var_spec}
 \usage{
-spec_type_to_var_spec(
-  doc,
-  cols = c(variable = "[N|n]ame|[V|v]ariables?", length = "[L|l]ength", label =
-    "[L|l]abel", type = "[T|t]ype", dataset = "[D|d]ataset|[D|d]omain", format =
-    "[F|f]ormat"),
-  sheet = "[V|v]ar"
-)
+spec_type_to_var_spec(doc,
+  cols = c(
+    "variable" = "[N|n]ame|[V|v]ariables?",
+    "length"   = "[L|l]ength",
+    "label"    = "[L|l]abel",
+    "type"     = "[T|t]ype",
+    "dataset"  = "[D|d]ataset|[D|d]omain",
+    "format"   = "[F|f]ormat"
+  ),
+  sheet = "[V|v]ar")
 }
 \arguments{
 \item{doc}{Named list of datasets @seealso \code{\link[=read_all_sheets]{read_all_sheets()}} for exact
@@ -32,9 +35,12 @@ sheet and renames the columns. (Note: the keep column will be converted logical)
 \seealso{
 Other spec builders: 
 \code{\link{spec_type_to_codelist}()},
+\code{\link{spec_type_to_comments}()},
 \code{\link{spec_type_to_derivations}()},
+\code{\link{spec_type_to_documents}()},
 \code{\link{spec_type_to_ds_spec}()},
 \code{\link{spec_type_to_ds_vars}()},
+\code{\link{spec_type_to_supp}()},
 \code{\link{spec_type_to_value_spec}()}
 }
 \concept{spec builders}

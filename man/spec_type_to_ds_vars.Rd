@@ -4,15 +4,30 @@
 \alias{spec_type_to_ds_vars}
 \title{Spec to ds_vars}
 \usage{
-spec_type_to_ds_vars(
-  doc,
-  cols = c(dataset = "[D|d]ataset|[D|d]omain", variable =
-    "[V|v]ariable [[N|n]ame]?|[V|v]ariables?", order =
-    "[V|v]ariable [O|o]rder|[O|o]rder", mandatory = "[K|k]eep|[M|m]andatory"),
+# Default (define_fields = FALSE):
+spec_type_to_ds_vars(doc,
+  cols = c(
+    "dataset"   = "[D|d]ataset|[D|d]omain",
+    "variable"  = "[V|v]ariable [[N|n]ame]?|[V|v]ariables?",
+    "order"     = "[V|v]ariable [O|o]rder|[O|o]rder",
+    "mandatory" = "[K|k]eep|[M|m]andatory"
+  ),
   key_seq_sep_sheet = TRUE,
-  key_seq_cols = c(dataset = "Dataset", key_seq = "Key Variables"),
-  sheet = "[V|v]ar|Datasets"
-)
+  key_seq_cols = c("dataset" = "Dataset", "key_seq" = "Key Variables"),
+  sheet = "[V|v]ar|Datasets", define_fields = FALSE)
+
+# With define_fields = TRUE, additional cols are appended automatically:
+spec_type_to_ds_vars(doc,
+  cols = c(
+    "dataset"   = "[D|d]ataset|[D|d]omain",
+    "variable"  = "[V|v]ariable [[N|n]ame]?|[V|v]ariables?",
+    "order"     = "[V|v]ariable [O|o]rder|[O|o]rder",
+    "mandatory" = "[K|k]eep|[M|m]andatory",
+    "role"      = "[R|r]ole"
+  ),
+  key_seq_sep_sheet = TRUE,
+  key_seq_cols = c("dataset" = "Dataset", "key_seq" = "Key Variables"),
+  sheet = "[V|v]ar|Datasets", define_fields = TRUE)
 }
 \arguments{
 \item{doc}{Named list of datasets @seealso \code{\link[=read_all_sheets]{read_all_sheets()}} for exact
@@ -41,8 +56,11 @@ sheet and renames the columns
 \seealso{
 Other spec builders: 
 \code{\link{spec_type_to_codelist}()},
+\code{\link{spec_type_to_comments}()},
 \code{\link{spec_type_to_derivations}()},
+\code{\link{spec_type_to_documents}()},
 \code{\link{spec_type_to_ds_spec}()},
+\code{\link{spec_type_to_supp}()},
 \code{\link{spec_type_to_value_spec}()},
 \code{\link{spec_type_to_var_spec}()}
 }
