@@ -422,7 +422,7 @@ test_that("select_dataset(simplify = TRUE) returns expected structure", {
 
   expected_names <- c(
     "dataset", "variable", "key_seq", "order", "mandatory", "core", "supp_flag",
-    "length", "label", "type", "common", "format", "origin", "sig_dig", "code_id",
+    "length", "label", "type", "format", "common", "origin", "sig_dig", "code_id",
     "where", "derivation_id", "derivation", "codes", "idvar", "qeval"
   )
 

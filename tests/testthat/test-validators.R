@@ -162,7 +162,8 @@ test_that("check_columns handles multiple datasets including 'supp' correctly", 
     ds_spec = ds_spec_test,
     ds_vars = ds_vars_test,
     var_spec = var_spec_test,
-    supp = supp_test
+    supp = supp_test,
+    schema = base_column_schema()
   ))
 
   # Example: Test for a missing column to ensure `check_structure` works
@@ -213,7 +214,8 @@ test_that("check_columns handles multiple datasets excluding 'supp' correctly", 
     check_columns(
       ds_spec = ds_spec_test,
       ds_vars = ds_vars_test,
-      var_spec = var_spec_test
+      var_spec = var_spec_test,
+      schema = base_column_schema()
     )
   )
 })
