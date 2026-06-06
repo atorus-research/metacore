@@ -4,8 +4,8 @@
 #' were added. Used when `define_fields = FALSE` to preserve backwards
 #' compatibility for callers who do not need the Define.xml extensions.
 #'
-#' @return named list of zero-row prototype tibbles, one per table
-#' @noRd
+#' @return named list of zero-row schema tibbles, one per table
+#' @export
 base_column_schema <- function() {
    list(
       .ds_spec = tibble(
@@ -48,7 +48,7 @@ base_column_schema <- function() {
 #' added here are automatically tolerated on existing objects.
 #'
 #' @return named list of zero-row schema tibbles, one per table
-#' @noRd
+#' @export
 define_column_schema <- function() {
    schema <- base_column_schema()
 
@@ -88,6 +88,98 @@ define_column_schema <- function() {
 }
 
 
+#' Default column regex mappings for the base (pre-Define.xml) schema
+#'
+#' Returns named regex vectors used by the `spec_type_to_*` family to locate
+#' and rename columns when reading Excel specifications. Mirrors the structure
+#' of `base_column_schema()` — one entry per table, keys matching column names.
+#'
+#' @return named list of named character vectors, one per table
+#' @export
+base_col_regex <- function() {
+   list(
+      .ds_spec = c(
+         "dataset"   = "[N|n]ame|[D|d]ataset|[D|d]omain",
+         "structure" = "[S|s]tructure",
+         "label"     = "[L|l]abel|[D|d]escription"
+      ),
+      .ds_vars = c(
+         "dataset"   = "[D|d]ataset|[D|d]omain",
+         "variable"  = "[V|v]ariable [[N|n]ame]?|[V|v]ariables?",
+         "order"     = "[V|v]ariable [O|o]rder|[O|o]rder",
+         "mandatory" = "[K|k]eep|[M|m]andatory"
+      ),
+      .var_spec = c(
+         "variable" = "[N|n]ame|[V|v]ariables?",
+         "length"   = "[L|l]ength",
+         "label"    = "[L|l]abel",
+         "type"     = "[T|t]ype",
+         "dataset"  = "[D|d]ataset|[D|d]omain",
+         "format"   = "[F|f]ormat"
+      ),
+      .value_spec = c(
+         "dataset"       = "[D|d]ataset|[D|d]omain",
+         "variable"      = "[N|n]ame|[V|v]ariables?",
+         "origin"        = "[O|o]rigin",
+         "type"          = "[T|t]ype",
+         "code_id"       = "[C|c]odelist|Controlled Term",
+         "sig_dig"       = "[S|s]ignificant",
+         "where"         = "[W|w]here",
+         "derivation_id" = "[M|m]ethod",
+         "predecessor"   = "[P|p]redecessor"
+      ),
+      .derivations = c(
+         "derivation_id" = "ID",
+         "derivation"    = "[D|d]efinition|[D|d]escription"
+      )
+   )
+}
+
+
+#' Default column regex mappings including Define.xml-specific fields
+#'
+#' Extends `base_col_regex()` with the additional columns required for
+#' Define.xml generation. Mirrors the structure of `define_column_schema()`.
+#'
+#' @return named list of named character vectors, one per table
+#' @export
+define_col_regex <- function() {
+   regex <- base_col_regex()
+   regex$.ds_spec <- c(
+      regex$.ds_spec,
+      "class"     = "[C|c]lass",
+      "repeating" = "[R|r]epeating",
+      "reference" = "[R|r]eference [D|d]ata",
+      "purpose"   = "[P|p]urpose"
+   )
+   regex$.ds_vars <- c(regex$.ds_vars, "role" = "[R|r]ole")
+   regex$.value_spec <- c(
+      regex$.value_spec,
+      "where_label" = "[L|l]abel|[D|d]escription"
+      # comment_id is populated via a separate join in spec_type_to_value_spec,
+      # not through create_tbl, so it is intentionally excluded here.
+   )
+   regex$.derivations <- c(
+      regex$.derivations,
+      "method_name" = "[N|n]ame",
+      "method_type" = "[T|t]ype",
+      "document_id" = "[D|d]ocument",
+      "pages"       = "[P|p]ages"
+   )
+   # Define-only tables (no base equivalent)
+   regex$.documents <- c(
+      "document_id" = "ID",
+      "title"       = "[T|t]itle",
+      "href"        = "[H|h]ref"
+   )
+   regex$.comments <- c(
+      "comment_id" = "ID",
+      "comment"    = "[D|d]escription"
+   )
+   regex
+}
+
+
 #' Columns present only in the define schema for a given table
 #'
 #' Returns the column names that exist in `define_column_schema()` but not in
@@ -111,7 +203,7 @@ define_only_cols <- function(table_name) {
 
 #' Column Names by dataset
 #'
-#' @param schema Optional named list of prototype tibbles from
+#' @param schema Optional named list of schema tibbles from
 #'   `define_column_schema()` or `base_column_schema()`. Defaults to the full
 #'   extended schema.
 #' @return list of column names by dataset
@@ -148,4 +240,29 @@ fill_cols <- function(.data, schema) {
       .data[[col]] <- schema[[col]][seq_len(nrow(.data))]
    }
    .data
+}
+
+
+#' Reorder columns to match column_schema order
+#'
+#' @param .data dataset to reorder
+#' @param table_name name of the table (e.g., "ds_spec", "ds_vars")
+#'
+#' @return dataset with columns in schema order
+#' @noRd
+reorder_by_schema <- function(.data, table_name) {
+  schema <- define_column_schema()
+  table_key <- paste0(".", table_name)
+
+  if (!table_key %in% names(schema)) {
+    return(.data)
+  }
+
+  expected_cols <- names(schema[[table_key]])
+  current_cols <- names(.data)
+
+  # Keep only columns that exist in current data, in schema order
+  cols_to_keep <- intersect(expected_cols, current_cols)
+
+  .data |> select(all_of(cols_to_keep))
 }
