@@ -640,8 +640,7 @@ get_control_term <- function(metacode, variable = NULL, dataset = NULL, where = 
     cli_abort(c(
       "x" = "{.val {var_str}} contains value-level metadata and does not have a unique codelist. Please specify a {.var where}.",
       "i" = "Possible values for {.var where} are {.val {vlm_map$where}}.",
-      "i" = "To return all possible codelists definied by VLM set {.var where} = {.val all}."
-    ))
+      "i" = "To return all possible codelists defined by VLM set {.var where} = {.val \"all\"}."
   }
 
   # VLM case: multiple codelists returned and guard clauses passed checks
