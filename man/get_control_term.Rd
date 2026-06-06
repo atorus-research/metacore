@@ -17,11 +17,24 @@ get_control_term(metacode, variable = NULL, dataset = NULL, where = NULL)
 to retrieve all control terminology for variables with multiple VLM conditions}
 }
 \value{
-A vector, a tibble, or NULL
+A vector, a tibble, a named list of tibbles, or NULL
 }
 \description{
 Returns the control term (a vector for permitted values and a tibble for code
 lists) for a given variable. If the variable has value-level metadata (VLM),
 a specific VLM condition can be selected via the \code{where} parameter, or
 \code{where = "all"} can be used to retrieve all controlled terminology.
+}
+\examples{
+\dontrun{
+Example for a single controlled term using both strings and bare column names
+meta_ex <- spec_to_metacore(metacore_example("p21_mock.xlsx"), verbose = "silent")
+get_control_term(meta_ex, QVAL, SUPPAE)
+get_control_term(meta_ex, "QVAL", "SUPPAE")
+
+Example for VLM retrieving all possible CT and CT for a single where clause
+meta_vlm <- spec_to_metacore(metacore_example("vlm_test_spec.xlsx"), verbose = "silent")
+get_control_term(meta_vlm, "AVALCA1N", "ADEX", where = "all")
+get_control_term(meta_vlm, "AVALCA1N", "ADEX", where = "PARAMCD EQ PERCOMP")
+}
 }

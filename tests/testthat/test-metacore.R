@@ -143,8 +143,11 @@ test_that("get_control_term: Variable not found in value_spec", {
 
 test_that("get_control_term: Dataset filtering - valid dataset", {
   # Test with both bare and string dataset specification
-  result1 <- get_control_term(p21_spec, QVAL, "SUPPAE")
+  result1 <- get_control_term(p21_spec, QVAL, SUPPAE)
   result2 <- get_control_term(p21_spec, "QVAL", "SUPPAE")
+
+  expect_no_error(get_control_term(p21_spec, "QVAL", SUPPAE))
+  expect_no_error(get_control_term(p21_spec, QVAL, "SUPPAE"))
 
   expect_equal(result1, tibble(code = c("N", "Y"), decode = c("No", "Yes")))
   expect_equal(result2, result1)

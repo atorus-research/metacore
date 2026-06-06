@@ -545,19 +545,30 @@ select_dataset <- function(.data, dataset, simplify = FALSE, quiet = deprecated(
 #' @param where Optional VLM condition matching `value_spec$where`, or `"all"`
 #'   to retrieve all control terminology for variables with multiple VLM conditions
 #'
-#' @return
-#' A vector, a tibble, or NULL
+#' @return A vector, a tibble, a named list of tibbles, or NULL
 #' @export
 #'
+#' @examples
+#' \dontrun{
+#' Example for a single controlled term using both strings and bare column names
+#' meta_ex <- spec_to_metacore(metacore_example("p21_mock.xlsx"), verbose = "silent")
+#' get_control_term(meta_ex, QVAL, SUPPAE)
+#' get_control_term(meta_ex, "QVAL", "SUPPAE")
+#'
+#' Example for VLM retrieving all possible CT and CT for a single where clause
+#' meta_vlm <- spec_to_metacore(metacore_example("vlm_test_spec.xlsx"), verbose = "silent")
+#' get_control_term(meta_vlm, "AVALCA1N", "ADEX", where = "all")
+#' get_control_term(meta_vlm, "AVALCA1N", "ADEX", where = "PARAMCD EQ PERCOMP")
+#' }
 get_control_term <- function(metacode, variable = NULL, dataset = NULL, where = NULL) {
-  if (missing(variable) || is.null(variable)) {
+  if (missing(variable)) {
     cli_abort("{.var variable} must be provided.")
   }
 
   # Capture NSE or string safely
   var_str <- as_name(ensym(variable))
   dataset_str <- NULL
-  if (!missing(dataset) && !is.null(dataset)) {
+  if (!missing(dataset)) {
     dataset_str <- as_name(ensym(dataset))
   }
   where_str <- where
@@ -574,8 +585,12 @@ get_control_term <- function(metacode, variable = NULL, dataset = NULL, where = 
     value_spec <- filter(value_spec, dataset == dataset_str)
   }
 
-  if (length(unique(value_spec$dataset)) > 1) {
-    cli_abort("{.val {var_str}} does not have a unique codelist. Please specify a dataset.")
+  # If there is a non-unique codes and no dataset is selected, throw an error
+  if (is.null(dataset_str) && is.null(where_str)) {
+     code_ids_tmp <- unique(stats::na.omit(value_spec$code_id))
+     if (length(code_ids_tmp) > 1 && length(unique(value_spec$dataset)) > 1) {
+        cli_abort("{.val {var_str}} does not have a unique codelist. Please specify a dataset.")
+     }
   }
 
   if (nrow(value_spec) == 0) {
@@ -642,6 +657,7 @@ get_control_term <- function(metacode, variable = NULL, dataset = NULL, where = 
       "x" = "{.val {var_str}} contains value-level metadata and does not have a unique codelist. Please specify a {.var where}.",
       "i" = "Possible values for {.var where} are {.val {vlm_map$where}}.",
       "i" = "To return all possible codelists defined by VLM set {.var where} = {.val \"all\"}."
+    ))
   }
 
   # VLM case: multiple codelists returned and guard clauses passed checks
