@@ -1,0 +1,374 @@
+================================================================================
+ANALYSIS: Define-XML 2.0 vs 2.1 Compatibility
+================================================================================
+
+Date: 2026-06-02
+Purpose: Identify structural differences between Define-XML 2.0 and 2.1 and
+         determine what changes would be required in the metacore readers and
+         writers to support both versions.
+
+IMPORTANT FRAMING NOTE
+----------------------
+Metacore's primary role is to read metadata from Excel specification documents
+(P21-style .xlsx files) and normalise them into a standard in-memory object.
+The Define-XML writer consumes whatever metacore holds — it cannot generate
+fields that were never captured from the spec.
+
+This analysis therefore classifies each 2.1 change by whether the underlying
+data EXISTS in a typical P21 spec sheet:
+
+  [SPEC]    — The data is in the spec and can be read into metacore today or
+              with a small reader update.
+  [WRITER]  — The data has no equivalent spec column; it must be supplied as a
+              parameter to metacore_to_define_xml() at generation time.
+  [DERIVE]  — The data can be inferred from what the spec does contain, without
+              needing a new column or a new parameter.
+
+Sources consulted:
+  - inst/extdata/SDTM_spec_CDISC_pilot.xlsx (reference P21 spec)
+    Sheets and columns observed:
+      Study:      Attribute, Value (StudyName, StudyDescription, ProtocolName,
+                  StandardName, StandardVersion, Language)
+      Datasets:   Dataset, Description, Class, Structure, Purpose,
+                  Key Variables, Repeating, Reference Data, Comment
+      Variables:  Order, Dataset, Variable, Label, Data Type, Length,
+                  Significant Digits, Format, Mandatory, Codelist, Origin,
+                  Pages, Method, Predecessor, Role, Comment
+      ValueLevel: Order, Dataset, Variable, Where Clause, Description,
+                  Data Type, Length, Significant Digits, Format, Mandatory,
+                  Codelist, Origin, Pages, Method, Predecessor, Comment
+      Codelists:  ID, Name, NCI Codelist Code, Data Type, Order, Term,
+                  NCI Term Code, Decoded Value
+      Methods:    ID, Name, Type, Description, Expression Context,
+                  Expression Code, Document, Pages
+      Comments:   ID, Description, Document, Pages
+      Documents:  ID, Title, Href
+  - tests/testthat/define2-0-0.xsl (CDISC reference stylesheet with explicit
+    v2.0 / v2.1 branching comments throughout)
+  - tests/testthat/define-2021.xml (current 2.0.0 test file)
+  - R/xml_builders.R, R/define_xml_writers.R (current implementation)
+
+
+================================================================================
+1. OVERVIEW
+================================================================================
+
+Define-XML 2.1 is an incremental extension of 2.0. It does NOT change the
+underlying ODM version (both use ODM 1.3.2) but updates the def: namespace
+from v2.0 to v2.1 and introduces new elements and attributes. All 2.1 changes
+are additive — a 2.0 document is valid 2.1 with zero changes, meaning 2.1
+support can be layered on top of the current implementation without breaking
+existing behaviour.
+
+The primary theme of 2.1 is richer standards traceability: datasets, variables,
+codelists, and methods can now explicitly reference which CDISC standard they
+belong to, flag non-standard content, and mark empty datasets.
+
+Of the 14 structural changes between 2.0 and 2.1, roughly half have no
+equivalent in a P21 spec document. Those fields must either be accepted as
+writer parameters, defaulted to sensible values, or omitted entirely. The
+result is a much smaller implementation scope than a naive XML-to-XML
+comparison would suggest.
+
+
+================================================================================
+2. STRUCTURAL DIFFERENCES: 2.0 vs 2.1
+================================================================================
+
+--- Change #1: Namespace and version identifiers --- [WRITER]
+
+  2.0: xmlns:def="http://www.cdisc.org/ns/def/v2.0"  /  def:DefineVersion="2.0.0"
+  2.1: xmlns:def="http://www.cdisc.org/ns/def/v2.1"  /  def:DefineVersion="2.1.0"
+
+  No spec column for this. Controlled entirely by the define_version parameter
+  passed to metacore_to_define_xml(). The reader detects the version from the
+  DefineVersion attribute; after xml_ns_strip() the namespace URI does not
+  affect XPath behaviour.
+
+
+--- Change #2: Standards block replaces MetaDataVersion attributes --- [PARTIAL: SPEC + WRITER]
+
+  2.0: StandardName and StandardVersion are flat attributes on MetaDataVersion:
+    <MetaDataVersion def:StandardName="CDISC SDTM" def:StandardVersion="3.2">
+
+  2.1: Those attributes are removed. Standards are declared as child elements:
+    <MetaDataVersion>
+      <def:Standards>
+        <def:Standard OID="STD.1" Name="CDISC SDTM" Type="IG"
+                      Version="3.2" PublishingSet="SDTM"
+                      IsDefault="Yes" Status="Final"/>
+      </def:Standards>
+    </MetaDataVersion>
+
+  What the spec has (Study sheet):
+    StandardName    → Name attribute                 [SPEC - already read]
+    StandardVersion → Version attribute              [SPEC - already read]
+
+  What the spec does NOT have (must be writer parameters or defaults):
+    OID             — not in spec; can be auto-generated (e.g. "STD.1")
+    Type            — not in spec; default "IG" is correct for most studies
+    PublishingSet   — not in spec; can default to the standard name
+    IsDefault       — not in spec; always "Yes" when there is one standard
+    Status          — not in spec; can default to "Final"
+
+  The study_level table already stores standard_name and standard_version.
+  A new `standards` table is NOT required — the writer can construct the
+  Standards block from study_level, supplementing the missing 2.1 attributes
+  with defaults or values from a study_details parameter override.
+
+  What needs to change:
+    Writer: .create_metadata_version() branches on define_version:
+      2.0 → emit flat @def:StandardName / @def:StandardVersion (current)
+      2.1 → emit def:Standards/def:Standard child element, reading Name and
+            Version from metacore$study_level and filling OID/Type/etc. with
+            defaults or study_details overrides.
+    Reader: define_to_metacore() branches on DefineVersion:
+      2.0 → read standard_name/version from MetaDataVersion attributes (current)
+      2.1 → read Name/Version from def:Standards/def:Standard[@IsDefault='Yes']
+
+
+--- Change #3: Dataset Class becomes a child element, gains SubClass --- [PARTIAL: SPEC + WRITER]
+
+  2.0: <ItemGroupDef def:Class="FINDINGS">
+  2.1: <ItemGroupDef>
+         <def:Class Name="FINDINGS">
+           <def:SubClass Name="FINDINGS ABOUT EVENTS OF INTEREST"/>
+         </def:Class>
+       </ItemGroupDef>
+
+  What the spec has (Datasets sheet):
+    Class column → top-level class name              [SPEC - already read]
+
+  What the spec does NOT have:
+    SubClass — no SubClass column exists in the Datasets sheet. This is a more
+               granular CDISC classification not commonly included in P21 specs.
+
+  Conclusion: SubClass should NOT be added to the metacore schema or generated
+  XML. It has no spec source and is unlikely to be populated in practice.
+
+  The Class attribute-to-element restructuring IS needed for writer and reader:
+
+  Reader change: xml_to_ds_spec() should check for the child def:Class element
+    (2.1) first, then fall back to @def:Class attribute (2.0), so it handles
+    both versions transparently. ds_spec.class already exists; no schema change.
+
+  Writer change: .create_item_group_defs() branches on define_version:
+    2.0 → set_attrs(igd, "def:Class" = ds$class)  [current]
+    2.1 → xml_add_child(igd, "def:Class", Name = ds$class)
+
+
+--- Change #4: @def:StandardOID on ItemGroupDef and CodeList --- [WRITER]
+
+  2.1 allows datasets and codelists to reference a specific def:Standard:
+    <ItemGroupDef def:StandardOID="STD.1" ...>
+    <CodeList     def:StandardOID="STD.1" ...>
+
+  The Datasets and Codelists sheets have no column for this linkage.
+
+  Conclusion: Omit @def:StandardOID from generated XML unless supplied as a
+  writer parameter. When omitted the document is still valid 2.1.
+
+
+--- Change #5: @def:IsNonStandard on ItemGroupDef and CodeList --- [WRITER]
+
+  2.1 flags content not from a registered CDISC standard:
+    <ItemGroupDef def:IsNonStandard="Yes">
+
+  No spec column for this in Datasets or Codelists sheets.
+
+  Conclusion: Omit from generated XML by default. Could be a writer parameter
+  if needed. Low priority — most clinical trial specs are fully standard.
+
+
+--- Change #6: @def:HasNoData on ItemGroupDef and ItemRef --- [WRITER]
+
+  2.1 marks datasets/variables with no actual data in the submission:
+    <ItemGroupDef def:HasNoData="Yes">
+    <ItemRef      def:HasNoData="Yes">
+
+  No spec column for this in Datasets or Variables sheets.
+
+  Conclusion: Omit from generated XML by default. Could be passed via
+  study_details if needed. Low priority.
+
+
+--- Change #7: def:Origin gains a @Source attribute --- [WRITER]
+
+  2.1 adds @Source to def:Origin to capture the collection instrument:
+    <def:Origin Type="Collected" Source="CRF">
+
+  The Variables sheet has an Origin column, but it captures the Type value
+  (Collected, Derived, etc.), not a separate Source. No spec column for Source.
+
+  Conclusion: Omit @Source from generated XML. Not available from the spec.
+
+
+--- Change #8: Origin type rename CRF → Collected --- [DERIVE]
+
+  2.0 used @Type="CRF"; 2.1 formalises the rename to @Type="Collected".
+  The current origin_type() function maps "crf" → "CRF".
+
+  For 2.1 output: update origin_type() to map "crf" → "Collected" when
+  define_version is "2.1.0". No schema change needed.
+
+  Reader: xml_to_value_spec() already lowercases all origin values, so both
+  "CRF" and "Collected" are stored as "crf" and "collected" respectively.
+  Existing behaviour is compatible.
+
+
+--- Change #9: CodeListItem/Description and EnumeratedItem/Description --- [SPEC - not present]
+
+  2.1 allows a free-text description on individual codelist entries, distinct
+  from the decoded value. The Codelists sheet has no per-term description
+  column (only Decoded Value).
+
+  Conclusion: Omit from reader and writer.
+
+
+--- Change #10: CodeListItem@Rank and EnumeratedItem@Rank --- [SPEC - not present]
+
+  2.1 adds an optional @Rank attribute for explicit ordering of codelist items.
+  The Codelists sheet has no Rank column.
+
+  Conclusion: Omit. OrderNumber (already written) is sufficient.
+
+
+--- Change #11: NCI Codelist Code / NCI Term Code --- [SPEC - present, not yet captured]
+
+  Not strictly a 2.1-only change, but worth noting. The Codelists sheet has:
+    NCI Codelist Code  (e.g. "C71620") — not currently read into metacore
+    NCI Term Code      (e.g. "C67456") — not currently read into metacore
+
+  These relate to CDISC CT references and could support @def:StandardOID
+  linkage in 2.1, but more practically they are useful for existing 2.0
+  CodeList@Preference attributes. This is a gap in 2.0 support as well.
+
+  Conclusion: Worth capturing as a separate enhancement, but not a blocking
+  requirement for basic 2.1 compatibility.
+
+
+--- Change #12: MethodDef/FormalExpression --- [SPEC - PRESENT]
+
+  2.1 formalises FormalExpression. The Methods sheet has:
+    Expression Context  → FormalExpression@Context  (e.g. "SAS", "R")
+    Expression Code     → FormalExpression text content
+
+  Both columns exist in the spec (though empty in the example file).
+  These are already listed as Phase 4 items in the original analysis
+  (DEFINE_XML_GENERATION_ANALYSIS.txt section 6.4).
+
+  What needs to change:
+    Schema: derivations gains expression_context (character) and
+            expression_code (character) — already planned as Phase 4.
+    Reader: spec_type_to_derivations() reads these columns from the
+            Methods sheet — already targeted for Phase 4.
+    Writer: .create_method_defs() emits FormalExpression when populated.
+
+
+--- Change #13: def:ValueListDef/Description --- [SPEC - not present]
+
+  2.1 allows a description on the ValueListDef element as a whole. No spec
+  column maps to a per-value-list description.
+
+  Conclusion: Omit from reader and writer.
+
+
+--- Change #14: MetaDataVersion@def:CommentOID and ODM@def:Context --- [WRITER]
+
+  2.1 adds:
+    MetaDataVersion@def:CommentOID  — reference to a CommentDef
+    ODM@def:Context                 — submission context (e.g. "Submission")
+
+  Neither appears in any spec sheet.
+
+  Conclusion: Could be writer parameters in study_details if needed.
+  Low priority.
+
+
+================================================================================
+3. WHAT STAYS THE SAME
+================================================================================
+
+The following structures are unchanged between 2.0 and 2.1 and require no
+modifications to either readers or writers:
+
+  - ODM root attributes (FileType, FileOID, CreationDateTime, SourceSystem)
+  - Study/GlobalVariables (StudyName, StudyDescription, ProtocolName)
+  - ItemGroupDef core attributes (OID, Name, Repeating, IsReferenceData,
+    SASDatasetName, Purpose, def:Structure, def:ArchiveLocationID)
+  - ItemRef core attributes (ItemOID, OrderNumber, Mandatory, KeySequence,
+    MethodOID, Role)
+  - ItemDef structure (OID, Name, DataType, Length, SASFieldName,
+    DisplayFormat, SignificantDigits, def:CommentOID)
+  - def:Origin structure (Type, DocumentRef, PDFPageRef) — @Source is new
+  - def:ValueListDef/ItemRef structure
+  - def:WhereClauseDef/RangeCheck structure
+  - CodeList core structure (OID, Name, DataType, EnumeratedItem,
+    CodeListItem, ExternalCodeList)
+  - MethodDef core structure (OID, Name, Type, Description)
+  - def:CommentDef structure
+  - def:leaf elements (location and structure unchanged)
+
+
+================================================================================
+4. SUMMARY: WHAT ACTUALLY NEEDS TO CHANGE
+================================================================================
+
+Taking a spec-first perspective, the genuine work required is small:
+
+  [WRITER - parameter/default]
+  - Add define_version parameter to metacore_to_define_xml() (default "2.0.0")
+  - .create_odm_root(): emit correct def: namespace URI based on version
+  - .create_metadata_version():
+      2.0 → flat @def:StandardName / @def:StandardVersion attributes (current)
+      2.1 → def:Standards/def:Standard child block, reading name/version from
+            metacore$study_level, defaulting OID/Type/Status/IsDefault
+
+  [WRITER + READER - version-aware branching]
+  - .create_item_group_defs():
+      2.0 → @def:Class attribute (current)
+      2.1 → def:Class child element with Name attribute
+  - xml_to_ds_spec():
+      Try def:Class child element first, fall back to @def:Class attribute.
+      No schema change needed.
+
+  [WRITER - minor]
+  - origin_type(): when define_version is "2.1.0", map "crf" → "Collected"
+
+  [SPEC reader + WRITER - Phase 4, already planned]
+  - Read Expression Context and Expression Code from Methods sheet into
+    derivations.expression_context and derivations.expression_code
+  - Emit FormalExpression in .create_method_defs() when populated
+
+  Changes that are NOT needed (no spec equivalent, safe to omit):
+  - SubClass on datasets
+  - @def:StandardOID on datasets/codelists
+  - @def:IsNonStandard
+  - @def:HasNoData
+  - def:Origin@Source
+  - CodeListItem/Description and @Rank
+  - def:ValueListDef/Description
+  - MetaDataVersion@def:CommentOID
+  - ODM@def:Context
+
+
+================================================================================
+5. EFFORT ESTIMATE
+================================================================================
+
+  define_version parameter + namespace URI:      0.5 hours
+  Standards block writer + reader branching:     1-2 hours
+  Class element/attribute writer + reader:       1   hour
+  origin_type() CRF→Collected version switch:    0.5 hours
+  FormalExpression reader + writer (Phase 4):    2-3 hours
+  Tests:                                         2-3 hours
+  ----------------------------------------
+  TOTAL:                                        ~7-10 hours
+
+  This is substantially less than a naive XML-comparison estimate because
+  most 2.1 additions have no spec source and should simply be omitted rather
+  than added as new schema columns or writer parameters.
+
+================================================================================
+END OF ANALYSIS
+================================================================================
