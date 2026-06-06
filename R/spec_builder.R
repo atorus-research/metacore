@@ -47,62 +47,61 @@
 #' @export
 spec_to_metacore <- function(path, quiet = deprecated(), where_sep_sheet = TRUE,
                              define_fields = FALSE, verbose = "message") {
-   # Check if user has supplied `quiet` instead of `verbose`
    if (lifecycle::is_present(quiet)) {
       deprecate_soft(when = "0.3.0", what = "spec_to_metacore(quiet)", with = "spec_to_metacore(verbose)")
    } else {
       quiet <- FALSE
-   } # Else deal with deprecated argument for compatibility
+   }
 
    with_verbosity(
       {
          doc <- read_all_sheets(path)
 
-         if (spec_type(path) == "by_type") {
-            ds_spec <- spec_type_to_ds_spec(doc, define_fields = define_fields)
-            ds_vars <- spec_type_to_ds_vars(doc, define_fields = define_fields)
-            var_spec <- spec_type_to_var_spec(doc)
-            value_spec <- spec_type_to_value_spec(doc, where_sep_sheet = where_sep_sheet, define_fields = define_fields)
-            derivations <- spec_type_to_derivations(doc, define_fields = define_fields)
-            codelist <- spec_type_to_codelist(doc)
-            documents <- spec_type_to_documents(doc)
-            comments <- spec_type_to_comments(doc)
-            supp <- create_supp_table(
-               doc,
-               where_sep_sheet = where_sep_sheet,
-               var_spec = var_spec,
-               value_spec = value_spec,
-               codelist = codelist,
-               comments = comments
-            )
-
-            # Add supplemental variables to ds_vars, var_spec, value_spec
-            ds_vars <- add_supp_to_table(supp, ds_vars, define_column_schema()$.ds_vars)
-            var_spec <- add_supp_to_table(supp, var_spec, define_column_schema()$.var_spec)
-            value_spec <- add_supp_to_table(supp, value_spec, define_column_schema()$.value_spec)
-
-            # Strip unneeded vars from supp
-            supp <- reorder_by_schema(supp, "supp")
-
-            mc <- metacore(
-               ds_spec,
-               ds_vars,
-               var_spec,
-               value_spec,
-               derivations,
-               codelist,
-               supp = supp,
-               documents = documents,
-               comments = comments,
-               define_fields = define_fields,
-               quiet = quiet,
-               verbose = verbose
-            )
-         } else {
+         if (spec_type(path) != "by_type") {
             cli_abort(
                "This specification format is not currently supported. You will need to write your own reader"
             )
          }
+
+         # Core tables — always built regardless of define_fields
+         ds_spec     <- spec_type_to_ds_spec(doc, define_fields = define_fields)
+         ds_vars     <- spec_type_to_ds_vars(doc, define_fields = define_fields)
+         var_spec    <- spec_type_to_var_spec(doc)
+         value_spec  <- spec_type_to_value_spec(doc, where_sep_sheet = where_sep_sheet, define_fields = define_fields)
+         derivations <- spec_type_to_derivations(doc, define_fields = define_fields)
+         codelist    <- spec_type_to_codelist(doc)
+
+         # Define.xml-only tables — skipped when define_fields = FALSE
+         documents <- if (define_fields) spec_type_to_documents(doc) else NULL
+         comments  <- if (define_fields) spec_type_to_comments(doc) else NULL
+         supp <- base_column_schema()$.supp
+
+         # Supplemental variables — skipped when define_fields = FALSE
+         if (define_fields) {
+           supp <- spec_type_to_supp(
+             doc,
+             where_sep_sheet = where_sep_sheet,
+             var_spec   = var_spec,
+             value_spec = value_spec,
+             codelist   = codelist,
+             comments   = comments
+           )
+
+           ds_vars    <- add_supp_to_table(supp, ds_vars,    define_column_schema()$.ds_vars)
+           var_spec   <- add_supp_to_table(supp, var_spec,   define_column_schema()$.var_spec)
+           value_spec <- add_supp_to_table(supp, value_spec, define_column_schema()$.value_spec)
+           supp       <- reorder_by_schema(supp, "supp")
+         }
+
+         mc <- metacore(
+            ds_spec, ds_vars, var_spec, value_spec, derivations, codelist,
+            supp      = supp,
+            documents = documents,
+            comments  = comments,
+            define_fields = define_fields,
+            quiet   = quiet,
+            verbose = verbose
+         )
 
          if (quiet) invisible(mc) else mc
       },
@@ -162,24 +161,43 @@ read_all_sheets <- function(path) {
 #'   expressions for more flexibility. But, the names must follow the given pattern
 #' @param sheet Regular expression for the sheet name
 #'
+#' @usage
+#' # Default (define_fields = FALSE):
+#' spec_type_to_ds_spec(doc,
+#'   cols = c(
+#'     "dataset"   = "[N|n]ame|[D|d]ataset|[D|d]omain",
+#'     "structure" = "[S|s]tructure",
+#'     "label"     = "[L|l]abel|[D|d]escription"
+#'   ),
+#'   sheet = NULL, define_fields = FALSE)
+#'
+#' # With define_fields = TRUE, additional cols are appended automatically:
+#' spec_type_to_ds_spec(doc,
+#'   cols = c(
+#'     "dataset"   = "[N|n]ame|[D|d]ataset|[D|d]omain",
+#'     "structure" = "[S|s]tructure",
+#'     "label"     = "[L|l]abel|[D|d]escription",
+#'     "class"     = "[C|c]lass",
+#'     "repeating" = "[R|r]epeating",
+#'     "reference" = "[R|r]eference [D|d]ata",
+#'     "purpose"   = "[P|p]urpose"
+#'   ),
+#'   sheet = NULL, define_fields = TRUE)
+#'
 #' @return a dataset formatted for the metacore object
 #' @export
 #'
 #' @family spec builders
 spec_type_to_ds_spec <- function(
       doc,
-      cols = c(
-         "dataset" = "[N|n]ame|[D|d]ataset|[D|d]omain",
-         "structure" = "[S|s]tructure",
-         "label" = "[L|l]abel|[D|d]escription",
-         "class" = "[C|c]lass",
-         "repeating" = "[R|r]epeating",
-         "reference" = "[R|r]eference [D|d]ata",
-         "purpose" = "[P|p]urpose"
-      ),
+      cols = NULL,
       sheet = NULL,
       define_fields = FALSE
 ) {
+   if (is.null(cols)) {
+      cols <- (if (define_fields) define_col_regex() else base_col_regex())$.ds_spec
+   }
+
    # Validate against the full schema so typos are caught regardless of mode
    valid_names <- names(define_column_schema()$.ds_spec)
    if (!all(names(cols) %in% valid_names) | is.null(names(cols))) {
@@ -229,19 +247,39 @@ spec_type_to_ds_spec <- function(
 #'   vector.
 #' @param key_seq_cols names vector to get the key_sequence for each dataset
 #'
+#' @usage
+#' # Default (define_fields = FALSE):
+#' spec_type_to_ds_vars(doc,
+#'   cols = c(
+#'     "dataset"   = "[D|d]ataset|[D|d]omain",
+#'     "variable"  = "[V|v]ariable [[N|n]ame]?|[V|v]ariables?",
+#'     "order"     = "[V|v]ariable [O|o]rder|[O|o]rder",
+#'     "mandatory" = "[K|k]eep|[M|m]andatory"
+#'   ),
+#'   key_seq_sep_sheet = TRUE,
+#'   key_seq_cols = c("dataset" = "Dataset", "key_seq" = "Key Variables"),
+#'   sheet = "[V|v]ar|Datasets", define_fields = FALSE)
+#'
+#' # With define_fields = TRUE, additional cols are appended automatically:
+#' spec_type_to_ds_vars(doc,
+#'   cols = c(
+#'     "dataset"   = "[D|d]ataset|[D|d]omain",
+#'     "variable"  = "[V|v]ariable [[N|n]ame]?|[V|v]ariables?",
+#'     "order"     = "[V|v]ariable [O|o]rder|[O|o]rder",
+#'     "mandatory" = "[K|k]eep|[M|m]andatory",
+#'     "role"      = "[R|r]ole"
+#'   ),
+#'   key_seq_sep_sheet = TRUE,
+#'   key_seq_cols = c("dataset" = "Dataset", "key_seq" = "Key Variables"),
+#'   sheet = "[V|v]ar|Datasets", define_fields = TRUE)
+#'
 #' @return a dataset formatted for the metacore object
 #' @export
 #'
 #' @family spec builders
 spec_type_to_ds_vars <- function(
       doc,
-      cols = c(
-         "dataset" = "[D|d]ataset|[D|d]omain",
-         "variable" = "[V|v]ariable [[N|n]ame]?|[V|v]ariables?",
-         "order" = "[V|v]ariable [O|o]rder|[O|o]rder",
-         "mandatory" = "[K|k]eep|[M|m]andatory",
-         "role" = "[R|r]ole"
-      ),
+      cols = NULL,
       key_seq_sep_sheet = TRUE,
       key_seq_cols = c(
          "dataset" = "Dataset",
@@ -250,6 +288,10 @@ spec_type_to_ds_vars <- function(
       sheet = "[V|v]ar|Datasets",
       define_fields = FALSE
 ) {
+   if (is.null(cols)) {
+      cols <- (if (define_fields) define_col_regex() else base_col_regex())$.ds_vars
+   }
+
    # Validate against the full schema so typos are caught regardless of mode
    valid_names <- names(define_column_schema()$.ds_vars)
    name_check  <- all(names(cols) %in% valid_names)
@@ -321,21 +363,28 @@ spec_type_to_ds_vars <- function(
 #'   expressions for more flexibility. But, the names must follow the given pattern
 #' @param sheet Regular expression for the sheet name
 #'
+#' @usage
+#' spec_type_to_var_spec(doc,
+#'   cols = c(
+#'     "variable" = "[N|n]ame|[V|v]ariables?",
+#'     "length"   = "[L|l]ength",
+#'     "label"    = "[L|l]abel",
+#'     "type"     = "[T|t]ype",
+#'     "dataset"  = "[D|d]ataset|[D|d]omain",
+#'     "format"   = "[F|f]ormat"
+#'   ),
+#'   sheet = "[V|v]ar")
+#'
 #' @return a dataset formatted for the metacore object
 #' @export
 #'
 #' @family spec builders
 spec_type_to_var_spec <- function(
       doc,
-      cols = c(
-         "variable" = "[N|n]ame|[V|v]ariables?",
-         "length" = "[L|l]ength",
-         "label" = "[L|l]abel",
-         "type" = "[T|t]ype",
-         "dataset" = "[D|d]ataset|[D|d]omain",
-         "format" = "[F|f]ormat"
-      ),
+      cols = NULL,
       sheet = "[V|v]ar") {
+
+   if (is.null(cols)) cols <- base_col_regex()$.var_spec
 
    # "dataset" is a processing-only column (not in schema) used to detect
    # per-domain duplicate variables before it is dropped from the output.
@@ -428,24 +477,49 @@ spec_type_to_var_spec <- function(
 #'   information already exists in the value tab of your specification set to
 #'   NULL
 #'
+#' @usage
+#' # Default (define_fields = FALSE):
+#' spec_type_to_value_spec(doc,
+#'   cols = c(
+#'     "dataset"       = "[D|d]ataset|[D|d]omain",
+#'     "variable"      = "[N|n]ame|[V|v]ariables?",
+#'     "origin"        = "[O|o]rigin",
+#'     "type"          = "[T|t]ype",
+#'     "code_id"       = "[C|c]odelist|Controlled Term",
+#'     "sig_dig"       = "[S|s]ignificant",
+#'     "where"         = "[W|w]here",
+#'     "derivation_id" = "[M|m]ethod",
+#'     "predecessor"   = "[P|p]redecessor"
+#'   ),
+#'   sheet = NULL, where_sep_sheet = TRUE,
+#'   where_cols = c("id" = "ID", "where" = c("Variable", "Comparator", "Value")),
+#'   var_sheet = "[V|v]ar", define_fields = FALSE)
+#'
+#' # With define_fields = TRUE, additional cols are appended automatically:
+#' spec_type_to_value_spec(doc,
+#'   cols = c(
+#'     "dataset"       = "[D|d]ataset|[D|d]omain",
+#'     "variable"      = "[N|n]ame|[V|v]ariables?",
+#'     "origin"        = "[O|o]rigin",
+#'     "type"          = "[T|t]ype",
+#'     "code_id"       = "[C|c]odelist|Controlled Term",
+#'     "sig_dig"       = "[S|s]ignificant",
+#'     "where"         = "[W|w]here",
+#'     "derivation_id" = "[M|m]ethod",
+#'     "predecessor"   = "[P|p]redecessor",
+#'     "where_label"   = "[L|l]abel|[D|d]escription"
+#'   ),
+#'   sheet = NULL, where_sep_sheet = TRUE,
+#'   where_cols = c("id" = "ID", "where" = c("Variable", "Comparator", "Value")),
+#'   var_sheet = "[V|v]ar", define_fields = TRUE)
+#'
 #' @return a dataset formatted for the metacore object
 #' @export
 #'
 #' @family spec builders
 spec_type_to_value_spec <- function(
       doc,
-      cols = c(
-         "dataset" = "[D|d]ataset|[D|d]omain",
-         "variable" = "[N|n]ame|[V|v]ariables?",
-         "origin" = "[O|o]rigin",
-         "type" = "[T|t]ype",
-         "code_id" = "[C|c]odelist|Controlled Term",
-         "sig_dig" = "[S|s]ignificant",
-         "where" = "[W|w]here",
-         "where_label" = "[L|l]abel|[D|d]escription",
-         "derivation_id" = "[M|m]ethod",
-         "predecessor" = "[P|p]redecessor"
-      ),
+      cols = NULL,
       sheet = NULL,
       where_sep_sheet = TRUE,
       where_cols = c(
@@ -455,6 +529,10 @@ spec_type_to_value_spec <- function(
       var_sheet = "[V|v]ar",
       define_fields = FALSE
 ) {
+   if (is.null(cols)) {
+      cols <- (if (define_fields) define_col_regex() else base_col_regex())$.value_spec
+   }
+
    # "predecessor" is a processing-only column (not in schema) transformed into
    # derivation_id and then dropped. "comment_id" is a define-extra populated via
    # a separate join rather than through create_tbl, so excluded from optional.
@@ -539,10 +617,9 @@ spec_type_to_value_spec <- function(
       out <- mutate(out, where_label = if_else(is.na(where), NA_character_, where_label))
    }
 
-   # Extract comment_id from Variables sheet if available
-   var_sheets <- names(doc) |> keep(~ str_detect(., "[V|v]ar"))
-   if (length(var_sheets) > 0) {
-      comment_mapping <- doc[var_sheets] |>
+   # Extract comment_id from Variables sheet if available for define fields
+   if (length(var_sheet) > 0 && define_fields == TRUE) {
+      comment_mapping <- doc[var_sheet] |>
          map_dfr(~ .x %>%
                     select(
                        dataset = matches("[D|d]ataset|[D|d]omain"),
@@ -555,7 +632,8 @@ spec_type_to_value_spec <- function(
 
       if (nrow(comment_mapping) > 0) {
          out <- out |>
-            left_join(comment_mapping, by = c("dataset", "variable"))
+           select(-comment_id) |>
+           left_join(comment_mapping, by = c("dataset", "variable"))
       }
    }
 
@@ -708,6 +786,43 @@ spec_type_to_codelist <- function(
 #'   comment columns. These do not have to be on the specified sheet.
 #' @param sheet Regular expression for the sheet name
 #'
+#' @usage
+#' # Default (define_fields = FALSE):
+#' spec_type_to_derivations(doc,
+#'   cols = c(
+#'     "derivation_id" = "ID",
+#'     "derivation"    = "[D|d]efinition|[D|d]escription"
+#'   ),
+#'   sheet = "Method|Derivations?",
+#'   var_cols = c(
+#'     "dataset"     = "[D|d]ataset|[D|d]omain",
+#'     "variable"    = "[N|n]ame|[V|v]ariables?",
+#'     "origin"      = "[O|o]rigin",
+#'     "predecessor" = "[P|p]redecessor",
+#'     "comment"     = "[C|c]omment"
+#'   ),
+#'   define_fields = FALSE)
+#'
+#' # With define_fields = TRUE, additional cols are appended automatically:
+#' spec_type_to_derivations(doc,
+#'   cols = c(
+#'     "derivation_id" = "ID",
+#'     "derivation"    = "[D|d]efinition|[D|d]escription",
+#'     "method_name"   = "[N|n]ame",
+#'     "method_type"   = "[T|t]ype",
+#'     "document_id"   = "[D|d]ocument",
+#'     "pages"         = "[P|p]ages"
+#'   ),
+#'   sheet = "Method|Derivations?",
+#'   var_cols = c(
+#'     "dataset"     = "[D|d]ataset|[D|d]omain",
+#'     "variable"    = "[N|n]ame|[V|v]ariables?",
+#'     "origin"      = "[O|o]rigin",
+#'     "predecessor" = "[P|p]redecessor",
+#'     "comment"     = "[C|c]omment"
+#'   ),
+#'   define_fields = TRUE)
+#'
 #' @return a dataset formatted for the metacore object
 #' @export
 #'
@@ -715,14 +830,7 @@ spec_type_to_codelist <- function(
 #' @importFrom purrr quietly
 spec_type_to_derivations <- function(
       doc,
-      cols = c(
-         "derivation_id" = "ID",
-         "derivation" = "[D|d]efinition|[D|d]escription",
-         "method_name" = "[N|n]ame",
-         "method_type" = "[T|t]ype",
-         "document_id" = "[D|d]ocument",
-         "pages" = "[P|p]ages"
-      ),
+      cols = NULL,
       sheet = "Method|Derivations?",
       var_cols = c(
          "dataset" = "[D|d]ataset|[D|d]omain",
@@ -733,6 +841,10 @@ spec_type_to_derivations <- function(
       ),
       define_fields = FALSE
 ) {
+   if (is.null(cols)) {
+      cols <- (if (define_fields) define_col_regex() else base_col_regex())$.derivations
+   }
+
    # Validate against the full schema so typos are caught regardless of mode
    valid_names <- names(define_column_schema()$.derivations)
    var_names   <- c("dataset", "variable", "origin", "predecessor", "comment")
@@ -816,15 +928,43 @@ spec_type_to_derivations <- function(
       reorder_by_schema("derivations")
 }
 
+#' Spec to documents
+#'
+#' Creates the documents table from a Documents sheet in the specification.
+#' The Documents sheet should contain a document identifier (`document_id`),
+#' a human-readable title, and an href (file path or URL) pointing to the
+#' external document. Documents are linked to derivations via `document_id`
+#' in the derivations table.
+#'
+#' This table is only populated when `define_fields = TRUE` is passed to
+#' [spec_to_metacore()]. It is a Define.xml-specific table with no equivalent
+#' in the base schema.
+#'
+#' @param doc Named list of datasets. @seealso [read_all_sheets()] for exact format
+#' @param cols Named vector of column regexes. Defaults are drawn from
+#'   [define_col_regex()]. Names must be a subset of `c("document_id", "title", "href")`.
+#' @param sheet Regular expression for the sheet name
+#'
+#' @usage
+#' spec_type_to_documents(doc,
+#'   cols = c(
+#'     "document_id" = "ID",
+#'     "title"       = "[T|t]itle",
+#'     "href"        = "[H|h]ref"
+#'   ),
+#'   sheet = "[D|d]ocuments?")
+#'
+#' @return a dataset formatted for the metacore object, or `NULL` if no
+#'   matching sheet is found
+#' @export
+#'
+#' @family spec builders
 spec_type_to_documents <- function(
       doc,
-      cols = c(
-         "document_id" = "ID",
-         "title" = "[T|t]itle",
-         "href" = "[H|h]ref"
-      ),
+      cols = NULL,
       sheet = "[D|d]ocuments?"
 ) {
+   if (is.null(cols)) cols <- define_col_regex()$.documents
 
    documents_names <- names(define_column_schema()$.documents)
 
@@ -839,10 +979,7 @@ spec_type_to_documents <- function(
    if (!is.null(sheet)) {
       sheet_ls <- str_subset(names(doc), sheet)
       doc <- doc[sheet_ls]
-      # If no matching sheets found, return NULL (documents are optional)
-      if (length(doc) == 0) {
-         return(NULL)
-      }
+      if (length(doc) == 0) return(NULL)
    }
 
    create_tbl(doc, cols, context = "spec_type_to_documents", schema = define_column_schema()$.documents) |>
@@ -858,9 +995,17 @@ spec_type_to_documents <- function(
 #' in the value_spec table.
 #'
 #' @param doc Named list of datasets @seealso [read_all_sheets()] for exact format
-#' @param cols Named vector of column names. The column names can be regular
-#'   expressions for more flexibility. But, the names must follow the given pattern
+#' @param cols Named vector of column regexes. Defaults are drawn from
+#'   [define_col_regex()]. Names must be a subset of `c("comment_id", "comment")`.
 #' @param sheet Regular expression for the sheet name
+#'
+#' @usage
+#' spec_type_to_comments(doc,
+#'   cols = c(
+#'     "comment_id" = "ID",
+#'     "comment"    = "[D|d]escription"
+#'   ),
+#'   sheet = "[C|c]omments?")
 #'
 #' @return a dataset formatted for the metacore object (comments table)
 #' @export
@@ -868,12 +1013,11 @@ spec_type_to_documents <- function(
 #' @family spec builders
 spec_type_to_comments <- function(
       doc,
-      cols = c(
-         "comment_id" = "ID",
-         "comment" = "[D|d]escription"
-      ),
+      cols = NULL,
       sheet = "[C|c]omments?"
 ) {
+   if (is.null(cols)) cols <- define_col_regex()$.comments
+
 
    comments_names <- names(define_column_schema()$.comments)
 
@@ -900,7 +1044,7 @@ spec_type_to_comments <- function(
       reorder_by_schema("comments")
 }
 
-#' Create supp table
+#' Spec to supp
 #'
 #' Creates the supp table from value_spec, codelist, and comments by identifying
 #' supplemental datasets (SUPP*) and extracting their metadata. For each SUPP domain,
@@ -911,7 +1055,9 @@ spec_type_to_comments <- function(
 #'
 #' @param doc Named list of datasets @seealso [read_all_sheets()] for exact format
 #' @param cols Named vector of column names. The column names can be regular
-#'   expressions for more flexibility. But, the names must follow the given pattern
+#'   expressions for more flexibility. But, the names must follow the given pattern.
+#'   For modern Pinnacle 21 specification spec types, the mapping will typically be
+#'   the same as the mapping for the `value_spec` table.
 #' @param sheet Regular expression for the sheet name
 #' @param where_sep_sheet Boolean value to control if the where information in a
 #'   separate dataset. If the where information is on a separate sheet, set to
@@ -924,11 +1070,30 @@ spec_type_to_comments <- function(
 #' @param comments comments table from metacore object (optional). Only required when
 #'   generating a define.xml enabled metacore object.
 #'
+#' @usage
+#' spec_type_to_supp(doc,
+#'   cols = c(
+#'     "dataset" = "[D|d]ataset|[D|d]omain",
+#'     "where"   = "[W|w]here [C|clause]",
+#'     "type"    = "[T|t]ype",
+#'     "length"  = "[L|l]ength",
+#'     "origin"  = "[O|o]rigin"
+#'   ),
+#'   sheet = NULL,
+#'   where_sep_sheet = TRUE,
+#'   where_cols = c(
+#'     "id"         = "ID",
+#'     "variable"   = "[V|v]ariable",
+#'     "comparator" = "[C|c]omparator",
+#'     "value"      = "[V|v]alue"
+#'   ),
+#'   var_spec = NULL, value_spec = NULL, codelist = NULL, comments = NULL)
+#'
 #' @return a dataset formatted for the metacore object (supp table)
 #' @export
 #'
 #' @family spec builders
-create_supp_table <- function(
+spec_type_to_supp <- function(
       doc,
       cols = c(
          "dataset" = "[D|d]ataset|[D|d]omain",
@@ -969,13 +1134,18 @@ create_supp_table <- function(
       }
    }
 
-   out <- create_tbl(doc, cols, context = "create_supp_table") |>
+   # SUPP datasets share a Variables sheet with parent domains, so isolate them
+   # and strip the prefix to recover the parent domain name used as the join key
+   # throughout metacore (e.g. SUPPAE -> AE)
+   out <- create_tbl(doc, cols, context = "spec_type_to_supp") |>
       filter(str_detect(dataset, "^SUPP")) |>
       mutate(dataset = gsub("^SUPP", "", dataset)) |>
       distinct()
 
    if (where_sep_sheet && "where" %in% names(out)) {
-      where_df <- create_tbl(doc, where_cols, context = "create_supp_table") |>
+      # Older P21 specs store WHERE clauses on a dedicated sheet keyed by ID;
+      # the `value` column holds the QNAM variable name the clause applies to
+      where_df <- create_tbl(doc, where_cols, context = "spec_type_to_supp") |>
          select(id, variable = value)
 
       out <- out |>
@@ -992,6 +1162,9 @@ create_supp_table <- function(
       return(tibble(dataset = character(), variable = character(), idvar = character(), qeval = character()))
    }
 
+   # SUPP variable metadata (names, idvar, qeval) is encoded as value-level rows
+   # inside the SUPP domain's own value_spec, not as direct columns — we unpack
+   # QNAM, IDVAR, and QEVAL rows separately below
    supp_vars <- value_spec |>
       filter(str_detect(dataset, "^SUPP")) |>
       mutate(dataset = gsub("^SUPP", "", dataset)) |>
@@ -1001,10 +1174,13 @@ create_supp_table <- function(
       return(tibble(dataset = character(), variable = character(), idvar = character(), qeval = character()))
    }
 
+   # Fallback so the idvar join below doesn't fail when comments weren't loaded
    if (is.null(comments)) {
       comments <- tibble(comment_id = character(), comment = character())
    }
 
+   # QNAM's codelist holds the supplemental variable names (code) and labels
+   # (decode) — this is the canonical list of supp variables for the domain
    supp_qnam <- supp_vars |>
       filter(variable == "QNAM") |>
       select(dataset, code_id) |>
@@ -1013,6 +1189,9 @@ create_supp_table <- function(
       unnest(codes) |>
       select(dataset, variable = code, label = decode)
 
+   # QEVAL is a single permitted value per domain indicating who evaluates the
+   # supplemental qualifier (e.g. "INVESTIGATOR"); one value shared across all
+   # variables in the domain
    qeval_lookup <- supp_vars |>
       filter(variable == "QEVAL") |>
       select(dataset, code_id) |>
@@ -1021,6 +1200,8 @@ create_supp_table <- function(
       unnest(codes) |>
       select(dataset, qeval = code)
 
+   # IDVAR is stored as a comment in the format IDVAR="<varname>" rather than a
+   # direct column, because the spec has no dedicated idvar field
    idvar_lookup <- supp_vars |>
       filter(variable == "IDVAR") |>
       select(dataset, comment_id) |>
@@ -1028,6 +1209,8 @@ create_supp_table <- function(
       mutate(idvar = str_replace(comment, '^IDVAR="(.*)"$', "\\1")) |>
       select(dataset, idvar)
 
+   # supp_qnam drives the row set (one row per supp variable); out contributes
+   # the type/length/origin read from the Variables sheet
    supp_qnam |>
       left_join(out, by = c("dataset", "variable")) |>
       left_join(idvar_lookup, by = "dataset") |>
@@ -1037,6 +1220,26 @@ create_supp_table <- function(
       filter(!is.na(variable))
 }
 
+#' Add supplemental variable rows to a core metacore table
+#'
+#' Takes the parsed `supp` table (from [spec_type_to_supp()]) and appends any
+#' supplemental variables not already present in `target`. The parent domain is
+#' derived by stripping the leading `"SUPP"` prefix from the dataset name
+#' (e.g. `"SUPPAE"` becomes `"AE"`). Only columns present in `target_schema`
+#' are carried across; missing schema columns are back-filled with typed `NA`s.
+#' Where `target_schema` includes a `supp_flag` column, newly added rows have
+#' it set to `TRUE`.
+#'
+#' @param supp The supp table returned by [spec_type_to_supp()]
+#' @param target The core table to append rows to (e.g. `ds_vars`, `var_spec`,
+#'   or `value_spec`)
+#' @param target_schema A zero-row schema tibble for `target`, used to
+#'   determine which columns to keep and their types. Typically one element of
+#'   [define_column_schema()] or [base_column_schema()]
+#'
+#' @return `target` with supplemental variable rows appended, columns ordered
+#'   to match `target_schema`
+#' @noRd
 add_supp_to_table <- function(supp, target, target_schema) {
    if (is.null(supp) || nrow(supp) == 0) return(target)
 
