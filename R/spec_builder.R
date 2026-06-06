@@ -1081,7 +1081,7 @@ add_supp_to_table <- function(supp, target, target_schema) {
 #' @param context Provides the calling context for better error messaging to the user
 #' @param schema Optional zero-row schema tibble (e.g. from `base_column_schema()` or
 #'   `define_column_schema()`). When provided, any schema columns absent from the
-#'   matched sheet are back-filled with typed `NA`s via [fill_cols()].
+#'   matched sheet are back-filled with typed `NA`s via `fill_cols()`.
 #'
 #' @return dataset (or list of datasets if not specific enough)
 #' @export
