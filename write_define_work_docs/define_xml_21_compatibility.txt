@@ -315,7 +315,7 @@ reader or writer modifications:
 4. SUMMARY: CHANGES REQUIRED IN METACORE
 ================================================================================
 
---- Schema extensions (column_schema() in validators.R) ---
+--- Schema extensions (define_column_schema() in validators.R) ---
 
   New table: standards
     standard_oid    character  (e.g. "STD.ADAM")
