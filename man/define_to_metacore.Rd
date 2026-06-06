@@ -4,7 +4,12 @@
 \alias{define_to_metacore}
 \title{Define XML to DataDef Object}
 \usage{
-define_to_metacore(path, quiet = deprecated(), verbose = "message")
+define_to_metacore(
+  path,
+  quiet = deprecated(),
+  define_fields = FALSE,
+  verbose = "message"
+)
 }
 \arguments{
 \item{path}{location of the define xml as a string}
@@ -13,6 +18,13 @@ define_to_metacore(path, quiet = deprecated(), verbose = "message")
 will suppress warnings, but not errors. Expects either \code{TRUE} or \code{FALSE}.
 Default behaviour is \code{FALSE}. As of v0.3.0 this argument is deprecated in favour
 of \code{verbose}.}
+
+\item{define_fields}{logical; set to \code{TRUE} to include the extended columns
+required for Define.xml generation (\code{class}, \code{repeating}, \code{reference},
+\code{purpose} in \code{ds_spec}; \code{role} in \code{ds_vars}; \code{where_label} and
+\code{comment_id} in \code{value_spec}; \code{method_name}, \code{method_type}, \code{document_id},
+\code{pages} in \code{derivations}) as well as the \code{study_level}, \code{documents}, and
+\code{comments} tables. Defaults to \code{FALSE} to preserve the original schema.}
 
 \item{verbose}{A character string specifying the desired verbosity level.
 Must be one of:

@@ -20,6 +20,7 @@ or code list
 }
 \seealso{
 Other xml builder: 
+\code{\link{xml_to_comments}()},
 \code{\link{xml_to_derivations}()},
 \code{\link{xml_to_ds_spec}()},
 \code{\link{xml_to_ds_vars}()},

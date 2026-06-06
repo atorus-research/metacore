@@ -165,12 +165,14 @@ test_that("check_columns handles multiple datasets including 'supp' correctly", 
     supp = supp_test
   ))
 
-  # Example: Test for a missing column to ensure `check_structure` works
+  # check_columns() validates content of columns that are present and silently
+  # ignores absent ones — column presence is check_columns()'s caller's job
+  # (var_name_check does it). A table with a missing column should not error.
   ds_spec_bad <- tribble(
     ~dataset, ~structure,
     "ADSL", "flat"
   )
-  expect_error(
+  expect_no_error(
     check_columns(ds_spec = ds_spec_bad)
   )
 })

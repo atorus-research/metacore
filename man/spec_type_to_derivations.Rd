@@ -6,7 +6,9 @@
 \usage{
 spec_type_to_derivations(
   doc,
-  cols = c(derivation_id = "ID", derivation = "[D|d]efinition|[D|d]escription"),
+  cols = c(derivation_id = "ID", derivation = "[D|d]efinition|[D|d]escription",
+    method_name = "[N|n]ame", method_type = "[T|t]ype", document_id = "[D|d]ocument",
+    pages = "[P|p]ages"),
   sheet = "Method|Derivations?",
   var_cols = c(dataset = "[D|d]ataset|[D|d]omain", variable = "[N|n]ame|[V|v]ariables?",
     origin = "[O|o]rigin", predecessor = "[P|p]redecessor", comment = "[C|c]omment")
@@ -37,7 +39,9 @@ correct sheet and renames the columns. The derivation will be used for
 }
 \seealso{
 Other spec builders: 
+\code{\link{create_supp_table}()},
 \code{\link{spec_type_to_codelist}()},
+\code{\link{spec_type_to_comments}()},
 \code{\link{spec_type_to_ds_spec}()},
 \code{\link{spec_type_to_ds_vars}()},
 \code{\link{spec_type_to_value_spec}()},

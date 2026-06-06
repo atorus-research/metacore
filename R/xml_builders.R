@@ -7,6 +7,12 @@
 #'   will suppress warnings, but not errors. Expects either `TRUE` or `FALSE`.
 #'   Default behaviour is `FALSE`. As of v0.3.0 this argument is deprecated in favour
 #'   of `verbose`.
+#' @param define_fields logical; set to `TRUE` to include the extended columns
+#'   required for Define.xml generation (`class`, `repeating`, `reference`,
+#'   `purpose` in `ds_spec`; `role` in `ds_vars`; `where_label` and
+#'   `comment_id` in `value_spec`; `method_name`, `method_type`, `document_id`,
+#'   `pages` in `derivations`) as well as the `study_level`, `documents`, and
+#'   `comments` tables. Defaults to `FALSE` to preserve the original schema.
 #' @param verbose A character string specifying the desired verbosity level.
 #'   Must be one of:
 #'   \describe{
@@ -19,7 +25,8 @@
 #'
 #' @return Metacore/DataDef object
 #' @export
-define_to_metacore <- function(path, quiet = deprecated(), verbose = "message") {
+define_to_metacore <- function(path, quiet = deprecated(), define_fields = FALSE,
+                               verbose = "message") {
   # Check if user has supplied `quiet` instead of `verbose`
   if (lifecycle::is_present(quiet)) {
     deprecate_soft(when = "0.3.0", what = "define_to_metacore(quiet)", with = "define_to_metacore(verbose)")
@@ -50,6 +57,7 @@ define_to_metacore <- function(path, quiet = deprecated(), verbose = "message") 
         value_spec,
         derivations,
         codelist = code_list,
+        define_fields = define_fields,
         quiet = quiet
       )
     },
@@ -69,6 +77,7 @@ define_to_metacore <- function(path, quiet = deprecated(), verbose = "message") 
 #'
 xml_to_ds_spec <- function(doc) {
   # Read in the dataset level nodes
+   browser()
   xml_find_all(doc, "//MetaDataVersion/ItemGroupDef[contains(@OID, 'IG')]") %>%
     map_dfr(function(node) {
       tibble(

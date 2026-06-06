@@ -8,6 +8,7 @@ spec_to_metacore(
   path,
   quiet = deprecated(),
   where_sep_sheet = TRUE,
+  define_fields = FALSE,
   verbose = "message"
 )
 }
@@ -21,6 +22,13 @@ Default behaviour is \code{FALSE}. From v0.3.0 this argument is deprecated in fa
 
 \item{where_sep_sheet}{Option to tell if the where is in a separate sheet,
 like in older p21 specs or in a single sheet like newer p21 specs.}
+
+\item{define_fields}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}logical; set to \code{TRUE} to
+include the extended columns required for Define.xml generation (\code{class}, \code{repeating},
+\code{reference}, \code{purpose} in \code{ds_spec}; \code{role} in \code{ds_vars}; \code{where_label} and
+\code{comment_id} in \code{value_spec}; \code{method_name}, \code{method_type}, \code{document_id},
+\code{pages} in \code{derivations}) as well as the \code{study_level}, \code{documents}, and
+\code{comments} tables. Defaults to \code{FALSE} to preserve the original schema.}
 
 \item{verbose}{A character string specifying the desired verbosity level.
 Must be one of:
@@ -45,14 +53,14 @@ be used as building blocks for bespoke specification documents.
 # Run `spec_to_metacore` with `verbose = "collapse"`
 spec_path <- metacore_example("p21_mock.xlsx")
 metacore <- spec_to_metacore(
-path = spec_path,
-verbose = "collapse"
+  path = spec_path,
+  verbose = "collapse"
 )
 
 # Run `spec_to_metacore` with `verbose = "warn"`
 metacore <- spec_to_metacore(
-path = spec_path,
-verbose = "warn"
+  path = spec_path,
+  verbose = "warn"
 )
 
 }

@@ -4,7 +4,7 @@
 \alias{create_tbl}
 \title{Create table}
 \usage{
-create_tbl(doc, cols, context)
+create_tbl(doc, cols, optional = NULL, context = NULL)
 }
 \arguments{
 \item{doc}{list of sheets from a excel doc}

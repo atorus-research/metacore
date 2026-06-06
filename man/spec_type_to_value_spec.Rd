@@ -8,8 +8,9 @@ spec_type_to_value_spec(
   doc,
   cols = c(dataset = "[D|d]ataset|[D|d]omain", variable = "[N|n]ame|[V|v]ariables?",
     origin = "[O|o]rigin", type = "[T|t]ype", code_id = "[C|c]odelist|Controlled Term",
-    sig_dig = "[S|s]ignificant", where = "[W|w]here", derivation_id = "[M|m]ethod",
-    predecessor = "[P|p]redecessor"),
+    sig_dig = "[S|s]ignificant", where = "[W|w]here", where_label =
+    "[L|l]abel|[D|d]escription", derivation_id = "[M|m]ethod", predecessor =
+    "[P|p]redecessor"),
   sheet = NULL,
   where_sep_sheet = TRUE,
   where_cols = c(id = "ID", where = c("Variable", "Comparator", "Value")),
@@ -49,7 +50,9 @@ correct sheet and renames the columns
 }
 \seealso{
 Other spec builders: 
+\code{\link{create_supp_table}()},
 \code{\link{spec_type_to_codelist}()},
+\code{\link{spec_type_to_comments}()},
 \code{\link{spec_type_to_derivations}()},
 \code{\link{spec_type_to_ds_spec}()},
 \code{\link{spec_type_to_ds_vars}()},
