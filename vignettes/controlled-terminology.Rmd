@@ -1,25 +1,23 @@
 ---
 title: "Working with Controlled Terminology"
+output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{controlled-terminology}
   %\VignetteEncoding{UTF-8}
-  %\VignetteEngine{quarto::html}
-knitr:
-  opts_chunk:
-    collapse: true
-    comment: '#>'
-editor: 
-  markdown: 
-    wrap: 72
+  %\VignetteEngine{knitr::rmarkdown}
 ---
 
-```{r echo=FALSE, }
-#| label: setup
-suppressMessages({
-  library(metacore)
-  library(dplyr)
-  library(tibble)
-})
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup, echo=FALSE, message=FALSE}
+library(metacore)
+library(dplyr, warn.conflicts = FALSE)
+library(tibble)
 ```
 
 Controlled terminology is a cornerstone of clinical data
@@ -28,7 +26,7 @@ controlled terminology refers to predefined sets of valid values that
 variables can take. These standardized values ensure consistency,
 traceability, and compliance across clinical trial datasets.
 
-#### Types of Controlled Terminology 
+#### Types of Controlled Terminology
 
 -   **Codelist**: A mapping between codes and their human-readable
     decodes (e.g., "Y" = "Yes", "N" = "No")
@@ -104,13 +102,11 @@ qval_codes2 <- get_control_term(metacore, "QVAL", dataset = "SUPPAE")
 identical(qval_codes1, qval_codes2) # TRUE
 ```
 
-::: callout-tip
-Subsetting your metacore object using `select_dataset()` is the
-recommended way to introduce metadata driven programming with metacore
-into your workflow. When developing clinical datasets, programmers tend
-to work on one dataset at a time. Subsetting your metadata ensures that
-you are always working with the right metadata for the job.
-:::
+> **Tip:** Subsetting your metacore object using `select_dataset()` is the
+> recommended way to introduce metadata driven programming with metacore
+> into your workflow. When developing clinical datasets, programmers tend
+> to work on one dataset at a time. Subsetting your metadata ensures that
+> you are always working with the right metadata for the job.
 
 ## Value-Level Metadata (VLM)
 
@@ -149,7 +145,7 @@ vlm_meta <- spec_to_metacore(
 
 adex_spec <- select_dataset(vlm_meta, "ADEX", verbose = "silent")
 
-# Get the codelist for AVALCAT1 when PARAMCD equals a specific condition
+# Get the codelist for AVALCA1N when PARAMCD equals a specific condition
 avalca1n_duration <- get_control_term(
   adex_spec,
   "AVALCA1N",
