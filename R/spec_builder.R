@@ -12,6 +12,12 @@
 #'   `verbose`.
 #' @param where_sep_sheet Option to tell if the where is in a separate sheet,
 #'   like in older p21 specs or in a single sheet like newer p21 specs.
+#' @param define_fields `r lifecycle::badge("experimental")`logical; set to `TRUE` to
+#'   include the extended columns required for Define.xml generation (`class`, `repeating`,
+#'   `reference`, `purpose` in `ds_spec`; `role` in `ds_vars`; `where_label` and
+#'   `comment_id` in `value_spec`; `method_name`, `method_type`, `document_id`,
+#'   `pages` in `derivations`) as well as the `study_level`, `documents`, and
+#'   `comments` tables. Defaults to `FALSE` to preserve the original schema.
 #' @param verbose A character string specifying the desired verbosity level.
 #'   Must be one of:
 #'   \describe{
@@ -39,7 +45,8 @@
 #' )
 #'
 #' @export
-spec_to_metacore <- function(path, quiet = deprecated(), where_sep_sheet = TRUE, verbose = "message") {
+spec_to_metacore <- function(path, quiet = deprecated(), where_sep_sheet = TRUE,
+                             define_fields = FALSE, verbose = "message") {
    # Check if user has supplied `quiet` instead of `verbose`
    if (lifecycle::is_present(quiet)) {
       deprecate_soft(when = "0.3.0", what = "spec_to_metacore(quiet)", with = "spec_to_metacore(verbose)")
@@ -70,9 +77,9 @@ spec_to_metacore <- function(path, quiet = deprecated(), where_sep_sheet = TRUE,
             )
 
             # Add supplemental variables to ds_vars, var_spec, value_spec
-            ds_vars <- add_supp_to_table(supp, ds_vars, column_schema()$.ds_vars)
-            var_spec <- add_supp_to_table(supp, var_spec, column_schema()$.var_spec)
-            value_spec <- add_supp_to_table(supp, value_spec, column_schema()$.value_spec)
+            ds_vars <- add_supp_to_table(supp, ds_vars, define_column_schema()$.ds_vars)
+            var_spec <- add_supp_to_table(supp, var_spec, define_column_schema()$.var_spec)
+            value_spec <- add_supp_to_table(supp, value_spec, define_column_schema()$.value_spec)
 
             # Strip unneeded vars from supp
             supp <- reorder_by_schema(supp, "supp")
@@ -87,6 +94,7 @@ spec_to_metacore <- function(path, quiet = deprecated(), where_sep_sheet = TRUE,
                supp = supp,
                documents = documents,
                comments = comments,
+               define_fields = define_fields,
                quiet = quiet,
                verbose = verbose
             )
@@ -1230,7 +1238,7 @@ select_rename_w_dups <- function(.data, cols) {
 #' @return dataset with columns in schema order
 #' @noRd
 reorder_by_schema <- function(.data, table_name) {
-  schema <- column_schema()
+  schema <- define_column_schema()
   table_key <- paste0(".", table_name)
 
   if (!table_key %in% names(schema)) {
