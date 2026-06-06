@@ -219,113 +219,19 @@ supp_check <- function(ds_vars, supp) {
 }
 
 
-#' Column Names by dataset
-#'
-#' @return list of column names by dataset
-#' @noRd
-col_vars <- function() {
-  schema <- column_schema()
-  # study_level, documents, and comments are study-wide tables that are not
-  # name-validated against the per-dataset tables, so they are excluded here
-  schema$.study_level <- NULL
-  schema$.documents <- NULL
-  schema$.comments <- NULL
-  lapply(schema, names)
-}
-
-
-#' Column prototypes for every metacore table
-#'
-#' Single source of truth for the columns (and their types) of each table held
-#' in a metacore object. Each element is a zero-row tibble used both to validate
-#' column names (via [col_vars()]) and to back-fill missing columns when a
-#' metacore object is initialised (via [fill_cols()]). New, optional columns
-#' added here are automatically tolerated on existing objects.
-#'
-#' @return named list of zero-row prototype tibbles, one per table
-#' @noRd
-column_schema <- function() {
-  list(
-    .ds_spec = tibble(
-      dataset = character(), structure = character(), label = character(),
-      class = character(), repeating = logical(), reference = logical(),
-      purpose = character()
-    ),
-    .ds_vars = tibble(
-      dataset = character(), variable = character(), key_seq = integer(),
-      order = integer(), mandatory = logical(), core = character(),
-      supp_flag = logical(), role = character()
-    ),
-    .var_spec = tibble(
-      variable = character(), length = integer(), label = character(),
-      type = character(), common = logical(), format = character()
-    ),
-    .value_spec = tibble(
-      dataset = character(), variable = character(), type = character(),
-      origin = character(), sig_dig = integer(), code_id = character(),
-      where = character(), where_label = character(), derivation_id = character(),
-      comment_id = character()
-    ),
-    .derivations = tibble(
-      derivation_id = character(), derivation = character(),
-      method_name = character(), method_type = character(),
-      document_id = character(), pages = character()
-    ),
-    .codelist = tibble(
-      code_id = character(), name = character(), type = character(), codes = list()
-    ),
-    .supp = tibble(
-      dataset = character(), variable = character(), idvar = character(),
-      qeval = character()
-    ),
-    .study_level = tibble(
-      study_name = character(), study_description = character(),
-      protocol_name = character(), standard_name = character(),
-      standard_version = character(), define_version = character(),
-      language = character()
-    ),
-    .documents = tibble(
-      document_id = character(), title = character(), href = character()
-    ),
-    .comments = tibble(
-      comment_id = character(), comment = character()
-    )
-  )
-}
-
-
-#' Back-fill missing columns against a prototype
-#'
-#' Adds any columns present in `proto` but absent from `.data`, using the
-#' prototype's type and filling with `NA`. Existing columns are left untouched.
-#' A `NULL` input returns the empty prototype. This makes newly added schema
-#' columns optional for callers building metacore objects.
-#'
-#' @param .data a data frame (or `NULL`)
-#' @param proto a zero-row prototype tibble from [col_protos()]
-#' @return `.data` with all prototype columns present
-#' @noRd
-fill_cols <- function(.data, proto) {
-  if (is.null(.data)) {
-    return(proto)
-  }
-  missing <- setdiff(names(proto), names(.data))
-  for (col in missing) {
-    .data[[col]] <- proto[[col]][seq_len(nrow(.data))]
-  }
-  .data
-}
-
-
 #' Check Variable names
 #'
 #' @param envrionment the private environment of the object
+#' @param define_fields logical; when `TRUE` validate against the full
+#'   extended schema, when `FALSE` validate against the base schema only.
 #'
 #' @return warning messages to the console if there is an issue
 #' @noRd
-var_name_check <- function(envrionment) {
+var_name_check <- function(envrionment, define_fields = TRUE) {
+  # Select the correct schema based on whether Define.xml fields are enabled
+  schema <- if (define_fields) define_column_schema() else base_column_schema()
   # Set the name as they should be
-  col_names <- col_vars()
+  col_names <- col_vars(schema)
   # Only check the known per-dataset tables; other private members (e.g.
   # .study_level, .documents, .ds_len) are not name-validated here
   tbl_name <- names(col_names)
@@ -490,9 +396,14 @@ check_columns <- function(ds_spec = NULL, ds_vars = NULL, var_spec = NULL, value
   actual_datasets <- actual_datasets[!sapply(actual_datasets, is.null)]
   ds_names <- names(actual_datasets)
 
-  # Filter out all_message() tibble to include only the required checks
+  # Filter checks to (a) the datasets supplied and (b) columns that actually
+  # exist — this makes check_columns() work correctly with both the full
+  # extended schema and the base schema (define_fields = FALSE).
   filtered_checks <- all_message() %>%
-    filter(dataset %in% ds_names)
+    filter(dataset %in% ds_names) %>%
+    filter(purrr::map2_lgl(dataset, var, function(ds, v) {
+      v %in% names(actual_datasets[[ds]])
+    }))
 
   # Apply filtered checks to the supplied dataframes
   messages <- purrr::pmap(
