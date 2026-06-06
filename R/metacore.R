@@ -550,7 +550,7 @@ select_dataset <- function(.data, dataset, simplify = FALSE, quiet = deprecated(
 #' @export
 #'
 get_control_term <- function(metacode, variable = NULL, dataset = NULL, where = NULL) {
-  if (missing(variable)) {
+  if (missing(variable) || is.null(variable)) {
     cli_abort("{.var variable} must be provided.")
   }
 
