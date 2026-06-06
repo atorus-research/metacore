@@ -77,7 +77,6 @@ define_to_metacore <- function(path, quiet = deprecated(), define_fields = FALSE
 #'
 xml_to_ds_spec <- function(doc) {
   # Read in the dataset level nodes
-   browser()
   xml_find_all(doc, "//MetaDataVersion/ItemGroupDef[contains(@OID, 'IG')]") %>%
     map_dfr(function(node) {
       tibble(
