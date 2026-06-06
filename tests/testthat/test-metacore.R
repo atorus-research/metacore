@@ -282,7 +282,7 @@ test_that("metacore() verbose = `silent` returns invisibly", {
   value_spec <- tibble::tibble(
     dataset = "AE", variable = "AETERM", where = NA_character_,
     type = "character", sig_dig = NA_integer_,
-    code_id = NA_character_, origin = "Collected", derivation_id = NA_integer_
+    code_id = NA_character_, origin = "Collected", derivation_id = NA_character_
   )
 
   expect_invisible(
@@ -309,7 +309,7 @@ test_that("metacore() quiet = FALSE returns a Metacore object", {
   value_spec <- tibble::tibble(
     dataset = "AE", variable = "AETERM", where = NA_character_,
     type = "character", sig_dig = NA_integer_,
-    code_id = NA_character_, origin = "Collected", derivation_id = NA_integer_
+    code_id = NA_character_, origin = "Collected", derivation_id = NA_character_
   )
 
   mc <- suppressWarnings(
@@ -338,7 +338,7 @@ test_that("metacore() verbose message/silent paths produce similar structure", {
   value_spec <- tibble::tibble(
     dataset = "AE", variable = "AETERM", where = NA_character_,
     type = "character", sig_dig = NA_integer_,
-    code_id = NA_character_, origin = "Collected", derivation_id = NA_integer_
+    code_id = NA_character_, origin = "Collected", derivation_id = NA_character_
   )
 
   mc_q <- suppressWarnings(
@@ -421,9 +421,9 @@ test_that("select_dataset(simplify = TRUE) returns expected structure", {
   ae_simple <- select_dataset(spec, "AE", simplify = TRUE, verbose = "silent")
 
   expected_names <- c(
-    "dataset", "variable", "order", "mandatory", "key_seq", "core", "supp_flag",
-    "length", "label", "type", "format", "common", "origin", "code_id", "sig_dig",
-    "derivation_id", "where", "derivation", "codes", "idvar", "qeval"
+    "dataset", "variable", "key_seq", "order", "mandatory", "core", "supp_flag",
+    "length", "label", "type", "common", "format", "origin", "sig_dig", "code_id",
+    "where", "derivation_id", "derivation", "codes", "idvar", "qeval"
   )
 
   expect_equal(names(ae_simple), expected_names)
