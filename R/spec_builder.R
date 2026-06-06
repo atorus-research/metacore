@@ -59,11 +59,11 @@ spec_to_metacore <- function(path, quiet = deprecated(), where_sep_sheet = TRUE,
          doc <- read_all_sheets(path)
 
          if (spec_type(path) == "by_type") {
-            ds_spec <- spec_type_to_ds_spec(doc)
-            ds_vars <- spec_type_to_ds_vars(doc)
+            ds_spec <- spec_type_to_ds_spec(doc, define_fields = define_fields)
+            ds_vars <- spec_type_to_ds_vars(doc, define_fields = define_fields)
             var_spec <- spec_type_to_var_spec(doc)
-            value_spec <- spec_type_to_value_spec(doc, where_sep_sheet = where_sep_sheet)
-            derivations <- spec_type_to_derivations(doc)
+            value_spec <- spec_type_to_value_spec(doc, where_sep_sheet = where_sep_sheet, define_fields = define_fields)
+            derivations <- spec_type_to_derivations(doc, define_fields = define_fields)
             codelist <- spec_type_to_codelist(doc)
             documents <- spec_type_to_documents(doc)
             comments <- spec_type_to_comments(doc)
@@ -177,31 +177,39 @@ spec_type_to_ds_spec <- function(
          "reference" = "[R|r]eference [D|d]ata",
          "purpose" = "[P|p]urpose"
       ),
-      sheet = NULL
+      sheet = NULL,
+      define_fields = FALSE
 ) {
-   ds_spec_names <- c("dataset", "structure", "label", "class", "repeating", "reference", "purpose")
-   ds_spec_optional <- c("class", "repeating", "reference", "purpose")
-
-   name_check <- all(names(cols) %in% ds_spec_names)
-   if (!name_check | is.null(names(cols))) {
+   # Validate against the full schema so typos are caught regardless of mode
+   valid_names <- names(define_column_schema()$.ds_spec)
+   if (!all(names(cols) %in% valid_names) | is.null(names(cols))) {
       cli_abort(c(
          "x" = "Incorrect column names supplied for {.var ds_spec}",
-         "i" = "The column vector {.arg cols} must be named with a subset of {.val {ds_spec_names}}",
-         "i" = "The columns {.val {ds_spec_optional}} are optional"
+         "i" = "The column vector {.arg cols} must be named with a subset of {.val {valid_names}}"
       ))
    }
+
+   # Drop define-specific col mappings from cols when define_fields = FALSE
+   active_schema <- if (define_fields) define_column_schema() else base_column_schema()
+   cols          <- cols[names(cols) %in% names(active_schema$.ds_spec)]
+
    if (!is.null(sheet)) {
       sheet_ls <- str_subset(names(doc), sheet)
       doc <- doc[sheet_ls]
    }
 
-   create_tbl(doc, cols, ds_spec_optional, context = "spec_type_to_ds_spec") |>
-      distinct() |>
-      mutate(
+   out <- create_tbl(doc, cols, context = "spec_type_to_ds_spec", schema = active_schema$.ds_spec) |>
+      distinct()
+
+   if (define_fields) {
+      out <- mutate(
+         out,
          repeating = yn_to_tf(.data$repeating),
-         reference = yn_to_tf(.data$reference),
-      ) |>
-      reorder_by_schema("ds_spec")
+         reference = yn_to_tf(.data$reference)
+      )
+   }
+
+   reorder_by_schema(out, "ds_spec")
 }
 
 #' Spec to ds_vars
@@ -231,7 +239,6 @@ spec_type_to_ds_vars <- function(
          "dataset" = "[D|d]ataset|[D|d]omain",
          "variable" = "[V|v]ariable [[N|n]ame]?|[V|v]ariables?",
          "order" = "[V|v]ariable [O|o]rder|[O|o]rder",
-         "core" = "[C|c]ore|CDISC [C|c]ore",
          "mandatory" = "[K|k]eep|[M|m]andatory",
          "role" = "[R|r]ole"
       ),
@@ -240,13 +247,12 @@ spec_type_to_ds_vars <- function(
          "dataset" = "Dataset",
          "key_seq" = "Key Variables"
       ),
-      sheet = "[V|v]ar|Datasets"
+      sheet = "[V|v]ar|Datasets",
+      define_fields = FALSE
 ) {
-
-   ds_vars_names <- c("dataset", "variable", "order", "mandatory", "key_seq", "core", "supp_flag", "role")
-   ds_vars_optional <- c("core", "role")
-
-   name_check <- all(names(cols) %in% ds_vars_names)
+   # Validate against the full schema so typos are caught regardless of mode
+   valid_names <- names(define_column_schema()$.ds_vars)
+   name_check  <- all(names(cols) %in% valid_names)
 
    name_check_extra <- ifelse(
       key_seq_sep_sheet,
@@ -254,14 +260,15 @@ spec_type_to_ds_vars <- function(
       all(names(key_seq_cols) %in% c("dataset", "key_seq"))
    )
 
-   # Testing for names of vectors
    if (any(!name_check, !name_check_extra, is.null(names(cols)))) {
       cli_abort(c(
          "x" = "Incorrect column names supplied for {.var ds_vars}",
-         "i" = "The column vector {.arg cols} must be named with a subset of {.val {ds_vars_names}}",
-         "i" = "The columns {.val {ds_vars_optional}} are optional"
+         "i" = "The column vector {.arg cols} must be named with a subset of {.val {valid_names}}"
       ))
    }
+
+   # Drop define-specific col mappings from cols when define_fields = FALSE
+   active_schema <- if (define_fields) define_column_schema() else base_column_schema()
 
    # Sub-setting sheets
    if (!is.null(sheet)) {
@@ -270,11 +277,11 @@ spec_type_to_ds_vars <- function(
    }
 
    # Get base doc
-   out <- create_tbl(doc, cols, ds_vars_optional, context = as.character(sys.call(0)[[1]]))
+   out <- create_tbl(doc, cols, context = "spec_type_to_ds_vars", schema = active_schema$.ds_vars)
 
    # Getting the key seq values
    if (key_seq_sep_sheet) {
-      key_seq_df <- create_tbl(doc, key_seq_cols, ds_vars_optional, context = as.character(sys.call(0)[[1]])) |>
+      key_seq_df <- create_tbl(doc, key_seq_cols, context = "spec_type_to_ds_vars") |>
          mutate(
             key_seq = str_split(key_seq, ",\\s"),
             key_seq = map(key_seq, function(x) {
@@ -284,18 +291,21 @@ spec_type_to_ds_vars <- function(
          ) |>
          unnest(key_seq)
 
-      out <- left_join(out, key_seq_df, by = c("dataset", "variable"))
+      out <- left_join(
+        select(out, -key_seq),
+        key_seq_df,
+        by = c("dataset", "variable")
+      )
    }
 
    out |>
+     reorder_by_schema("ds_vars") |>
       distinct() |>
       mutate(
          key_seq = as.integer(.data$key_seq),
          mandatory = yn_to_tf(.data$mandatory),
-         core = as.character(.data$core),
          order = as.numeric(.data$order)
-      ) |>
-      reorder_by_schema("ds_vars")
+      )
 }
 
 
@@ -327,16 +337,15 @@ spec_type_to_var_spec <- function(
       ),
       sheet = "[V|v]ar") {
 
-   var_spec_names <- c("variable", "length", "label", "type", "dataset", "common", "format")
-   var_spec_optional <- c("common")
+   # "dataset" is a processing-only column (not in schema) used to detect
+   # per-domain duplicate variables before it is dropped from the output.
+   var_spec_names <- c(names(define_column_schema()$.var_spec), "dataset")
 
-   # Check the names
    name_check <- all(names(cols) %in% var_spec_names)
    if (!name_check | is.null(names(cols))) {
       cli_abort(c(
          "x" = "Incorrect column names supplied for {.var var_spec}",
          "i" = "The column vector {.arg cols} must be named with {.val {var_spec_names}}",
-         "i" = "The columns {.val {var_spec_optional}} are optional",
          "i" = "Additionally, dataset is only used to clarify if information differs by domain."
       ))
    }
@@ -346,7 +355,7 @@ spec_type_to_var_spec <- function(
       doc <- doc[str_subset(names(doc), sheet)]
    }
 
-   out <- create_tbl(doc, cols, var_spec_optional, context = "spec_type_to_var_spec")
+   out <- create_tbl(doc, cols, context = "spec_type_to_var_spec", schema = define_column_schema()$.var_spec)
 
    # Check for duplicate variables without dataset column
    if (!"dataset" %in% names(out)) {
@@ -443,23 +452,24 @@ spec_type_to_value_spec <- function(
          "id" = "ID",
          "where" = c("Variable", "Comparator", "Value")
       ),
-      var_sheet = "[V|v]ar"
+      var_sheet = "[V|v]ar",
+      define_fields = FALSE
 ) {
+   # "predecessor" is a processing-only column (not in schema) transformed into
+   # derivation_id and then dropped. "comment_id" is a define-extra populated via
+   # a separate join rather than through create_tbl, so excluded from optional.
+   valid_names <- c(names(define_column_schema()$.value_spec), "predecessor")
 
-   value_spec_names <- c("dataset", "variable", "origin", "type", "code_id", "sig_dig", "where", "where_label", "derivation_id", "predecessor")
-   value_spec_optional <- c("predecessor", "where_label")
-
-   name_check <- all(names(cols) %in% value_spec_names)
-
-   if (!name_check | is.null(names(cols))) {
+   if (!all(names(cols) %in% valid_names) | is.null(names(cols))) {
       cli_abort(c(
          "x" = "Incorrect column names supplied for {.var value_spec}",
-         "i" = "The column vector {.arg cols} must be named with a subset of {.val {value_spec_names}}",
-         "i" = "The columns {.val {value_spec_optional}} are optional",
+         "i" = "The column vector {.arg cols} must be named with a subset of {.val {valid_names}}",
          "i" = "If {.val derivation_id} is not avaliable it can be excluded and dataset.variable will be used.",
          "i" = "If the where information is on a seperate sheet, put the column with cross ref as where."
       ))
    }
+   active_schema <- if (define_fields) define_column_schema() else base_column_schema()
+   cols          <- cols[names(cols) %in% c(names(active_schema$.value_spec), "predecessor")]
 
    # Select a subset of sheets if specified
    if (!is.null(sheet)) {
@@ -467,7 +477,7 @@ spec_type_to_value_spec <- function(
       doc <- doc[sheet_ls]
    }
 
-   out <- create_tbl(doc, cols, value_spec_optional, context = spec_type_to_value_spec)
+   out <- create_tbl(doc, cols, context = "spec_type_to_value_spec", schema = active_schema$.value_spec)
 
    # Does a var sheet exist?
    if (!is.null(var_sheet)) {
@@ -517,7 +527,6 @@ spec_type_to_value_spec <- function(
       distinct() |>
       mutate(
          sig_dig = as.integer(.data$sig_dig),
-         where_label = if_else(is.na(where), NA_character_, where_label),
          derivation_id = case_when(
             !is.na(.data$derivation_id) ~ .data$derivation_id,
             str_to_lower(.data$origin) == "predecessor" ~ paste0("pred.", as.character(.data$predecessor)),
@@ -525,6 +534,10 @@ spec_type_to_value_spec <- function(
          )
       ) |>
       select(-.data$predecessor)
+
+   if (define_fields && "where" %in% names(out)) {
+      out <- mutate(out, where_label = if_else(is.na(where), NA_character_, where_label))
+   }
 
    # Extract comment_id from Variables sheet if available
    var_sheets <- names(doc) |> keep(~ str_detect(., "[V|v]ar"))
@@ -717,21 +730,22 @@ spec_type_to_derivations <- function(
          "origin" = "[O|o]rigin",
          "predecessor" = "[P|p]redecessor",
          "comment" = "[C|c]omment"
-      )
+      ),
+      define_fields = FALSE
 ) {
+   # Validate against the full schema so typos are caught regardless of mode
+   valid_names <- names(define_column_schema()$.derivations)
+   var_names   <- c("dataset", "variable", "origin", "predecessor", "comment")
 
-   derivations_names <- c("derivation_id", "derivation", "method_name", "method_type", "document_id", "pages")
-   derivations_optional <- c("method_name", "method_type", "document_id", "pages")
-   var_names <- c("dataset", "variable", "origin", "predecessor", "comment")
-
-   # Validate names of the derivations columns
-   name_check <- all(names(cols) %in% derivations_names)
+   name_check <- all(names(cols) %in% valid_names)
    if (!name_check | is.null(names(cols))) {
       cli_abort(c(
          "x" = "Incorrect column names supplied for {.arg cols}",
-         "i" = "{.arg cols} must be named with {.val {derivations_names}}"
+         "i" = "{.arg cols} must be named with {.val {valid_names}}"
       ))
    }
+   active_schema <- if (define_fields) define_column_schema() else base_column_schema()
+   cols          <- cols[names(cols) %in% names(active_schema$.derivations)]
 
    # Validate the names of the variable columns (used to join)
    name_check <- all(names(var_cols) %in% var_names)
@@ -793,7 +807,7 @@ spec_type_to_derivations <- function(
       doc <- doc[str_subset(names(doc), sheet)]
    }
 
-   out <- create_tbl(doc, cols, derivations_optional, context = "spec_type_to_derivations")
+   out <- create_tbl(doc, cols, context = "spec_type_to_derivations", schema = active_schema$.derivations)
 
    out |>
       bind_rows(other_derivations) |>
@@ -812,15 +826,13 @@ spec_type_to_documents <- function(
       sheet = "[D|d]ocuments?"
 ) {
 
-   documents_names <- c("document_id", "title", "href")
-   documents_optional <- c("document_id", "title", "href")
+   documents_names <- names(define_column_schema()$.documents)
 
    name_check <- all(names(cols) %in% documents_names)
    if (!name_check | is.null(names(cols))) {
       cli_abort(c(
          "x" = "Incorrect column names supplied for {.var documents}",
-         "i" = "The column vector {.arg cols} must be named with a subset of {.val {documents_names}}",
-         "i" = "The columns {.val {documents_optional}} are optional"
+         "i" = "The column vector {.arg cols} must be named with a subset of {.val {documents_names}}"
       ))
    }
 
@@ -833,7 +845,7 @@ spec_type_to_documents <- function(
       }
    }
 
-   create_tbl(doc, cols, documents_optional, context = "spec_type_to_documents") |>
+   create_tbl(doc, cols, context = "spec_type_to_documents", schema = define_column_schema()$.documents) |>
       distinct() |>
       reorder_by_schema("ds_documents")
 }
@@ -863,8 +875,7 @@ spec_type_to_comments <- function(
       sheet = "[C|c]omments?"
 ) {
 
-   comments_names <- c("comment_id", "comment")
-   comments_optional <- c()
+   comments_names <- names(define_column_schema()$.comments)
 
    name_check <- all(names(cols) %in% comments_names)
    if (!name_check | is.null(names(cols))) {
@@ -883,7 +894,7 @@ spec_type_to_comments <- function(
       }
    }
 
-   create_tbl(doc, cols, comments_optional, context = "spec_type_to_comments") |>
+   create_tbl(doc, cols, context = "spec_type_to_comments", schema = define_column_schema()$.comments) |>
       distinct() |>
       filter(!is.na(comment_id)) |>
       reorder_by_schema("comments")
@@ -898,9 +909,20 @@ spec_type_to_comments <- function(
 #'
 #' Note for future: length is populated only when VLM exists
 #'
-#' @param value_spec value_spec table from metacore object
+#' @param doc Named list of datasets @seealso [read_all_sheets()] for exact format
+#' @param cols Named vector of column names. The column names can be regular
+#'   expressions for more flexibility. But, the names must follow the given pattern
+#' @param sheet Regular expression for the sheet name
+#' @param where_sep_sheet Boolean value to control if the where information in a
+#'   separate dataset. If the where information is on a separate sheet, set to
+#'   true and provide the column information with the `where_cols` inputs.
+#' @param where_cols Named list with an id and where field. All columns in the
+#'   where field will be collapsed together
+#' @param var_spec var_spec table from the metacore object
+#' @param value_spec value_spec table from the metacore object
 #' @param codelist codelist table from metacore object
-#' @param comments comments table from metacore object (optional)
+#' @param comments comments table from metacore object (optional). Only required when
+#'   generating a define.xml enabled metacore object.
 #'
 #' @return a dataset formatted for the metacore object (supp table)
 #' @export
@@ -1057,13 +1079,13 @@ add_supp_to_table <- function(supp, target, target_schema) {
 #' @param cols vector of regex to get a datasets base on which columns it has.
 #'   If the vector is named it will also rename the columns
 #' @param context Provides the calling context for better error messaging to the user
+#' @param schema Optional zero-row schema tibble (e.g. from `base_column_schema()` or
+#'   `define_column_schema()`). When provided, any schema columns absent from the
+#'   matched sheet are back-filled with typed `NA`s via [fill_cols()].
 #'
 #' @return dataset (or list of datasets if not specific enough)
 #' @export
-create_tbl <- function(doc, cols, optional = NULL, context = NULL) {
-   # Split cols into required (must match to identify sheet) and optional
-   # (attempted if present in the sheet, silently omitted and filled with NA
-   # if absent — backwards-compatible with specs that predate these columns).
+create_tbl <- function(doc, cols, optional = NULL, context = NULL, schema = NULL) {
    required_cols <- cols[!names(cols) %in% optional]
    optional_cols  <- cols[names(cols) %in% optional]
 
@@ -1106,10 +1128,10 @@ create_tbl <- function(doc, cols, optional = NULL, context = NULL) {
 
    # Else if no unique match but all columns optional return empty dataframe
    if (length(matches) != 1 && length(required_cols) == 0) {
-      return(data.frame())
+      return(if (!is.null(schema)) schema else data.frame())
    }
 
-   if (length(matches) == 1) {
+   result <- if (length(matches) == 1) {
       build_from_sheet(matches[[1]], required_cols, optional_cols, context, names(matches))
    } else {
       sheets_mats <- names(matches)
@@ -1122,6 +1144,16 @@ create_tbl <- function(doc, cols, optional = NULL, context = NULL) {
       )
       imap(matches, ~ build_from_sheet(.x, required_cols, optional_cols, context, .y))
    }
+
+   if (!is.null(schema)) {
+      if (is.data.frame(result)) {
+         result <- fill_cols(result, schema)
+      } else {
+         result <- lapply(result, fill_cols, schema = schema)
+      }
+   }
+
+   result
 }
 
 
