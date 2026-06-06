@@ -29,6 +29,7 @@ You can install the current development version of metacore from
 [github](https://github.com/atorus-research/metacore) with:
 
 ``` r
+
 devtools::install_github("atorus-research/metacore")
 ```
 

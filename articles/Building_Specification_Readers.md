@@ -1,6 +1,7 @@
 # Building Specification Readers
 
 ``` r
+
 library(metacore)
 #> Attaching package `metacore`
 #> 
@@ -25,6 +26,7 @@ format, it is still worth trying the default readers, as the error
 messages can be helpful.
 
 ``` r
+
 spec_to_metacore(metacore_example("mock_spec.xlsx"))
 #> Error in `create_tbl()`:
 #> ! Unable to rename the following columns in Domains
@@ -73,6 +75,7 @@ information relevant to a different table, such as a domain tab, a
 variable tab, etc. To test this you can use the `spec_type` function.
 
 ``` r
+
 metacore:::spec_type(metacore_example("mock_spec.xlsx"))
 #> [1] "by_type"
 ```
@@ -94,6 +97,7 @@ information in these tabs to get the 6 tables needed for the metacore
 object.
 
 ``` r
+
 doc <- read_all_sheets(metacore_example("mock_spec.xlsx"))
 doc %>% map(head)
 #> $Domains
@@ -170,6 +174,7 @@ other inputs have defaults. So we can try with just the default and see
 what we get.
 
 ``` r
+
 spec_type_to_ds_spec(doc)
 #> Error in `create_tbl()`:
 #> ! Unable to rename the following columns in Domains
@@ -183,6 +188,7 @@ cols input because the default regular expression isn’t specific enough.
 First, let’s check the column names in the Domain tab
 
 ``` r
+
 doc$Domains %>% names()
 #>  [1] "Domain Name"    "Label"          "Repeating"      "Is Reference?" 
 #>  [5] "Class"          "Source"         "Data Structure" "Key Variables" 
@@ -197,6 +203,7 @@ We only need the Domain `Name`, `Label`, and `Data Structure` columns.
 So we can update the expressions to be more specific.
 
 ``` r
+
 ds_spec <- spec_type_to_ds_spec(doc,
   cols = c(
     "dataset" = "Name",
@@ -248,6 +255,7 @@ specifications cause all the information is in the variable tab; so we
 can try with just the defaults again.
 
 ``` r
+
 spec_type_to_ds_vars(doc)
 #> Error in `create_tbl()`:
 #> ! Unable to rename the following columns in Variables
@@ -266,6 +274,7 @@ First, adjust the dataset name in the `key_seq_cols` argument. Second,
 change the sheets to include the variable and the domain sheet.
 
 ``` r
+
 doc$Variables %>% head()
 #> # A tibble: 6 × 18
 #>   `Domain Name` `Therapeutic Area` Indication `Variable Name` Label        Type 
@@ -347,6 +356,7 @@ automatically figure out which variables are common to all dataset. This
 is good because we don’t have a common variable in our specs.
 
 ``` r
+
 var_spec <- spec_type_to_var_spec(doc, cols = c(
   "variable" = "Variable Name",
   "length" = "[L|l]ength",
@@ -375,6 +385,7 @@ because all the formats end in a full stop (.), but the controlled terms
 don’t.
 
 ``` r
+
 var_spec <- var_spec %>%
   mutate(format = if_else(str_detect(format, "\\."), format, ""))
 ```
@@ -407,6 +418,7 @@ Additionally this spec doesn’t have a predecessor column, so we can just
 use the method column.
 
 ``` r
+
 value_spec <- spec_type_to_value_spec(doc,
   cols = c(
     "dataset" = "VLM Name|Domain",
@@ -439,6 +451,7 @@ on the origin. In this mock we don’t have a predecessor column so we can
 set to comment as well.
 
 ``` r
+
 derivation <- spec_type_to_derivations(doc,
   cols = c(
     "derivation_id" = "Name",
@@ -479,6 +492,7 @@ external dictionaries. But, in the specification we only have codelist
 so `dict_cols` needs to be set to null.
 
 ``` r
+
 codelist <- spec_type_to_codelist(doc,
   codelist_cols = c(
     "code_id" = "Codelist Code",
@@ -504,6 +518,7 @@ head(codelist)
 Now we have all the tables we need we can make the metacore object
 
 ``` r
+
 metacore(ds_spec, ds_vars, var_spec, value_spec,
   derivation, codelist,
   verbose = "message"

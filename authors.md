@@ -22,7 +22,7 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/atorus-research/metacore/blob/0.3.0/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/atorus-research/metacore/blob/main/DESCRIPTION)
 
 Hobby L, Fillmore C, Denney B, Gans M, Tarasiewicz A, Stackhouse M,
 Senior T (2026). *metacore: A Centralized Metadata Object Focus on

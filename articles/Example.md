@@ -1,6 +1,7 @@
 # Example
 
 ``` r
+
 library(metacore)
 #> Attaching package `metacore`
 #> 
@@ -25,6 +26,7 @@ We start by reading the define from disk using the `xmlTreeParse()`
 function from the `XML` package.
 
 ``` r
+
 doc <- read_xml(metacore_example("SDTM_define.xml"))
 xml_ns_strip(doc)
 ```
@@ -33,6 +35,7 @@ Next, we use the metacore readers for each of the separate tables
 necessary for a metacore object.
 
 ``` r
+
 ds_spec2 <- xml_to_ds_spec(doc)
 ds_vars <- xml_to_ds_vars(doc)
 var_spec <- xml_to_var_spec(doc)
@@ -44,6 +47,7 @@ derivations <- xml_to_derivations(doc)
 Great! Now we’re ready to create our metacore object.
 
 ``` r
+
 test <- metacore(ds_spec2, ds_vars, var_spec, value_spec, derivations, code_list)
 #> Warning: The following word in value_spec$origin is not allowed:
 #> ℹ edt
@@ -70,6 +74,7 @@ easily, with functions that filter metadata down to information only
 relevant to a specific dataset.
 
 ``` r
+
 # a metacore object with all your dataframes
 subset <- test %>% select_dataset("DM")
 #> Warning: `core` from the `ds_vars` table only contains missing values.
@@ -104,6 +109,7 @@ by using the `simplify = TRUE` argument, a simplified data frame can be
 returned.
 
 ``` r
+
 subset_t
 #> # A tibble: 25 × 21
 #>    dataset variable key_seq order mandatory core  supp_flag type    length label
