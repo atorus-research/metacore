@@ -58,10 +58,10 @@ test_that("NA columns fail", {
   expect_warning(do.call(check_columns, dfs))
 })
 
-test_that("all_message dataframe contains 6 datasets", {
+test_that("all_message dataframe contains 8 datasets", {
   expect_equal(all_message() %>%
     distinct(dataset) %>%
-    nrow(), 7)
+    nrow(), 8)
 })
 
 test_that("check cross-reference tests", {
