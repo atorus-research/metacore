@@ -124,14 +124,15 @@ MetaCore_validate <- function() {
       } else {
          check_columns(
             private$.ds_spec, private$.ds_vars, private$.var_spec,
-            private$.value_spec, private$.derivations, private$.codelist
+            private$.value_spec, private$.derivations, private$.codelist,
+            schema = base_column_schema()
          )
          ds_vars_check(private$.ds_vars, private$.var_spec)
          value_check(private$.ds_vars, private$.value_spec)
          derivation_check(private$.value_spec, private$.derivations)
          codelist_check(private$.value_spec, private$.codelist)
          if (nrow(private$.supp) > 0) {
-            check_columns(supp = private$.supp)
+            check_columns(supp = private$.supp, schema = base_column_schema())
             supp_check(private$.ds_vars, private$.supp)
          }
       }

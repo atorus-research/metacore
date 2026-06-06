@@ -380,30 +380,24 @@ all_message <- function() {
 #'   checks pass, it returns invisibly.
 #' @noRd
 check_columns <- function(ds_spec = NULL, ds_vars = NULL, var_spec = NULL, value_spec = NULL,
-                          derivations = NULL, codelist = NULL, supp = NULL, comments = NULL) {
-  # Create a list of the actual dataframes passed
+                          derivations = NULL, codelist = NULL, supp = NULL, comments = NULL,
+                          schema = define_column_schema()) {
   actual_datasets <- list(
-    ds_spec = ds_spec,
-    ds_vars = ds_vars,
-    var_spec = var_spec,
-    value_spec = value_spec,
-    derivations = derivations,
-    codelist = codelist,
-    supp = supp,
-    comments = comments
+    ds_spec = ds_spec, ds_vars = ds_vars, var_spec = var_spec,
+    value_spec = value_spec, derivations = derivations,
+    codelist = codelist, supp = supp, comments = comments
   )
 
-  # Filter checks to (a) the datasets supplied and (b) columns that actually
-  # exist — this makes check_columns() work correctly with both the full
-  # extended schema and the base schema (define_fields = FALSE).
   actual_datasets <- actual_datasets[!sapply(actual_datasets, is.null)]
   ds_names <- names(actual_datasets)
-
-  # Filter out all_message() tibble to include only the required checks
+  # Filter checks to (a) the datasets supplied and (b) columns present in the
+  # active schema — ensures define-specific columns are not checked when the
+  # object was built with define_fields = FALSE.
   filtered_checks <- all_message() %>%
     filter(dataset %in% ds_names) %>%
-    filter(purrr::map2_lgl(dataset, var, function(ds, v) {
-      v %in% names(actual_datasets[[ds]])
+    filter(purrr::map2_lgl(.data[["dataset"]], .data[["var"]], function(ds, v) {
+      tbl_key <- paste0(".", ds)
+      tbl_key %in% names(schema) && v %in% names(schema[[tbl_key]])
     }))
 
   # Apply filtered checks to the supplied dataframes
