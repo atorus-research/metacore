@@ -1109,64 +1109,8 @@ create_tbl <- function(doc, cols, optional = NULL, context = NULL) {
       return(data.frame())
    }
 
-   # If a match is found, build the table from the matching sheet
-   build_from_sheet <- function(sheet_data) {
-      sheet_names <- names(sheet_data)
-
-      # Determine which optional cols exist in this sheet
-      found_optional <- optional_cols |> keep(~ any(str_detect(sheet_names, .)))
-
-      # Active cols = required + whichever optional are present
-      active_cols <- c(required_cols, found_optional)
-
-      # Duplicate-match check and tightening of regex to exact anchors if needed
-      nm_test <- active_cols |>
-         map(~ str_detect(sheet_names, .)) |>
-         map(~ sheet_names[.]) |>
-         keep(~ length(.) > 1)
-
-      if (length(nm_test) > 0) {
-         test_exact <- active_cols[names(nm_test)] |>
-            paste0("^", ., "$") |>
-            map_int(~ sum(str_detect(sheet_names, .))) |>
-            keep(~ . != 1)
-         if (length(test_exact) == 0) {
-            active_cols[names(nm_test)] <- active_cols[names(nm_test)] |> paste0("^", ., "$")
-         } else {
-            errors <- NULL
-            for (i in seq_along(nm_test)) {
-               errors <- c(errors, str_glue(
-                  "{names(nm_test[i])} matches {length(nm_test[[i]])} columns: {paste(nm_test[[i]], collapse = ', ')}"
-               ))
-            }
-            context_hint <- if (!is.null(context)) {
-               str_glue("Please check your regular expression for `{context}`")
-            } else {
-               "Please check your regular expressions."
-            }
-            cli_abort(
-               c(
-                  "Unable to rename the following columns in {names(matches)}",
-                  set_names(errors, rep("x", length(errors))),
-                  "i" = context_hint
-               )
-            )
-         }
-      }
-
-      result <- select_rename_w_dups(sheet_data, active_cols)
-
-      # Add any optional cols that were absent from the sheet as NA
-      missing_optional <- setdiff(names(optional_cols), names(found_optional))
-      for (col in missing_optional) {
-         result[[col]] <- NA_character_
-      }
-
-      result
-   }
-
    if (length(matches) == 1) {
-      build_from_sheet(matches[[1]])
+      build_from_sheet(matches[[1]], required_cols, optional_cols, context, names(matches))
    } else {
       sheets_mats <- names(matches)
       cli_warn(
@@ -1176,8 +1120,75 @@ create_tbl <- function(doc, cols, optional = NULL, context = NULL) {
          ),
          ansi_collapse(sheets_mats)
       )
-      matches |> map(build_from_sheet)
+      imap(matches, ~ build_from_sheet(.x, required_cols, optional_cols, context, .y))
    }
+}
+
+
+#' Build a table from a single matched sheet
+#'
+#' @param sheet_data a single data frame (one element of the `doc` list)
+#' @param required_cols named regex vector of required columns
+#' @param optional_cols named regex vector of optional columns
+#' @param context calling context string for error messages
+#' @param sheet_name sheet name used in duplicate-column error messages
+#'
+#' @return renamed data frame with optional absent columns filled as `NA_character_`
+#' @noRd
+build_from_sheet <- function(sheet_data, required_cols, optional_cols, context,
+                              sheet_name = NULL) {
+   sheet_names <- names(sheet_data)
+
+   # Determine which optional cols exist in this sheet
+   found_optional <- optional_cols |> keep(~ any(str_detect(sheet_names, .)))
+
+   # Active cols = required + whichever optional are present
+   active_cols <- c(required_cols, found_optional)
+
+   # Duplicate-match check and tightening of regex to exact anchors if needed
+   nm_test <- active_cols |>
+      map(~ str_detect(sheet_names, .)) |>
+      map(~ sheet_names[.]) |>
+      keep(~ length(.) > 1)
+
+   if (length(nm_test) > 0) {
+      test_exact <- active_cols[names(nm_test)] |>
+         paste0("^", ., "$") |>
+         map_int(~ sum(str_detect(sheet_names, .))) |>
+         keep(~ . != 1)
+      if (length(test_exact) == 0) {
+         active_cols[names(nm_test)] <- active_cols[names(nm_test)] |> paste0("^", ., "$")
+      } else {
+         errors <- NULL
+         for (i in seq_along(nm_test)) {
+            errors <- c(errors, str_glue(
+               "{names(nm_test[i])} matches {length(nm_test[[i]])} columns: {paste(nm_test[[i]], collapse = ', ')}"
+            ))
+         }
+         context_hint <- if (!is.null(context)) {
+            str_glue("Please check your regular expression for `{context}`")
+         } else {
+            "Please check your regular expressions."
+         }
+         cli_abort(
+            c(
+               "Unable to rename the following columns in {sheet_name}",
+               set_names(errors, rep("x", length(errors))),
+               "i" = context_hint
+            )
+         )
+      }
+   }
+
+   result <- select_rename_w_dups(sheet_data, active_cols)
+
+   # Add any optional cols that were absent from the sheet as NA
+   missing_optional <- setdiff(names(optional_cols), names(found_optional))
+   for (col in missing_optional) {
+      result[[col]] <- NA_character_
+   }
+
+   result
 }
 
 
