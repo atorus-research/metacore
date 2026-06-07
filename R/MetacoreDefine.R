@@ -80,6 +80,33 @@ MetaCoreDefine_validate <- function() {
    }
 }
 
+#' Extended Metacore filter — subsets all tables to a single dataset,
+#' then trims documents and comments to only those still referenced.
+#' @family Metacore
+#' @noRd
+MetaCoreDefine_filter <- function(value) {
+   super$metacore_filter(value)
+
+   # Trim documents to those referenced by the now-filtered derivations
+   if ("document_id" %in% names(private$.derivations)) {
+      used_docs <- private$.derivations |>
+         filter(!is.na(.data$document_id)) |>
+         distinct(.data$document_id)
+      private$.documents <- private$.documents |>
+         right_join(used_docs, by = "document_id", multiple = "all")
+   }
+
+   # Trim comments to those referenced by the now-filtered value_spec
+   if ("comment_id" %in% names(private$.value_spec)) {
+      used_comments <- private$.value_spec |>
+         filter(!is.na(.data$comment_id)) |>
+         distinct(.data$comment_id)
+      private$.comments <- private$.comments |>
+         right_join(used_comments, by = "comment_id", multiple = "all")
+   }
+}
+
+
 #' Extended Metacore R6 Class (Define.xml schema: adds study_level, documents, comments)
 #' @family Metacore
 #' @noRd
@@ -87,8 +114,9 @@ MetaCoreDefine <- R6::R6Class(
    "MetacoreDefine",
    inherit = MetaCore,
    public = list(
-      initialize = MetaCoreDefine_initialize,
-      validate   = MetaCoreDefine_validate
+      initialize      = MetaCoreDefine_initialize,
+      validate        = MetaCoreDefine_validate,
+      metacore_filter = MetaCoreDefine_filter
    ),
    private = list(
       .study_level = tibble(),
