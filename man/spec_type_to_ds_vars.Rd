@@ -4,64 +4,134 @@
 \alias{spec_type_to_ds_vars}
 \title{Spec to ds_vars}
 \usage{
-# Default (define_fields = FALSE):
-spec_type_to_ds_vars(doc,
-  cols = c(
-    "dataset"   = "[D|d]ataset|[D|d]omain",
-    "variable"  = "[V|v]ariable [[N|n]ame]?|[V|v]ariables?",
-    "order"     = "[V|v]ariable [O|o]rder|[O|o]rder",
-    "mandatory" = "[K|k]eep|[M|m]andatory"
-  ),
+spec_type_to_ds_vars(
+  doc,
+  cols = base_col_regex()$.ds_vars,
   key_seq_sep_sheet = TRUE,
-  key_seq_cols = c("dataset" = "Dataset", "key_seq" = "Key Variables"),
-  sheet = "[V|v]ar|Datasets", define_fields = FALSE)
-
-# With define_fields = TRUE, additional cols are appended automatically:
-spec_type_to_ds_vars(doc,
-  cols = c(
-    "dataset"   = "[D|d]ataset|[D|d]omain",
-    "variable"  = "[V|v]ariable [[N|n]ame]?|[V|v]ariables?",
-    "order"     = "[V|v]ariable [O|o]rder|[O|o]rder",
-    "mandatory" = "[K|k]eep|[M|m]andatory",
-    "role"      = "[R|r]ole"
-  ),
-  key_seq_sep_sheet = TRUE,
-  key_seq_cols = c("dataset" = "Dataset", "key_seq" = "Key Variables"),
-  sheet = "[V|v]ar|Datasets", define_fields = TRUE)
+  key_seq_cols = c(dataset = "Dataset", key_seq = "Key Variables"),
+  sheet = "[V|v]ar|Datasets",
+  define_fields = FALSE
+)
 }
 \arguments{
-\item{doc}{Named list of datasets @seealso \code{\link[=read_all_sheets]{read_all_sheets()}} for exact
-format}
+\item{doc}{Named list of data frames produced by \code{\link[=read_all_sheets]{read_all_sheets()}}.}
 
-\item{cols}{Named vector of column names. The column names can be regular
-expressions for more flexibility. But, the names must follow the given
-pattern}
+\item{cols}{Named character vector of regular expressions mapping output
+column names to column headings in your specification. When \code{NULL}
+(default), patterns from \code{\link[=base_col_regex]{base_col_regex()}} are used (or \code{\link[=define_col_regex]{define_col_regex()}}
+when \code{define_fields = TRUE}). Valid names are \code{dataset}, \code{variable},
+\code{order}, \code{mandatory}; plus \code{key_seq} when \code{key_seq_sep_sheet = FALSE};
+plus \code{role} when \code{define_fields = TRUE}.}
 
-\item{key_seq_sep_sheet}{A boolean to indicate if the key sequence is on a
-separate sheet. If set to false add the key_seq column name to the \code{cols}
-vector.}
+\item{key_seq_sep_sheet}{Logical; \code{TRUE} (default) reads the key sequence
+from a separate sheet using \code{key_seq_cols}. Set to \code{FALSE} and include
+\code{"key_seq"} in \code{cols} when key sequence is on the same sheet as variables.}
 
-\item{key_seq_cols}{names vector to get the key_sequence for each dataset}
+\item{key_seq_cols}{Named character vector identifying the dataset and key
+sequence columns when \code{key_seq_sep_sheet = TRUE}. Defaults to
+\code{c("dataset" = "Dataset", "key_seq" = "Key Variables")}.}
 
-\item{sheet}{Regular expression for the sheet names}
+\item{sheet}{Regular expression used to restrict which sheets are searched.
+Defaults to matching sheets named \code{"Variables"} or \code{"Datasets"}.}
+
+\item{define_fields}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}} Logical; when
+\code{TRUE}, the additional Define.xml column (\code{role}) is appended to the
+result. Defaults to \code{FALSE}.}
 }
 \value{
 a dataset formatted for the metacore object
 }
 \description{
-Creates the ds_vars from a list of datasets (optionally filtered by the sheet
-input). The named vector \code{cols} is used to determine which is the correct
-sheet and renames the columns
+Builds the \code{ds_vars} table from a named list of Excel sheets produced by
+\code{\link[=read_all_sheets]{read_all_sheets()}}. \code{ds_vars} holds \strong{one row per dataset–variable
+combination} and acts as the bridge between dataset-level and
+variable-level metadata.
+}
+\details{
+\subsection{How it works}{
+
+The function searches every sheet in \code{doc} for one that contains all
+required columns, renames them to the standard metacore names, and returns a
+single tidy tibble. Key sequence information is handled separately because
+it is commonly stored on a different sheet (e.g. the Domains sheet) from the
+variable list.
+}
+
+\subsection{Output columns}{\tabular{ll}{
+   Column \tab Description \cr
+   \code{dataset} \tab Dataset name, e.g. \code{"ADSL"} \cr
+   \code{variable} \tab Variable name, e.g. \code{"USUBJID"} \cr
+   \code{order} \tab Column order within the dataset (integer) \cr
+   \code{mandatory} \tab \code{TRUE} if NULL values are not permitted (from Define-XML v2.1) \cr
+   \code{key_seq} \tab Integer sort key; \code{NA} if the variable is not a key variable \cr
+   \code{core} \tab ADaM core status: \code{"Required"}, \code{"Expected"}, or \code{"Permissible"} \cr
+   \code{supp_flag} \tab \code{TRUE} if the variable is a supplemental qualifier \cr
+}
+
+}
+
+\subsection{Default column matching}{
+
+When \code{cols = NULL} (the default), patterns from \code{\link[=base_col_regex]{base_col_regex()}} are used.
+These are designed to match standard Pinnacle 21 headings:
+\itemize{
+\item \strong{\code{dataset}} — heading matches \code{"Dataset"} or \code{"Domain"}
+\item \strong{\code{variable}} — heading matches \code{"Variable Name"} or \code{"Variables"}
+\item \strong{\code{order}} — heading matches \code{"Variable Order"} or \code{"Order"}
+\item \strong{\code{mandatory}} — heading matches \code{"Keep"} or \code{"Mandatory"}
+}
+
+If your specification uses different headings, supply a named character
+vector to \code{cols}:
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{spec_type_to_ds_vars(doc, cols = c(
+  "dataset"   = "Domain",
+  "variable"  = "Variable Name",
+  "order"     = "Variable Order",
+  "mandatory" = "Required"
+))
+}\if{html}{\out{</div>}}
+}
+
+\subsection{Key sequence}{
+
+The key sequence (\code{key_seq}) is read \strong{from a separate sheet by default}
+(\code{key_seq_sep_sheet = TRUE}), using the column names in \code{key_seq_cols}. If
+your specification stores the key sequence on the same sheet as the variable
+list, set \code{key_seq_sep_sheet = FALSE} and add a \code{"key_seq"} entry to \code{cols}:
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{spec_type_to_ds_vars(doc,
+  key_seq_sep_sheet = FALSE,
+  cols = c(
+    "dataset"   = "Domain",
+    "variable"  = "Variable Name",
+    "order"     = "Variable Order",
+    "mandatory" = "Mandatory",
+    "key_seq"   = "Key Sequence"
+  )
+)
+}\if{html}{\out{</div>}}
+}
+
+\subsection{Additional Define.xml columns (\code{define_fields = TRUE})}{
+
+Set \code{define_fields = TRUE} to append one extra column required for
+Define.xml 2.0 generation. Patterns are drawn from \code{\link[=define_col_regex]{define_col_regex()}}:\tabular{lll}{
+   Column \tab Description \tab Default heading match \cr
+   \code{role} \tab Variable role (e.g. \code{"Identifier"}, \code{"Topic"}) \tab \code{"Role"} \cr
+}
+
+}
 }
 \seealso{
-Other spec builders: 
-\code{\link{spec_type_to_codelist}()},
-\code{\link{spec_type_to_comments}()},
-\code{\link{spec_type_to_derivations}()},
-\code{\link{spec_type_to_documents}()},
-\code{\link{spec_type_to_ds_spec}()},
-\code{\link{spec_type_to_supp}()},
-\code{\link{spec_type_to_value_spec}()},
-\code{\link{spec_type_to_var_spec}()}
+Other spec builders:
+\code{\link[=spec_type_to_codelist]{spec_type_to_codelist()}},
+\code{\link[=spec_type_to_comments]{spec_type_to_comments()}},
+\code{\link[=spec_type_to_derivations]{spec_type_to_derivations()}},
+\code{\link[=spec_type_to_documents]{spec_type_to_documents()}},
+\code{\link[=spec_type_to_ds_spec]{spec_type_to_ds_spec()}},
+\code{\link[=spec_type_to_supp]{spec_type_to_supp()}},
+\code{\link[=spec_type_to_value_spec]{spec_type_to_value_spec()}},
+\code{\link[=spec_type_to_var_spec]{spec_type_to_var_spec()}}
 }
 \concept{spec builders}

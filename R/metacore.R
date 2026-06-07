@@ -388,7 +388,7 @@ select_dataset <- function(.data, dataset, simplify = FALSE, quiet = deprecated(
          cl$metacore_filter(dataset)
 
          if (simplify) {
-            test <- list(
+            mc <- list(
                cl$ds_vars,
                cl$var_spec,
                cl$value_spec,
@@ -397,8 +397,10 @@ select_dataset <- function(.data, dataset, simplify = FALSE, quiet = deprecated(
                cl$supp
             ) %>%
                reduce(left_join)
+         } else if (inherits(cl, "MetacoreDefine")) {
+            mc <- DatasetMetaDefine$new(metacore = cl, quiet = quiet, verbose = verbose)
          } else {
-            test <- DatasetMeta$new(metacore = cl, quiet = quiet)
+            mc <- DatasetMeta$new(metacore = cl, quiet = quiet, verbose = verbose)
          }
       },
       quiet,

@@ -21,6 +21,7 @@ Useful links:
 
 Authors:
 \itemize{
+  \item Liam Hobby \email{liam.f.hobby@gsk.com}
   \item Christina Fillmore \email{christina.e.fillmore@gsk.com} (\href{https://orcid.org/0000-0003-0595-2302}{ORCID})
   \item Bill Denney
   \item Maya Gans \email{maya.gans@atorusresearch.com} (\href{https://orcid.org/0000-0002-5452-6089}{ORCID})

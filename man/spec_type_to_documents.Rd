@@ -4,13 +4,11 @@
 \alias{spec_type_to_documents}
 \title{Spec to documents}
 \usage{
-spec_type_to_documents(doc,
-  cols = c(
-    "document_id" = "ID",
-    "title"       = "[T|t]itle",
-    "href"        = "[H|h]ref"
-  ),
-  sheet = "[D|d]ocuments?")
+spec_type_to_documents(
+  doc,
+  cols = base_col_regex()$.documents,
+  sheet = "[D|d]ocuments?"
+)
 }
 \arguments{
 \item{doc}{Named list of datasets. @seealso \code{\link[=read_all_sheets]{read_all_sheets()}} for exact format}
@@ -25,6 +23,7 @@ a dataset formatted for the metacore object, or \code{NULL} if no
 matching sheet is found
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 Creates the documents table from a Documents sheet in the specification.
 The Documents sheet should contain a document identifier (\code{document_id}),
 a human-readable title, and an href (file path or URL) pointing to the
@@ -37,14 +36,14 @@ This table is only populated when \code{define_fields = TRUE} is passed to
 in the base schema.
 }
 \seealso{
-Other spec builders: 
-\code{\link{spec_type_to_codelist}()},
-\code{\link{spec_type_to_comments}()},
-\code{\link{spec_type_to_derivations}()},
-\code{\link{spec_type_to_ds_spec}()},
-\code{\link{spec_type_to_ds_vars}()},
-\code{\link{spec_type_to_supp}()},
-\code{\link{spec_type_to_value_spec}()},
-\code{\link{spec_type_to_var_spec}()}
+Other spec builders:
+\code{\link[=spec_type_to_codelist]{spec_type_to_codelist()}},
+\code{\link[=spec_type_to_comments]{spec_type_to_comments()}},
+\code{\link[=spec_type_to_derivations]{spec_type_to_derivations()}},
+\code{\link[=spec_type_to_ds_spec]{spec_type_to_ds_spec()}},
+\code{\link[=spec_type_to_ds_vars]{spec_type_to_ds_vars()}},
+\code{\link[=spec_type_to_supp]{spec_type_to_supp()}},
+\code{\link[=spec_type_to_value_spec]{spec_type_to_value_spec()}},
+\code{\link[=spec_type_to_var_spec]{spec_type_to_var_spec()}}
 }
 \concept{spec builders}

@@ -4,7 +4,8 @@
 \alias{spec_type_to_supp}
 \title{Spec to supp}
 \usage{
-spec_type_to_supp(doc,
+spec_type_to_supp(
+  doc,
   cols = c(
     "dataset" = "[D|d]ataset|[D|d]omain",
     "where"   = "[W|w]here [C|clause]",
@@ -52,6 +53,7 @@ generating a define.xml enabled metacore object.}
 a dataset formatted for the metacore object (supp table)
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 Creates the supp table from value_spec, codelist, and comments by identifying
 supplemental datasets (SUPP*) and extracting their metadata. For each SUPP domain,
 extracts variable names from the QNAM codelist, identifying variables from the
@@ -61,14 +63,14 @@ IDVAR comment, and evaluator from the QEVAL codelist.
 Note for future: length is populated only when VLM exists
 }
 \seealso{
-Other spec builders: 
-\code{\link{spec_type_to_codelist}()},
-\code{\link{spec_type_to_comments}()},
-\code{\link{spec_type_to_derivations}()},
-\code{\link{spec_type_to_documents}()},
-\code{\link{spec_type_to_ds_spec}()},
-\code{\link{spec_type_to_ds_vars}()},
-\code{\link{spec_type_to_value_spec}()},
-\code{\link{spec_type_to_var_spec}()}
+Other spec builders:
+\code{\link[=spec_type_to_codelist]{spec_type_to_codelist()}},
+\code{\link[=spec_type_to_comments]{spec_type_to_comments()}},
+\code{\link[=spec_type_to_derivations]{spec_type_to_derivations()}},
+\code{\link[=spec_type_to_documents]{spec_type_to_documents()}},
+\code{\link[=spec_type_to_ds_spec]{spec_type_to_ds_spec()}},
+\code{\link[=spec_type_to_ds_vars]{spec_type_to_ds_vars()}},
+\code{\link[=spec_type_to_value_spec]{spec_type_to_value_spec()}},
+\code{\link[=spec_type_to_var_spec]{spec_type_to_var_spec()}}
 }
 \concept{spec builders}

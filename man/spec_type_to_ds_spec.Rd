@@ -4,54 +4,104 @@
 \alias{spec_type_to_ds_spec}
 \title{Spec to ds_spec}
 \usage{
-# Default (define_fields = FALSE):
-spec_type_to_ds_spec(doc,
-  cols = c(
-    "dataset"   = "[N|n]ame|[D|d]ataset|[D|d]omain",
-    "structure" = "[S|s]tructure",
-    "label"     = "[L|l]abel|[D|d]escription"
-  ),
-  sheet = NULL, define_fields = FALSE)
-
-# With define_fields = TRUE, additional cols are appended automatically:
-spec_type_to_ds_spec(doc,
-  cols = c(
-    "dataset"   = "[N|n]ame|[D|d]ataset|[D|d]omain",
-    "structure" = "[S|s]tructure",
-    "label"     = "[L|l]abel|[D|d]escription",
-    "class"     = "[C|c]lass",
-    "repeating" = "[R|r]epeating",
-    "reference" = "[R|r]eference [D|d]ata",
-    "purpose"   = "[P|p]urpose"
-  ),
-  sheet = NULL, define_fields = TRUE)
+spec_type_to_ds_spec(
+  doc,
+  cols = base_col_regex()$.ds_spec,
+  sheet = NULL,
+  define_fields = FALSE
+)
 }
 \arguments{
-\item{doc}{Named list of datasets @seealso \code{\link[=read_all_sheets]{read_all_sheets()}} for exact
-format}
+\item{doc}{Named list of data frames produced by \code{\link[=read_all_sheets]{read_all_sheets()}}.}
 
-\item{cols}{Named vector of column names. The column names can be regular
-expressions for more flexibility. But, the names must follow the given pattern}
+\item{cols}{Named character vector of regular expressions mapping output
+column names to column headings in your specification. When \code{NULL}
+(default), patterns from \code{\link[=base_col_regex]{base_col_regex()}} are used (or \code{\link[=define_col_regex]{define_col_regex()}}
+when \code{define_fields = TRUE}). Valid names are \code{dataset}, \code{structure},
+\code{label}; plus \code{class}, \code{repeating}, \code{reference}, \code{purpose} when
+\code{define_fields = TRUE}.}
 
-\item{sheet}{Regular expression for the sheet name}
+\item{sheet}{Regular expression used to restrict which sheets are searched.
+\code{NULL} (default) searches all sheets.}
+
+\item{define_fields}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}} Logical; when
+\code{TRUE}, additional Define.xml columns (\code{class}, \code{repeating}, \code{reference},
+\code{purpose}) are appended to the result. Defaults to \code{FALSE}.}
 }
 \value{
 a dataset formatted for the metacore object
 }
 \description{
-Creates the ds_spec from a list of datasets (optionally filtered by the sheet
-input). The named vector \code{cols} is used to determine which is the correct
-sheet and renames the columns
+Builds the \code{ds_spec} table from a named list of Excel sheets produced by
+\code{\link[=read_all_sheets]{read_all_sheets()}}. \code{ds_spec} holds \strong{one row per dataset} and captures
+dataset-level metadata.
+}
+\details{
+\subsection{How it works}{
+
+The function searches every sheet in \code{doc} for one that contains all
+required columns (matched by regular expression), renames those columns to
+the standard metacore names, and returns a single tidy tibble. If no sheet
+contains all required columns an informative error is raised; if more than
+one sheet matches a warning is issued listing the candidates.
+}
+
+\subsection{Output columns}{\tabular{ll}{
+   Column \tab Description \cr
+   \code{dataset} \tab Short dataset name, e.g. \code{"ADSL"} \cr
+   \code{structure} \tab Dataset structure, e.g. \code{"ONE RECORD PER SUBJECT"} \cr
+   \code{label} \tab Human-readable dataset label \cr
+}
+
+}
+
+\subsection{Default column matching}{
+
+When \code{cols = NULL} (the default), patterns from \code{\link[=base_col_regex]{base_col_regex()}} are used.
+These are designed to match standard Pinnacle 21 headings:
+\itemize{
+\item \strong{\code{dataset}} — heading matches \code{"Name"}, \code{"Dataset"}, or \code{"Domain"}
+\item \strong{\code{structure}} — heading matches \code{"Structure"}
+\item \strong{\code{label}} — heading matches \code{"Label"} or \code{"Description"}
+}
+
+If your specification uses different headings, supply a named character
+vector to \code{cols}. Names must match the output column names listed in the
+table above. Values are treated as regular expressions:
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{spec_type_to_ds_spec(doc, cols = c(
+  "dataset"   = "Study Domain",
+  "structure" = "Record Structure",
+  "label"     = "Long Label"
+))
+}\if{html}{\out{</div>}}
+
+You only need to supply entries for columns whose headings differ from the
+defaults — omitted columns will still use the built-in pattern.
+}
+
+\subsection{Additional Define.xml columns (\code{define_fields = TRUE})}{
+
+Set \code{define_fields = TRUE} to append four extra columns required for
+Define.xml 2.0 generation. Patterns are drawn from \code{\link[=define_col_regex]{define_col_regex()}}:\tabular{lll}{
+   Column \tab Description \tab Default heading match \cr
+   \code{class} \tab Dataset class (e.g. \code{"BASIC DATA STRUCTURE"}) \tab \code{"Class"} \cr
+   \code{repeating} \tab Is the dataset repeating? (\code{TRUE}/\code{FALSE}) \tab \code{"Repeating"} \cr
+   \code{reference} \tab Is it reference data? (\code{TRUE}/\code{FALSE}) \tab \code{"Reference Data"} \cr
+   \code{purpose} \tab Purpose (e.g. \code{"Analysis"}, \code{"Tabulation"}) \tab \code{"Purpose"} \cr
+}
+
+}
 }
 \seealso{
-Other spec builders: 
-\code{\link{spec_type_to_codelist}()},
-\code{\link{spec_type_to_comments}()},
-\code{\link{spec_type_to_derivations}()},
-\code{\link{spec_type_to_documents}()},
-\code{\link{spec_type_to_ds_vars}()},
-\code{\link{spec_type_to_supp}()},
-\code{\link{spec_type_to_value_spec}()},
-\code{\link{spec_type_to_var_spec}()}
+Other spec builders:
+\code{\link[=spec_type_to_codelist]{spec_type_to_codelist()}},
+\code{\link[=spec_type_to_comments]{spec_type_to_comments()}},
+\code{\link[=spec_type_to_derivations]{spec_type_to_derivations()}},
+\code{\link[=spec_type_to_documents]{spec_type_to_documents()}},
+\code{\link[=spec_type_to_ds_vars]{spec_type_to_ds_vars()}},
+\code{\link[=spec_type_to_supp]{spec_type_to_supp()}},
+\code{\link[=spec_type_to_value_spec]{spec_type_to_value_spec()}},
+\code{\link[=spec_type_to_var_spec]{spec_type_to_var_spec()}}
 }
 \concept{spec builders}

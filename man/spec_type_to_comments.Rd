@@ -4,12 +4,11 @@
 \alias{spec_type_to_comments}
 \title{Spec to comments}
 \usage{
-spec_type_to_comments(doc,
-  cols = c(
-    "comment_id" = "ID",
-    "comment"    = "[D|d]escription"
-  ),
-  sheet = "[C|c]omments?")
+spec_type_to_comments(
+  doc,
+  cols = define_col_regex()$.comments,
+  sheet = "[C|c]omments?"
+)
 }
 \arguments{
 \item{doc}{Named list of datasets @seealso \code{\link[=read_all_sheets]{read_all_sheets()}} for exact format}
@@ -23,20 +22,21 @@ spec_type_to_comments(doc,
 a dataset formatted for the metacore object (comments table)
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 Creates the comments table from a Comments sheet in the specification.
 The Comments sheet should contain comment_id (ID column) and comment text
 (Description column). Comments are linked to variables via the comment_id
 in the value_spec table.
 }
 \seealso{
-Other spec builders: 
-\code{\link{spec_type_to_codelist}()},
-\code{\link{spec_type_to_derivations}()},
-\code{\link{spec_type_to_documents}()},
-\code{\link{spec_type_to_ds_spec}()},
-\code{\link{spec_type_to_ds_vars}()},
-\code{\link{spec_type_to_supp}()},
-\code{\link{spec_type_to_value_spec}()},
-\code{\link{spec_type_to_var_spec}()}
+Other spec builders:
+\code{\link[=spec_type_to_codelist]{spec_type_to_codelist()}},
+\code{\link[=spec_type_to_derivations]{spec_type_to_derivations()}},
+\code{\link[=spec_type_to_documents]{spec_type_to_documents()}},
+\code{\link[=spec_type_to_ds_spec]{spec_type_to_ds_spec()}},
+\code{\link[=spec_type_to_ds_vars]{spec_type_to_ds_vars()}},
+\code{\link[=spec_type_to_supp]{spec_type_to_supp()}},
+\code{\link[=spec_type_to_value_spec]{spec_type_to_value_spec()}},
+\code{\link[=spec_type_to_var_spec]{spec_type_to_var_spec()}}
 }
 \concept{spec builders}

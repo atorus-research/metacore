@@ -4,74 +4,136 @@
 \alias{spec_type_to_derivations}
 \title{Spec to derivation}
 \usage{
-# Default (define_fields = FALSE):
-spec_type_to_derivations(doc,
-  cols = c(
-    "derivation_id" = "ID",
-    "derivation"    = "[D|d]efinition|[D|d]escription"
-  ),
+spec_type_to_derivations(
+  doc,
+  cols = base_col_regex()$.derivations,
   sheet = "Method|Derivations?",
-  var_cols = c(
-    "dataset"     = "[D|d]ataset|[D|d]omain",
-    "variable"    = "[N|n]ame|[V|v]ariables?",
-    "origin"      = "[O|o]rigin",
-    "predecessor" = "[P|p]redecessor",
-    "comment"     = "[C|c]omment"
-  ),
-  define_fields = FALSE)
-
-# With define_fields = TRUE, additional cols are appended automatically:
-spec_type_to_derivations(doc,
-  cols = c(
-    "derivation_id" = "ID",
-    "derivation"    = "[D|d]efinition|[D|d]escription",
-    "method_name"   = "[N|n]ame",
-    "method_type"   = "[T|t]ype",
-    "document_id"   = "[D|d]ocument",
-    "pages"         = "[P|p]ages"
-  ),
-  sheet = "Method|Derivations?",
-  var_cols = c(
-    "dataset"     = "[D|d]ataset|[D|d]omain",
-    "variable"    = "[N|n]ame|[V|v]ariables?",
-    "origin"      = "[O|o]rigin",
-    "predecessor" = "[P|p]redecessor",
-    "comment"     = "[C|c]omment"
-  ),
-  define_fields = TRUE)
+  var_cols = c(dataset = "[D|d]ataset|[D|d]omain", variable = "[N|n]ame|[V|v]ariables?",
+    origin = "[O|o]rigin", predecessor = "[P|p]redecessor", comment = "[C|c]omment"),
+  define_fields = FALSE
+)
 }
 \arguments{
-\item{doc}{Named list of datasets @seealso \code{\link[=read_all_sheets]{read_all_sheets()}} for exact
-format}
+\item{doc}{Named list of data frames produced by \code{\link[=read_all_sheets]{read_all_sheets()}}.}
 
-\item{cols}{Named vector of column names. The column names can be regular
-expressions for more flexibility. But, the names must follow the given
-pattern}
+\item{cols}{Named character vector of regular expressions mapping output
+column names to headings on the derivation/methods sheet. When \code{NULL}
+(default), patterns from \code{\link[=base_col_regex]{base_col_regex()}} are used (or \code{\link[=define_col_regex]{define_col_regex()}}
+when \code{define_fields = TRUE}). Valid names are \code{derivation_id}, \code{derivation};
+plus \code{method_name}, \code{method_type}, \code{document_id}, \code{pages} when
+\code{define_fields = TRUE}.}
 
-\item{sheet}{Regular expression for the sheet name}
+\item{sheet}{Regular expression used to restrict which sheets are searched
+for the derivation/methods sheet. Defaults to matching sheets named
+\code{"Method"} or \code{"Derivations"}.}
 
-\item{var_cols}{Named vector of the name(s) of the origin, predecessor and
-comment columns. These do not have to be on the specified sheet.}
+\item{var_cols}{Named character vector of regular expressions mapping the
+processing columns (\code{dataset}, \code{variable}, \code{origin}, \code{predecessor},
+\code{comment}) to headings on the variables sheet. Defaults to built-in
+patterns covering standard Pinnacle 21 headings.}
+
+\item{define_fields}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}} Logical; when
+\code{TRUE}, additional Define.xml columns (\code{method_name}, \code{method_type},
+\code{document_id}, \code{pages}) are appended to the result. Defaults to \code{FALSE}.}
 }
 \value{
 a dataset formatted for the metacore object
 }
 \description{
-Creates the derivation table from a list of datasets (optionally filtered by
-the sheet input). The named vector \code{cols} is used to determine which is the
-correct sheet and renames the columns. The derivation will be used for
-"derived" origins, the comments for "assigned" origins, and predecessor for
-"predecessor" origins.
+Builds the \code{derivations} table from a named list of Excel sheets produced by
+\code{\link[=read_all_sheets]{read_all_sheets()}}. \code{derivations} holds \strong{one row per unique derivation}
+and maps a derivation ID to its full derivation text.
+}
+\details{
+\subsection{How it works}{
+
+Derivations are assembled from \strong{two sources} and then combined:
+\enumerate{
+\item \strong{Methods/derivations sheet} (\code{cols}, \code{sheet}): A dedicated sheet
+containing an ID column and a derivation-text column. Rows from this
+sheet are included directly.
+\item \strong{Variables sheet} (\code{var_cols}): Origin, predecessor, and comment columns
+are read from the variables sheet and used to auto-generate derivation
+entries for variables not already covered by the methods sheet:
+\itemize{
+\item \code{"Derived"} origin → derivation text comes from the derivation column.
+\item \code{"Assigned"} origin → derivation text comes from the comment column;
+the ID is formed as \code{DATASET.VARIABLE}.
+\item \code{"Predecessor"} origin → derivation text is the predecessor variable
+name; the ID is formed as \code{pred.PREDECESSOR}.
+}
+}
+}
+
+\subsection{Output columns}{\tabular{ll}{
+   Column \tab Description \cr
+   \code{derivation_id} \tab Unique derivation identifier, e.g. \code{"M.AVAL"} \cr
+   \code{derivation} \tab Full derivation text or computational method \cr
+}
+
+}
+
+\subsection{Default column matching — derivation sheet}{
+
+When \code{cols = NULL} (the default), patterns from \code{\link[=base_col_regex]{base_col_regex()}} are used
+to find columns on the methods/derivations sheet:
+\itemize{
+\item \strong{\code{derivation_id}} — heading matches \code{"ID"}
+\item \strong{\code{derivation}} — heading matches \code{"Definition"} or \code{"Description"}
+}
+}
+
+\subsection{Default column matching — variables sheet (\code{var_cols})}{
+
+\code{var_cols} locates the origin, predecessor, and comment columns. Defaults:
+\itemize{
+\item \strong{\code{dataset}} — heading matches \code{"Dataset"} or \code{"Domain"}
+\item \strong{\code{variable}} — heading matches \code{"Name"} or \code{"Variables"}
+\item \strong{\code{origin}} — heading matches \code{"Origin"}
+\item \strong{\code{predecessor}} — heading matches \code{"Predecessor"}
+\item \strong{\code{comment}} — heading matches \code{"Comment"}
+}
+
+To customise, pass a named character vector to \code{cols} and/or \code{var_cols}:
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{spec_type_to_derivations(doc,
+  cols = c(
+    "derivation_id" = "Method ID",
+    "derivation"    = "Computational Algorithm"
+  ),
+  var_cols = c(
+    "dataset"     = "Domain",
+    "variable"    = "Variable Name",
+    "origin"      = "Source",
+    "predecessor" = "Predecessor Variable",
+    "comment"     = "Notes"
+  )
+)
+}\if{html}{\out{</div>}}
+}
+
+\subsection{Additional Define.xml columns (\code{define_fields = TRUE})}{
+
+Set \code{define_fields = TRUE} to append four extra columns required for
+Define.xml 2.0 generation. Patterns are drawn from \code{\link[=define_col_regex]{define_col_regex()}}:\tabular{lll}{
+   Column \tab Description \tab Default heading match \cr
+   \code{method_name} \tab Short name for the method \tab \code{"Name"} \cr
+   \code{method_type} \tab Method type (e.g. \code{"Computation"}) \tab \code{"Type"} \cr
+   \code{document_id} \tab Cross-reference to an entry in \code{documents} \tab \code{"Document"} \cr
+   \code{pages} \tab Page reference(s) within the document \tab \code{"Pages"} \cr
+}
+
+}
 }
 \seealso{
-Other spec builders: 
-\code{\link{spec_type_to_codelist}()},
-\code{\link{spec_type_to_comments}()},
-\code{\link{spec_type_to_documents}()},
-\code{\link{spec_type_to_ds_spec}()},
-\code{\link{spec_type_to_ds_vars}()},
-\code{\link{spec_type_to_supp}()},
-\code{\link{spec_type_to_value_spec}()},
-\code{\link{spec_type_to_var_spec}()}
+Other spec builders:
+\code{\link[=spec_type_to_codelist]{spec_type_to_codelist()}},
+\code{\link[=spec_type_to_comments]{spec_type_to_comments()}},
+\code{\link[=spec_type_to_documents]{spec_type_to_documents()}},
+\code{\link[=spec_type_to_ds_spec]{spec_type_to_ds_spec()}},
+\code{\link[=spec_type_to_ds_vars]{spec_type_to_ds_vars()}},
+\code{\link[=spec_type_to_supp]{spec_type_to_supp()}},
+\code{\link[=spec_type_to_value_spec]{spec_type_to_value_spec()}},
+\code{\link[=spec_type_to_var_spec]{spec_type_to_var_spec()}}
 }
 \concept{spec builders}

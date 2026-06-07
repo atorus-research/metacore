@@ -4,7 +4,7 @@
 \alias{create_tbl}
 \title{Create table}
 \usage{
-create_tbl(doc, cols, optional = NULL, context = NULL, schema = NULL)
+create_tbl(doc, cols, context = NULL, schema = NULL)
 }
 \arguments{
 \item{doc}{list of sheets from a excel doc}
@@ -14,7 +14,7 @@ If the vector is named it will also rename the columns}
 
 \item{context}{Provides the calling context for better error messaging to the user}
 
-\item{schema}{Optional zero-row schema tibble (e.g. from \code{base_column_schema()} or
+\item{schema}{Optional zero-row schema tibble (e.g. from \code{\link[=base_column_schema]{base_column_schema()}} or
 \code{define_column_schema()}). When provided, any schema columns absent from the
 matched sheet are back-filled with typed \code{NA}s via \code{fill_cols()}.}
 }
