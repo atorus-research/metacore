@@ -48,3 +48,17 @@ VignetteBuilder:
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE, r6 = FALSE)
 Config/roxygen2/version: 8.0.0
+Collate: 
+    'Metacore.R'
+    'MetacoreDefine.R'
+    'DatasetMeta.R'
+    'checks.R'
+    'metacore-package.R'
+    'metacore-schema.R'
+    'spec_builder.R'
+    'utils-pipe.R'
+    'utils.R'
+    'validators.R'
+    'xml_builders.R'
+    'xml_helpers.R'
+    'zzz.R'
