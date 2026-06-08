@@ -6,22 +6,18 @@
 \usage{
 spec_type_to_supp(
   doc,
-  cols = c(
-    "dataset" = "[D|d]ataset|[D|d]omain",
-    "where"   = "[W|w]here [C|clause]",
-    "type"    = "[T|t]ype",
-    "length"  = "[L|l]ength",
-    "origin"  = "[O|o]rigin"
-  ),
+  cols = c(dataset = "[D|d]ataset|[D|d]omain", variable = "[V|v]ariable", where =
+    "[W|w]here [C|clause]", type = "[T|t]ype", length = "[L|l]ength", origin =
+    "[O|o]rigin"),
   sheet = NULL,
   where_sep_sheet = TRUE,
-  where_cols = c(
-    "id"         = "ID",
-    "variable"   = "[V|v]ariable",
-    "comparator" = "[C|c]omparator",
-    "value"      = "[V|v]alue"
-  ),
-  var_spec = NULL, value_spec = NULL, codelist = NULL, comments = NULL)
+  where_cols = c(id = "ID", variable = "[V|v]ariable", comparator = "[C|c]omparator",
+    value = "[V|v]alue"),
+  var_spec = NULL,
+  value_spec = NULL,
+  codelist = NULL,
+  comments = NULL
+)
 }
 \arguments{
 \item{doc}{Named list of datasets @seealso \code{\link[=read_all_sheets]{read_all_sheets()}} for exact format}
