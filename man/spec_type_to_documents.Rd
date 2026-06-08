@@ -6,7 +6,7 @@
 \usage{
 spec_type_to_documents(
   doc,
-  cols = base_col_regex()$.documents,
+  cols = define_col_regex()$.documents,
   sheet = "[D|d]ocuments?"
 )
 }
