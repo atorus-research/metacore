@@ -23,8 +23,8 @@
 #' Shared private fields and greet for DatasetMeta variants
 #' @noRd
 .dataset_meta_private <- list(
-  .name     = NA,
-  .label    = NA,
+  .name = NA,
+  .label = NA,
   .num_vars = NA,
   .key_vars = NA,
   .greet = function(quiet, verbose) {
@@ -39,8 +39,8 @@
 #' Shared post-initialize bookkeeping for DatasetMeta variants
 #' @noRd
 .dataset_meta_post_init <- function(metacore, quiet, verbose, private) {
-  private$.name     <- metacore$ds_spec$dataset[[1]]
-  private$.label    <- metacore$ds_spec$label[[1]]
+  private$.name <- metacore$ds_spec$dataset[[1]]
+  private$.label <- metacore$ds_spec$label[[1]]
   private$.num_vars <- nrow(metacore$ds_vars)
   private$.key_vars <- metacore$ds_vars |>
     filter(!is.na(key_seq)) |>
@@ -57,9 +57,9 @@
 #' @family Metacore
 #' @noRd
 DatasetMeta <- R6::R6Class("DatasetMeta",
-  inherit  = MetaCore,
-  private  = .dataset_meta_private,
-  public   = list(
+  inherit = MetaCore,
+  private = .dataset_meta_private,
+  public = list(
     initialize = function(metacore, quiet = deprecated(), verbose = "message") {
       super$initialize(
         ds_spec     = metacore$ds_spec,
@@ -89,9 +89,9 @@ DatasetMeta <- R6::R6Class("DatasetMeta",
 #' @family Metacore
 #' @noRd
 DatasetMetaDefine <- R6::R6Class("DatasetMeta",
-  inherit  = MetaCoreDefine,
-  private  = .dataset_meta_private,
-  public   = list(
+  inherit = MetaCoreDefine,
+  private = .dataset_meta_private,
+  public = list(
     initialize = function(metacore, quiet = deprecated(), verbose = "message") {
       super$initialize(
         ds_spec     = metacore$ds_spec,

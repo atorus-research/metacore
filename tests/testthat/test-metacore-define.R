@@ -21,7 +21,7 @@ make_ae_spec <- function() {
       derivation_id = NA_character_
     ),
     derivations = tibble::tibble(derivation_id = character(), derivation = character()),
-    codelist    = tibble::tibble(
+    codelist = tibble::tibble(
       code_id = character(), name = character(), type = character(), codes = list()
     ),
     supp = tibble::tibble(
@@ -66,7 +66,7 @@ make_two_dataset_spec <- function() {
       derivation_id = NA_character_
     ),
     derivations = tibble::tibble(derivation_id = character(), derivation = character()),
-    codelist    = tibble::tibble(
+    codelist = tibble::tibble(
       code_id = character(), name = character(), type = character(), codes = list()
     ),
     supp = tibble::tibble(
@@ -102,28 +102,28 @@ test_that("MetacoreDefine exposes study_level, documents, comments active bindin
   mc <- suppressWarnings(do.call(metacore, c(make_ae_spec(), list(define_fields = TRUE))))
 
   expect_s3_class(mc$study_level, "tbl_df")
-  expect_s3_class(mc$documents,   "tbl_df")
-  expect_s3_class(mc$comments,    "tbl_df")
+  expect_s3_class(mc$documents, "tbl_df")
+  expect_s3_class(mc$comments, "tbl_df")
 })
 
 test_that("study_level, documents, comments are read-only", {
   mc <- suppressWarnings(do.call(metacore, c(make_ae_spec(), list(define_fields = TRUE))))
 
   expect_error(mc$study_level <- tibble::tibble(), "read only")
-  expect_error(mc$documents   <- tibble::tibble(), "read only")
-  expect_error(mc$comments    <- tibble::tibble(), "read only")
+  expect_error(mc$documents <- tibble::tibble(), "read only")
+  expect_error(mc$comments <- tibble::tibble(), "read only")
 })
 
 test_that("all 7 base tables still accessible from MetacoreDefine", {
   mc <- suppressWarnings(do.call(metacore, c(make_ae_spec(), list(define_fields = TRUE))))
 
-  expect_s3_class(mc$ds_spec,     "tbl_df")
-  expect_s3_class(mc$ds_vars,     "tbl_df")
-  expect_s3_class(mc$var_spec,    "tbl_df")
-  expect_s3_class(mc$value_spec,  "tbl_df")
+  expect_s3_class(mc$ds_spec, "tbl_df")
+  expect_s3_class(mc$ds_vars, "tbl_df")
+  expect_s3_class(mc$var_spec, "tbl_df")
+  expect_s3_class(mc$value_spec, "tbl_df")
   expect_s3_class(mc$derivations, "tbl_df")
-  expect_s3_class(mc$codelist,    "tbl_df")
-  expect_s3_class(mc$supp,        "tbl_df")
+  expect_s3_class(mc$codelist, "tbl_df")
+  expect_s3_class(mc$supp, "tbl_df")
 })
 
 
@@ -212,28 +212,28 @@ test_that("provided comments data is stored correctly", {
 test_that("study_level columns have correct labels", {
   mc <- suppressWarnings(do.call(metacore, c(make_ae_spec(), list(define_fields = TRUE))))
 
-  expect_equal(attr(mc$study_level$study_name,       "label"), "Study Name")
-  expect_equal(attr(mc$study_level$study_description,"label"), "Study Description")
-  expect_equal(attr(mc$study_level$protocol_name,    "label"), "Protocol Name")
-  expect_equal(attr(mc$study_level$standard_name,    "label"), "Standard")
+  expect_equal(attr(mc$study_level$study_name, "label"), "Study Name")
+  expect_equal(attr(mc$study_level$study_description, "label"), "Study Description")
+  expect_equal(attr(mc$study_level$protocol_name, "label"), "Protocol Name")
+  expect_equal(attr(mc$study_level$standard_name, "label"), "Standard")
   expect_equal(attr(mc$study_level$standard_version, "label"), "Standard Version")
-  expect_equal(attr(mc$study_level$define_version,   "label"), "Define Version")
-  expect_equal(attr(mc$study_level$language,         "label"), "Language")
+  expect_equal(attr(mc$study_level$define_version, "label"), "Define Version")
+  expect_equal(attr(mc$study_level$language, "label"), "Language")
 })
 
 test_that("documents columns have correct labels", {
   mc <- suppressWarnings(do.call(metacore, c(make_ae_spec(), list(define_fields = TRUE))))
 
   expect_equal(attr(mc$documents$document_id, "label"), "Document ID")
-  expect_equal(attr(mc$documents$title,       "label"), "Title")
-  expect_equal(attr(mc$documents$href,        "label"), "Href")
+  expect_equal(attr(mc$documents$title, "label"), "Title")
+  expect_equal(attr(mc$documents$href, "label"), "Href")
 })
 
 test_that("comments columns have correct labels", {
   mc <- suppressWarnings(do.call(metacore, c(make_ae_spec(), list(define_fields = TRUE))))
 
   expect_equal(attr(mc$comments$comment_id, "label"), "Comment ID")
-  expect_equal(attr(mc$comments$comment,    "label"), "Comment Text")
+  expect_equal(attr(mc$comments$comment, "label"), "Comment Text")
 })
 
 
@@ -266,8 +266,8 @@ test_that("define_fields = TRUE adds method_name, method_type, document_id, page
 test_that("define_fields = FALSE does NOT add extended columns to ds_spec or ds_vars", {
   mc <- suppressWarnings(do.call(metacore, c(make_ae_spec(), list(define_fields = FALSE))))
 
-  expect_false("class"  %in% names(mc$ds_spec))
-  expect_false("role"   %in% names(mc$ds_vars))
+  expect_false("class" %in% names(mc$ds_spec))
+  expect_false("role" %in% names(mc$ds_vars))
   expect_false("where_label" %in% names(mc$value_spec))
   expect_false("method_name" %in% names(mc$derivations))
 })
@@ -286,13 +286,13 @@ test_that("all-empty MetacoreDefine tables produce a warning", {
 
   expect_warning(
     metacore(
-      ds_spec     = schema$.ds_spec,
-      ds_vars     = schema$.ds_vars,
-      var_spec    = schema$.var_spec,
-      value_spec  = schema$.value_spec,
+      ds_spec = schema$.ds_spec,
+      ds_vars = schema$.ds_vars,
+      var_spec = schema$.var_spec,
+      value_spec = schema$.value_spec,
       derivations = schema$.derivations,
-      codelist    = schema$.codelist,
-      supp        = schema$.supp,
+      codelist = schema$.codelist,
+      supp = schema$.supp,
       define_fields = TRUE
     ),
     "all datasets are empty"
@@ -505,7 +505,7 @@ test_that("select_dataset on MetacoreDefine with simplify = TRUE returns a flat 
 
   expect_s3_class(ae_simple, "tbl_df")
   expect_true("variable" %in% names(ae_simple))
-  expect_true("dataset"  %in% names(ae_simple))
+  expect_true("dataset" %in% names(ae_simple))
 })
 
 test_that("select_dataset on base Metacore returns DatasetMeta with base class vector", {

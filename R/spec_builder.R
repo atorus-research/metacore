@@ -64,16 +64,16 @@ spec_to_metacore <- function(path, quiet = deprecated(), where_sep_sheet = TRUE,
       }
 
       # Core tables — always built regardless of define_fields
-      ds_spec     <- spec_type_to_ds_spec(doc, define_fields = define_fields)
-      ds_vars     <- spec_type_to_ds_vars(doc, define_fields = define_fields)
-      var_spec    <- spec_type_to_var_spec(doc)
-      value_spec  <- spec_type_to_value_spec(doc, where_sep_sheet = where_sep_sheet, define_fields = define_fields)
+      ds_spec <- spec_type_to_ds_spec(doc, define_fields = define_fields)
+      ds_vars <- spec_type_to_ds_vars(doc, define_fields = define_fields)
+      var_spec <- spec_type_to_var_spec(doc)
+      value_spec <- spec_type_to_value_spec(doc, where_sep_sheet = where_sep_sheet, define_fields = define_fields)
       derivations <- spec_type_to_derivations(doc, define_fields = define_fields)
-      codelist    <- spec_type_to_codelist(doc)
+      codelist <- spec_type_to_codelist(doc)
 
       # Define.xml-only tables — skipped when define_fields = FALSE
       documents <- if (define_fields) spec_type_to_documents(doc) else NULL
-      comments  <- if (define_fields) spec_type_to_comments(doc) else NULL
+      comments <- if (define_fields) spec_type_to_comments(doc) else NULL
       supp <- base_column_schema()$.supp
 
       # Supplemental variables — skipped when define_fields = FALSE
@@ -81,25 +81,25 @@ spec_to_metacore <- function(path, quiet = deprecated(), where_sep_sheet = TRUE,
         supp <- spec_type_to_supp(
           doc,
           where_sep_sheet = where_sep_sheet,
-          var_spec   = var_spec,
+          var_spec = var_spec,
           value_spec = value_spec,
-          codelist   = codelist,
-          comments   = comments
+          codelist = codelist,
+          comments = comments
         )
 
-        ds_vars    <- add_supp_to_table(supp, ds_vars,    define_column_schema()$.ds_vars)
-        var_spec   <- add_supp_to_table(supp, var_spec,   define_column_schema()$.var_spec)
+        ds_vars <- add_supp_to_table(supp, ds_vars, define_column_schema()$.ds_vars)
+        var_spec <- add_supp_to_table(supp, var_spec, define_column_schema()$.var_spec)
         value_spec <- add_supp_to_table(supp, value_spec, define_column_schema()$.value_spec)
-        supp       <- reorder_by_schema(supp, "supp")
+        supp <- reorder_by_schema(supp, "supp")
       }
 
       mc <- metacore(
         ds_spec, ds_vars, var_spec, value_spec, derivations, codelist,
-        supp      = supp,
+        supp = supp,
         documents = documents,
-        comments  = comments,
+        comments = comments,
         define_fields = define_fields,
-        quiet   = quiet,
+        quiet = quiet,
         verbose = verbose
       )
 
@@ -227,10 +227,10 @@ read_all_sheets <- function(path) {
 #'
 #' @family spec builders
 spec_type_to_ds_spec <- function(
-    doc,
-    cols = base_col_regex()$.ds_spec,
-    sheet = NULL,
-    define_fields = FALSE
+  doc,
+  cols = base_col_regex()$.ds_spec,
+  sheet = NULL,
+  define_fields = FALSE
 ) {
   cols <- (if (define_fields) define_col_regex()$.ds_spec else cols)
 
@@ -245,7 +245,7 @@ spec_type_to_ds_spec <- function(
 
   # Drop define-specific col mappings from cols when define_fields = FALSE
   active_schema <- if (define_fields) define_column_schema() else base_column_schema()
-  cols          <- cols[names(cols) %in% names(active_schema$.ds_spec)]
+  cols <- cols[names(cols) %in% names(active_schema$.ds_spec)]
 
   if (!is.null(sheet)) {
     sheet_ls <- str_subset(names(doc), sheet)
@@ -369,21 +369,21 @@ spec_type_to_ds_spec <- function(
 #'
 #' @family spec builders
 spec_type_to_ds_vars <- function(
-    doc,
-    cols = base_col_regex()$.ds_vars,
-    key_seq_sep_sheet = TRUE,
-    key_seq_cols = c(
-      "dataset" = "Dataset",
-      "key_seq" = "Key Variables"
-    ),
-    sheet = "[V|v]ar|Datasets",
-    define_fields = FALSE
+  doc,
+  cols = base_col_regex()$.ds_vars,
+  key_seq_sep_sheet = TRUE,
+  key_seq_cols = c(
+    "dataset" = "Dataset",
+    "key_seq" = "Key Variables"
+  ),
+  sheet = "[V|v]ar|Datasets",
+  define_fields = FALSE
 ) {
   cols <- (if (define_fields) define_col_regex()$.ds_vars else cols)
 
   # Validate against the full schema so typos are caught regardless of mode
   valid_names <- names(define_column_schema()$.ds_vars)
-  name_check  <- all(names(cols) %in% valid_names)
+  name_check <- all(names(cols) %in% valid_names)
 
   name_check_extra <- ifelse(
     key_seq_sep_sheet,
@@ -528,10 +528,10 @@ spec_type_to_ds_vars <- function(
 #'
 #' @family spec builders
 spec_type_to_var_spec <- function(
-    doc,
-    cols = base_col_regex()$.var_spec,
-    sheet = "[V|v]ar") {
-
+  doc,
+  cols = base_col_regex()$.var_spec,
+  sheet = "[V|v]ar"
+) {
   # "dataset" is a processing-only column (not in schema) used to detect
   # per-domain duplicate variables before it is dropped from the output.
   var_spec_names <- c(names(define_column_schema()$.var_spec), "dataset")
@@ -715,16 +715,16 @@ spec_type_to_var_spec <- function(
 #'
 #' @family spec builders
 spec_type_to_value_spec <- function(
-    doc,
-    cols = base_col_regex()$.value_spec,
-    sheet = NULL,
-    where_sep_sheet = TRUE,
-    where_cols = c(
-      "id" = "ID",
-      "where" = c("Variable", "Comparator", "Value")
-    ),
-    var_sheet = "[V|v]ar",
-    define_fields = FALSE
+  doc,
+  cols = base_col_regex()$.value_spec,
+  sheet = NULL,
+  where_sep_sheet = TRUE,
+  where_cols = c(
+    "id" = "ID",
+    "where" = c("Variable", "Comparator", "Value")
+  ),
+  var_sheet = "[V|v]ar",
+  define_fields = FALSE
 ) {
   cols <- (if (define_fields) define_col_regex()$.value_spec else cols)
 
@@ -742,7 +742,7 @@ spec_type_to_value_spec <- function(
     ))
   }
   active_schema <- if (define_fields) define_column_schema() else base_column_schema()
-  cols          <- cols[names(cols) %in% c(names(active_schema$.value_spec), "predecessor")]
+  cols <- cols[names(cols) %in% c(names(active_schema$.value_spec), "predecessor")]
 
   # Select a subset of sheets if specified
   if (!is.null(sheet)) {
@@ -762,9 +762,8 @@ spec_type_to_value_spec <- function(
   if (length(var_sheet) > 0) {
     var_out <- doc[var_sheet] |>
       map_dfr(~ .x %>%
-                select_rename_w_dups(cols) |>
-                mutate(where = NA_character_)
-      ) |>
+        select_rename_w_dups(cols) |>
+        mutate(where = NA_character_)) |>
       anti_join(out, by = c("dataset", "variable"))
 
     out <- bind_rows(out, var_out)
@@ -778,7 +777,6 @@ spec_type_to_value_spec <- function(
     out <- out |>
       left_join(where_df, by = c("where" = "id")) |>
       select(-where, where = where_new)
-
   } else if (where_sep_sheet) {
     cli_warn(c(
       "x" = "where column needed to cross-reference where information from separate sheet"
@@ -816,13 +814,12 @@ spec_type_to_value_spec <- function(
   if (length(var_sheet) > 0 && define_fields == TRUE) {
     comment_mapping <- doc[var_sheet] |>
       map_dfr(~ .x %>%
-                select(
-                  dataset = matches("[D|d]ataset|[D|d]omain"),
-                  variable = matches("[N|n]ame|[V|v]ariables?"),
-                  comment_id = matches("[C|c]omment")
-                ) %>%
-                filter(!is.na(comment_id), comment_id != "")
-      ) |>
+        select(
+          dataset = matches("[D|d]ataset|[D|d]omain"),
+          variable = matches("[N|n]ame|[V|v]ariables?"),
+          comment_id = matches("[C|c]omment")
+        ) %>%
+        filter(!is.na(comment_id), comment_id != "")) |>
       distinct()
 
     if (nrow(comment_mapping) > 0) {
@@ -863,30 +860,29 @@ spec_type_to_value_spec <- function(
 #'
 #' @family spec builders
 spec_type_to_codelist <- function(
-    doc,
-    codelist_cols = c(
-      "code_id" = "ID",
-      "name" = "[N|n]ame",
-      "code" = "^[C|c]ode|^[T|t]erm",
-      "decode" = "[D|d]ecode"
-    ),
-    permitted_val_cols = NULL,
-    dict_cols = c(
-      "code_id" = "ID",
-      "name" = "[N|n]ame",
-      "dictionary" = "[D|d]ictionary",
-      "version" = "[V|v]ersion"
-    ),
-    sheets = NULL,
-    simplify = FALSE
+  doc,
+  codelist_cols = c(
+    "code_id" = "ID",
+    "name" = "[N|n]ame",
+    "code" = "^[C|c]ode|^[T|t]erm",
+    "decode" = "[D|d]ecode"
+  ),
+  permitted_val_cols = NULL,
+  dict_cols = c(
+    "code_id" = "ID",
+    "name" = "[N|n]ame",
+    "dictionary" = "[D|d]ictionary",
+    "version" = "[V|v]ersion"
+  ),
+  sheets = NULL,
+  simplify = FALSE
 ) {
-
   if (is.null(codelist_cols)) {
     cli_abort("Codelist column names must be provided as {.arg codelist_cols}")
   }
 
   codelist_names <- c("code_id", "name", "code", "decode")
-  dict_names <-  c("code_id", "name", "dictionary", "version")
+  dict_names <- c("code_id", "name", "dictionary", "version")
   permitted_val_names <- c("code_id", "name", "code")
 
   # Validate names of codelist columns (minimum requirement)
@@ -934,8 +930,8 @@ spec_type_to_codelist <- function(
     mutate(type = if_else(simplify & all(code == decode), "permitted_val", "code_decode")) |>
     nest(codes = c(code, decode)) |>
     mutate(codes = dplyr::case_match(type,
-                                     "permitted_val" ~ lapply(codes, \(df) pull(df, code)),
-                                     .default = codes
+      "permitted_val" ~ lapply(codes, \(df) pull(df, code)),
+      .default = codes
     ))
 
   # Add permitted values if available
@@ -1068,23 +1064,23 @@ spec_type_to_codelist <- function(
 #' @family spec builders
 #' @importFrom purrr quietly
 spec_type_to_derivations <- function(
-    doc,
-    cols = base_col_regex()$.derivations,
-    sheet = "Method|Derivations?",
-    var_cols = c(
-      "dataset" = "[D|d]ataset|[D|d]omain",
-      "variable" = "[N|n]ame|[V|v]ariables?",
-      "origin" = "[O|o]rigin",
-      "predecessor" = "[P|p]redecessor",
-      "comment" = "[C|c]omment"
-    ),
-    define_fields = FALSE
+  doc,
+  cols = base_col_regex()$.derivations,
+  sheet = "Method|Derivations?",
+  var_cols = c(
+    "dataset" = "[D|d]ataset|[D|d]omain",
+    "variable" = "[N|n]ame|[V|v]ariables?",
+    "origin" = "[O|o]rigin",
+    "predecessor" = "[P|p]redecessor",
+    "comment" = "[C|c]omment"
+  ),
+  define_fields = FALSE
 ) {
   cols <- (if (define_fields) define_col_regex()$.derivations else cols)
 
   # Validate against the full schema so typos are caught regardless of mode
   valid_names <- names(define_column_schema()$.derivations)
-  var_names   <- c("dataset", "variable", "origin", "predecessor", "comment")
+  var_names <- c("dataset", "variable", "origin", "predecessor", "comment")
 
   name_check <- all(names(cols) %in% valid_names)
   if (!name_check | is.null(names(cols))) {
@@ -1094,7 +1090,7 @@ spec_type_to_derivations <- function(
     ))
   }
   active_schema <- if (define_fields) define_column_schema() else base_column_schema()
-  cols          <- cols[names(cols) %in% names(active_schema$.derivations)]
+  cols <- cols[names(cols) %in% names(active_schema$.derivations)]
 
   # Validate the names of the variable columns (used to join)
   name_check <- all(names(var_cols) %in% var_names)
@@ -1137,14 +1133,14 @@ spec_type_to_derivations <- function(
     mutate(
       origin_lower = str_to_lower(origin),
       derivation_id = dplyr::case_match(origin_lower,
-                                        "predecessor" ~ paste0("pred.", predecessor),
-                                        "assigned" ~ paste0(dataset, ".", variable),
-                                        .default = NA_character_
+        "predecessor" ~ paste0("pred.", predecessor),
+        "assigned" ~ paste0(dataset, ".", variable),
+        .default = NA_character_
       ),
       derivation = dplyr::case_match(origin_lower,
-                                     "predecessor" ~ as.character(predecessor),
-                                     "assigned" ~ comment,
-                                     .default = NA_character_
+        "predecessor" ~ as.character(predecessor),
+        "assigned" ~ comment,
+        .default = NA_character_
       ),
       .keep = "unused"
     ) |>
@@ -1189,9 +1185,9 @@ spec_type_to_derivations <- function(
 #'
 #' @family spec builders
 spec_type_to_documents <- function(
-    doc,
-    cols = base_col_regex()$.documents,
-    sheet = "[D|d]ocuments?"
+  doc,
+  cols = base_col_regex()$.documents,
+  sheet = "[D|d]ocuments?"
 ) {
   documents_names <- names(define_column_schema()$.documents)
 
@@ -1206,7 +1202,9 @@ spec_type_to_documents <- function(
   if (!is.null(sheet)) {
     sheet_ls <- str_subset(names(doc), sheet)
     doc <- doc[sheet_ls]
-    if (length(doc) == 0) return(NULL)
+    if (length(doc) == 0) {
+      return(NULL)
+    }
   }
 
   create_tbl(doc, cols, context = "spec_type_to_documents", schema = define_column_schema()$.documents) |>
@@ -1232,9 +1230,9 @@ spec_type_to_documents <- function(
 #'
 #' @family spec builders
 spec_type_to_comments <- function(
-    doc,
-    cols = define_col_regex()$.comments,
-    sheet = "[C|c]omments?"
+  doc,
+  cols = define_col_regex()$.comments,
+  sheet = "[C|c]omments?"
 ) {
   comments_names <- names(define_column_schema()$.comments)
 
@@ -1313,28 +1311,27 @@ spec_type_to_comments <- function(
 #'
 #' @family spec builders
 spec_type_to_supp <- function(
-    doc,
-    cols = c(
-      "dataset" = "[D|d]ataset|[D|d]omain",
-      "where" = "[W|w]here [C|clause]",
-      "type" = "[T|t]ype",
-      "length" = "[L|l]ength",
-      "origin" = "[O|o]rigin"
-    ),
-    sheet = NULL,
-    where_sep_sheet = TRUE,
-    where_cols = c(
-      "id" = "ID",
-      "variable" = "[V|v]ariable",
-      "comparator" = "[C|c]omparator",
-      "value" = "[V|v]alue"
-    ),
-    var_spec = NULL,
-    value_spec = NULL,
-    codelist = NULL,
-    comments = NULL
+  doc,
+  cols = c(
+    "dataset" = "[D|d]ataset|[D|d]omain",
+    "where" = "[W|w]here [C|clause]",
+    "type" = "[T|t]ype",
+    "length" = "[L|l]ength",
+    "origin" = "[O|o]rigin"
+  ),
+  sheet = NULL,
+  where_sep_sheet = TRUE,
+  where_cols = c(
+    "id" = "ID",
+    "variable" = "[V|v]ariable",
+    "comparator" = "[C|c]omparator",
+    "value" = "[V|v]alue"
+  ),
+  var_spec = NULL,
+  value_spec = NULL,
+  codelist = NULL,
+  comments = NULL
 ) {
-
   names <- c("dataset", "where", "type", "length", "origin")
 
   name_check <- all(names(cols) %in% names)
@@ -1370,7 +1367,6 @@ spec_type_to_supp <- function(
     out <- out |>
       left_join(where_df, by = c("where" = "id")) |>
       select(dataset, variable, type, length, origin)
-
   } else if (where_sep_sheet) {
     cli_warn(c(
       "x" = "where column needed to cross-reference where information from separate sheet"
@@ -1460,7 +1456,9 @@ spec_type_to_supp <- function(
 #'   to match `target_schema`
 #' @noRd
 add_supp_to_table <- function(supp, target, target_schema) {
-  if (is.null(supp) || nrow(supp) == 0) return(target)
+  if (is.null(supp) || nrow(supp) == 0) {
+    return(target)
+  }
 
   # Derive parent domain from SUPP dataset name (SUPPAE -> AE)
   new_rows <- supp |>
@@ -1474,7 +1472,9 @@ add_supp_to_table <- function(supp, target, target_schema) {
     anti_join(target, by = join_key) |>
     distinct()
 
-  if (nrow(to_add) == 0) return(target)
+  if (nrow(to_add) == 0) {
+    return(target)
+  }
 
   # Back-fill schema columns absent from to_add with typed NAs
   missing_cols <- setdiff(names(target_schema), names(to_add))
@@ -1525,7 +1525,9 @@ create_tbl <- function(doc, cols, context = NULL, schema = NULL) {
           discard(~.)
       })
     mis_lens <- mismatch_per_sheet |> map_int(length)
-    closest_sheets <- mis_lens |> keep(~ . == min(mis_lens)) |> names()
+    closest_sheets <- mis_lens |>
+      keep(~ . == min(mis_lens)) |>
+      names()
     sheets_to_error <- mismatch_per_sheet[names(mismatch_per_sheet) %in% closest_sheets]
 
     has_where_col <- sheets_to_error |>

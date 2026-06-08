@@ -7,35 +7,35 @@
 #' @return named list of zero-row schema tibbles, one per table
 #' @export
 base_column_schema <- function() {
-   list(
-      .ds_spec = tibble(
-         dataset = character(), structure = character(), label = character()
-      ),
-      .ds_vars = tibble(
-         dataset = character(), variable = character(), key_seq = integer(),
-         order = integer(), mandatory = logical(), core = character(),
-         supp_flag = logical()
-      ),
-      .var_spec = tibble(
-         variable = character(), length = integer(), label = character(),
-         type = character(), common = logical(), format = character()
-      ),
-      .value_spec = tibble(
-         dataset = character(), variable = character(), type = character(),
-         origin = character(), sig_dig = integer(), code_id = character(),
-         where = character(), derivation_id = character()
-      ),
-      .derivations = tibble(
-         derivation_id = character(), derivation = character()
-      ),
-      .codelist = tibble(
-         code_id = character(), name = character(), type = character(), codes = list()
-      ),
-      .supp = tibble(
-         dataset = character(), variable = character(), idvar = character(),
-         qeval = character()
-      )
-   )
+  list(
+    .ds_spec = tibble(
+      dataset = character(), structure = character(), label = character()
+    ),
+    .ds_vars = tibble(
+      dataset = character(), variable = character(), key_seq = integer(),
+      order = integer(), mandatory = logical(), core = character(),
+      supp_flag = logical()
+    ),
+    .var_spec = tibble(
+      variable = character(), length = integer(), label = character(),
+      type = character(), common = logical(), format = character()
+    ),
+    .value_spec = tibble(
+      dataset = character(), variable = character(), type = character(),
+      origin = character(), sig_dig = integer(), code_id = character(),
+      where = character(), derivation_id = character()
+    ),
+    .derivations = tibble(
+      derivation_id = character(), derivation = character()
+    ),
+    .codelist = tibble(
+      code_id = character(), name = character(), type = character(), codes = list()
+    ),
+    .supp = tibble(
+      dataset = character(), variable = character(), idvar = character(),
+      qeval = character()
+    )
+  )
 }
 
 
@@ -50,41 +50,41 @@ base_column_schema <- function() {
 #' @return named list of zero-row schema tibbles, one per table
 #' @export
 define_column_schema <- function() {
-   schema <- base_column_schema()
+  schema <- base_column_schema()
 
-   # Extend shared tables with define-specific columns
-   schema$.ds_spec <- tibble(
-      !!!schema$.ds_spec,
-      class = character(), repeating = logical(), reference = logical(),
-      purpose = character()
-   )
-   schema$.ds_vars <- tibble(!!!schema$.ds_vars, role = character())
-   schema$.value_spec <- tibble(
-      !!!schema$.value_spec[1:7],
-      where_label = character(), derivation_id = character(),
-      comment_id = character()
-   )
-   schema$.derivations <- tibble(
-      !!!schema$.derivations,
-      method_name = character(), method_type = character(),
-      document_id = character(), pages = character()
-   )
+  # Extend shared tables with define-specific columns
+  schema$.ds_spec <- tibble(
+    !!!schema$.ds_spec,
+    class = character(), repeating = logical(), reference = logical(),
+    purpose = character()
+  )
+  schema$.ds_vars <- tibble(!!!schema$.ds_vars, role = character())
+  schema$.value_spec <- tibble(
+    !!!schema$.value_spec[1:7],
+    where_label = character(), derivation_id = character(),
+    comment_id = character()
+  )
+  schema$.derivations <- tibble(
+    !!!schema$.derivations,
+    method_name = character(), method_type = character(),
+    document_id = character(), pages = character()
+  )
 
-   # Define-only tables
-   schema$.study_level <- tibble(
-      study_name = character(), study_description = character(),
-      protocol_name = character(), standard_name = character(),
-      standard_version = character(), define_version = character(),
-      language = character()
-   )
-   schema$.documents <- tibble(
-      document_id = character(), title = character(), href = character()
-   )
-   schema$.comments <- tibble(
-      comment_id = character(), comment = character()
-   )
+  # Define-only tables
+  schema$.study_level <- tibble(
+    study_name = character(), study_description = character(),
+    protocol_name = character(), standard_name = character(),
+    standard_version = character(), define_version = character(),
+    language = character()
+  )
+  schema$.documents <- tibble(
+    document_id = character(), title = character(), href = character()
+  )
+  schema$.comments <- tibble(
+    comment_id = character(), comment = character()
+  )
 
-   schema
+  schema
 }
 
 
@@ -97,42 +97,42 @@ define_column_schema <- function() {
 #' @return named list of named character vectors, one per table
 #' @export
 base_col_regex <- function() {
-   list(
-      .ds_spec = c(
-         "dataset"   = "[N|n]ame|[D|d]ataset|[D|d]omain",
-         "structure" = "[S|s]tructure",
-         "label"     = "[L|l]abel|[D|d]escription"
-      ),
-      .ds_vars = c(
-         "dataset"   = "[D|d]ataset|[D|d]omain",
-         "variable"  = "[V|v]ariable [[N|n]ame]?|[V|v]ariables?",
-         "order"     = "[V|v]ariable [O|o]rder|[O|o]rder",
-         "mandatory" = "[K|k]eep|[M|m]andatory"
-      ),
-      .var_spec = c(
-         "variable" = "[N|n]ame|[V|v]ariables?",
-         "length"   = "[L|l]ength",
-         "label"    = "[L|l]abel",
-         "type"     = "[T|t]ype",
-         "dataset"  = "[D|d]ataset|[D|d]omain",
-         "format"   = "[F|f]ormat"
-      ),
-      .value_spec = c(
-         "dataset"       = "[D|d]ataset|[D|d]omain",
-         "variable"      = "[N|n]ame|[V|v]ariables?",
-         "origin"        = "[O|o]rigin",
-         "type"          = "[T|t]ype",
-         "code_id"       = "[C|c]odelist|Controlled Term",
-         "sig_dig"       = "[S|s]ignificant",
-         "where"         = "[W|w]here",
-         "derivation_id" = "[M|m]ethod",
-         "predecessor"   = "[P|p]redecessor"
-      ),
-      .derivations = c(
-         "derivation_id" = "ID",
-         "derivation"    = "[D|d]efinition|[D|d]escription"
-      )
-   )
+  list(
+    .ds_spec = c(
+      "dataset"   = "[N|n]ame|[D|d]ataset|[D|d]omain",
+      "structure" = "[S|s]tructure",
+      "label"     = "[L|l]abel|[D|d]escription"
+    ),
+    .ds_vars = c(
+      "dataset"   = "[D|d]ataset|[D|d]omain",
+      "variable"  = "[V|v]ariable [[N|n]ame]?|[V|v]ariables?",
+      "order"     = "[V|v]ariable [O|o]rder|[O|o]rder",
+      "mandatory" = "[K|k]eep|[M|m]andatory"
+    ),
+    .var_spec = c(
+      "variable" = "[N|n]ame|[V|v]ariables?",
+      "length"   = "[L|l]ength",
+      "label"    = "[L|l]abel",
+      "type"     = "[T|t]ype",
+      "dataset"  = "[D|d]ataset|[D|d]omain",
+      "format"   = "[F|f]ormat"
+    ),
+    .value_spec = c(
+      "dataset"       = "[D|d]ataset|[D|d]omain",
+      "variable"      = "[N|n]ame|[V|v]ariables?",
+      "origin"        = "[O|o]rigin",
+      "type"          = "[T|t]ype",
+      "code_id"       = "[C|c]odelist|Controlled Term",
+      "sig_dig"       = "[S|s]ignificant",
+      "where"         = "[W|w]here",
+      "derivation_id" = "[M|m]ethod",
+      "predecessor"   = "[P|p]redecessor"
+    ),
+    .derivations = c(
+      "derivation_id" = "ID",
+      "derivation"    = "[D|d]efinition|[D|d]escription"
+    )
+  )
 }
 
 
@@ -144,39 +144,39 @@ base_col_regex <- function() {
 #' @return named list of named character vectors, one per table
 #' @export
 define_col_regex <- function() {
-   regex <- base_col_regex()
-   regex$.ds_spec <- c(
-      regex$.ds_spec,
-      "class"     = "[C|c]lass",
-      "repeating" = "[R|r]epeating",
-      "reference" = "[R|r]eference [D|d]ata",
-      "purpose"   = "[P|p]urpose"
-   )
-   regex$.ds_vars <- c(regex$.ds_vars, "role" = "[R|r]ole")
-   regex$.value_spec <- c(
-      regex$.value_spec,
-      "where_label" = "[L|l]abel|[D|d]escription"
-      # comment_id is populated via a separate join in spec_type_to_value_spec,
-      # not through create_tbl, so it is intentionally excluded here.
-   )
-   regex$.derivations <- c(
-      regex$.derivations,
-      "method_name" = "[N|n]ame",
-      "method_type" = "[T|t]ype",
-      "document_id" = "[D|d]ocument",
-      "pages"       = "[P|p]ages"
-   )
-   # Define-only tables (no base equivalent)
-   regex$.documents <- c(
-      "document_id" = "ID",
-      "title"       = "[T|t]itle",
-      "href"        = "[H|h]ref"
-   )
-   regex$.comments <- c(
-      "comment_id" = "ID",
-      "comment"    = "[D|d]escription"
-   )
-   regex
+  regex <- base_col_regex()
+  regex$.ds_spec <- c(
+    regex$.ds_spec,
+    "class"     = "[C|c]lass",
+    "repeating" = "[R|r]epeating",
+    "reference" = "[R|r]eference [D|d]ata",
+    "purpose"   = "[P|p]urpose"
+  )
+  regex$.ds_vars <- c(regex$.ds_vars, "role" = "[R|r]ole")
+  regex$.value_spec <- c(
+    regex$.value_spec,
+    "where_label" = "[L|l]abel|[D|d]escription"
+    # comment_id is populated via a separate join in spec_type_to_value_spec,
+    # not through create_tbl, so it is intentionally excluded here.
+  )
+  regex$.derivations <- c(
+    regex$.derivations,
+    "method_name" = "[N|n]ame",
+    "method_type" = "[T|t]ype",
+    "document_id" = "[D|d]ocument",
+    "pages"       = "[P|p]ages"
+  )
+  # Define-only tables (no base equivalent)
+  regex$.documents <- c(
+    "document_id" = "ID",
+    "title"       = "[T|t]itle",
+    "href"        = "[H|h]ref"
+  )
+  regex$.comments <- c(
+    "comment_id" = "ID",
+    "comment"    = "[D|d]escription"
+  )
+  regex
 }
 
 
@@ -192,12 +192,16 @@ define_col_regex <- function() {
 #'   the table is identical in both schemas (or absent from both)
 #' @noRd
 define_only_cols <- function(table_name) {
-   tbl <- paste0(".", table_name)
-   define <- define_column_schema()
-   base   <- base_column_schema()
-   if (!tbl %in% names(define)) return(character())
-   if (!tbl %in% names(base))   return(names(define[[tbl]]))
-   setdiff(names(define[[tbl]]), names(base[[tbl]]))
+  tbl <- paste0(".", table_name)
+  define <- define_column_schema()
+  base <- base_column_schema()
+  if (!tbl %in% names(define)) {
+    return(character())
+  }
+  if (!tbl %in% names(base)) {
+    return(names(define[[tbl]]))
+  }
+  setdiff(names(define[[tbl]]), names(base[[tbl]]))
 }
 
 
@@ -209,13 +213,13 @@ define_only_cols <- function(table_name) {
 #' @return list of column names by dataset
 #' @noRd
 col_vars <- function(schema = NULL) {
-   if (is.null(schema)) schema <- define_column_schema()
-   # study_level, documents, and comments are study-wide tables that are not
-   # name-validated against the per-dataset tables, so they are excluded here
-   schema$.study_level <- NULL
-   schema$.documents <- NULL
-   schema$.comments <- NULL
-   lapply(schema, names)
+  if (is.null(schema)) schema <- define_column_schema()
+  # study_level, documents, and comments are study-wide tables that are not
+  # name-validated against the per-dataset tables, so they are excluded here
+  schema$.study_level <- NULL
+  schema$.documents <- NULL
+  schema$.comments <- NULL
+  lapply(schema, names)
 }
 
 
@@ -232,14 +236,14 @@ col_vars <- function(schema = NULL) {
 #' @return `.data` with all schema columns present
 #' @noRd
 fill_cols <- function(.data, schema) {
-   if (is.null(.data)) {
-      return(schema)
-   }
-   missing <- setdiff(names(schema), names(.data))
-   for (col in missing) {
-      .data[[col]] <- schema[[col]][seq_len(nrow(.data))]
-   }
-   .data
+  if (is.null(.data)) {
+    return(schema)
+  }
+  missing <- setdiff(names(schema), names(.data))
+  for (col in missing) {
+    .data[[col]] <- schema[[col]][seq_len(nrow(.data))]
+  }
+  .data
 }
 
 
