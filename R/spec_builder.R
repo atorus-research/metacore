@@ -1186,7 +1186,7 @@ spec_type_to_derivations <- function(
 #' @family spec builders
 spec_type_to_documents <- function(
   doc,
-  cols = base_col_regex()$.documents,
+  cols = define_col_regex()$.documents,
   sheet = "[D|d]ocuments?"
 ) {
   documents_names <- names(define_column_schema()$.documents)
@@ -1314,6 +1314,7 @@ spec_type_to_supp <- function(
   doc,
   cols = c(
     "dataset" = "[D|d]ataset|[D|d]omain",
+    "variable" = "[V|v]ariable",
     "where" = "[W|w]here [C|clause]",
     "type" = "[T|t]ype",
     "length" = "[L|l]ength",
@@ -1332,7 +1333,7 @@ spec_type_to_supp <- function(
   codelist = NULL,
   comments = NULL
 ) {
-  names <- c("dataset", "where", "type", "length", "origin")
+  names <- c("dataset", "variable", "where", "type", "length", "origin")
 
   name_check <- all(names(cols) %in% names)
   if (!name_check | is.null(names(cols))) {
