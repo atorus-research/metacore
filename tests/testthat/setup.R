@@ -93,3 +93,13 @@ make_define_spec <- function() {
     )
   )
 }
+
+study <- tibble::tibble(
+  study_name        = "CDISC01",
+  study_description = "CDISC Pilot Study",
+  protocol_name     = "CDISC01",
+  standard_name     = "ADaM",
+  standard_version  = "1.1",
+  define_version    = "2.0",
+  language          = "en"
+)

@@ -48,7 +48,7 @@ test_that("NULL study_level produces empty tibble with correct columns", {
 test_that("NULL documents produces empty tibble with correct columns", {
   spec <- metacore(
     mc_define$ds_spec, mc_define$ds_vars, mc_define$var_spec, mc_define$value_spec, mc_define$derivations, mc_define$codelist,
-    mc_define$supp, sl, documents = NULL, mc_define$comments, define_fields = TRUE, verbose = "silent"
+    mc_define$supp, study, documents = NULL, mc_define$comments, define_fields = TRUE, verbose = "silent"
   )
   expect_equal(names(spec$documents), names(define_column_schema()$.documents))
   expect_equal(nrow(spec$documents), 0L)
@@ -57,7 +57,7 @@ test_that("NULL documents produces empty tibble with correct columns", {
 test_that("NULL comments produces empty tibble with correct columns", {
   spec <- metacore(
     mc_define$ds_spec, mc_define$ds_vars, mc_define$var_spec, mc_define$value_spec, mc_define$derivations, mc_define$codelist,
-    mc_define$supp, sl, mc_define$documents, comments = NULL, define_fields = TRUE, verbose = "silent"
+    mc_define$supp, study, mc_define$documents, comments = NULL, define_fields = TRUE, verbose = "silent"
   )
   expect_equal(names(spec$comments), names(define_column_schema()$.comments))
   expect_equal(nrow(spec$comments), 0L)
@@ -67,19 +67,9 @@ test_that("NULL comments produces empty tibble with correct columns", {
 # Provided data is stored correctly --------------------------------------------
 
 test_that("provided study_level data is stored with correct values", {
-  sl <- tibble::tibble(
-    study_name        = "CDISC01",
-    study_description = "CDISC Pilot Study",
-    protocol_name     = "CDISC01",
-    standard_name     = "ADaM",
-    standard_version  = "1.1",
-    define_version    = "2.0",
-    language          = "en"
-  )
-
   spec <- metacore(
     mc_define$ds_spec, mc_define$ds_vars, mc_define$var_spec, mc_define$value_spec, mc_define$derivations, mc_define$codelist,
-    mc_define$supp, sl, mc_define$documents, mc_define$comments, define_fields = TRUE, verbose = "silent"
+    mc_define$supp, study, mc_define$documents, mc_define$comments, define_fields = TRUE, verbose = "silent"
   )
 
   expect_equal(nrow(spec$study_level), 1L)
