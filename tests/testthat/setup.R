@@ -1,4 +1,5 @@
-mc <- spec_to_metacore(metacore_example("p21_mock.xlsx"), where_sep_sheet = FALSE, verbose = "silent", define_fields = TRUE)
+mc_define <- spec_to_metacore(metacore_example("p21_mock.xlsx"), where_sep_sheet = FALSE, verbose = "silent", define_fields = TRUE)
+mc_original <- spec_to_metacore(metacore_example("p21_mock.xlsx"), where_sep_sheet = FALSE, verbose = "silent", define_fields = FALSE)
 
 make_ae_spec <- function() {
   list(
