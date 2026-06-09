@@ -556,15 +556,15 @@ spec_type_to_var_spec <- function(
   if (!"dataset" %in% names(out)) {
     dups <- out |>
       distinct() |>
-      count(variable) |>
+      dplyr::count(variable) |>
       filter(n > 1) |>
       pull(variable)
 
     if (length(dups) > 0) {
       cli_abort(c(
-        col_red("The following variables are repeated with different metadata for different datasets:"),
-        "i" = ansi_collapse(dups),
-        "i" = "Please add 'dataset' = [Name of dataset column] to your named cols vector to correct this."
+        "x" = "The following variables are repeated with different metadata for different datasets: {dups}",
+        "i" = "Please add {.val dataset} = \"<name of dataset column>\" to your named cols vector to correct this.",
+        "i" = "E.g. \"dataset\" = \"[D|d]ataset\""
       ))
     }
   } else {
@@ -769,8 +769,8 @@ spec_type_to_value_spec <- function(
     out <- bind_rows(out, var_out)
   }
 
-  if (where_sep_sheet && "where" %in% names(out)) {
-    where_df <- create_tbl(doc, where_cols, context = spec_type_to_value_spec) |>
+  if (where_sep_sheet && any(!is.na(out$where))) {
+    where_df <- create_tbl(doc, where_cols, context = "spec_type_to_value_spec") |>
       tidyr::unite("where_new", starts_with("where"), sep = " ", na.rm = TRUE, remove = FALSE) |>
       select(id, where_new)
 
@@ -1574,11 +1574,11 @@ build_from_sheet <- function(sheet_data, cols, context, sheet_name = NULL) {
 
   if (length(nm_test) > 0) {
     test_exact <- cols[names(nm_test)] |>
-      paste0("^", ., "$") |>
+      (\(x) paste0("^", x, "$"))() |>
       map_int(~ sum(str_detect(sheet_names, .))) |>
       keep(~ . != 1)
     if (length(test_exact) == 0) {
-      cols[names(nm_test)] <- cols[names(nm_test)] |> paste0("^", ., "$")
+      cols[names(nm_test)] <- cols[names(nm_test)] |> (\(x) paste0("^", x, "$"))()
     } else {
       errors <- NULL
       for (i in seq_along(nm_test)) {

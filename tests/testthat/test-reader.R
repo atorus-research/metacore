@@ -649,37 +649,176 @@ test_that("define_to_metacore(quiet) deprecation message is output when supplied
   )
 })
 
-test_that("Informative error when where_sep_sheet=TRUE but WhereClause sheet missing", {
-  # This should trigger the helpful error message about where_sep_sheet
-  expect_error(
-    spec_to_metacore(
-      "spec_no_val.xlsx", # Use relative path like the existing test
-      where_sep_sheet = TRUE, # This is the default, but being explicit
-      verbose = "silent"
-    ),
-    regexp = "where.*where_sep_sheet",
-    ignore.case = TRUE
-  )
-
-  # Verify the error message contains helpful context
-  err <- tryCatch(
+test_that("spec_to_metacore warns when where_sep_sheet=TRUE but no WHERE IDs exist in the spec", {
+  # spec_no_val.xlsx has no WHERE clause references (all-NA where column)
+  expect_warning(
     spec_to_metacore(
       "spec_no_val.xlsx",
       where_sep_sheet = TRUE,
-      verbose = "silent"
+      verbose = "warn"
     ),
-    error = function(e) conditionMessage(e)
+    regexp = "where column needed"
+  )
+})
+
+test_that("spec_type_to_value_spec warns when where_sep_sheet=TRUE but all where values are NA", {
+  val_sheet <- tibble::tibble(
+    Dataset     = "ADSL",
+    Variable    = "AGE",
+    Origin      = "Derived",
+    Type        = "Num",
+    Predecessor = NA_character_
+  )
+  doc <- list(ValueSpec = val_sheet)
+  cols <- c(
+    dataset     = "^Dataset$",
+    variable    = "^Variable$",
+    origin      = "^Origin$",
+    type        = "^Type$",
+    predecessor = "^Predecessor$"
   )
 
-  # Check that the error message mentions:
-  # 1. That columns couldn't be matched
-  expect_match(err, "Unable to identify a sheet|Could not find matching columns", ignore.case = TRUE)
+  expect_warning(
+    spec_type_to_value_spec(doc, cols = cols, where_sep_sheet = TRUE, var_sheet = NULL),
+    regexp = "where column needed"
+  )
+})
 
-  # 2. Provides the helpful tip about where_sep_sheet
-  expect_match(err, "where_sep_sheet", ignore.case = TRUE)
+test_that("spec_type_to_value_spec replaces where IDs with text from the separate where sheet", {
+  val_sheet <- tibble::tibble(
+    Dataset     = "ADSL",
+    Variable    = "AGE",
+    Origin      = "Derived",
+    Type        = "Num",
+    Predecessor = NA_character_,
+    Where       = "W01"
+  )
+  where_sheet <- tibble::tibble(
+    ID         = "W01",
+    Variable   = "AGEGR",
+    Comparator = "GE",
+    Value      = "18"
+  )
+  doc <- list(ValueSpec = val_sheet, WhereSheet = where_sheet)
+  cols <- c(
+    dataset     = "^Dataset$",
+    variable    = "^Variable$",
+    origin      = "^Origin$",
+    type        = "^Type$",
+    predecessor = "^Predecessor$",
+    where       = "^Where$"
+  )
 
-  # 3. Shows which sheet was closest
-  expect_match(err, "Sheet|Closest", ignore.case = TRUE)
+  result <- spec_type_to_value_spec(doc, cols = cols, where_sep_sheet = TRUE, var_sheet = NULL)
+
+  expect_equal(result$where, "AGEGR GE 18")
+})
+
+test_that("spec_type_to_value_spec auto-generates derivation_id from origin when not in cols", {
+  val_sheet <- tibble::tibble(
+    Dataset     = c("ADSL", "ADSL"),
+    Variable    = c("AGE", "VISIT"),
+    Origin      = c("Assigned", "Derived"),
+    Type        = c("Num", "Char"),
+    Predecessor = c(NA_character_, NA_character_)
+  )
+  doc <- list(ValueSpec = val_sheet)
+  # No derivation_id in cols — auto-generated at lines 786-795
+  cols <- c(
+    dataset     = "^Dataset$",
+    variable    = "^Variable$",
+    origin      = "^Origin$",
+    type        = "^Type$",
+    predecessor = "^Predecessor$"
+  )
+
+  result <- spec_type_to_value_spec(doc, cols = cols, where_sep_sheet = FALSE, var_sheet = NULL)
+
+  # origin "Assigned" → dataset.variable
+  expect_equal(result$derivation_id[result$variable == "AGE"], "ADSL.AGE")
+  # other origin → pred.dataset.variable
+  expect_equal(result$derivation_id[result$variable == "VISIT"], "pred.ADSL.VISIT")
+})
+
+test_that("spec_type_to_var_spec errors when duplicate variables have different metadata without dataset col", {
+  vars_sheet <- tibble::tibble(
+    Variable = c("VISIT", "VISIT"),
+    Length   = c("20", "40"),  # different lengths → same variable, different metadata
+    Label    = c("Visit", "Visit"),
+    Type     = c("Char", "Char"),
+    Format   = c(NA_character_, NA_character_)
+  )
+  doc <- list(Variables = vars_sheet)
+  cols <- c(
+    variable = "^Variable$",
+    length   = "^Length$",
+    label    = "^Label$",
+    type     = "^Type$",
+    format   = "^Format$"
+  )
+
+  expect_error(
+    spec_type_to_var_spec(doc, cols = cols),
+    regexp = "repeated with different metadata"
+  )
+  expect_error(
+    spec_type_to_var_spec(doc, cols = cols),
+    regexp = "VISIT"
+  )
+})
+
+test_that("spec_type_to_var_spec passes when duplicate variables have identical metadata without dataset col", {
+  vars_sheet <- tibble::tibble(
+    Variable = c("VISIT", "VISIT"),
+    Length   = c("20", "20"),  # identical rows — distinct() collapses to one
+    Label    = c("Visit", "Visit"),
+    Type     = c("Char", "Char"),
+    Format   = c(NA_character_, NA_character_)
+  )
+  doc <- list(Variables = vars_sheet)
+  cols <- c(
+    variable = "^Variable$",
+    length   = "^Length$",
+    label    = "^Label$",
+    type     = "^Type$",
+    format   = "^Format$"
+  )
+
+  result <- spec_type_to_var_spec(doc, cols = cols)
+
+  expect_equal(nrow(result), 1L)
+  expect_equal(result$variable, "VISIT")
+})
+
+test_that("build_from_sheet resolves ambiguous regex via exact anchoring", {
+  # "label" partially matches both "label" and "label_extra"; ^label$ matches only "label"
+  sheet_data <- tibble::tibble(label = 1:3, label_extra = 4:6, other = 7:9)
+  cols <- c(lbl = "label", oth = "other")
+
+  result <- metacore:::build_from_sheet(sheet_data, cols, context = "test_table", sheet_name = "TestSheet")
+
+  expect_equal(result$lbl, 1:3)
+  expect_equal(result$oth, 7:9)
+})
+
+test_that("build_from_sheet errors when exact anchoring still leaves ambiguity", {
+  # "label" matches "label_1" and "label_2"; ^label$ matches neither
+  sheet_data <- tibble::tibble(label_1 = 1:3, label_2 = 4:6)
+  cols <- c(lbl = "label")
+
+  expect_error(
+    metacore:::build_from_sheet(sheet_data, cols, context = "test_table", sheet_name = "MySheet"),
+    regexp = "Unable to rename"
+  )
+  expect_error(
+    metacore:::build_from_sheet(sheet_data, cols, context = "test_table", sheet_name = "MySheet"),
+    regexp = "Please check your regular expression for `test_table`"
+  )
+  # NULL context uses the generic hint
+  expect_error(
+    metacore:::build_from_sheet(sheet_data, cols, context = NULL, sheet_name = "MySheet"),
+    regexp = "Please check your regular expressions"
+  )
 })
 
 test_that("spec_to_metacore provides detailed information for failed regular expressions", {
