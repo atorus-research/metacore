@@ -538,7 +538,7 @@ test_that("codelist reader tests", {
       "SCREENING 1", "UNSCHEDULED 1.1", "UNSCHEDULED 1.2", "UNSCHEDULED 1.3", "SCREENING 2", "BASELINE", "UNSCHEDULED 3.1", "AMBUL ECG PLACEMENT", "WEEK 2", "UNSCHEDULED 4.1", "UNSCHEDULED 4.2", "WEEK 4", "UNSCHEDULED 5.1", "AMBUL ECG REMOVAL",
       "UNSCHEDULED 6.1", "WEEK 6", "UNSCHEDULED 7.1", "WEEK 8", "WEEK 10 (T)", "UNSCHEDULED 8.2", "WEEK 12", "WEEK 14 (T)", "UNSCHEDULED 9.2", "UNSCHEDULED 9.3", "WEEK 16", "WEEK 18 (T)", "UNSCHEDULED 10.2", "WEEK 20", "WEEK 22 (T)", "UNSCHEDULED 11.2", "WEEK 24", "UNSCHEDULED 12.1", "WEEK 26", "UNSCHEDULED 13.1", "AE FOLLOW-UP", "RETRIEVAL", "Rash followup"
     )), "code_decode",
-    # "CL.Y_BLANK",                    "Y_BLANK",                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   tibble(code = "Y", decode = "Yes"),      "code_decode",
+    # "CL.Y_BLANK", "Y_BLANK",                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   tibble(code = "Y", decode = "Yes"),      "code_decode",
     "CL.YN", "YN", tibble(code = c("N", "Y"), decode = c("No", "Yes")), "code_decode"
   )
 
@@ -723,7 +723,7 @@ test_that("spec_type_to_value_spec auto-generates derivation_id from origin when
     Predecessor = c(NA_character_, NA_character_)
   )
   doc <- list(ValueSpec = val_sheet)
-  # No derivation_id in cols — auto-generated at lines 786-795
+  # No derivation_id in cols. Auto-generated at lines 786-795
   cols <- c(
     dataset     = "^Dataset$",
     variable    = "^Variable$",
@@ -734,16 +734,16 @@ test_that("spec_type_to_value_spec auto-generates derivation_id from origin when
 
   result <- spec_type_to_value_spec(doc, cols = cols, where_sep_sheet = FALSE, var_sheet = NULL)
 
-  # origin "Assigned" → dataset.variable
+  # origin "Assigned" to dataset.variable
   expect_equal(result$derivation_id[result$variable == "AGE"], "ADSL.AGE")
-  # other origin → pred.dataset.variable
+  # other origin to pred.dataset.variable
   expect_equal(result$derivation_id[result$variable == "VISIT"], "pred.ADSL.VISIT")
 })
 
 test_that("spec_type_to_var_spec errors when duplicate variables have different metadata without dataset col", {
   vars_sheet <- tibble::tibble(
     Variable = c("VISIT", "VISIT"),
-    Length   = c("20", "40"),  # different lengths → same variable, different metadata
+    Length   = c("20", "40"), # different lengths, same variable, different metadata
     Label    = c("Visit", "Visit"),
     Type     = c("Char", "Char"),
     Format   = c(NA_character_, NA_character_)
@@ -770,7 +770,7 @@ test_that("spec_type_to_var_spec errors when duplicate variables have different 
 test_that("spec_type_to_var_spec passes when duplicate variables have identical metadata without dataset col", {
   vars_sheet <- tibble::tibble(
     Variable = c("VISIT", "VISIT"),
-    Length   = c("20", "20"),  # identical rows — distinct() collapses to one
+    Length   = c("20", "20"), # identical rows. distinct() collapses to one
     Label    = c("Visit", "Visit"),
     Type     = c("Char", "Char"),
     Format   = c(NA_character_, NA_character_)
@@ -834,5 +834,64 @@ test_that("spec_to_metacore provides detailed information for failed regular exp
       "x" = "mandatory matches 2 columns: Keep, Mandatory",
       "i" = "Please check your regular expression for `spec_type_to_ds_vars`"
     ))
+  )
+})
+
+# spec_type_to_codelist column-name validation --------------------------------
+
+test_that("spec_type_to_codelist errors when codelist_cols not provided", {
+  expect_error(
+    spec_type_to_codelist(spec, codelist_cols = NULL),
+    regexp = "Codelist column names must be provided as `codelist_cols`"
+  )
+})
+
+test_that("spec_type_to_codelist errors on bad codelist_cols names", {
+  expect_error(
+    spec_type_to_codelist(spec, codelist_cols = c("bad" = "ID")),
+    regexp = "Incorrect column names supplied for `codelist_cols`"
+  )
+})
+
+test_that("spec_type_to_codelist errors on unnamed codelist_cols", {
+  expect_error(
+    spec_type_to_codelist(spec, codelist_cols = c("ID", "Name")),
+    regexp = "Incorrect column names supplied for `codelist_cols`"
+  )
+})
+
+test_that("spec_type_to_codelist errors on bad permitted_val_cols names", {
+  expect_error(
+    spec_type_to_codelist(
+      spec,
+      permitted_val_cols = c("bad" = "^Code|^Term")
+    ),
+    regexp = "Incorrect column names supplied for `permitted_val_cols`"
+  )
+})
+
+test_that("spec_type_to_codelist errors on bad dict_cols names", {
+  expect_error(
+    spec_type_to_codelist(
+      spec,
+      dict_cols = c("bad" = "ID")
+    ),
+    regexp = "Incorrect column names supplied for `dict_cols`"
+  )
+})
+
+# spec_type_to_derivations var_cols validation --------------------------------
+
+test_that("spec_type_to_derivations errors on bad var_cols names", {
+  expect_error(
+    spec_type_to_derivations(spec, var_cols = c("bad" = "[D|d]ataset")),
+    regexp = "Incorrect column names supplied for `var_cols`"
+  )
+})
+
+test_that("spec_type_to_derivations errors on unnamed var_cols", {
+  expect_error(
+    spec_type_to_derivations(spec, var_cols = c("[D|d]ataset", "[V|v]ariable")),
+    regexp = "Incorrect column names supplied for `var_cols`"
   )
 })

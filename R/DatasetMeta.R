@@ -1,6 +1,6 @@
 #' Shared print method for DatasetMeta variants
 #' @noRd
-.dataset_meta_print <- function(...) {
+DatasetMeta_print <- function(...) {
   tables <- ls(envir = self)
   cli_par()
   cli_rule(left = "Dataset specification object for {private$.name} ({private$.label})")
@@ -22,7 +22,7 @@
 
 #' Shared private fields and greet for DatasetMeta variants
 #' @noRd
-.dataset_meta_private <- list(
+DatasetMeta_private <- list(
   .name = NA,
   .label = NA,
   .num_vars = NA,
@@ -38,7 +38,7 @@
 
 #' Shared post-initialize bookkeeping for DatasetMeta variants
 #' @noRd
-.dataset_meta_post_init <- function(metacore, quiet, verbose, private) {
+DatasetMeta_post_init <- function(metacore, quiet, verbose, private) {
   private$.name <- metacore$ds_spec$dataset[[1]]
   private$.label <- metacore$ds_spec$label[[1]]
   private$.num_vars <- nrow(metacore$ds_vars)
@@ -58,7 +58,7 @@
 #' @noRd
 DatasetMeta <- R6::R6Class("DatasetMeta",
   inherit = MetaCore,
-  private = .dataset_meta_private,
+  private = DatasetMeta_private,
   public = list(
     initialize = function(metacore, quiet = deprecated(), verbose = "message") {
       super$initialize(
@@ -70,9 +70,9 @@ DatasetMeta <- R6::R6Class("DatasetMeta",
         codelist    = metacore$codelist,
         supp        = metacore$supp
       )
-      .dataset_meta_post_init(metacore, quiet, verbose, private)
+      DatasetMeta_post_init(metacore, quiet, verbose, private)
     },
-    print = .dataset_meta_print
+    print = DatasetMeta_print
   )
 )
 
@@ -90,7 +90,7 @@ DatasetMeta <- R6::R6Class("DatasetMeta",
 #' @noRd
 DatasetMetaDefine <- R6::R6Class("DatasetMeta",
   inherit = MetaCoreDefine,
-  private = .dataset_meta_private,
+  private = DatasetMeta_private,
   public = list(
     initialize = function(metacore, quiet = deprecated(), verbose = "message") {
       super$initialize(
@@ -107,8 +107,8 @@ DatasetMetaDefine <- R6::R6Class("DatasetMeta",
         quiet       = quiet,
         verbose     = verbose
       )
-      .dataset_meta_post_init(metacore, quiet, verbose, private)
+      DatasetMeta_post_init(metacore, quiet, verbose, private)
     },
-    print = .dataset_meta_print
+    print = DatasetMeta_print
   )
 )

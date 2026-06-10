@@ -38,15 +38,17 @@ Imports:
     tidyr,
     tidyselect,
     xml2
-Suggests: 
+Suggests:
     covr,
     knitr,
     rmarkdown,
-    testthat
+    testthat,
+    withr
 VignetteBuilder: 
     knitr
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE, r6 = FALSE)
+Config/testthat/edition: 3
 Config/roxygen2/version: 8.0.0
 Collate: 
     'Metacore.R'
