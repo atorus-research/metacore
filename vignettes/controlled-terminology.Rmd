@@ -1,0 +1,279 @@
+---
+title: "Working with Controlled Terminology"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{controlled-terminology}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup, echo=FALSE, message=FALSE}
+library(metacore)
+library(dplyr, warn.conflicts = FALSE)
+library(tibble)
+```
+
+Controlled terminology is a cornerstone of clinical data
+standardization. In the context of CDISC standards (SDTM and ADaM),
+controlled terminology refers to predefined sets of valid values that
+variables can take. These standardized values ensure consistency,
+traceability, and compliance across clinical trial datasets.
+
+#### Types of Controlled Terminology
+
+-   **Codelist**: A mapping between codes and their human-readable
+    decodes (e.g., "Y" = "Yes", "N" = "No")
+
+-   **Permitted Values**: A simple list of allowed values with no decode
+    mapping
+
+-   **External Library References**: References to external controlled
+    vocabulary
+
+## Getting started with `get_control_term()`
+
+The `get_control_term()` function is the primary tool for retrieving
+controlled terminology metadata from a metacore object. Let's start with
+the basics.
+
+#### Loading your metadata
+
+First, load your metadata specification into metacore. This example uses
+the included mock specification:
+
+```{r eval=TRUE}
+# Load specification from Excel
+metacore <- spec_to_metacore(
+  metacore_example("p21_mock.xlsx"),
+  verbose = "silent"
+)
+
+# Examine the structure
+metacore
+```
+
+#### Simple case: Retrieving a Single Codelist
+
+When a variable has a unique codelist across all datasets, retrieval is
+straightforward:
+
+```{r eval=TRUE}
+# Get the codelist for AESEV (Adverse Event Severity)
+# This variable has a single definition across datasets
+severity_codes <- get_control_term(metacore, "AESEV")
+severity_codes
+```
+
+Notice that `get_control_term()` returns a tibble
+with `code` and `decode` columns. You can use this directly in your data
+validation or mapping routines:
+
+```{r eval=TRUE}
+# Example: Create a mapping for recoding
+severity_mapping <- severity_codes %>%
+  tibble::deframe() # Convert to named vector for dplyr::recode()
+
+print(severity_mapping)
+```
+
+#### Specifying a Dataset
+
+When a variable appears across multiple datasets with the same codelist,
+or when you want to be explicit about which dataset's definition you're
+using, either subset your metacore object for a single dataset or
+specify the `dataset` parameter:
+
+```{r eval=TRUE}
+# Option 1: Subset the specification object (recommended workflow)
+suppae_spec <- select_dataset(metacore, "SUPPAE", verbose = "silent")
+qval_codes1 <- get_control_term(suppae_spec, "QVAL")
+
+# Option 2: Specify the dataset within `get_control_term`
+qval_codes2 <- get_control_term(metacore, "QVAL", dataset = "SUPPAE")
+
+# These operations return the same result
+identical(qval_codes1, qval_codes2) # TRUE
+```
+
+> **Tip:** Subsetting your metacore object using `select_dataset()` is the
+> recommended way to introduce metadata driven programming with metacore
+> into your workflow. When developing clinical datasets, programmers tend
+> to work on one dataset at a time. Subsetting your metadata ensures that
+> you are always working with the right metadata for the job.
+
+## Value-Level Metadata (VLM)
+
+Value-level metadata (VLM) is an advanced feature that allows a single
+variable to have different controlled terminology depending on the value
+of another variable. This is common in CDISC datasets where different
+parameter types may require different codelists.
+
+#### **Understanding VLM Structure**
+
+In standard (non-VLM) datasets, a variable like `AVALCAT1` (Analysis
+Value Category) has a single codelist. However, with VLM, the same
+variable might have multiple codelists depending on the parameter code
+or other conditions.
+
+For example:
+
+-   `AVALCAT1` for `PARAMCD = "ADURD"` (Duration) might have codes: "1",
+    "2", "3"
+
+-   `AVALCAT1` for `PARAMCD = "ADURF"` (Frequency) might have codes:
+    "A", "B", "C"
+
+#### **Retrieving VLM Codelists**
+
+When a variable has value-level metadata, you must specify which
+condition's codelist you want using the `where` parameter:
+
+```{r eval=TRUE}
+# This example uses a VLM test specification
+vlm_meta <- spec_to_metacore(
+  metacore_example("vlm_test_spec.xlsx"),
+  where_sep_sheet = FALSE,
+  verbose = "silent"
+)
+
+adex_spec <- select_dataset(vlm_meta, "ADEX", verbose = "silent")
+
+# Get the codelist for AVALCA1N when PARAMCD equals a specific condition
+avalca1n_duration <- get_control_term(
+  adex_spec,
+  "AVALCA1N",
+  where = "PARAMCD EQ ADURD"
+)
+avalca1n_duration
+```
+
+The `where` parameter accepts conditions that match the value-level
+metadata definition from your specification. This information is mapped
+to the `value_spec` table of your metacore object:
+
+```{r eval=TRUE}
+# See available VLM conditions
+adex_spec$value_spec |>
+  filter(variable == "AVALCA1N") |>
+  pull(where)
+```
+
+#### **Handling Multiple VLM Conditions**
+
+If you try to retrieve a VLM variable without specifying
+a `where` condition, `get_control_term()` will alert you to the
+available options:
+
+```{r eval=TRUE, error=TRUE}
+# No `where` provided
+avalca1n_duration <- get_control_term(adex_spec, "AVALCA1N")
+```
+
+To see all possible codelists for a VLM variable, use `where = "all"`:
+
+```{r eval=TRUE}
+# Retrieve all codelists for this variable
+all_avalca1n_codelists <- get_control_term(adex_spec, "AVALCA1N", where = "all")
+
+# Result is a named list with unique names for each condition
+names(all_avalca1n_codelists)
+```
+
+Each element in the returned list corresponds to one VLM condition and
+contains its codelist:
+
+```{r eval=TRUE}
+# Access individual codelists by name
+print(all_avalca1n_codelists$`ADEX: PARAMCD EQ ADURD`)
+```
+
+## Error Handling and Troubleshooting
+
+#### **Error:** Variable not found in `value_spec`
+
+```{r eval=TRUE, error=TRUE}
+get_control_term(metacore, "NONEXISTENT_VAR")
+```
+
+**Solution:** Check the variable name against your specification.
+Variable names are case-sensitive.
+
+#### **Error:** Variable does not have a unique codelist. Please specify a dataset
+
+```{r eval=TRUE, error=TRUE}
+get_control_term(metacore, "QVAL")
+```
+
+**Solution:** Specify which dataset's version of the codelist you want
+
+```{r eval=TRUE}
+get_control_term(metacore, "QVAL", dataset = "SUPPAE")
+```
+
+#### **Error:** Variable has no controlled terminology
+
+```{r eval=TRUE, error=TRUE}
+get_control_term(metacore, "STUDYID")
+```
+
+**Solution:** Some variables may not have controlled terms (e.g.,
+free-text fields). Confirm with your specification that this is expected
+for your variable.
+
+#### **Error:** No VLM condition found matching the supplied where clause
+
+```{r eval=TRUE, error=TRUE}
+get_control_term(adex_spec, "AVALCA1N", where = "INVALID WHERE")
+```
+
+**Solution:** Check the `metacore$value_spec` for your desired variable
+to see a list of possible `where` conditions
+
+```{r eval=TRUE}
+adex_spec$value_spec |>
+  filter(variable == "AVALCA1N") |>
+  pull(where)
+```
+
+## Summary
+
+The `get_control_term()` function provides a powerful, flexible way to
+access standardized controlled terminology in your R workflows. By
+leveraging metacore's metadata structure alongside companion packages
+like metatools and xportr, you can:
+
+-   Ensure data quality and consistency through validation against
+    standardized codelists
+
+-   Maintain regulatory compliance with traceable, reproducible
+    workflows
+
+-   Create reproducible, code that bridges raw data to regulatory
+    submission
+
+-   Handle both simple and complex (VLM) scenarios efficiently
+
+-   Leverage the broader pharmaverse ecosystem for comprehensive
+    metadata management
+
+Whether you're validating data, creating derived variables, building
+reference documentation, or preparing datasets for regulatory
+submission, metacore puts standardized metadata at your fingertips.
+
+For more information about metacore's structure and capabilities, see
+the other vignettes and the [project
+README](https://github.com/atorus-research/metacore). To learn more
+about the broader ecosystem:
+
+-   [metatools documentation](https://pharmaverse.github.io/metatools/)
+
+-   [xportr documentation](https://atorus-research.github.io/xportr/)
+
+-   [pharmaverse homepage](https://pharmaverse.org/)

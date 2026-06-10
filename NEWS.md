@@ -1,3 +1,5 @@
+# metacore (development version)
+
 # Metacore 0.3.0
 
 One of the primary goals of these updates is to make the package less "noisy", reducing the number of messages and warnings produced by the package and providing users more options for controlling them.

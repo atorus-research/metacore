@@ -52,7 +52,7 @@ test_that("metacore example returns file options", {
     sort(metacore_example()),
     sort(c(
       "ADaM_define_CDISC_pilot3.xml", "mock_spec.xlsx", "p21_mock.xlsx", "pilot_ADaM.rda",
-      "pilot_SDTM.rda", "SDTM_define.xml", "SDTM_spec_CDISC_pilot.xlsx"
+      "pilot_SDTM.rda", "SDTM_define.xml", "SDTM_spec_CDISC_pilot.xlsx", "vlm_test_spec.xlsx"
     ))
   )
 })
