@@ -227,11 +227,10 @@ read_all_sheets <- function(path) {
 #'
 #' @family spec builders
 spec_type_to_ds_spec <- function(
-  doc,
-  cols = base_col_regex()$.ds_spec,
-  sheet = NULL,
-  define_fields = FALSE
-) {
+    doc,
+    cols = base_col_regex()$.ds_spec,
+    sheet = NULL,
+    define_fields = FALSE) {
   cols <- (if (define_fields) define_col_regex()$.ds_spec else cols)
 
   # Validate against the full schema so typos are caught regardless of mode
@@ -369,16 +368,15 @@ spec_type_to_ds_spec <- function(
 #'
 #' @family spec builders
 spec_type_to_ds_vars <- function(
-  doc,
-  cols = base_col_regex()$.ds_vars,
-  key_seq_sep_sheet = TRUE,
-  key_seq_cols = c(
-    "dataset" = "Dataset",
-    "key_seq" = "Key Variables"
-  ),
-  sheet = "[V|v]ar|Datasets",
-  define_fields = FALSE
-) {
+    doc,
+    cols = base_col_regex()$.ds_vars,
+    key_seq_sep_sheet = TRUE,
+    key_seq_cols = c(
+      "dataset" = "Dataset",
+      "key_seq" = "Key Variables"
+    ),
+    sheet = "[V|v]ar|Datasets",
+    define_fields = FALSE) {
   cols <- (if (define_fields) define_col_regex()$.ds_vars else cols)
 
   # Validate against the full schema so typos are caught regardless of mode
@@ -528,10 +526,9 @@ spec_type_to_ds_vars <- function(
 #'
 #' @family spec builders
 spec_type_to_var_spec <- function(
-  doc,
-  cols = base_col_regex()$.var_spec,
-  sheet = "[V|v]ar"
-) {
+    doc,
+    cols = base_col_regex()$.var_spec,
+    sheet = "[V|v]ar") {
   # "dataset" is a processing-only column (not in schema) used to detect
   # per-domain duplicate variables before it is dropped from the output.
   var_spec_names <- c(names(define_column_schema()$.var_spec), "dataset")
@@ -715,17 +712,16 @@ spec_type_to_var_spec <- function(
 #'
 #' @family spec builders
 spec_type_to_value_spec <- function(
-  doc,
-  cols = base_col_regex()$.value_spec,
-  sheet = NULL,
-  where_sep_sheet = TRUE,
-  where_cols = c(
-    "id" = "ID",
-    "where" = c("Variable", "Comparator", "Value")
-  ),
-  var_sheet = "[V|v]ar",
-  define_fields = FALSE
-) {
+    doc,
+    cols = base_col_regex()$.value_spec,
+    sheet = NULL,
+    where_sep_sheet = TRUE,
+    where_cols = c(
+      "id" = "ID",
+      "where" = c("Variable", "Comparator", "Value")
+    ),
+    var_sheet = "[V|v]ar",
+    define_fields = FALSE) {
   cols <- (if (define_fields) define_col_regex()$.value_spec else cols)
 
   # "predecessor" is a processing-only column (not in schema) transformed into
@@ -860,23 +856,22 @@ spec_type_to_value_spec <- function(
 #'
 #' @family spec builders
 spec_type_to_codelist <- function(
-  doc,
-  codelist_cols = c(
-    "code_id" = "ID",
-    "name" = "[N|n]ame",
-    "code" = "^[C|c]ode|^[T|t]erm",
-    "decode" = "[D|d]ecode"
-  ),
-  permitted_val_cols = NULL,
-  dict_cols = c(
-    "code_id" = "ID",
-    "name" = "[N|n]ame",
-    "dictionary" = "[D|d]ictionary",
-    "version" = "[V|v]ersion"
-  ),
-  sheets = NULL,
-  simplify = FALSE
-) {
+    doc,
+    codelist_cols = c(
+      "code_id" = "ID",
+      "name" = "[N|n]ame",
+      "code" = "^[C|c]ode|^[T|t]erm",
+      "decode" = "[D|d]ecode"
+    ),
+    permitted_val_cols = NULL,
+    dict_cols = c(
+      "code_id" = "ID",
+      "name" = "[N|n]ame",
+      "dictionary" = "[D|d]ictionary",
+      "version" = "[V|v]ersion"
+    ),
+    sheets = NULL,
+    simplify = FALSE) {
   if (is.null(codelist_cols)) {
     cli_abort("Codelist column names must be provided as {.arg codelist_cols}")
   }
@@ -1064,18 +1059,17 @@ spec_type_to_codelist <- function(
 #' @family spec builders
 #' @importFrom purrr quietly
 spec_type_to_derivations <- function(
-  doc,
-  cols = base_col_regex()$.derivations,
-  sheet = "Method|Derivations?",
-  var_cols = c(
-    "dataset" = "[D|d]ataset|[D|d]omain",
-    "variable" = "[N|n]ame|[V|v]ariables?",
-    "origin" = "[O|o]rigin",
-    "predecessor" = "[P|p]redecessor",
-    "comment" = "[C|c]omment"
-  ),
-  define_fields = FALSE
-) {
+    doc,
+    cols = base_col_regex()$.derivations,
+    sheet = "Method|Derivations?",
+    var_cols = c(
+      "dataset" = "[D|d]ataset|[D|d]omain",
+      "variable" = "[N|n]ame|[V|v]ariables?",
+      "origin" = "[O|o]rigin",
+      "predecessor" = "[P|p]redecessor",
+      "comment" = "[C|c]omment"
+    ),
+    define_fields = FALSE) {
   cols <- (if (define_fields) define_col_regex()$.derivations else cols)
 
   # Validate against the full schema so typos are caught regardless of mode
@@ -1185,10 +1179,9 @@ spec_type_to_derivations <- function(
 #'
 #' @family spec builders
 spec_type_to_documents <- function(
-  doc,
-  cols = define_col_regex()$.documents,
-  sheet = "[D|d]ocuments?"
-) {
+    doc,
+    cols = define_col_regex()$.documents,
+    sheet = "[D|d]ocuments?") {
   documents_names <- names(define_column_schema()$.documents)
 
   name_check <- all(names(cols) %in% documents_names)
@@ -1230,10 +1223,9 @@ spec_type_to_documents <- function(
 #'
 #' @family spec builders
 spec_type_to_comments <- function(
-  doc,
-  cols = define_col_regex()$.comments,
-  sheet = "[C|c]omments?"
-) {
+    doc,
+    cols = define_col_regex()$.comments,
+    sheet = "[C|c]omments?") {
   comments_names <- names(define_column_schema()$.comments)
 
   name_check <- all(names(cols) %in% comments_names)
@@ -1291,28 +1283,27 @@ spec_type_to_comments <- function(
 #'
 #' @family spec builders
 spec_type_to_supp <- function(
-  doc,
-  cols = c(
-    "dataset" = "[D|d]ataset|[D|d]omain",
-    "variable" = "[V|v]ariable",
-    "where" = "[W|w]here [C|clause]",
-    "type" = "[T|t]ype",
-    "length" = "[L|l]ength",
-    "origin" = "[O|o]rigin"
-  ),
-  sheet = NULL,
-  where_sep_sheet = TRUE,
-  where_cols = c(
-    "id" = "ID",
-    "variable" = "[V|v]ariable",
-    "comparator" = "[C|c]omparator",
-    "value" = "[V|v]alue"
-  ),
-  var_spec = NULL,
-  value_spec = NULL,
-  codelist = NULL,
-  comments = NULL
-) {
+    doc,
+    cols = c(
+      "dataset" = "[D|d]ataset|[D|d]omain",
+      "variable" = "[V|v]ariable",
+      "where" = "[W|w]here [C|clause]",
+      "type" = "[T|t]ype",
+      "length" = "[L|l]ength",
+      "origin" = "[O|o]rigin"
+    ),
+    sheet = NULL,
+    where_sep_sheet = TRUE,
+    where_cols = c(
+      "id" = "ID",
+      "variable" = "[V|v]ariable",
+      "comparator" = "[C|c]omparator",
+      "value" = "[V|v]alue"
+    ),
+    var_spec = NULL,
+    value_spec = NULL,
+    codelist = NULL,
+    comments = NULL) {
   names <- c("dataset", "variable", "where", "type", "length", "origin")
 
   name_check <- all(names(cols) %in% names)
