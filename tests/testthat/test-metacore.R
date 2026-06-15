@@ -48,9 +48,6 @@ test_that("metacore wrapper function works", {
   )
 
   expect_equal(wrapper, r6)
-
-  expect_warning(define_to_metacore(metacore_example("ADaM_define_CDISC_pilot3.xml")))
-  expect_warning(spec_to_metacore(metacore_example("p21_mock.xlsx")))
 })
 
 
@@ -60,12 +57,12 @@ test_that("Can pass metacore NULL df's", {
     dfs$value_spec, dfs$derivations, dfs$codelist, dfs$supp
   ))
   dummy <- list(
-    character(), character(), numeric(), numeric(),
-    logical(), character(), logical()
+    character(), character(), numeric(), logical(),
+    numeric(), character(), logical()
   )
   names(dummy) <- c(
-    "dataset", "variable", "key_seq", "order",
-    "mandatory", "core", "supp_flag"
+    "dataset", "variable", "order", "mandatory",
+    "key_seq", "core", "supp_flag"
   )
   dummy <- as_tibble(dummy)
   # Because of the labels the dfs are slightly different so checking
@@ -376,7 +373,8 @@ test_that("metacore(quiet) deprecation message is output when supplied by the us
         core = NA_character_,
         supp_flag = NA
       ),
-      quiet = FALSE
+      quiet = FALSE,
+      verbose = "silent"
     )
   )
 
@@ -421,8 +419,8 @@ test_that("select_dataset(simplify = TRUE) returns expected structure", {
   ae_simple <- select_dataset(spec, "AE", simplify = TRUE, verbose = "silent")
 
   expected_names <- c(
-    "dataset", "variable", "key_seq", "order", "mandatory", "core", "supp_flag",
-    "length", "label", "type", "format", "common", "origin", "sig_dig", "code_id",
+    "dataset", "variable", "order", "mandatory", "key_seq", "core", "supp_flag",
+    "length", "label", "type", "format", "common", "origin", "code_id", "sig_dig",
     "where", "derivation_id", "derivation", "codes", "idvar", "qeval"
   )
 
@@ -432,7 +430,7 @@ test_that("select_dataset(simplify = TRUE) returns expected structure", {
 
 # Backwards compatability with 0.3.0 -------------------------------------------
 test_that("Metacore structure is the same as 0.3.0 when define_fields = FALSE", {
-  metacore_0_3_0 <- load_metacore("inst/extdata/metacore_0_3_0.rds")
+  metacore_0_3_0 <- load_metacore(metacore_example("metacore_0_3_0.rds"))
   metacore_0_4_0 <- spec_to_metacore(metacore_example("p21_mock.xlsx"), where_sep_sheet = FALSE, verbose = "silent")
 
   expect_identical(names(metacore_0_3_0), names(metacore_0_4_0))

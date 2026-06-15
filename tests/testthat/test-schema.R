@@ -24,9 +24,9 @@ test_that("base_column_schema has correct columns for each table", {
   schema <- base_column_schema()
 
   expect_named(schema$.ds_spec, c("dataset", "structure", "label"))
-  expect_named(schema$.ds_vars, c("dataset", "variable", "key_seq", "order", "mandatory", "core", "supp_flag"))
-  expect_named(schema$.var_spec, c("variable", "length", "label", "type", "common", "format"))
-  expect_named(schema$.value_spec, c("dataset", "variable", "type", "origin", "sig_dig", "code_id", "where", "derivation_id"))
+  expect_named(schema$.ds_vars, c("dataset", "variable", "order", "mandatory", "key_seq", "core", "supp_flag"))
+  expect_named(schema$.var_spec, c("variable", "length", "label", "type", "format", "common"))
+  expect_named(schema$.value_spec, c("dataset", "variable", "origin", "type", "code_id", "sig_dig", "where", "derivation_id"))
   expect_named(schema$.derivations, c("derivation_id", "derivation"))
   expect_named(schema$.codelist, c("code_id", "name", "type", "codes"))
   expect_named(schema$.supp, c("dataset", "variable", "idvar", "qeval"))
