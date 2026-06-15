@@ -429,3 +429,25 @@ test_that("select_dataset(simplify = TRUE) returns expected structure", {
   expect_equal(names(ae_simple), expected_names)
   expect_equal(nrow(ae_simple), nrow(ae$ds_vars))
 })
+
+# Backwards compatability with 0.3.0 -------------------------------------------
+test_that("Metacore structure is the same as 0.3.0 when define_fields = FALSE", {
+  metacore_0_3_0 <- load_metacore("inst/extdata/metacore_0_3_0.rds")
+  metacore_0_4_0 <- spec_to_metacore(metacore_example("p21_mock.xlsx"), where_sep_sheet = FALSE, verbose = "silent")
+
+  expect_identical(names(metacore_0_3_0), names(metacore_0_4_0))
+  expect_identical(metacore_0_3_0$ds_spec, metacore_0_4_0$ds_spec)
+  expect_identical(metacore_0_3_0$ds_vars, metacore_0_4_0$ds_vars)
+  expect_identical(metacore_0_3_0$var_spec, metacore_0_4_0$var_spec)
+  # `where` changed from TRUE default to NA in 0.4.0 so excluded from check
+  expect_identical(
+    metacore_0_3_0$value_spec[, -which(names(metacore_0_3_0$value_spec) == "where")],
+    metacore_0_4_0$value_spec[, -which(names(metacore_0_4_0$value_spec) == "where")]
+  )
+  expect_identical(metacore_0_3_0$codelist, metacore_0_4_0$codelist)
+  expect_identical(metacore_0_3_0$derivations, metacore_0_4_0$derivations)
+  expect_identical(metacore_0_3_0$supp, metacore_0_4_0$supp)
+})
+
+
+

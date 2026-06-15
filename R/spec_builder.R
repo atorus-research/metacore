@@ -590,8 +590,9 @@ spec_type_to_var_spec <- function(
         select(variable, common)
 
       out <- out |>
-        left_join(common_vars, by = "variable")
-      # replace_na(list(common = FALSE))
+        select(-common) |>
+        left_join(common_vars, by = "variable") |>
+        replace_na(list(common = FALSE))
     }
 
     # Remove duplicates and qualify variables with dataset if different metadata

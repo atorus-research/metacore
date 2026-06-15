@@ -12,18 +12,17 @@ base_column_schema <- function() {
       dataset = character(), structure = character(), label = character()
     ),
     .ds_vars = tibble(
-      dataset = character(), variable = character(), key_seq = integer(),
-      order = integer(), mandatory = logical(), core = character(),
+      dataset = character(), variable = character(), order = integer(),
+      mandatory = logical(), key_seq = integer(), core = character(),
       supp_flag = logical()
     ),
     .var_spec = tibble(
       variable = character(), length = integer(), label = character(),
-      type = character(), common = logical(), format = character()
+      type = character(), format = character(), common = logical()
     ),
     .value_spec = tibble(
-      dataset = character(), variable = character(), type = character(),
-      origin = character(), sig_dig = integer(), code_id = character(),
-      where = character(), derivation_id = character()
+      dataset = character(), variable = character(), origin = character(), type = character(),
+      code_id = character(), sig_dig = integer(), where = character(), derivation_id = character()
     ),
     .derivations = tibble(
       derivation_id = character(), derivation = character()
