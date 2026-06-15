@@ -10,7 +10,7 @@ empty_df <- function(nms, fill) {
 # and i think its checking the wrong thing
 
 test_that("specific words and primitive columns fail when character", {
-  dfs <- purrr::map(col_vars(), ~ empty_df(.x, fill = "A")) %>%
+  dfs <- purrr::map(col_vars(base_column_schema()), ~ empty_df(.x, fill = "A")) %>%
     setNames(c(
       "ds_spec",
       "ds_vars",
@@ -21,12 +21,12 @@ test_that("specific words and primitive columns fail when character", {
       "supp"
     ))
 
-  expect_warning(do.call(check_columns, dfs))
+  expect_warning(do.call(check_columns, c(dfs, list(schema = base_column_schema()))))
 })
 
 
 test_that("NA columns fail", {
-  dfs <- purrr::map(col_vars(), ~ empty_df(.x, fill = NA)) %>%
+  dfs <- purrr::map(col_vars(base_column_schema()), ~ empty_df(.x, fill = NA)) %>%
     setNames(c(
       "ds_spec",
       "ds_vars",
@@ -37,12 +37,12 @@ test_that("NA columns fail", {
       "supp"
     ))
 
-  expect_error(do.call(check_columns, dfs))
+  expect_error(do.call(check_columns, c(dfs, list(schema = base_column_schema()))))
 })
 
 
 test_that("NA columns fail", {
-  dfs <- purrr::map(col_vars(), ~ empty_df(.x, fill = "A")) %>%
+  dfs <- purrr::map(col_vars(base_column_schema()), ~ empty_df(.x, fill = "A")) %>%
     setNames(c(
       "ds_spec",
       "ds_vars",
@@ -55,7 +55,7 @@ test_that("NA columns fail", {
 
   dfs$ds_spec$label <- NA
 
-  expect_warning(do.call(check_columns, dfs))
+  expect_warning(do.call(check_columns, c(dfs, list(schema = base_column_schema()))))
 })
 
 test_that("all_message dataframe contains 8 datasets", {

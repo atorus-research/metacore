@@ -224,21 +224,21 @@ test_that("define_only_cols returns empty character for unknown table", {
 
 # col_vars() -------------------------------------------------------------------
 
-test_that("col_vars with default schema returns 7 tables (excludes study_level etc.)", {
+test_that("col_vars with default schema returns 10 tables (excludes study_level etc.)", {
   cv <- col_vars()
 
   expect_type(cv, "list")
-  expect_length(cv, 7L)
-  expect_false("study_level" %in% names(cv))
-  expect_false("documents" %in% names(cv))
-  expect_false("comments" %in% names(cv))
+  expect_length(cv, 10L)
+  expect_true(".study_level" %in% names(cv))
+  expect_true(".documents" %in% names(cv))
+  expect_true(".comments" %in% names(cv))
 })
 
 test_that("col_vars includes all 7 expected table names", {
   cv <- col_vars()
   expect_true(all(c(
-    ".ds_spec", ".ds_vars", ".var_spec", ".value_spec",
-    ".derivations", ".codelist", ".supp"
+    ".ds_spec", ".ds_vars", ".var_spec", ".value_spec", ".derivations",
+    ".codelist", ".supp", ".study_level", ".documents", ".comments"
   ) %in% names(cv)))
 })
 
@@ -246,8 +246,8 @@ test_that("col_vars with base schema returns fewer columns per table", {
   cv_define <- col_vars(define_column_schema())
   cv_base <- col_vars(base_column_schema())
 
-  # Base and define both have 7 tables
-  expect_equal(length(cv_define), length(cv_base))
+  # Define has fewer tables than Base
+  expect_gt(length(cv_define), length(cv_base))
 
   # Define tables have >= as many columns as base tables
   for (tbl in names(cv_base)) {

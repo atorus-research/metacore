@@ -214,11 +214,6 @@ define_only_cols <- function(table_name) {
 #' @noRd
 col_vars <- function(schema = NULL) {
   if (is.null(schema)) schema <- define_column_schema()
-  # study_level, documents, and comments are study-wide tables that are not
-  # name-validated against the per-dataset tables, so they are excluded here
-  schema$.study_level <- NULL
-  schema$.documents <- NULL
-  schema$.comments <- NULL
   lapply(schema, names)
 }
 

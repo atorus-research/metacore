@@ -251,6 +251,21 @@ spec_type_to_ds_spec <- function(
     doc <- doc[sheet_ls]
   }
 
+  # purpose is optional: if missing from all sheets, warn and let fill_cols add NA
+  if (define_fields && "purpose" %in% names(cols)) {
+    purpose_regex <- cols[["purpose"]]
+    purpose_found <- doc |>
+      purrr::map_lgl(~ any(str_detect(names(.), purpose_regex))) |>
+      any()
+    if (!purpose_found) {
+      cli_warn(c(
+        "The {.val purpose} column was not found in the spec sheet.",
+        "i" = "The {.field purpose} column will be filled with {.val NA}."
+      ))
+      cols <- cols[names(cols) != "purpose"]
+    }
+  }
+
   out <- create_tbl(doc, cols, context = "spec_type_to_ds_spec", schema = active_schema$.ds_spec) |>
     distinct()
 

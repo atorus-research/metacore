@@ -224,10 +224,6 @@ test_that("comment_check is skipped when comments table is empty", {
   expect_false(any(grepl("referenced but not found|never used", warnings_raised)))
 })
 
-
-# Integration: select_dataset --------------------------------------------------
-
-
 # select_dataset_define --------------------------------------------------------
 
 test_that("select_dataset on MetacoreDefine returns DatasetMeta with define class vector", {
@@ -312,4 +308,59 @@ test_that("select_dataset on MetacoreDefine with simplify = TRUE returns a flat 
   expect_s3_class(ae_simple, "tbl_df")
   expect_true("variable" %in% names(ae_simple))
   expect_true("dataset" %in% names(ae_simple))
+})
+
+# set_study_level -------------------------------------------------------------
+
+test_that("set_study_level populates all fields and returns self invisibly", {
+  cl <- mc_define$clone()
+  ret <- cl$set_study_level(
+    study_name        = "CDISC Pilot",
+    study_description = "A pilot study",
+    protocol_name     = "CDISCPILOT01",
+    standard_name     = "CDISC SDTM",
+    standard_version  = "3.2",
+    define_version    = "2.1",
+    language          = "en"
+  )
+
+  expect_identical(ret, cl)
+  expect_equal(nrow(cl$study_level), 1L)
+  expect_equal(cl$study_level$study_name,        "CDISC Pilot",   ignore_attr = TRUE)
+  expect_equal(cl$study_level$study_description, "A pilot study", ignore_attr = TRUE)
+  expect_equal(cl$study_level$protocol_name,     "CDISCPILOT01",  ignore_attr = TRUE)
+  expect_equal(cl$study_level$standard_name,     "CDISC SDTM",    ignore_attr = TRUE)
+  expect_equal(cl$study_level$standard_version,  "3.2",           ignore_attr = TRUE)
+  expect_equal(cl$study_level$define_version,    "2.1",           ignore_attr = TRUE)
+  expect_equal(cl$study_level$language,          "en",            ignore_attr = TRUE)
+})
+
+test_that("set_study_level fills omitted arguments with NA", {
+  cl <- mc_define$clone()
+  cl$set_study_level(study_name = "Partial", define_version = "2.1")
+
+  expect_equal(cl$study_level$study_name,    "Partial", ignore_attr = TRUE)
+  expect_equal(cl$study_level$define_version, "2.1",    ignore_attr = TRUE)
+  expect_true(all(is.na(cl$study_level[c(
+    "study_description", "protocol_name", "standard_name",
+    "standard_version", "language"
+  )])))
+})
+
+test_that("set_study_level preserves column labels", {
+  cl <- mc_define$clone()
+  cl$set_study_level(study_name = "X")
+
+  expect_equal(attr(cl$study_level$study_name,    "label"), "Study Name")
+  expect_equal(attr(cl$study_level$define_version, "label"), "Define Version")
+})
+
+test_that("set_study_level errors on non-scalar argument", {
+  cl <- mc_define$clone()
+  expect_error(cl$set_study_level(study_name = c("a", "b")), "single character string")
+})
+
+test_that("set_study_level errors on non-character argument", {
+  cl <- mc_define$clone()
+  expect_error(cl$set_study_level(study_name = 123L), "single character string")
 })

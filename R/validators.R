@@ -221,13 +221,13 @@ supp_check <- function(ds_vars, supp) {
 
 #' Check Variable names
 #'
-#' @param envrionment the private environment of the object
+#' @param environment the private environment of the object
 #' @param define_fields logical; when `TRUE` validate against the full
 #'   extended schema, when `FALSE` validate against the base schema only.
 #'
 #' @return warning messages to the console if there is an issue
 #' @noRd
-var_name_check <- function(envrionment, define_fields = TRUE) {
+var_name_check <- function(environment, define_fields = TRUE) {
   # Select the correct schema based on whether Define.xml fields are enabled
   schema <- if (define_fields) define_column_schema() else base_column_schema()
   col_names <- col_vars(schema)
@@ -235,7 +235,7 @@ var_name_check <- function(envrionment, define_fields = TRUE) {
   # Only check the known per-dataset tables; other private members (e.g.
   # .study_level, .documents, .ds_len) are not name-validated here
   tbl_name <- names(col_names)
-  tbls <- map(tbl_name, get, envir = envrionment)
+  tbls <- map(tbl_name, get, envir = environment)
 
   # Checks is names match the table above, returns T if so F else. If the names
   # don't match, will also produce a warning of what the names should be

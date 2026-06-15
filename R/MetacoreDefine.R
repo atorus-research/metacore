@@ -2,19 +2,23 @@
 #' @family Metacore
 #' @noRd
 MetaCoreDefine_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist, supp, study_level = NULL,
-                                      documents = NULL, comments = NULL, quiet = FALSE, verbose = "message") {
-  deprecate_soft(
-    when = "0.3.0",
-    what = "MetaCore_initialize(quiet)",
-    with = "MetaCore_initialize(verbose)"
-  )
-
-  .metacore_init_base_tables(
-    private, define_column_schema(), ds_spec, ds_vars, var_spec,
-    value_spec, derivations, codelist, supp
-  )
+                                      documents = NULL, comments = NULL, quiet = deprecated(), verbose = "message") {
+  if (lifecycle::is_present(quiet)) {
+    deprecate_soft(
+      when = "0.3.0",
+      what = "MetaCoreDefine_initialize(quiet)",
+      with = "MetaCoreDefine_initialize(verbose)"
+    )
+  } else {
+    quiet <- FALSE
+  }
 
   full_schema <- define_column_schema()
+
+  .metacore_init_base_tables(
+    private, full_schema, ds_spec, ds_vars, var_spec,
+    value_spec, derivations, codelist, supp
+  )
 
   private$.study_level <- fill_cols(study_level, full_schema$.study_level) |>
     add_labs(
@@ -107,6 +111,62 @@ MetaCoreDefine_filter <- function(value) {
 }
 
 
+#' Set study-level metadata on a MetacoreDefine object
+#'
+#' Populates the `study_level` table, which cannot be derived from a Pinnacle 21
+#' spec sheet and must therefore be supplied by the caller after construction.
+#' Each argument corresponds to one column in `define_column_schema()$.study_level`.
+#' Omitted arguments are stored as `NA`.
+#'
+#' @param study_name       Study name (single string).
+#' @param study_description Study description (single string).
+#' @param protocol_name    Protocol name (single string).
+#' @param standard_name    Standard name, e.g. `"CDISC/NCI"` (single string).
+#' @param standard_version Standard version, e.g. `"2.0"` (single string).
+#' @param define_version   Define-XML version, e.g. `"2.1"` (single string).
+#' @param language         Language code, e.g. `"en"` (single string).
+#'
+#' @return The object, invisibly, to allow method chaining.
+#' @family Metacore
+#' @noRd
+MetaCoreDefine_set_study_level <- function(
+    study_name = NA_character_,
+    study_description = NA_character_,
+    protocol_name = NA_character_,
+    standard_name = NA_character_,
+    standard_version = NA_character_,
+    define_version = NA_character_,
+    language = NA_character_) {
+  args <- list(
+    study_name = study_name, study_description = study_description,
+    protocol_name = protocol_name, standard_name = standard_name,
+    standard_version = standard_version, define_version = define_version,
+    language = language
+  )
+
+  bad <- purrr::keep(args, function(x) !(length(x) == 1L && (is.na(x) || is.character(x))))
+  if (length(bad) > 0) {
+    cli_abort(c(
+      "x" = "Each argument to {.fn set_study_level} must be a single character string or {.val NA}.",
+      "i" = "Problem argument{?s}: {.arg {names(bad)}}"
+    ))
+  }
+
+  schema <- define_column_schema()$.study_level
+
+  private$.study_level <- tibble::tibble(!!!args) |>
+    fill_cols(schema) |>
+    add_labs(
+      study_name = "Study Name", study_description = "Study Description",
+      protocol_name = "Protocol Name", standard_name = "Standard",
+      standard_version = "Standard Version", define_version = "Define Version",
+      language = "Language"
+    )
+
+  invisible(self)
+}
+
+
 #' Extended Metacore R6 Class (Define.xml schema: adds study_level, documents, comments)
 #' @family Metacore
 #' @noRd
@@ -116,7 +176,8 @@ MetaCoreDefine <- R6::R6Class(
   public = list(
     initialize      = MetaCoreDefine_initialize,
     validate        = MetaCoreDefine_validate,
-    metacore_filter = MetaCoreDefine_filter
+    metacore_filter = MetaCoreDefine_filter,
+    set_study_level = MetaCoreDefine_set_study_level
   ),
   private = list(
     .study_level = tibble(),

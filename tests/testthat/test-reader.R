@@ -895,3 +895,28 @@ test_that("spec_type_to_derivations errors on unnamed var_cols", {
     regexp = "Incorrect column names supplied for `var_cols`"
   )
 })
+
+# spec_type_to_ds_spec optional purpose column --------------------------------
+
+test_that("spec_type_to_ds_spec warns when purpose is missing and fills NA", {
+  doc <- list(
+    Datasets = tibble::tibble(
+      Dataset = c("ADSL", "ADAE"),
+      Structure = c("1 row per subject", "1 row per event"),
+      Label = c("Subject Level", "Adverse Events"),
+      Class = c("BASIC DATA STRUCTURE", "BASIC DATA STRUCTURE"),
+      Repeating = c("No", "No"),
+      `Reference Data` = c("No", "No")
+      # purpose column intentionally absent
+    )
+  )
+
+  expect_warning(
+    spec_type_to_ds_spec(doc, define_fields = TRUE),
+    regexp = "purpose.*column was not found"
+  )
+
+  out <- suppressWarnings(spec_type_to_ds_spec(doc, define_fields = TRUE))
+  expect_true("purpose" %in% names(out))
+  expect_true(all(is.na(out$purpose)))
+})
