@@ -17,11 +17,11 @@ This reads in a xml document and gets all the derivations/comments. These can
 be cross referenced to variables using the derivation_id's
 }
 \seealso{
-Other xml builder: 
-\code{\link{xml_to_codelist}()},
-\code{\link{xml_to_ds_spec}()},
-\code{\link{xml_to_ds_vars}()},
-\code{\link{xml_to_value_spec}()},
-\code{\link{xml_to_var_spec}()}
+Other xml builder:
+\code{\link[=xml_to_codelist]{xml_to_codelist()}},
+\code{\link[=xml_to_ds_spec]{xml_to_ds_spec()}},
+\code{\link[=xml_to_ds_vars]{xml_to_ds_vars()}},
+\code{\link[=xml_to_value_spec]{xml_to_value_spec()}},
+\code{\link[=xml_to_var_spec]{xml_to_var_spec()}}
 }
 \concept{xml builder}

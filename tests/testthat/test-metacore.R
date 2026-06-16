@@ -48,9 +48,6 @@ test_that("metacore wrapper function works", {
   )
 
   expect_equal(wrapper, r6)
-
-  expect_warning(define_to_metacore(metacore_example("ADaM_define_CDISC_pilot3.xml")))
-  expect_warning(spec_to_metacore(metacore_example("p21_mock.xlsx")))
 })
 
 
@@ -60,12 +57,12 @@ test_that("Can pass metacore NULL df's", {
     dfs$value_spec, dfs$derivations, dfs$codelist, dfs$supp
   ))
   dummy <- list(
-    character(), character(), numeric(), numeric(),
-    logical(), character(), logical()
+    character(), character(), numeric(), logical(),
+    numeric(), character(), logical()
   )
   names(dummy) <- c(
-    "dataset", "variable", "key_seq", "order",
-    "mandatory", "core", "supp_flag"
+    "dataset", "variable", "order", "mandatory",
+    "key_seq", "core", "supp_flag"
   )
   dummy <- as_tibble(dummy)
   # Because of the labels the dfs are slightly different so checking
@@ -254,9 +251,9 @@ test_that("metacore() verbose = `silent` is silent and returns Metacore object",
   value_spec <- tibble::tibble(
     dataset = "AE", variable = "AETERM", where = NA_character_,
     type = "character", sig_dig = NA_integer_,
-    code_id = NA_character_, origin = "Collected", derivation_id = NA_integer_
+    code_id = NA_character_, origin = "Collected", derivation_id = NA_character_
   )
-  derivations <- tibble::tibble(derivation_id = integer(), derivation = character())
+  derivations <- tibble::tibble(derivation_id = character(), derivation = character())
   codelist <- tibble::tibble(code_id = character(), name = character(), type = character(), codes = list())
   supp <- tibble::tibble(dataset = character(), variable = character(), idvar = character(), qeval = character())
 
@@ -282,7 +279,7 @@ test_that("metacore() verbose = `silent` returns invisibly", {
   value_spec <- tibble::tibble(
     dataset = "AE", variable = "AETERM", where = NA_character_,
     type = "character", sig_dig = NA_integer_,
-    code_id = NA_character_, origin = "Collected", derivation_id = NA_integer_
+    code_id = NA_character_, origin = "Collected", derivation_id = NA_character_
   )
 
   expect_invisible(
@@ -309,7 +306,7 @@ test_that("metacore() quiet = FALSE returns a Metacore object", {
   value_spec <- tibble::tibble(
     dataset = "AE", variable = "AETERM", where = NA_character_,
     type = "character", sig_dig = NA_integer_,
-    code_id = NA_character_, origin = "Collected", derivation_id = NA_integer_
+    code_id = NA_character_, origin = "Collected", derivation_id = NA_character_
   )
 
   mc <- suppressWarnings(
@@ -338,7 +335,7 @@ test_that("metacore() verbose message/silent paths produce similar structure", {
   value_spec <- tibble::tibble(
     dataset = "AE", variable = "AETERM", where = NA_character_,
     type = "character", sig_dig = NA_integer_,
-    code_id = NA_character_, origin = "Collected", derivation_id = NA_integer_
+    code_id = NA_character_, origin = "Collected", derivation_id = NA_character_
   )
 
   mc_q <- suppressWarnings(
@@ -376,7 +373,8 @@ test_that("metacore(quiet) deprecation message is output when supplied by the us
         core = NA_character_,
         supp_flag = NA
       ),
-      quiet = FALSE
+      quiet = FALSE,
+      verbose = "silent"
     )
   )
 
@@ -423,9 +421,28 @@ test_that("select_dataset(simplify = TRUE) returns expected structure", {
   expected_names <- c(
     "dataset", "variable", "order", "mandatory", "key_seq", "core", "supp_flag",
     "length", "label", "type", "format", "common", "origin", "code_id", "sig_dig",
-    "derivation_id", "where", "derivation", "codes", "idvar", "qeval"
+    "where", "derivation_id", "derivation", "codes", "idvar", "qeval"
   )
 
   expect_equal(names(ae_simple), expected_names)
   expect_equal(nrow(ae_simple), nrow(ae$ds_vars))
+})
+
+# Backwards compatability with 0.3.0 -------------------------------------------
+test_that("Metacore structure is the same as 0.3.0 when define_fields = FALSE", {
+  metacore_0_3_0 <- load_metacore(metacore_example("metacore_0_3_0.rds"))
+  metacore_0_4_0 <- spec_to_metacore(metacore_example("p21_mock.xlsx"), where_sep_sheet = FALSE, verbose = "silent")
+
+  expect_identical(names(metacore_0_3_0), names(metacore_0_4_0))
+  expect_identical(metacore_0_3_0$ds_spec, metacore_0_4_0$ds_spec)
+  expect_identical(metacore_0_3_0$ds_vars, metacore_0_4_0$ds_vars)
+  expect_identical(metacore_0_3_0$var_spec, metacore_0_4_0$var_spec)
+  # `where` changed from TRUE default to NA in 0.4.0 so excluded from check
+  expect_identical(
+    metacore_0_3_0$value_spec[, -which(names(metacore_0_3_0$value_spec) == "where")],
+    metacore_0_4_0$value_spec[, -which(names(metacore_0_4_0$value_spec) == "where")]
+  )
+  expect_identical(metacore_0_3_0$codelist, metacore_0_4_0$codelist)
+  expect_identical(metacore_0_3_0$derivations, metacore_0_4_0$derivations)
+  expect_identical(metacore_0_3_0$supp, metacore_0_4_0$supp)
 })

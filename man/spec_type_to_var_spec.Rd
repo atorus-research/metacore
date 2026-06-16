@@ -6,35 +6,111 @@
 \usage{
 spec_type_to_var_spec(
   doc,
-  cols = c(variable = "[N|n]ame|[V|v]ariables?", length = "[L|l]ength", label =
-    "[L|l]abel", type = "[T|t]ype", dataset = "[D|d]ataset|[D|d]omain", format =
-    "[F|f]ormat"),
+  cols = base_col_regex()$.var_spec,
   sheet = "[V|v]ar"
 )
 }
 \arguments{
-\item{doc}{Named list of datasets @seealso \code{\link[=read_all_sheets]{read_all_sheets()}} for exact
-format}
+\item{doc}{Named list of data frames produced by \code{\link[=read_all_sheets]{read_all_sheets()}}.}
 
-\item{cols}{Named vector of column names. The column names can be regular
-expressions for more flexibility. But, the names must follow the given pattern}
+\item{cols}{Named character vector of regular expressions mapping output
+column names to column headings in your specification. When \code{NULL}
+(default), patterns from \code{\link[=base_col_regex]{base_col_regex()}} are used automatically. Valid
+names are \code{variable}, \code{length}, \code{label}, \code{type}, \code{format}, and the
+optional processing column \code{dataset} (see Details).}
 
-\item{sheet}{Regular expression for the sheet name}
+\item{sheet}{Regular expression used to restrict which sheets are searched.
+Defaults to matching sheets named \code{"Variables"} or similar.}
 }
 \value{
 a dataset formatted for the metacore object
 }
 \description{
-Creates the var_spec from a list of datasets (optionally filtered by the sheet
-input). The named vector \code{cols} is used to determine which is the correct
-sheet and renames the columns. (Note: the keep column will be converted logical)
+Builds the \code{var_spec} table from a named list of Excel sheets produced by
+\code{\link[=read_all_sheets]{read_all_sheets()}}. \code{var_spec} holds \strong{one row per unique variable name}
+and stores metadata that is shared across all datasets (label, type, length,
+format).
+}
+\details{
+\subsection{How it works}{
+
+The function searches every sheet in \code{doc} for one that contains all
+required columns, renames them to the standard metacore names, deduplicates
+by variable, and returns a single tidy tibble. Because CDISC standards
+require that a variable's label and length be consistent across datasets,
+normalising to one row per variable both enforces this rule and reduces
+object size.
+}
+
+\subsection{Output columns}{\tabular{ll}{
+   Column \tab Description \cr
+   \code{variable} \tab Variable name, e.g. \code{"USUBJID"} \cr
+   \code{length} \tab Maximum character length or numeric width (integer) \cr
+   \code{label} \tab Variable label, e.g. \code{"Unique Subject Identifier"} \cr
+   \code{type} \tab Variable type, e.g. \code{"Char"} or \code{"Num"} \cr
+   \code{format} \tab SAS format string, e.g. \code{"DATE9."} (\code{NA} if none) \cr
+   \code{common} \tab \code{TRUE} if the variable appears in every dataset (auto-computed) \cr
+}
+
+}
+
+\subsection{Default column matching}{
+
+When \code{cols = NULL} (the default), patterns from \code{\link[=base_col_regex]{base_col_regex()}} are used.
+These are designed to match standard Pinnacle 21 headings:
+\itemize{
+\item \strong{\code{variable}} — heading matches \code{"Name"} or \code{"Variables"}
+\item \strong{\code{length}} — heading matches \code{"Length"}
+\item \strong{\code{label}} — heading matches \code{"Label"}
+\item \strong{\code{type}} — heading matches \code{"Type"}
+\item \strong{\code{format}} — heading matches \code{"Format"}
+}
+
+If your specification uses different headings, supply a named character
+vector to \code{cols}:
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{spec_type_to_var_spec(doc, cols = c(
+  "variable" = "Variable Name",
+  "length"   = "Max Length",
+  "label"    = "Variable Label",
+  "type"     = "Data Type",
+  "format"   = "SAS Format"
+))
+}\if{html}{\out{</div>}}
+}
+
+\subsection{Handling variables with different metadata across datasets}{
+
+Some variables (e.g. \code{VISIT}) legitimately have different lengths or labels
+in different datasets. To handle this, include a \code{"dataset"} entry in
+\code{cols} pointing to the dataset/domain column. The function will then:
+\enumerate{
+\item Qualify any variable with inconsistent metadata as \code{DOMAIN.VARIABLE}
+(e.g. \code{"ADAE.VISIT"} vs \code{"ADSL.VISIT"}).
+\item Automatically compute the \code{common} flag — \code{TRUE} for variables that
+appear in every dataset.
+}
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{spec_type_to_var_spec(doc, cols = c(
+  "variable" = "Variable Name",
+  "length"   = "Length",
+  "label"    = "Label",
+  "type"     = "Type",
+  "format"   = "Format",
+  "dataset"  = "Domain"   # enables per-domain deduplication
+))
+}\if{html}{\out{</div>}}
+}
 }
 \seealso{
-Other spec builders: 
-\code{\link{spec_type_to_codelist}()},
-\code{\link{spec_type_to_derivations}()},
-\code{\link{spec_type_to_ds_spec}()},
-\code{\link{spec_type_to_ds_vars}()},
-\code{\link{spec_type_to_value_spec}()}
+Other spec builders:
+\code{\link[=spec_type_to_codelist]{spec_type_to_codelist()}},
+\code{\link[=spec_type_to_comments]{spec_type_to_comments()}},
+\code{\link[=spec_type_to_derivations]{spec_type_to_derivations()}},
+\code{\link[=spec_type_to_documents]{spec_type_to_documents()}},
+\code{\link[=spec_type_to_ds_spec]{spec_type_to_ds_spec()}},
+\code{\link[=spec_type_to_ds_vars]{spec_type_to_ds_vars()}},
+\code{\link[=spec_type_to_supp]{spec_type_to_supp()}},
+\code{\link[=spec_type_to_value_spec]{spec_type_to_value_spec()}}
 }
 \concept{spec builders}

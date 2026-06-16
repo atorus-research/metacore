@@ -538,7 +538,7 @@ test_that("codelist reader tests", {
       "SCREENING 1", "UNSCHEDULED 1.1", "UNSCHEDULED 1.2", "UNSCHEDULED 1.3", "SCREENING 2", "BASELINE", "UNSCHEDULED 3.1", "AMBUL ECG PLACEMENT", "WEEK 2", "UNSCHEDULED 4.1", "UNSCHEDULED 4.2", "WEEK 4", "UNSCHEDULED 5.1", "AMBUL ECG REMOVAL",
       "UNSCHEDULED 6.1", "WEEK 6", "UNSCHEDULED 7.1", "WEEK 8", "WEEK 10 (T)", "UNSCHEDULED 8.2", "WEEK 12", "WEEK 14 (T)", "UNSCHEDULED 9.2", "UNSCHEDULED 9.3", "WEEK 16", "WEEK 18 (T)", "UNSCHEDULED 10.2", "WEEK 20", "WEEK 22 (T)", "UNSCHEDULED 11.2", "WEEK 24", "UNSCHEDULED 12.1", "WEEK 26", "UNSCHEDULED 13.1", "AE FOLLOW-UP", "RETRIEVAL", "Rash followup"
     )), "code_decode",
-    # "CL.Y_BLANK",                    "Y_BLANK",                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   tibble(code = "Y", decode = "Yes"),      "code_decode",
+    # "CL.Y_BLANK", "Y_BLANK",                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   tibble(code = "Y", decode = "Yes"),      "code_decode",
     "CL.YN", "YN", tibble(code = c("N", "Y"), decode = c("No", "Yes")), "code_decode"
   )
 
@@ -649,37 +649,176 @@ test_that("define_to_metacore(quiet) deprecation message is output when supplied
   )
 })
 
-test_that("Informative error when where_sep_sheet=TRUE but WhereClause sheet missing", {
-  # This should trigger the helpful error message about where_sep_sheet
-  expect_error(
-    spec_to_metacore(
-      "spec_no_val.xlsx", # Use relative path like the existing test
-      where_sep_sheet = TRUE, # This is the default, but being explicit
-      verbose = "silent"
-    ),
-    regexp = "where.*where_sep_sheet",
-    ignore.case = TRUE
-  )
-
-  # Verify the error message contains helpful context
-  err <- tryCatch(
+test_that("spec_to_metacore warns when where_sep_sheet=TRUE but no WHERE IDs exist in the spec", {
+  # spec_no_val.xlsx has no WHERE clause references (all-NA where column)
+  expect_warning(
     spec_to_metacore(
       "spec_no_val.xlsx",
       where_sep_sheet = TRUE,
-      verbose = "silent"
+      verbose = "warn"
     ),
-    error = function(e) conditionMessage(e)
+    regexp = "where column needed"
+  )
+})
+
+test_that("spec_type_to_value_spec warns when where_sep_sheet=TRUE but all where values are NA", {
+  val_sheet <- tibble::tibble(
+    Dataset     = "ADSL",
+    Variable    = "AGE",
+    Origin      = "Derived",
+    Type        = "Num",
+    Predecessor = NA_character_
+  )
+  doc <- list(ValueSpec = val_sheet)
+  cols <- c(
+    dataset     = "^Dataset$",
+    variable    = "^Variable$",
+    origin      = "^Origin$",
+    type        = "^Type$",
+    predecessor = "^Predecessor$"
   )
 
-  # Check that the error message mentions:
-  # 1. That columns couldn't be matched
-  expect_match(err, "Unable to identify a sheet|Could not find matching columns", ignore.case = TRUE)
+  expect_warning(
+    spec_type_to_value_spec(doc, cols = cols, where_sep_sheet = TRUE, var_sheet = NULL),
+    regexp = "where column needed"
+  )
+})
 
-  # 2. Provides the helpful tip about where_sep_sheet
-  expect_match(err, "where_sep_sheet", ignore.case = TRUE)
+test_that("spec_type_to_value_spec replaces where IDs with text from the separate where sheet", {
+  val_sheet <- tibble::tibble(
+    Dataset     = "ADSL",
+    Variable    = "AGE",
+    Origin      = "Derived",
+    Type        = "Num",
+    Predecessor = NA_character_,
+    Where       = "W01"
+  )
+  where_sheet <- tibble::tibble(
+    ID         = "W01",
+    Variable   = "AGEGR",
+    Comparator = "GE",
+    Value      = "18"
+  )
+  doc <- list(ValueSpec = val_sheet, WhereSheet = where_sheet)
+  cols <- c(
+    dataset     = "^Dataset$",
+    variable    = "^Variable$",
+    origin      = "^Origin$",
+    type        = "^Type$",
+    predecessor = "^Predecessor$",
+    where       = "^Where$"
+  )
 
-  # 3. Shows which sheet was closest
-  expect_match(err, "Sheet|Closest", ignore.case = TRUE)
+  result <- spec_type_to_value_spec(doc, cols = cols, where_sep_sheet = TRUE, var_sheet = NULL)
+
+  expect_equal(result$where, "AGEGR GE 18")
+})
+
+test_that("spec_type_to_value_spec auto-generates derivation_id from origin when not in cols", {
+  val_sheet <- tibble::tibble(
+    Dataset     = c("ADSL", "ADSL"),
+    Variable    = c("AGE", "VISIT"),
+    Origin      = c("Assigned", "Derived"),
+    Type        = c("Num", "Char"),
+    Predecessor = c(NA_character_, NA_character_)
+  )
+  doc <- list(ValueSpec = val_sheet)
+  # No derivation_id in cols. Auto-generated at lines 786-795
+  cols <- c(
+    dataset     = "^Dataset$",
+    variable    = "^Variable$",
+    origin      = "^Origin$",
+    type        = "^Type$",
+    predecessor = "^Predecessor$"
+  )
+
+  result <- spec_type_to_value_spec(doc, cols = cols, where_sep_sheet = FALSE, var_sheet = NULL)
+
+  # origin "Assigned" to dataset.variable
+  expect_equal(result$derivation_id[result$variable == "AGE"], "ADSL.AGE")
+  # other origin to pred.dataset.variable
+  expect_equal(result$derivation_id[result$variable == "VISIT"], "pred.ADSL.VISIT")
+})
+
+test_that("spec_type_to_var_spec errors when duplicate variables have different metadata without dataset col", {
+  vars_sheet <- tibble::tibble(
+    Variable = c("VISIT", "VISIT"),
+    Length   = c("20", "40"), # different lengths, same variable, different metadata
+    Label    = c("Visit", "Visit"),
+    Type     = c("Char", "Char"),
+    Format   = c(NA_character_, NA_character_)
+  )
+  doc <- list(Variables = vars_sheet)
+  cols <- c(
+    variable = "^Variable$",
+    length   = "^Length$",
+    label    = "^Label$",
+    type     = "^Type$",
+    format   = "^Format$"
+  )
+
+  expect_error(
+    spec_type_to_var_spec(doc, cols = cols),
+    regexp = "repeated with different metadata"
+  )
+  expect_error(
+    spec_type_to_var_spec(doc, cols = cols),
+    regexp = "VISIT"
+  )
+})
+
+test_that("spec_type_to_var_spec passes when duplicate variables have identical metadata without dataset col", {
+  vars_sheet <- tibble::tibble(
+    Variable = c("VISIT", "VISIT"),
+    Length   = c("20", "20"), # identical rows. distinct() collapses to one
+    Label    = c("Visit", "Visit"),
+    Type     = c("Char", "Char"),
+    Format   = c(NA_character_, NA_character_)
+  )
+  doc <- list(Variables = vars_sheet)
+  cols <- c(
+    variable = "^Variable$",
+    length   = "^Length$",
+    label    = "^Label$",
+    type     = "^Type$",
+    format   = "^Format$"
+  )
+
+  result <- spec_type_to_var_spec(doc, cols = cols)
+
+  expect_equal(nrow(result), 1L)
+  expect_equal(result$variable, "VISIT")
+})
+
+test_that("build_from_sheet resolves ambiguous regex via exact anchoring", {
+  # "label" partially matches both "label" and "label_extra"; ^label$ matches only "label"
+  sheet_data <- tibble::tibble(label = 1:3, label_extra = 4:6, other = 7:9)
+  cols <- c(lbl = "label", oth = "other")
+
+  result <- metacore:::build_from_sheet(sheet_data, cols, context = "test_table", sheet_name = "TestSheet")
+
+  expect_equal(result$lbl, 1:3)
+  expect_equal(result$oth, 7:9)
+})
+
+test_that("build_from_sheet errors when exact anchoring still leaves ambiguity", {
+  # "label" matches "label_1" and "label_2"; ^label$ matches neither
+  sheet_data <- tibble::tibble(label_1 = 1:3, label_2 = 4:6)
+  cols <- c(lbl = "label")
+
+  expect_error(
+    metacore:::build_from_sheet(sheet_data, cols, context = "test_table", sheet_name = "MySheet"),
+    regexp = "Unable to rename"
+  )
+  expect_error(
+    metacore:::build_from_sheet(sheet_data, cols, context = "test_table", sheet_name = "MySheet"),
+    regexp = "Please check your regular expression for `test_table`"
+  )
+  # NULL context uses the generic hint
+  expect_error(
+    metacore:::build_from_sheet(sheet_data, cols, context = NULL, sheet_name = "MySheet"),
+    regexp = "Please check your regular expressions"
+  )
 })
 
 test_that("spec_to_metacore provides detailed information for failed regular expressions", {
@@ -696,4 +835,293 @@ test_that("spec_to_metacore provides detailed information for failed regular exp
       "i" = "Please check your regular expression for `spec_type_to_ds_vars`"
     ))
   )
+})
+
+# spec_type_to_codelist column-name validation --------------------------------
+
+test_that("spec_type_to_codelist errors when codelist_cols not provided", {
+  expect_error(
+    spec_type_to_codelist(spec, codelist_cols = NULL),
+    regexp = "Codelist column names must be provided as `codelist_cols`"
+  )
+})
+
+test_that("spec_type_to_codelist errors on bad codelist_cols names", {
+  expect_error(
+    spec_type_to_codelist(spec, codelist_cols = c("bad" = "ID")),
+    regexp = "Incorrect column names supplied for `codelist_cols`"
+  )
+})
+
+test_that("spec_type_to_codelist errors on unnamed codelist_cols", {
+  expect_error(
+    spec_type_to_codelist(spec, codelist_cols = c("ID", "Name")),
+    regexp = "Incorrect column names supplied for `codelist_cols`"
+  )
+})
+
+test_that("spec_type_to_codelist errors on bad permitted_val_cols names", {
+  expect_error(
+    spec_type_to_codelist(
+      spec,
+      permitted_val_cols = c("bad" = "^Code|^Term")
+    ),
+    regexp = "Incorrect column names supplied for `permitted_val_cols`"
+  )
+})
+
+test_that("spec_type_to_codelist errors on bad dict_cols names", {
+  expect_error(
+    spec_type_to_codelist(
+      spec,
+      dict_cols = c("bad" = "ID")
+    ),
+    regexp = "Incorrect column names supplied for `dict_cols`"
+  )
+})
+
+# spec_type_to_derivations var_cols validation --------------------------------
+
+test_that("spec_type_to_derivations errors on bad var_cols names", {
+  expect_error(
+    spec_type_to_derivations(spec, var_cols = c("bad" = "[D|d]ataset")),
+    regexp = "Incorrect column names supplied for `var_cols`"
+  )
+})
+
+test_that("spec_type_to_derivations errors on unnamed var_cols", {
+  expect_error(
+    spec_type_to_derivations(spec, var_cols = c("[D|d]ataset", "[V|v]ariable")),
+    regexp = "Incorrect column names supplied for `var_cols`"
+  )
+})
+
+# spec_type_to_ds_spec optional purpose column --------------------------------
+
+test_that("spec_type_to_ds_spec warns when purpose is missing and fills NA", {
+  doc <- list(
+    Datasets = tibble::tibble(
+      Dataset = c("ADSL", "ADAE"),
+      Structure = c("1 row per subject", "1 row per event"),
+      Label = c("Subject Level", "Adverse Events"),
+      Class = c("BASIC DATA STRUCTURE", "BASIC DATA STRUCTURE"),
+      Repeating = c("No", "No"),
+      `Reference Data` = c("No", "No")
+      # purpose column intentionally absent
+    )
+  )
+
+  expect_warning(
+    spec_type_to_ds_spec(doc, define_fields = TRUE),
+    regexp = "purpose.*column was not found"
+  )
+
+  out <- suppressWarnings(spec_type_to_ds_spec(doc, define_fields = TRUE))
+  expect_true("purpose" %in% names(out))
+  expect_true(all(is.na(out$purpose)))
+})
+
+# spec_type_to_study_level ----------------------------------------------------
+
+# Shared fixture: the vlm_test_spec.xlsx "Define" sheet (attribute-value layout).
+# Loaded lazily so tests skip gracefully when the file is absent.
+vlm_xlsx_available <- file.exists("vlm_test_spec.xlsx")
+vlm_doc <- if (vlm_xlsx_available) read_all_sheets("vlm_test_spec.xlsx") else NULL
+
+test_that("spec_type_to_study_level pivot=TRUE reads vlm_test_spec.xlsx correctly", {
+  skip_if_not(vlm_xlsx_available, "vlm_test_spec.xlsx not available")
+  result <- spec_type_to_study_level(vlm_doc)
+
+  expect_equal(result$study_name, "VLM Test Specification")
+  expect_equal(
+    result$study_description,
+    "Dummy specification document designed to test behaviour of functions using VLM"
+  )
+  expect_equal(result$protocol_name, "123456.0")
+  expect_equal(result$language, "en")
+})
+
+test_that("spec_type_to_study_level output has all schema columns in correct order", {
+  skip_if_not(vlm_xlsx_available, "vlm_test_spec.xlsx not available")
+  result <- spec_type_to_study_level(vlm_doc)
+  expected_cols <- names(define_column_schema()$.study_level)
+
+  expect_s3_class(result, "tbl_df")
+  expect_equal(nrow(result), 1L)
+  expect_equal(names(result), expected_cols)
+})
+
+test_that("spec_type_to_study_level fills NA for attributes absent from the pivot", {
+  minimal_doc <- list(
+    Define = tibble::tibble(
+      Attribute = c("StudyName", NA, "Legend"),
+      Value = c("My Study", NA, "ignore this row")
+    )
+  )
+
+  result <- spec_type_to_study_level(minimal_doc)
+
+  expect_equal(result$study_name, "My Study")
+  expect_true(is.na(result$study_description))
+  expect_true(is.na(result$protocol_name))
+  expect_true(is.na(result$language))
+})
+
+test_that("spec_type_to_study_level NA attribute rows are filtered before pivot", {
+  doc_with_na <- list(
+    Define = tibble::tibble(
+      Attribute = c("StudyName", NA, NA),
+      Value     = c("Trial X", NA, "noise")
+    )
+  )
+
+  result <- spec_type_to_study_level(doc_with_na)
+
+  expect_equal(nrow(result), 1L)
+  expect_equal(result$study_name, "Trial X")
+})
+
+test_that("spec_type_to_study_level pivot=TRUE works with space-separated attribute names", {
+  doc_spaced <- list(
+    Define = tibble::tibble(
+      Attribute = c("Study Name", "Study Description", "Protocol Name", "Language"),
+      Value     = c("CDISCPILOT01", "Phase III", "PROT-001", "en")
+    )
+  )
+
+  result <- spec_type_to_study_level(doc_spaced)
+
+  expect_equal(result$study_name, "CDISCPILOT01")
+  expect_equal(result$study_description, "Phase III")
+  expect_equal(result$protocol_name, "PROT-001")
+  expect_equal(result$language, "en")
+})
+
+test_that("spec_type_to_study_level pivot=FALSE reads columnar sheet correctly", {
+  columnar_doc <- list(
+    Study = tibble::tibble(
+      StudyName        = "Columnar Study",
+      StudyDescription = "Columnar description",
+      ProtocolName     = "COL-001",
+      Language         = "en"
+    )
+  )
+
+  result <- spec_type_to_study_level(columnar_doc, sheet = "[Ss]tudy", pivot = FALSE)
+
+  expect_equal(result$study_name, "Columnar Study")
+  expect_equal(result$study_description, "Columnar description")
+  expect_equal(result$protocol_name, "COL-001")
+  expect_equal(result$language, "en")
+})
+
+test_that("spec_type_to_study_level pivot=FALSE fills NA for columns absent from sheet", {
+  columnar_doc <- list(
+    Study = tibble::tibble(
+      StudyName    = "Minimal Study",
+      ProtocolName = "MIN-001"
+    )
+  )
+
+  result <- spec_type_to_study_level(
+    columnar_doc,
+    cols    = c("study_name" = "[Ss]tudy[Nn]ame", "protocol_name" = "[Pp]rotocol[Nn]ame"),
+    sheet   = "[Ss]tudy",
+    pivot   = FALSE
+  )
+
+  expect_equal(result$study_name, "Minimal Study")
+  expect_equal(result$protocol_name, "MIN-001")
+  expect_true(is.na(result$study_description))
+  expect_true(is.na(result$language))
+})
+
+test_that("spec_type_to_study_level pivot=FALSE output has all schema columns", {
+  columnar_doc <- list(
+    Study = tibble::tibble(StudyName = "X", ProtocolName = "Y", StudyDescription = "Z")
+  )
+
+  result <- spec_type_to_study_level(columnar_doc, sheet = "[Ss]tudy", pivot = FALSE)
+
+  expect_equal(names(result), names(define_column_schema()$.study_level))
+})
+
+test_that("spec_type_to_study_level warns when multiple sheets match and uses the first", {
+  two_sheet_doc <- list(
+    Define = tibble::tibble(Attribute = "StudyName", Value = "First"),
+    Study  = tibble::tibble(Attribute = "StudyName", Value = "Second")
+  )
+
+  expect_warning(
+    result <- spec_type_to_study_level(two_sheet_doc),
+    regexp = "Multiple sheets match"
+  )
+  expect_equal(result$study_name, "First")
+})
+
+test_that("spec_type_to_study_level errors when no sheet matches", {
+  skip_if_not(vlm_xlsx_available, "vlm_test_spec.xlsx not available")
+  expect_error(
+    spec_type_to_study_level(vlm_doc, sheet = "NoSuchSheet"),
+    regexp = "No sheet matching"
+  )
+})
+
+test_that("spec_type_to_study_level errors on invalid col names", {
+  skip_if_not(vlm_xlsx_available, "vlm_test_spec.xlsx not available")
+  expect_error(
+    spec_type_to_study_level(vlm_doc, cols = c("bad_col" = "Study")),
+    regexp = "Incorrect column names supplied"
+  )
+})
+
+test_that("spec_type_to_study_level errors on unnamed cols vector", {
+  skip_if_not(vlm_xlsx_available, "vlm_test_spec.xlsx not available")
+  expect_error(
+    spec_type_to_study_level(vlm_doc, cols = c("StudyName", "ProtocolName")),
+    regexp = "Incorrect column names supplied"
+  )
+})
+
+test_that("spec_type_to_study_level pivot=TRUE errors when no Attribute column found", {
+  no_attr_doc <- list(
+    Define = tibble::tibble(Field = "StudyName", Value = "X")
+  )
+
+  expect_error(
+    spec_type_to_study_level(no_attr_doc),
+    regexp = "Could not find an attribute column"
+  )
+})
+
+test_that("spec_type_to_study_level pivot=TRUE errors when no Value column found", {
+  no_val_doc <- list(
+    Define = tibble::tibble(Attribute = "StudyName", Data = "X")
+  )
+
+  expect_error(
+    spec_type_to_study_level(no_val_doc),
+    regexp = "Could not find a value column"
+  )
+})
+
+test_that("spec_type_to_study_level accepts custom cols regex overrides", {
+  custom_doc <- list(
+    Define = tibble::tibble(
+      Attribute = c("Trial_Name", "Trial_Protocol"),
+      Value     = c("Custom Trial", "CT-123")
+    )
+  )
+
+  result <- spec_type_to_study_level(
+    custom_doc,
+    cols = c(
+      "study_name"    = "Trial_Name",
+      "protocol_name" = "Trial_Protocol"
+    )
+  )
+
+  expect_equal(result$study_name, "Custom Trial")
+  expect_equal(result$protocol_name, "CT-123")
+  expect_true(is.na(result$study_description))
 })

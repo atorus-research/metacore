@@ -10,7 +10,7 @@ empty_df <- function(nms, fill) {
 # and i think its checking the wrong thing
 
 test_that("specific words and primitive columns fail when character", {
-  dfs <- purrr::map(col_vars(), ~ empty_df(.x, fill = "A")) %>%
+  dfs <- purrr::map(col_vars(base_column_schema()), ~ empty_df(.x, fill = "A")) %>%
     setNames(c(
       "ds_spec",
       "ds_vars",
@@ -21,12 +21,12 @@ test_that("specific words and primitive columns fail when character", {
       "supp"
     ))
 
-  expect_warning(do.call(check_columns, dfs))
+  expect_warning(do.call(check_columns, c(dfs, list(schema = base_column_schema()))))
 })
 
 
 test_that("NA columns fail", {
-  dfs <- purrr::map(col_vars(), ~ empty_df(.x, fill = NA)) %>%
+  dfs <- purrr::map(col_vars(base_column_schema()), ~ empty_df(.x, fill = NA)) %>%
     setNames(c(
       "ds_spec",
       "ds_vars",
@@ -37,12 +37,12 @@ test_that("NA columns fail", {
       "supp"
     ))
 
-  expect_error(do.call(check_columns, dfs))
+  expect_error(do.call(check_columns, c(dfs, list(schema = base_column_schema()))))
 })
 
 
 test_that("NA columns fail", {
-  dfs <- purrr::map(col_vars(), ~ empty_df(.x, fill = "A")) %>%
+  dfs <- purrr::map(col_vars(base_column_schema()), ~ empty_df(.x, fill = "A")) %>%
     setNames(c(
       "ds_spec",
       "ds_vars",
@@ -55,13 +55,13 @@ test_that("NA columns fail", {
 
   dfs$ds_spec$label <- NA
 
-  expect_warning(do.call(check_columns, dfs))
+  expect_warning(do.call(check_columns, c(dfs, list(schema = base_column_schema()))))
 })
 
-test_that("all_message dataframe contains 6 datasets", {
+test_that("all_message dataframe contains 8 datasets", {
   expect_equal(all_message() %>%
     distinct(dataset) %>%
-    nrow(), 7)
+    nrow(), 8)
 })
 
 test_that("check cross-reference tests", {
@@ -162,7 +162,8 @@ test_that("check_columns handles multiple datasets including 'supp' correctly", 
     ds_spec = ds_spec_test,
     ds_vars = ds_vars_test,
     var_spec = var_spec_test,
-    supp = supp_test
+    supp = supp_test,
+    schema = base_column_schema()
   ))
 
   # Example: Test for a missing column to ensure `check_structure` works
@@ -213,7 +214,8 @@ test_that("check_columns handles multiple datasets excluding 'supp' correctly", 
     check_columns(
       ds_spec = ds_spec_test,
       ds_vars = ds_vars_test,
-      var_spec = var_spec_test
+      var_spec = var_spec_test,
+      schema = base_column_schema()
     )
   )
 })

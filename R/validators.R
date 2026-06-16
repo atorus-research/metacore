@@ -139,6 +139,40 @@ codelist_check <- function(value_spec, codelist) {
 }
 
 
+#' Comment Check
+#'
+#' @param value_spec value spec table
+#' @param comments comments table
+#'
+#' @return writes warning to console if there is an issue
+#' @noRd
+comment_check <- function(value_spec, comments) {
+  comment_vars <- value_spec %>%
+    filter(!is.na(comment_id)) %>%
+    distinct(comment_id)
+
+  # Check comment_ids in value_spec that aren't in comments
+  not_in_comments <- anti_join(comment_vars, comments, by = "comment_id")
+  if (nrow(not_in_comments) > 0) {
+    comment_ids <- not_in_comments %>% pull(comment_id)
+    cli_warn(c(
+      "The following comment IDs are referenced but not found in the comments table:",
+      "i" = paste(comment_ids, collapse = ", ")
+    ), call. = FALSE)
+  }
+
+  # Check comment_ids in comments that aren't in value_spec
+  not_in_val <- anti_join(comments, comment_vars, by = "comment_id")
+  if (nrow(not_in_val) > 0) {
+    comment_ids <- not_in_val %>% pull(comment_id)
+    cli_warn(c(
+      "The following comments are never used:",
+      "i" = paste(comment_ids, collapse = ", ")
+    ), call. = FALSE)
+  }
+}
+
+
 #' Check Supp
 #'
 #'
@@ -185,35 +219,24 @@ supp_check <- function(ds_vars, supp) {
 }
 
 
-#' Column Names by dataset
-#'
-#' @return list of column names by dataset
-#' @noRd
-col_vars <- function() {
-  list(
-    .ds_spec = c("dataset", "structure", "label"),
-    .ds_vars = c("dataset", "variable", "key_seq", "order", "mandatory", "core", "supp_flag"),
-    .var_spec = c("variable", "length", "label", "type", "common", "format"),
-    .value_spec = c("dataset", "variable", "type", "origin", "sig_dig", "code_id", "where", "derivation_id"),
-    .derivations = c("derivation_id", "derivation"),
-    .codelist = c("code_id", "name", "type", "codes"),
-    .supp = c("dataset", "variable", "idvar", "qeval")
-  )
-}
-
-
 #' Check Variable names
 #'
-#' @param envrionment the private environment of the object
+#' @param environment the private environment of the object
+#' @param define_fields logical; when `TRUE` validate against the full
+#'   extended schema, when `FALSE` validate against the base schema only.
 #'
 #' @return warning messages to the console if there is an issue
 #' @noRd
-var_name_check <- function(envrionment) {
-  # Set the name as they should be
-  col_names <- col_vars()
-  # Get the tables and table names from the environment
-  tbl_name <- ls(envrionment, all.names = TRUE)
-  tbls <- map(tbl_name, get, envir = envrionment)
+var_name_check <- function(environment, define_fields = TRUE) {
+  # Select the correct schema based on whether Define.xml fields are enabled
+  schema <- if (define_fields) define_column_schema() else base_column_schema()
+  col_names <- col_vars(schema)
+
+  # Only check the known per-dataset tables; other private members (e.g.
+  # .study_level, .documents, .ds_len) are not name-validated here
+  tbl_name <- names(col_names)
+  tbls <- map(tbl_name, get, envir = environment)
+
   # Checks is names match the table above, returns T if so F else. If the names
   # don't match, will also produce a warning of what the names should be
   map2_lgl(tbl_name, tbls, function(name, tbl) {
@@ -302,6 +325,22 @@ all_message <- function() {
     "supp", "variable", is.character, FALSE,
     "supp", "idvar", is.character, TRUE,
     "supp", "qeval", is.character, TRUE,
+    # Columns added to support Define.xml 2.0 generation. All optional (NA
+    # allowed) and appended after the original columns so that tables rebuilt
+    # from this spec keep the new columns last.
+    "ds_spec", "class", is.character, TRUE,
+    "ds_spec", "repeating", is.logical, TRUE,
+    "ds_spec", "reference", is.logical, TRUE,
+    "ds_spec", "purpose", is.character, TRUE,
+    "ds_vars", "role", is.character, TRUE,
+    "value_spec", "where_label", is.character, TRUE,
+    "value_spec", "comment_id", is.character, TRUE,
+    "derivations", "method_name", is.character, TRUE,
+    "derivations", "method_type", is.character, TRUE,
+    "derivations", "document_id", is.character, TRUE,
+    "derivations", "pages", is.character, TRUE,
+    "comments", "comment_id", is.character, FALSE,
+    "comments", "comment", is.character, TRUE,
   )
 }
 
@@ -341,25 +380,25 @@ all_message <- function() {
 #'   checks pass, it returns invisibly.
 #' @noRd
 check_columns <- function(ds_spec = NULL, ds_vars = NULL, var_spec = NULL, value_spec = NULL,
-                          derivations = NULL, codelist = NULL, supp = NULL) {
-  # Create a list of the actual dataframes passed
+                          derivations = NULL, codelist = NULL, supp = NULL, comments = NULL,
+                          schema = define_column_schema()) {
   actual_datasets <- list(
-    ds_spec = ds_spec,
-    ds_vars = ds_vars,
-    var_spec = var_spec,
-    value_spec = value_spec,
-    derivations = derivations,
-    codelist = codelist,
-    supp = supp
+    ds_spec = ds_spec, ds_vars = ds_vars, var_spec = var_spec,
+    value_spec = value_spec, derivations = derivations,
+    codelist = codelist, supp = supp, comments = comments
   )
 
-  # Filter out NULL entries (datasets not supplied) and get names
   actual_datasets <- actual_datasets[!sapply(actual_datasets, is.null)]
   ds_names <- names(actual_datasets)
-
-  # Filter out all_message() tibble to include only the required checks
+  # Filter checks to (a) the datasets supplied and (b) columns present in the
+  # active schema — ensures define-specific columns are not checked when the
+  # object was built with define_fields = FALSE.
   filtered_checks <- all_message() %>%
-    filter(dataset %in% ds_names)
+    filter(dataset %in% ds_names) %>%
+    filter(purrr::map2_lgl(.data[["dataset"]], .data[["var"]], function(ds, v) {
+      tbl_key <- paste0(".", ds)
+      tbl_key %in% names(schema) && v %in% names(schema[[tbl_key]])
+    }))
 
   # Apply filtered checks to the supplied dataframes
   messages <- purrr::pmap(

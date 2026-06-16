@@ -1,111 +1,87 @@
-#' This file includes the internal functions needed to create the readonly
-#' Metacore R6 object
+#' Internal helper: fill columns and apply labels for the 7 base tables.
+#' add_labs() silently ignores entries for columns not present in the table, so
+#' the same label map works whether the schema is base or extended.
 #'
-#' @param ds_spec contains each dataset in the study, with the labels for each
-#' @param ds_vars information on what variables are in each dataset + plus
-#'   dataset specific variable information
-#' @param var_spec variable information that is shared across all datasets
-#' @param value_spec parameter specific information, as data is long the specs
-#'   for wbc might be difference the hgb
-#' @param derivations contains derivation, it allows for different variables to
-#'   have the same derivation
-#' @param code_list contains the code/decode information
-#' @param supp contains the idvar and qeval information for supplemental variables
-#' @param quiet `r lifecycle::badge("superseded")` Option to quietly load in, this
-#'   will suppress warnings, but not errors. Expects either `TRUE` or `FALSE`.
-#'   Default behaviour is `FALSE`.
-#' @param verbose A character string specifying the desired verbosity level.
-#'   Must be one of:
-#'   \describe{
-#'     \item{"message"}{(default) Messages and warnings are handled normally.}
-#'     \item{"warn"}{Messages are suppressed, but warnings are allowed.}
-#'     \item{"collapse"}{Warnings are collapsed into a single message indicating the
-#'     number of suppressed warnings.}
-#'     \item{"silent"}{Both messages and warnings are suppressed.}
-#'   }
-#'
+#' @param private  the R6 private environment
+#' @param schema   named list of zero-row schema tibbles (base or full)
+#' @noRd
+#' @importFrom stringr str_to_lower
+.metacore_init_base_tables <- function(private, schema, ds_spec, ds_vars, var_spec, value_spec, derivations, codelist, supp) {
+  # snap() strips to schema columns then back-fills missing ones.
+  # Used only for tables that gained new columns in the extended schema so that
+  # passing an extended-schema table to a base-schema initialiser (or vice versa)
+  # is handled gracefully.  Tables without extended columns (var_spec, codelist,
+  # supp) use plain fill_cols so that genuinely wrong extra columns are still
+  # detected by var_name_check.
+  snap <- function(tbl, schema) fill_cols(select(tbl, any_of(names(schema))), schema)
+
+  private$.ds_spec <- snap(ds_spec, schema$.ds_spec) %>%
+    add_labs(
+      dataset = "Dataset Name", structure = "Value Structure", label = "Dataset Label",
+      class = "Dataset Class", repeating = "Repeating (Boolean)",
+      reference = "Reference Data (Boolean)", purpose = "Dataset Purpose"
+    )
+  private$.ds_vars <- snap(ds_vars, schema$.ds_vars) %>%
+    add_labs(
+      dataset = "Dataset Name", variable = "Variable Name",
+      key_seq = "Sequence Key", order = "Variable Order",
+      mandatory = "Mandatory (Boolean)", core = "ADaM core (Expected, Required, Permissible)",
+      supp_flag = "Supplemental Flag", role = "Variable Role"
+    )
+  private$.var_spec <- fill_cols(var_spec, schema$.var_spec) %>%
+    add_labs(
+      variable = "Variable Name", length = "Variable Length",
+      label = "Variable Label", type = "Variable Class",
+      common = "Common Across ADaM", format = "Variable Format",
+      sas_field_name = "SAS Field Name"
+    )
+  private$.value_spec <- snap(value_spec, schema$.value_spec) %>%
+    add_labs(
+      type = "Value Type", origin = "Origin of Value",
+      code_id = "ID of the Code List", dataset = "Dataset Name",
+      variable = "Variable Name", where = "Value of the Variable",
+      derivation_id = "ID of Derivation", where_label = "Where Clause Label",
+      comment_id = "Comment ID"
+    ) %>%
+    mutate(origin = str_to_lower(.data$origin))
+  private$.derivations <- snap(derivations, schema$.derivations) %>%
+    add_labs(
+      derivation_id = "ID of Derivation", derivation = "Derivation",
+      method_name = "Method Name", method_type = "Method Type",
+      document_id = "Document ID", pages = "Document Page References"
+    )
+  private$.codelist <- fill_cols(codelist, schema$.codelist) %>%
+    add_labs(
+      code_id = "ID of the Code List", names = "Name of the Code List",
+      type = "Code List/Permitted Values/External Library", codes = "List of Codes"
+    )
+  private$.supp <- fill_cols(supp, schema$.supp) %>%
+    add_labs(
+      dataset = "Dataset Name", variable = "Variable Name",
+      idvar = "Identifying Variable", qeval = "Evaluator"
+    )
+  private$.ds_len <- nrow(private$.ds_spec)
+  private$.ds_names <- private$.ds_spec %>% pull(dataset)
+  private$.ds_labels <- private$.ds_spec %>% pull(label)
+}
+
+
+#' Base Metacore initializer (original 7-table schema)
 #' @family Metacore
 #' @noRd
-#'
-#' @importFrom stringr str_to_lower
-MetaCore_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivations, codelist, supp, quiet = FALSE, verbose = "message") {
+MetaCore_initialize <- function(ds_spec, ds_vars, var_spec, value_spec, derivations,
+                                codelist, supp, quiet = FALSE, verbose = "message") {
   deprecate_soft(
     when = "0.3.0",
     what = "MetaCore_initialize(quiet)",
     with = "MetaCore_initialize(verbose)"
   )
-
-  private$.ds_spec <- ds_spec %>%
-    add_labs(
-      dataset = "Dataset Name",
-      structure = "Value Structure",
-      label = "Dataset Label"
-    )
-
-  private$.ds_vars <- ds_vars %>%
-    add_labs(
-      dataset = "Dataset Name",
-      variable = "Variable Name",
-      key_seq = "Sequence Key",
-      order = "Variable Order",
-      mandatory = "Mandatory (Boolean)",
-      core = "ADaM core (Expected, Required, Permissible)",
-      supp_flag = "Supplemental Flag"
-    )
-
-  private$.var_spec <- var_spec %>%
-    add_labs(
-      variable = "Variable Name",
-      length = "Variable Length",
-      label = "Variable Label",
-      type = "Variable Class",
-      common = "Common Across ADaM",
-      format = "Variable Format"
-    )
-
-  private$.value_spec <- value_spec %>%
-    add_labs(
-      type = "Value Type",
-      origin = "Origin of Value",
-      code_id = "ID of the Code List",
-      dataset = "Dataset Name",
-      variable = "Variable Name",
-      where = "Value of the Variable",
-      derivation_id = "ID of Derivation"
-    ) %>%
-    mutate(origin = str_to_lower(.data$origin))
-
-
-  private$.derivations <- derivations %>%
-    add_labs(
-      derivation_id = "ID of Derivation",
-      derivation = "Derivation"
-    )
-
-  private$.codelist <- codelist %>%
-    add_labs(
-      code_id = "ID of the Code List",
-      names = "Name of the Code List",
-      type = "Code List/Permitted Values/External Library",
-      codes = "List of Codes"
-    )
-
-  private$.supp <- supp %>%
-    add_labs(
-      dataset = "Dataset Name",
-      variable = "Variable Name",
-      idvar = "Identifying Variable",
-      qeval = "Evaluator"
-    )
-
-  private$.ds_len <- ds_spec %>% nrow()
-
-  private$.ds_names <- ds_spec %>% pull(dataset)
-
-  private$.ds_labels <- ds_spec %>% pull(label)
-
+  .metacore_init_base_tables(
+    private, base_column_schema(),
+    ds_spec, ds_vars, var_spec,
+    value_spec, derivations, codelist, supp
+  )
   self$validate()
-
   if (inherits_only(self, c("Metacore", "R6"))) {
     private$.greet(quiet)
   }
@@ -130,14 +106,11 @@ MetaCore_print <- function(...) {
 }
 
 
-#' Metacore R6 object validation function
-#'
-#' This checks that the labels and lengths of ds_vars match var_spec
+#' Base Metacore validation — checks the 7 core tables only
 #' @family Metacore
 #' @noRd
-#'
 MetaCore_validate <- function() {
-  if (var_name_check(private)) {
+  if (var_name_check(private, define_fields = FALSE)) {
     if (nrow(private$.ds_spec) == 0 &
       nrow(private$.ds_vars) == 0 &
       nrow(private$.var_spec) == 0 &
@@ -150,20 +123,16 @@ MetaCore_validate <- function() {
       )
     } else {
       check_columns(
-        private$.ds_spec,
-        private$.ds_vars,
-        private$.var_spec,
-        private$.value_spec,
-        private$.derivations,
-        private$.codelist
+        private$.ds_spec, private$.ds_vars, private$.var_spec,
+        private$.value_spec, private$.derivations, private$.codelist,
+        schema = base_column_schema()
       )
-
       ds_vars_check(private$.ds_vars, private$.var_spec)
       value_check(private$.ds_vars, private$.value_spec)
       derivation_check(private$.value_spec, private$.derivations)
       codelist_check(private$.value_spec, private$.codelist)
       if (nrow(private$.supp) > 0) {
-        check_columns(supp = private$.supp)
+        check_columns(supp = private$.supp, schema = base_column_schema())
         supp_check(private$.ds_vars, private$.supp)
       }
     }
@@ -184,7 +153,6 @@ MetaCore_validate <- function() {
 #' @param value any attempt at assignment to the readonly object
 #' @family Metacore
 #' @noRd
-#'
 readonly <- function(name) {
   private <- NULL
   inside <- function(value) {
@@ -245,14 +213,9 @@ MetaCore_filter <- function(value) {
   private$.supp <- private$.supp %>% filter(dataset == value)
 }
 
-#' The Metacore R6 Class
-#'
-#' This uses the initialize, print, and validate functions above to create a single object
-#' The user can query
-#'
+#' The base Metacore R6 Class (original 7-table schema)
 #' @family Metacore
 #' @noRd
-#
 MetaCore <- R6::R6Class("Metacore",
   public = list(
     initialize = MetaCore_initialize,
@@ -261,55 +224,13 @@ MetaCore <- R6::R6Class("Metacore",
     metacore_filter = MetaCore_filter
   ),
   private = list(
-    .ds_spec = tibble(
-      dataset = character(),
-      structure = character(),
-      label = character()
-    ),
-    .ds_vars = tibble(
-      dataset = character(),
-      variable = character(),
-      mandatory = logical(),
-      key_seq = integer(),
-      order = integer(),
-      core = character(),
-      supp_flag = logical()
-    ),
-    .var_spec = tibble(
-      variable = character(),
-      label = character(),
-      length = integer(),
-      type = character(),
-      common = character(),
-      format = character()
-    ),
-    .value_spec = tibble(
-      dataset = character(),
-      variable = character(),
-      where = character(),
-      type = character(),
-      sig_dig = integer(),
-      code_id = character(),
-      origin = character(),
-      derivation_id = integer()
-    ),
-    .derivations = tibble(
-      derivation_id = integer(),
-      derivation = character()
-    ),
-    # code_type == df | permitted_val | external_lib
-    .codelist = tibble(
-      code_id = character(),
-      name = character(),
-      type = character(),
-      codes = list()
-    ),
-    .supp = tibble(
-      dataset = character(),
-      variable = character(),
-      idvar = character(),
-      qeval = character()
-    ),
+    .ds_spec = tibble(),
+    .ds_vars = tibble(),
+    .var_spec = tibble(),
+    .value_spec = tibble(),
+    .derivations = tibble(),
+    .codelist = tibble(),
+    .supp = tibble(),
     .ds_len = NA,
     .ds_names = list(),
     .ds_labels = list(),
@@ -339,6 +260,22 @@ MetaCore <- R6::R6Class("Metacore",
 #' @param derivations contains derivation, it allows for different variables to have the same derivation
 #' @param codelist contains the code/decode information
 #' @param supp contains the idvar and qeval information for supplemental variables
+#' @param study_level contains study-level metadata used when generating a
+#'   Define.xml (study name, description, protocol, standard and Define-XML
+#'   versions, language). Optional; a single-row table.
+#' @param documents contains references to external documents (e.g. the Analysis
+#'   Data Reviewer's Guide) used for Define.xml page references. Optional; one
+#'   row per document with `document_id`, `title` and `href`.
+#' @param comments contains variable comments used for Define.xml CommentDef
+#'   elements. Optional; one row per comment with `comment_id` and `comment`.
+#'   Links to variables via `value_spec$comment_id`.
+#' @param define_fields logical; when `TRUE` the object includes the extended
+#'   columns required for Define.xml generation (`class`, `repeating`,
+#'   `reference`, `purpose` in `ds_spec`; `role` in `ds_vars`; `where_label`
+#'   and `comment_id` in `value_spec`; `method_name`, `method_type`,
+#'   `document_id`, `pages` in `derivations`) as well as the `study_level`,
+#'   `documents`, and `comments` tables. When `FALSE` (default) those fields
+#'   are stripped so the object matches the original metacore schema.
 #' @param quiet `r lifecycle::badge("superseded")` Option to quietly load in, this
 #'   will suppress warnings, but not errors. Expects either `TRUE` or `FALSE`.
 #'   Default behaviour is `FALSE`. As of v0.3.0 this argument is deprecated in favour
@@ -356,57 +293,10 @@ MetaCore <- R6::R6Class("Metacore",
 #' @family Metacore
 #'
 #' @export
-metacore <- function(ds_spec = tibble(
-                       dataset = character(),
-                       structure = character(),
-                       label = character()
-                     ),
-                     ds_vars = tibble(
-                       dataset = character(),
-                       variable = character(),
-                       keep = NULL, # Deprecated in 0.3.0. To be removed in a future version
-                       mandatory = logical(),
-                       key_seq = integer(),
-                       order = integer(),
-                       core = character(),
-                       supp_flag = logical()
-                     ),
-                     var_spec = tibble(
-                       variable = character(),
-                       label = character(),
-                       length = integer(),
-                       type = character(),
-                       common = character(),
-                       format = character()
-                     ),
-                     value_spec = tibble(
-                       dataset = character(),
-                       variable = character(),
-                       where = character(),
-                       type = character(),
-                       sig_dig = integer(),
-                       code_id = character(),
-                       origin = character(),
-                       derivation_id = integer()
-                     ),
-                     derivations = tibble(
-                       derivation_id = integer(),
-                       derivation = character()
-                     ),
-                     codelist = tibble(
-                       code_id = character(),
-                       name = character(),
-                       type = character(),
-                       codes = list()
-                     ),
-                     supp = tibble(
-                       dataset = character(),
-                       variable = character(),
-                       idvar = character(),
-                       qeval = character()
-                     ),
-                     quiet = deprecated(),
-                     verbose = "message") {
+metacore <- function(ds_spec = NULL, ds_vars = NULL, var_spec = NULL, value_spec = NULL,
+                     derivations = NULL, codelist = NULL, supp = NULL, study_level = NULL,
+                     documents = NULL, comments = NULL, define_fields = FALSE,
+                     quiet = deprecated(), verbose = "message") {
   # Check if user has supplied `quiet` instead of `verbose`
   if (lifecycle::is_present(quiet)) {
     deprecate_soft(when = "0.3.0", what = "metacore(quiet)", with = "metacore(verbose)")
@@ -416,61 +306,43 @@ metacore <- function(ds_spec = tibble(
 
   with_verbosity(
     {
-      # Signal deprecation warning for ds_vars$keep column. This cannot be handled by
-      # regular `lifecycle::deprecate_*` functionality as it is a column name of an
-      # argument that has been changed, not the argument itself.
-      if ("keep" %in% names(ds_vars)) {
-        cli_warn(c("The column `ds_vars$keep` in the `ds_vars` table was deprecated
-as of 0.3.0 in favour of `ds_vars$mandatory and will be removed in a future release.
-The input for the supplied column `keep` has been mapped to the new column `mandatory`."))
+      # Fill NULL tables with empty schema using the appropriate schema.
+      schema <- if (define_fields) define_column_schema() else base_column_schema()
+      if (is.null(ds_spec)) ds_spec <- schema$.ds_spec
+      if (is.null(ds_vars)) ds_vars <- schema$.ds_vars
+      if (is.null(var_spec)) var_spec <- schema$.var_spec
+      if (is.null(value_spec)) value_spec <- schema$.value_spec
+      if (is.null(derivations)) derivations <- schema$.derivations
+      if (is.null(codelist)) codelist <- schema$.codelist
+      if (is.null(supp)) supp <- schema$.supp
+
+      # Signal deprecation warning for ds_vars$keep column.
+      if (!is.null(ds_vars) && "keep" %in% names(ds_vars)) {
+        cli_warn(c("The column {.var ds_vars$keep} in the {.var ds_vars} table was deprecated
+as of 0.3.0 in favour of {.var ds_vars$mandatory} and will be removed in a future release.
+The input for the supplied column {.var keep} has been mapped to the new column {.var mandatory}."))
 
         ds_vars <- ds_vars %>%
           mutate(mandatory = keep) %>%
           select(-keep)
       }
 
-      is_empty_df <- as.list(environment()) %>%
-        keep(is.null)
-
-      if (length(is_empty_df) > 0) {
-        to_replace <- all_message() %>%
-          mutate(
-            convert = map(.data$test, function(x) {
-              if (identical(x, .Primitive("is.numeric"))) {
-                numeric()
-              } else if (identical(x, .Primitive("is.logical"))) {
-                logical()
-              } else {
-                character()
-              }
-            })
-          ) %>%
-          filter(.data$dataset %in% names(is_empty_df)) %>%
-          group_by(.data$dataset) %>%
-          group_split()
-
-        replaced <- to_replace %>%
-          map(function(df) {
-            names(df$convert) <- df$var
-            df$convert %>%
-              as_tibble()
-          })
-
-        names(replaced) <- to_replace %>% map_chr(~ unique(.x$dataset))
-        list2env(replaced, environment())
+      if (define_fields) {
+        MetaCoreDefine$new(
+          ds_spec = ds_spec, ds_vars = ds_vars, var_spec = var_spec,
+          value_spec = value_spec, derivations = derivations,
+          codelist = codelist, supp = supp,
+          study_level = study_level, documents = documents, comments = comments,
+          quiet = quiet, verbose = verbose
+        )
+      } else {
+        MetaCore$new(
+          ds_spec = ds_spec, ds_vars = ds_vars, var_spec = var_spec,
+          value_spec = value_spec, derivations = derivations,
+          codelist = codelist, supp = supp,
+          quiet = quiet, verbose = verbose
+        )
       }
-
-      MetaCore$new(
-        ds_spec = ds_spec,
-        ds_vars = ds_vars,
-        var_spec = var_spec,
-        value_spec = value_spec,
-        derivations = derivations,
-        codelist = codelist,
-        supp = supp,
-        quiet = quiet,
-        verbose = verbose
-      )
     },
     quiet,
     verbose
@@ -513,7 +385,7 @@ select_dataset <- function(.data, dataset, simplify = FALSE, quiet = deprecated(
       cl$metacore_filter(dataset)
 
       if (simplify) {
-        test <- list(
+        mc <- list(
           cl$ds_vars,
           cl$var_spec,
           cl$value_spec,
@@ -522,8 +394,10 @@ select_dataset <- function(.data, dataset, simplify = FALSE, quiet = deprecated(
           cl$supp
         ) %>%
           reduce(left_join)
+      } else if (inherits(cl, "MetacoreDefine")) {
+        mc <- DatasetMetaDefine$new(metacore = cl, quiet = quiet, verbose = verbose)
       } else {
-        test <- DatasetMeta$new(metacore = cl, quiet = quiet)
+        mc <- DatasetMeta$new(metacore = cl, quiet = quiet, verbose = verbose)
       }
     },
     quiet,

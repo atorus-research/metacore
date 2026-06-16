@@ -6,53 +6,146 @@
 \usage{
 spec_type_to_value_spec(
   doc,
-  cols = c(dataset = "[D|d]ataset|[D|d]omain", variable = "[N|n]ame|[V|v]ariables?",
-    origin = "[O|o]rigin", type = "[T|t]ype", code_id = "[C|c]odelist|Controlled Term",
-    sig_dig = "[S|s]ignificant", where = "[W|w]here", derivation_id = "[M|m]ethod",
-    predecessor = "[P|p]redecessor"),
+  cols = base_col_regex()$.value_spec,
   sheet = NULL,
   where_sep_sheet = TRUE,
   where_cols = c(id = "ID", where = c("Variable", "Comparator", "Value")),
-  var_sheet = "[V|v]ar"
+  var_sheet = "[V|v]ar",
+  define_fields = FALSE
 )
 }
 \arguments{
-\item{doc}{Named list of datasets @seealso \code{\link[=read_all_sheets]{read_all_sheets()}} for exact
-format}
+\item{doc}{Named list of data frames produced by \code{\link[=read_all_sheets]{read_all_sheets()}}.}
 
-\item{cols}{Named vector of column names. The column names can be regular
-expressions for more flexibility. But, the names must follow the given
-pattern}
+\item{cols}{Named character vector of regular expressions mapping output
+column names to column headings in your specification. When \code{NULL}
+(default), patterns from \code{\link[=base_col_regex]{base_col_regex()}} are used (or \code{\link[=define_col_regex]{define_col_regex()}}
+when \code{define_fields = TRUE}). Valid names are \code{dataset}, \code{variable},
+\code{origin}, \code{type}, \code{code_id}, \code{sig_dig}, \code{where}, \code{derivation_id}, and the
+processing column \code{predecessor}; plus \code{where_label} when
+\code{define_fields = TRUE}.}
 
-\item{sheet}{Regular expression for the sheet name}
+\item{sheet}{Regular expression used to restrict which sheets are searched.
+\code{NULL} (default) searches all sheets.}
 
-\item{where_sep_sheet}{Boolean value to control if the where information in a
-separate dataset. If the where information is on a separate sheet, set to
-true and provide the column information with the \code{where_cols} inputs.}
+\item{where_sep_sheet}{Logical; \code{TRUE} (default) reads WHERE clauses from a
+dedicated sheet via \code{where_cols}. Set to \code{FALSE} when WHERE information is
+on the same sheet as the variables.}
 
-\item{where_cols}{Named list with an id and where field. All columns in the
-where field will be collapsed together}
+\item{where_cols}{Named character vector identifying the id and where columns
+when \code{where_sep_sheet = TRUE}. Defaults to
+\code{c("id" = "ID", "where" = c("Variable", "Comparator", "Value"))}.}
 
-\item{var_sheet}{Name of sheet with the Variable information on it. Metacore
-expects each variable will have a row in the value_spec. Because many
-specification only have information in the value tab this is added. If the
-information already exists in the value tab of your specification set to
-NULL}
+\item{var_sheet}{Regular expression matching the variables sheet used to
+backfill any variables not already in the value tab. Set to \code{NULL} to
+skip backfilling. Defaults to matching sheets named \code{"Variables"}.}
+
+\item{define_fields}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}} Logical; when
+\code{TRUE}, additional Define.xml columns (\code{where_label}, \code{comment_id}) are
+appended to the result. Defaults to \code{FALSE}.}
 }
 \value{
 a dataset formatted for the metacore object
 }
 \description{
-Creates the value_spec from a list of datasets (optionally filtered by the
-sheet input). The named vector \code{cols} is used to determine which is the
-correct sheet and renames the columns
+Builds the \code{value_spec} table from a named list of Excel sheets produced by
+\code{\link[=read_all_sheets]{read_all_sheets()}}. \code{value_spec} holds \strong{one row per dataset–variable
+combination} and captures the value-level metadata needed for programming
+and traceability.
+}
+\details{
+\subsection{How it works}{
+
+The function searches every sheet in \code{doc} for one that contains all
+required columns, renames them, and returns a single tidy tibble. Because
+many specifications only include value-level metadata for \emph{derived} variables
+and leave collected variables off the VLM sheet, the function automatically
+backfills all variables from the variables sheet (\code{var_sheet}) so that every
+variable has at least one row in \code{value_spec}.
+}
+
+\subsection{Output columns}{\tabular{ll}{
+   Column \tab Description \cr
+   \code{dataset} \tab Dataset name, e.g. \code{"ADAE"} \cr
+   \code{variable} \tab Variable name, e.g. \code{"AVAL"} \cr
+   \code{origin} \tab Data origin: \code{"Derived"}, \code{"Assigned"}, \code{"Collected"}, etc. \cr
+   \code{type} \tab Variable type, e.g. \code{"Char"} or \code{"Num"} \cr
+   \code{code_id} \tab Cross-reference to a codelist entry in \code{codelist} \cr
+   \code{sig_dig} \tab Number of significant digits (numeric variables) \cr
+   \code{where} \tab WHERE clause identifying a parameter row in VLM \cr
+   \code{derivation_id} \tab Cross-reference to a derivation in \code{derivations} \cr
+}
+
+}
+
+\subsection{Default column matching}{
+
+When \code{cols = NULL} (the default), patterns from \code{\link[=base_col_regex]{base_col_regex()}} are used.
+These are designed to match standard Pinnacle 21 headings:
+\itemize{
+\item \strong{\code{dataset}} — heading matches \code{"Dataset"} or \code{"Domain"}
+\item \strong{\code{variable}} — heading matches \code{"Name"} or \code{"Variables"}
+\item \strong{\code{origin}} — heading matches \code{"Origin"}
+\item \strong{\code{type}} — heading matches \code{"Type"}
+\item \strong{\code{code_id}} — heading matches \code{"Codelist"} or \code{"Controlled Term"}
+\item \strong{\code{sig_dig}} — heading matches \code{"Significant"}
+\item \strong{\code{where}} — heading matches \code{"Where"}
+\item \strong{\code{derivation_id}} — heading matches \code{"Method"}
+\item \strong{\code{predecessor}} — heading matches \code{"Predecessor"} \emph{(processing only —
+converted to \code{derivation_id} entries and dropped from the output)}
+}
+
+If your specification uses different headings, supply a named character
+vector to \code{cols}:
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{spec_type_to_value_spec(doc, cols = c(
+  "dataset"       = "Domain",
+  "variable"      = "Variable Name",
+  "origin"        = "Source",
+  "derivation_id" = "Computational Method"
+))
+}\if{html}{\out{</div>}}
+}
+
+\subsection{WHERE clause location}{
+
+Pinnacle 21 stores WHERE clauses on a \strong{separate} sheet by default.
+If your specification puts the WHERE clause on the same sheet as the
+variables, set \code{where_sep_sheet = FALSE}:
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{spec_type_to_value_spec(doc, where_sep_sheet = FALSE)
+}\if{html}{\out{</div>}}
+}
+
+\subsection{Variable sheet backfill}{
+
+\code{var_sheet} names the sheet used to backfill missing variables. Set to
+\code{NULL} if your value tab already has a row for every variable:
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{spec_type_to_value_spec(doc, var_sheet = NULL)
+}\if{html}{\out{</div>}}
+}
+
+\subsection{Additional Define.xml columns (\code{define_fields = TRUE})}{
+
+Set \code{define_fields = TRUE} to append two extra columns required for
+Define.xml 2.0 generation. Patterns are drawn from \code{\link[=define_col_regex]{define_col_regex()}}:\tabular{lll}{
+   Column \tab Description \tab Default heading match \cr
+   \code{where_label} \tab Human-readable label for the WHERE clause \tab \code{"Label"} or \code{"Description"} \cr
+   \code{comment_id} \tab Cross-reference to a comment in \code{comments} \tab \emph{(joined from the variables sheet, not column-matched)} \cr
+}
+
+}
 }
 \seealso{
-Other spec builders: 
-\code{\link{spec_type_to_codelist}()},
-\code{\link{spec_type_to_derivations}()},
-\code{\link{spec_type_to_ds_spec}()},
-\code{\link{spec_type_to_ds_vars}()},
-\code{\link{spec_type_to_var_spec}()}
+Other spec builders:
+\code{\link[=spec_type_to_codelist]{spec_type_to_codelist()}},
+\code{\link[=spec_type_to_comments]{spec_type_to_comments()}},
+\code{\link[=spec_type_to_derivations]{spec_type_to_derivations()}},
+\code{\link[=spec_type_to_documents]{spec_type_to_documents()}},
+\code{\link[=spec_type_to_ds_spec]{spec_type_to_ds_spec()}},
+\code{\link[=spec_type_to_ds_vars]{spec_type_to_ds_vars()}},
+\code{\link[=spec_type_to_supp]{spec_type_to_supp()}},
+\code{\link[=spec_type_to_var_spec]{spec_type_to_var_spec()}}
 }
 \concept{spec builders}

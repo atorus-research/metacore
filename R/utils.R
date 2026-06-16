@@ -51,7 +51,16 @@ add_labs <- function(.data, ...) {
 #'
 check_structure <- function(.data, col, func, any_na_acceptable, nm) {
   column <- as_string(col)
-  vec <- .data %>% pull(!!col)
+
+  tryCatch(
+    vec <- .data %>% pull(!!col),
+    error = function(e) {
+      cli_abort(c(
+        "x" = "The column {.var {column}} is not present in the {.val {nm}} table"
+      ), call = rlang::call2("check_structure"))
+    }
+  )
+
   warning_string <- NULL
   error_message <- NULL
 

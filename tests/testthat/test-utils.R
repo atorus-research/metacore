@@ -51,8 +51,8 @@ test_that("metacore example returns file options", {
   expect_equal(
     sort(metacore_example()),
     sort(c(
-      "ADaM_define_CDISC_pilot3.xml", "mock_spec.xlsx", "p21_mock.xlsx", "pilot_ADaM.rda",
-      "pilot_SDTM.rda", "SDTM_define.xml", "SDTM_spec_CDISC_pilot.xlsx"
+      "ADaM_define_CDISC_pilot3.xml", "metacore_0_3_0.rds", "mock_spec.xlsx", "p21_mock.xlsx",
+      "pilot_ADaM.rda", "pilot_SDTM.rda", "SDTM_define.xml", "SDTM_spec_CDISC_pilot.xlsx"
     ))
   )
 })

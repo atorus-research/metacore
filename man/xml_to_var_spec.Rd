@@ -18,11 +18,11 @@ variable. The variable will just be the variable, unless the specification
 for that variable differ between datasets
 }
 \seealso{
-Other xml builder: 
-\code{\link{xml_to_codelist}()},
-\code{\link{xml_to_derivations}()},
-\code{\link{xml_to_ds_spec}()},
-\code{\link{xml_to_ds_vars}()},
-\code{\link{xml_to_value_spec}()}
+Other xml builder:
+\code{\link[=xml_to_codelist]{xml_to_codelist()}},
+\code{\link[=xml_to_derivations]{xml_to_derivations()}},
+\code{\link[=xml_to_ds_spec]{xml_to_ds_spec()}},
+\code{\link[=xml_to_ds_vars]{xml_to_ds_vars()}},
+\code{\link[=xml_to_value_spec]{xml_to_value_spec()}}
 }
 \concept{xml builder}
