@@ -55,6 +55,7 @@ Collate:
     'MetacoreDefine.R'
     'DatasetMeta.R'
     'checks.R'
+    'define_xml_writers.R'
     'metacore-package.R'
     'metacore-schema.R'
     'spec_builder.R'

@@ -130,6 +130,7 @@ Other spec builders:
 \code{\link[=spec_type_to_derivations]{spec_type_to_derivations()}},
 \code{\link[=spec_type_to_documents]{spec_type_to_documents()}},
 \code{\link[=spec_type_to_ds_spec]{spec_type_to_ds_spec()}},
+\code{\link[=spec_type_to_study_level]{spec_type_to_study_level()}},
 \code{\link[=spec_type_to_supp]{spec_type_to_supp()}},
 \code{\link[=spec_type_to_value_spec]{spec_type_to_value_spec()}},
 \code{\link[=spec_type_to_var_spec]{spec_type_to_var_spec()}}

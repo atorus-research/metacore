@@ -101,8 +101,7 @@ spec_to_metacore <- function(path, quiet = deprecated(), where_sep_sheet = TRUE,
         documents = documents,
         comments = comments,
         define_fields = define_fields,
-        quiet = quiet,
-        verbose = verbose
+        verbose = "message"
       )
 
       if (quiet) invisible(mc) else mc
@@ -1341,8 +1340,8 @@ spec_type_to_comments <- function(
 #'   mapping. Set to `FALSE` when the sheet already stores study metadata as
 #'   named columns.
 #'
-#' @return A one-row tibble formatted for the `study_level` slot of a
-#'   [MetacoreDefine] object.
+#' @return A one-row tibble formatted for the `study_level` table of a
+#'   `MetacoreDefine` object.
 #' @export
 #'
 #' @family spec builders
