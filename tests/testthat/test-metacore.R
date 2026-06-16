@@ -446,6 +446,3 @@ test_that("Metacore structure is the same as 0.3.0 when define_fields = FALSE", 
   expect_identical(metacore_0_3_0$derivations, metacore_0_4_0$derivations)
   expect_identical(metacore_0_3_0$supp, metacore_0_4_0$supp)
 })
-
-
-

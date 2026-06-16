@@ -326,21 +326,21 @@ test_that("set_study_level populates all fields and returns self invisibly", {
 
   expect_identical(ret, cl)
   expect_equal(nrow(cl$study_level), 1L)
-  expect_equal(cl$study_level$study_name,        "CDISC Pilot",   ignore_attr = TRUE)
+  expect_equal(cl$study_level$study_name, "CDISC Pilot", ignore_attr = TRUE)
   expect_equal(cl$study_level$study_description, "A pilot study", ignore_attr = TRUE)
-  expect_equal(cl$study_level$protocol_name,     "CDISCPILOT01",  ignore_attr = TRUE)
-  expect_equal(cl$study_level$standard_name,     "CDISC SDTM",    ignore_attr = TRUE)
-  expect_equal(cl$study_level$standard_version,  "3.2",           ignore_attr = TRUE)
-  expect_equal(cl$study_level$define_version,    "2.1",           ignore_attr = TRUE)
-  expect_equal(cl$study_level$language,          "en",            ignore_attr = TRUE)
+  expect_equal(cl$study_level$protocol_name, "CDISCPILOT01", ignore_attr = TRUE)
+  expect_equal(cl$study_level$standard_name, "CDISC SDTM", ignore_attr = TRUE)
+  expect_equal(cl$study_level$standard_version, "3.2", ignore_attr = TRUE)
+  expect_equal(cl$study_level$define_version, "2.1", ignore_attr = TRUE)
+  expect_equal(cl$study_level$language, "en", ignore_attr = TRUE)
 })
 
 test_that("set_study_level fills omitted arguments with NA", {
   cl <- mc_define$clone()
   cl$set_study_level(study_name = "Partial", define_version = "2.1")
 
-  expect_equal(cl$study_level$study_name,    "Partial", ignore_attr = TRUE)
-  expect_equal(cl$study_level$define_version, "2.1",    ignore_attr = TRUE)
+  expect_equal(cl$study_level$study_name, "Partial", ignore_attr = TRUE)
+  expect_equal(cl$study_level$define_version, "2.1", ignore_attr = TRUE)
   expect_true(all(is.na(cl$study_level[c(
     "study_description", "protocol_name", "standard_name",
     "standard_version", "language"
@@ -351,7 +351,7 @@ test_that("set_study_level preserves column labels", {
   cl <- mc_define$clone()
   cl$set_study_level(study_name = "X")
 
-  expect_equal(attr(cl$study_level$study_name,    "label"), "Study Name")
+  expect_equal(attr(cl$study_level$study_name, "label"), "Study Name")
   expect_equal(attr(cl$study_level$define_version, "label"), "Define Version")
 })
 

@@ -1359,7 +1359,6 @@ spec_type_to_study_level <- function(
     ),
     sheet = "[Dd]efine|[Ss]tudy",
     pivot = TRUE) {
-
   valid_names <- names(define_column_schema()$.study_level)
   if (!all(names(cols) %in% valid_names) || is.null(names(cols))) {
     cli_abort(c(
@@ -1388,7 +1387,7 @@ spec_type_to_study_level <- function(
   if (pivot) {
     col_names <- names(sheet_data)
     attr_col <- col_names[str_detect(col_names, "[Aa]ttribute")]
-    val_col  <- col_names[str_detect(col_names, "[Vv]alue")]
+    val_col <- col_names[str_detect(col_names, "[Vv]alue")]
 
     if (length(attr_col) == 0) {
       cli_abort(c(
