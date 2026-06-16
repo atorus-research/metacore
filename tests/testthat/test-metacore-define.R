@@ -40,9 +40,9 @@ test_that("all 7 base tables still accessible from MetacoreDefine", {
 
 # NULL inputs produce empty schema tibbles -------------------------------------
 
-test_that("NULL study_level produces empty tibble with correct columns", {
+test_that("study_level read from spec has correct columns and one row", {
   expect_equal(names(mc_define$study_level), names(define_column_schema()$.study_level))
-  expect_equal(nrow(mc_define$study_level), 0L)
+  expect_equal(nrow(mc_define$study_level), 1L)
 })
 
 test_that("NULL documents produces empty tibble with correct columns", {

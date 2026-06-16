@@ -33,7 +33,8 @@ globalVariables(c(
   "where_new",
   "var1",
   "n_lab",
-  "super"
+  "super",
+  "attribute"
 ))
 
 .onAttach <- function(libname, pkgname) {

@@ -72,6 +72,7 @@ spec_to_metacore <- function(path, quiet = deprecated(), where_sep_sheet = TRUE,
       codelist <- spec_type_to_codelist(doc)
 
       # Define.xml-only tables — skipped when define_fields = FALSE
+      study_level <- if (define_fields) spec_type_to_study_level(doc) else NULL
       documents <- if (define_fields) spec_type_to_documents(doc) else NULL
       comments <- if (define_fields) spec_type_to_comments(doc) else NULL
       supp <- base_column_schema()$.supp
@@ -96,6 +97,7 @@ spec_to_metacore <- function(path, quiet = deprecated(), where_sep_sheet = TRUE,
       mc <- metacore(
         ds_spec, ds_vars, var_spec, value_spec, derivations, codelist,
         supp = supp,
+        study_level = study_level,
         documents = documents,
         comments = comments,
         define_fields = define_fields,
@@ -1266,6 +1268,164 @@ spec_type_to_comments <- function(
     filter(!is.na(comment_id)) |>
     reorder_by_schema("comments")
 }
+
+#' Spec to study_level
+#'
+#' `r lifecycle::badge("experimental")`
+#' Builds the `study_level` table from a named list of Excel sheets produced by
+#' [read_all_sheets()]. `study_level` holds **one row of study-wide metadata**
+#' used when generating Define.xml 2.0 output.
+#'
+#' @details
+#' ## How it works
+#'
+#' The function locates a sheet whose name matches `sheet` (typically `"Define"`
+#' or `"Study"`). It then either **pivots** the sheet (the default) or reads
+#' columns directly, depending on `pivot`.
+#'
+#' ## Pivoted format (`pivot = TRUE`, default)
+#'
+#' The sheet contains two columns: one whose heading matches `[Aa]ttribute`
+#' (holding the field names) and one whose heading matches `[Vv]alue` (holding
+#' the corresponding values). For example:
+#'
+#' | Attribute        | Value                 |
+#' |:-----------------|:----------------------|
+#' | StudyName        | CDISC Pilot           |
+#' | StudyDescription | Phase III efficacy... |
+#' | ProtocolName     | CDISCPILOT01          |
+#'
+#' The function pivots this into a single-row tibble with one column per
+#' attribute, then renames columns to the standard schema names using the
+#' regular expressions in `cols`. Any attribute not matched by a `cols` entry is
+#' discarded; any schema column not found in the sheet is filled with `NA`.
+#'
+#' ## Columnar format (`pivot = FALSE`)
+#'
+#' The sheet already stores each field as its own column (one row of data). The
+#' regexes in `cols` are matched against the **column headings** of the sheet
+#' directly, and the matching columns are selected and renamed. This is the
+#' same approach used by all other `spec_type_to_*` builders.
+#'
+#' ## Output columns
+#'
+#' | Column | Description |
+#' |:-------|:------------|
+#' | `study_name` | Short study identifier |
+#' | `study_description` | Human-readable study description |
+#' | `protocol_name` | Protocol number or name |
+#' | `standard_name` | CDISC standard name (e.g. `"ADaM"`) |
+#' | `standard_version` | Version of the standard (e.g. `"1.0"`) |
+#' | `define_version` | Define-XML version (e.g. `"2.0"`) |
+#' | `language` | Language code (e.g. `"en"`) |
+#'
+#' @param doc Named list of data frames produced by [read_all_sheets()].
+#' @param cols Named character vector of regular expressions.
+#'   - When `pivot = TRUE` (default): regexes are matched against the **pivoted
+#'     attribute values** (which become column names after the pivot). Any
+#'     attribute not matched is silently discarded; missing schema columns are
+#'     filled with `NA`.
+#'   - When `pivot = FALSE`: regexes are matched against the **sheet's column
+#'     headings**, identical to other `spec_type_to_*` builders. Only the
+#'     columns listed in `cols` are required; missing schema columns are filled
+#'     with `NA`.
+#'
+#'   Names must be a subset of the `study_level` schema column names:
+#'   `study_name`, `study_description`, `protocol_name`, `standard_name`,
+#'   `standard_version`, `define_version`, `language`. A minimum of
+#'   `study_name`, `study_description`, and `protocol_name` should be supplied.
+#' @param sheet Regular expression used to identify the study-level sheet.
+#'   Defaults to matching sheets named `"Define"` or `"Study"`.
+#' @param pivot Logical; when `TRUE` (default) the sheet is assumed to be in
+#'   attribute–value format and is pivoted to a single wide row before column
+#'   mapping. Set to `FALSE` when the sheet already stores study metadata as
+#'   named columns.
+#'
+#' @return A one-row tibble formatted for the `study_level` slot of a
+#'   [MetacoreDefine] object.
+#' @export
+#'
+#' @family spec builders
+spec_type_to_study_level <- function(
+    doc,
+    cols = c(
+      "study_name"        = "[Ss]tudy.?[Nn]ame",
+      "study_description" = "[Ss]tudy.?[Dd]escription",
+      "protocol_name"     = "[Pp]rotocol.?[Nn]ame",
+      "standard_name"     = "[Ss]tandard.?[Nn]ame",
+      "standard_version"  = "[Ss]tandard.?[Vv]ersion",
+      "define_version"    = "[Dd]efine.?[Vv]ersion",
+      "language"          = "[Ll]anguage"
+    ),
+    sheet = "[Dd]efine|[Ss]tudy",
+    pivot = TRUE) {
+
+  valid_names <- names(define_column_schema()$.study_level)
+  if (!all(names(cols) %in% valid_names) || is.null(names(cols))) {
+    cli_abort(c(
+      "x" = "Incorrect column names supplied for {.var study_level}",
+      "i" = "The column vector {.arg cols} must be named with a subset of {.val {valid_names}}"
+    ))
+  }
+
+  if (!is.null(sheet)) {
+    sheet_ls <- str_subset(names(doc), sheet)
+    if (length(sheet_ls) == 0) {
+      cli_abort("No sheet matching {.val {sheet}} was found in the specification.")
+    }
+    if (length(sheet_ls) > 1) {
+      cli_warn(c(
+        "Multiple sheets match the sheet pattern.",
+        "i" = "Using the first match: {.val {sheet_ls[1]}}."
+      ))
+      sheet_ls <- sheet_ls[1]
+    }
+    doc <- doc[sheet_ls]
+  }
+
+  sheet_data <- doc[[1]]
+
+  if (pivot) {
+    col_names <- names(sheet_data)
+    attr_col <- col_names[str_detect(col_names, "[Aa]ttribute")]
+    val_col  <- col_names[str_detect(col_names, "[Vv]alue")]
+
+    if (length(attr_col) == 0) {
+      cli_abort(c(
+        "x" = "Could not find an attribute column in sheet {.val {names(doc)[1]}}.",
+        "i" = "Expected a column matching {.val Attribute} when {.arg pivot = TRUE}."
+      ))
+    }
+    if (length(val_col) == 0) {
+      cli_abort(c(
+        "x" = "Could not find a value column in sheet {.val {names(doc)[1]}}.",
+        "i" = "Expected a column matching {.val Value} when {.arg pivot = TRUE}."
+      ))
+    }
+
+    sheet_data <- sheet_data |>
+      select(attribute = all_of(attr_col[1]), value = all_of(val_col[1])) |>
+      filter(!is.na(.data$attribute)) |>
+      tidyr::pivot_wider(names_from = attribute, values_from = value)
+  }
+
+  # Match each cols regex against the (possibly pivoted) column names and
+  # extract the matching column, filling NA for any unmatched entry.
+  pivot_names <- names(sheet_data)
+  out <- imap(cols, function(regex, output_name) {
+    match_idx <- which(str_detect(pivot_names, regex))
+    if (length(match_idx) > 0) {
+      sheet_data[[pivot_names[match_idx[1]]]]
+    } else {
+      rep(NA_character_, nrow(sheet_data))
+    }
+  }) |>
+    tibble::as_tibble()
+
+  fill_cols(out, define_column_schema()$.study_level) |>
+    reorder_by_schema("study_level")
+}
+
 
 #' Spec to supp
 #'

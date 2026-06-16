@@ -920,3 +920,208 @@ test_that("spec_type_to_ds_spec warns when purpose is missing and fills NA", {
   expect_true("purpose" %in% names(out))
   expect_true(all(is.na(out$purpose)))
 })
+
+# spec_type_to_study_level ----------------------------------------------------
+
+# Shared fixture: the vlm_test_spec.xlsx "Define" sheet (attribute-value layout).
+# Loaded lazily so tests skip gracefully when the file is absent.
+vlm_xlsx_available <- file.exists("vlm_test_spec.xlsx")
+vlm_doc <- if (vlm_xlsx_available) read_all_sheets("vlm_test_spec.xlsx") else NULL
+
+test_that("spec_type_to_study_level pivot=TRUE reads vlm_test_spec.xlsx correctly", {
+  skip_if_not(vlm_xlsx_available, "vlm_test_spec.xlsx not available")
+  result <- spec_type_to_study_level(vlm_doc)
+
+  expect_equal(result$study_name, "VLM Test Specification")
+  expect_equal(
+    result$study_description,
+    "Dummy specification document designed to test behaviour of functions using VLM"
+  )
+  expect_equal(result$protocol_name, "123456.0")
+  expect_equal(result$language, "en")
+})
+
+test_that("spec_type_to_study_level output has all schema columns in correct order", {
+  skip_if_not(vlm_xlsx_available, "vlm_test_spec.xlsx not available")
+  result <- spec_type_to_study_level(vlm_doc)
+  expected_cols <- names(define_column_schema()$.study_level)
+
+  expect_s3_class(result, "tbl_df")
+  expect_equal(nrow(result), 1L)
+  expect_equal(names(result), expected_cols)
+})
+
+test_that("spec_type_to_study_level fills NA for attributes absent from the pivot", {
+  minimal_doc <- list(
+    Define = tibble::tibble(
+      Attribute = c("StudyName", NA, "Legend"),
+      Value = c("My Study", NA, "ignore this row")
+    )
+  )
+
+  result <- spec_type_to_study_level(minimal_doc)
+
+  expect_equal(result$study_name, "My Study")
+  expect_true(is.na(result$study_description))
+  expect_true(is.na(result$protocol_name))
+  expect_true(is.na(result$language))
+})
+
+test_that("spec_type_to_study_level NA attribute rows are filtered before pivot", {
+  doc_with_na <- list(
+    Define = tibble::tibble(
+      Attribute = c("StudyName", NA, NA),
+      Value     = c("Trial X", NA, "noise")
+    )
+  )
+
+  result <- spec_type_to_study_level(doc_with_na)
+
+  expect_equal(nrow(result), 1L)
+  expect_equal(result$study_name, "Trial X")
+})
+
+test_that("spec_type_to_study_level pivot=TRUE works with space-separated attribute names", {
+  doc_spaced <- list(
+    Define = tibble::tibble(
+      Attribute = c("Study Name", "Study Description", "Protocol Name", "Language"),
+      Value     = c("CDISCPILOT01", "Phase III", "PROT-001", "en")
+    )
+  )
+
+  result <- spec_type_to_study_level(doc_spaced)
+
+  expect_equal(result$study_name, "CDISCPILOT01")
+  expect_equal(result$study_description, "Phase III")
+  expect_equal(result$protocol_name, "PROT-001")
+  expect_equal(result$language, "en")
+})
+
+test_that("spec_type_to_study_level pivot=FALSE reads columnar sheet correctly", {
+  columnar_doc <- list(
+    Study = tibble::tibble(
+      StudyName        = "Columnar Study",
+      StudyDescription = "Columnar description",
+      ProtocolName     = "COL-001",
+      Language         = "en"
+    )
+  )
+
+  result <- spec_type_to_study_level(columnar_doc, sheet = "[Ss]tudy", pivot = FALSE)
+
+  expect_equal(result$study_name, "Columnar Study")
+  expect_equal(result$study_description, "Columnar description")
+  expect_equal(result$protocol_name, "COL-001")
+  expect_equal(result$language, "en")
+})
+
+test_that("spec_type_to_study_level pivot=FALSE fills NA for columns absent from sheet", {
+  columnar_doc <- list(
+    Study = tibble::tibble(
+      StudyName    = "Minimal Study",
+      ProtocolName = "MIN-001"
+    )
+  )
+
+  result <- spec_type_to_study_level(
+    columnar_doc,
+    cols    = c("study_name" = "[Ss]tudy[Nn]ame", "protocol_name" = "[Pp]rotocol[Nn]ame"),
+    sheet   = "[Ss]tudy",
+    pivot   = FALSE
+  )
+
+  expect_equal(result$study_name, "Minimal Study")
+  expect_equal(result$protocol_name, "MIN-001")
+  expect_true(is.na(result$study_description))
+  expect_true(is.na(result$language))
+})
+
+test_that("spec_type_to_study_level pivot=FALSE output has all schema columns", {
+  columnar_doc <- list(
+    Study = tibble::tibble(StudyName = "X", ProtocolName = "Y", StudyDescription = "Z")
+  )
+
+  result <- spec_type_to_study_level(columnar_doc, sheet = "[Ss]tudy", pivot = FALSE)
+
+  expect_equal(names(result), names(define_column_schema()$.study_level))
+})
+
+test_that("spec_type_to_study_level warns when multiple sheets match and uses the first", {
+  two_sheet_doc <- list(
+    Define = tibble::tibble(Attribute = "StudyName", Value = "First"),
+    Study  = tibble::tibble(Attribute = "StudyName", Value = "Second")
+  )
+
+  expect_warning(
+    result <- spec_type_to_study_level(two_sheet_doc),
+    regexp = "Multiple sheets match"
+  )
+  expect_equal(result$study_name, "First")
+})
+
+test_that("spec_type_to_study_level errors when no sheet matches", {
+  skip_if_not(vlm_xlsx_available, "vlm_test_spec.xlsx not available")
+  expect_error(
+    spec_type_to_study_level(vlm_doc, sheet = "NoSuchSheet"),
+    regexp = "No sheet matching"
+  )
+})
+
+test_that("spec_type_to_study_level errors on invalid col names", {
+  skip_if_not(vlm_xlsx_available, "vlm_test_spec.xlsx not available")
+  expect_error(
+    spec_type_to_study_level(vlm_doc, cols = c("bad_col" = "Study")),
+    regexp = "Incorrect column names supplied"
+  )
+})
+
+test_that("spec_type_to_study_level errors on unnamed cols vector", {
+  skip_if_not(vlm_xlsx_available, "vlm_test_spec.xlsx not available")
+  expect_error(
+    spec_type_to_study_level(vlm_doc, cols = c("StudyName", "ProtocolName")),
+    regexp = "Incorrect column names supplied"
+  )
+})
+
+test_that("spec_type_to_study_level pivot=TRUE errors when no Attribute column found", {
+  no_attr_doc <- list(
+    Define = tibble::tibble(Field = "StudyName", Value = "X")
+  )
+
+  expect_error(
+    spec_type_to_study_level(no_attr_doc),
+    regexp = "Could not find an attribute column"
+  )
+})
+
+test_that("spec_type_to_study_level pivot=TRUE errors when no Value column found", {
+  no_val_doc <- list(
+    Define = tibble::tibble(Attribute = "StudyName", Data = "X")
+  )
+
+  expect_error(
+    spec_type_to_study_level(no_val_doc),
+    regexp = "Could not find a value column"
+  )
+})
+
+test_that("spec_type_to_study_level accepts custom cols regex overrides", {
+  custom_doc <- list(
+    Define = tibble::tibble(
+      Attribute = c("Trial_Name", "Trial_Protocol"),
+      Value     = c("Custom Trial", "CT-123")
+    )
+  )
+
+  result <- spec_type_to_study_level(
+    custom_doc,
+    cols = c(
+      "study_name"    = "Trial_Name",
+      "protocol_name" = "Trial_Protocol"
+    )
+  )
+
+  expect_equal(result$study_name, "Custom Trial")
+  expect_equal(result$protocol_name, "CT-123")
+  expect_true(is.na(result$study_description))
+})

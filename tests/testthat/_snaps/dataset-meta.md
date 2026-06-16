@@ -40,7 +40,7 @@
         reference, and purpose
       > ds_vars: character [31 x 8] dataset, variable, order, mandatory, key_seq,
         core, supp_flag, and role
-      > study_level: character [0 x 7] study_name, study_description, protocol_name,
+      > study_level: character [1 x 7] study_name, study_description, protocol_name,
         standard_name, standard_version, define_version, and language
       > supp: character [6 x 4] dataset, variable, idvar, and qeval
       > value_spec: character [31 x 10] dataset, variable, origin, type, code_id,
