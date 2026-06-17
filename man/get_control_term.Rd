@@ -4,29 +4,37 @@
 \alias{get_control_term}
 \title{Get Control Term}
 \usage{
-get_control_term(metacode, variable, dataset = NULL)
+get_control_term(metacode, variable = NULL, dataset = NULL, where = NULL)
 }
 \arguments{
-\item{metacode}{metacore object}
+\item{metacode}{A metacore object}
 
-\item{variable}{A variable name to get the controlled terms for. This can
-either be a string or just the name of the variable}
+\item{variable}{A variable name (bare or string)}
 
-\item{dataset}{A dataset name. This is not required if there is only one set
-of control terminology across all datasets}
+\item{dataset}{Optional dataset name (bare or string)}
+
+\item{where}{Optional VLM condition matching \code{value_spec$where}, or \code{"all"}
+to retrieve all control terminology for variables with multiple VLM conditions}
 }
 \value{
-a vector for permitted values and a 2-column tibble for codelists
+A vector, a tibble, a named list of tibbles, or NULL
 }
 \description{
 Returns the control term (a vector for permitted values and a tibble for code
-lists) for a given variable. The dataset can be optionally specified if there
-is different control terminology for different datasets
+lists) for a given variable. If the variable has value-level metadata (VLM),
+a specific VLM condition can be selected via the \code{where} parameter, or
+\code{where = "all"} can be used to retrieve all controlled terminology.
 }
 \examples{
 \dontrun{
-meta_ex <- spec_to_metacore(metacore_example("p21_mock.xlsx"))
+Example for a single controlled term using both strings and bare column names
+meta_ex <- spec_to_metacore(metacore_example("p21_mock.xlsx"), verbose = "silent")
 get_control_term(meta_ex, QVAL, SUPPAE)
 get_control_term(meta_ex, "QVAL", "SUPPAE")
+
+Example for VLM retrieving all possible CT and CT for a single where clause
+meta_vlm <- spec_to_metacore(metacore_example("vlm_test_spec.xlsx"), verbose = "silent")
+get_control_term(meta_vlm, "AVALCA1N", "ADEX", where = "all")
+get_control_term(meta_vlm, "AVALCA1N", "ADEX", where = "PARAMCD EQ PERCOMP")
 }
 }
