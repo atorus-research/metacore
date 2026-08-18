@@ -1,0 +1,124 @@
+Define ARMADA display metadata requirements for validation through NEXUS to begin (display spec, plus version of mock shell used)
+DV_T01 — Display Description 
+
+Summary of Important Protocol Deviations 
+
+Study Design 
+
+Parallel 
+
+Title 
+
+Title: Summary of Important Protocol Deviations 
+
+MainAOM.outputLabel: Summary of Important Protocol Deviations 
+
+Rationale 
+
+The title is as written in the mock shell, with no option to select. 
+
+Footnote 
+
+None. No footnotes are defined in the mock shell for this display. 
+
+Analysis Set 
+
+Default analysis set is "Enrolled", ENRLFL EQ "Y" 
+
+Rationale 
+
+Use planned treatment 
+
+Treatment 
+
+TRT01PN-TRT01P 
+
+Only columns for Treatment A and Treatment B are needed. 
+
+A codelist with full matrix EQ TRUE should be created. The codelist items follow the values to be displayed — Treatment A and Treatment B — with the numeric values aligned with the order of the treatment columns. 
+
+Rationale 
+
+Per display principle number 400: In parallel studies with more than one treatment group, a total column will not be included in the summary table, unless this is specifically deemed appropriate (e.g., for summaries of baseline characteristics or subject accountability). 
+
+Total treatment is optional in the mock shell, and the developer note states: Include a Total column for crossover studies. 
+
+In regard to the display principle, the developer note, and the parallel study design, this table will not include a Total treatment column by default. 
+
+The 'No Treatment' column is optional and can be used by the study if a subject who did not receive treatment has an important protocol deviation. It is not included by default because not all studies will necessarily encounter this scenario 
+
+Column 
+
+As displayed in the PNG, the table has two stub columns (indented) and two result columns (one per treatment subset). 
+
+Section 
+
+This table has 3 required sections. The analysis-set-enrolled-counts row provides the treatment N (Big N) denominator and is displayed in the column headers, not as a body section. 
+
+Section 1 — Any Important Protocol Deviations 
+
+Display label: Any Important Protocol Deviations 
+
+Method: Number of distinct subjects (USUBJID) with at least one important protocol deviation, and percentage 
+
+By Variable: TRT01PN/NA/TRT01P (Full Matrix: Yes) 
+
+Domain: ADDV 
+
+Subset: ADIMPTFL EQ "Y" 
+
+Denominator: Big N (analysis-set-enrolled-counts) 
+Note: This summary row counts subjects with at least one important deviation; a subject is counted once regardless of the number of deviations. 
+
+Section 2 — By Category 
+
+Display label: <category name> (one row per observed deviation category, e.g. "NOT WITHDRAWN AFTER DEVELOPING WITHDRAWAL CRITERIA") 
+
+Method: Number of distinct subjects (USUBJID) with at least one deviation in the category, and percentage 
+
+By Variable: TRT01PN/NA/TRT01P (Full Matrix: Yes) * NA/NA/ACAT1 (Full Matrix: No) 
+
+Domain: ADDV 
+
+Subset: ADIMPTFL EQ "Y" 
+
+Denominator: Big N (analysis-set-enrolled-counts) 
+Note: Full Matrix: No for ACAT1 means only observed categories appear. 
+
+Section 3 — By Category and Coded Term 
+
+Display label: <coded term> (indented under each category, one row per observed coded term, e.g. "NOT DISCONTINUED FROM STUDY TREATMENT") 
+
+Method: Number of distinct subjects (USUBJID) with at least one deviation matching the category and coded term, and percentage 
+
+By Variable: TRT01PN/NA/TRT01P (Full Matrix: Yes) * NA/NA/ACAT1 (Full Matrix: No) * NA/NA/ADECOD (Full Matrix: No) 
+
+Domain: ADDV 
+
+Subset: ADIMPTFL EQ "Y" 
+
+Denominator: Big N (analysis-set-enrolled-counts) 
+Note: Full Matrix: No for ADECOD means only observed coded terms appear. 
+
+.missing 
+
+Important protocol deviations should have been coded and categorised prior to analysis; missing coded terms in ADDV are unexpected. If missing coded terms are encountered, a ".missing" row should be displayed with count and percentage to alert the reviewer. 
+
+Sorting Order 
+
+Deviation categories are sorted in descending order based on total incidence. Within each category, deviation coded terms are sorted in descending order based on total incidence. If two categories or coded terms have equal total incidence, they are presented in alphabetical order.  
+
+Known Conflicts with the Mock Shell 
+
+Column Header should be and two lines with Coded Term indented instead of Category/Coded Term 
+
+The first row is listed as "Any important protocol deviations" but should be changed to "Any Important Protocol Deviations". 
+
+The analysis set should be included in the title. 
+
+---------------------------------------------------------------
+Mock Shell 
+Extracted from DSB, version 1.0Image
+Image
+
+
