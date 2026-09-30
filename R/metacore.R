@@ -145,8 +145,10 @@ MetaCore_validate <- function() {
       nrow(private$.derivations) == 0 &
       nrow(private$.codelist) == 0 &
       nrow(private$.supp) == 0) {
-      cli_warn("Other checks were not performed, because all datasets are empty",
-        call. = FALSE
+      metacore_validation_warn(
+        "Other checks were not performed, because all datasets are empty",
+        subclass = "checks_not_performed",
+        reason = "empty"
       )
     } else {
       check_columns(
@@ -168,8 +170,10 @@ MetaCore_validate <- function() {
       }
     }
   } else {
-    cli_warn("Other checks were not performed, because column names were incorrect",
-      call. = FALSE
+    metacore_validation_warn(
+      "Other checks were not performed, because column names were incorrect",
+      subclass = "checks_not_performed",
+      reason = "column_names"
     )
   }
 }

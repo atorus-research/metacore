@@ -1,3 +1,7 @@
+# Metacore (development version)
+
+-   Validation warnings are now classed conditions (`metacore_validation_warning_<check>`, `metacore_validation_warning`, `metacore_warning`) carrying the affected table, column, or values as fields, so callers can handle or muffle a specific expected warning with `withCallingHandlers()` instead of matching message text. See `?metacore_conditions` [#162](https://github.com/atorus-research/metacore/issues/162).
+
 # Metacore 0.3.0
 
 One of the primary goals of these updates is to make the package less "noisy", reducing the number of messages and warnings produced by the package and providing users more options for controlling them.
