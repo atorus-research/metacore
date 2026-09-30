@@ -41,6 +41,83 @@ add_labs <- function(.data, ...) {
 }
 
 
+#' Raise a classed validation warning
+#'
+#' Every warning raised while validating a metacore object goes through this
+#' helper so that callers can handle it by class instead of by message text.
+#' The condition carries the classes
+#' `metacore_validation_warning_<subclass>`, `metacore_validation_warning`, and
+#' `metacore_warning`, plus any fields given in `...` (the table, column, or
+#' offending values); see [metacore_conditions].
+#'
+#' @param message The warning message, in the form [cli::cli_warn()] accepts.
+#' @param subclass A single string naming the check, used to build the most
+#'   specific condition class.
+#' @param ... Named fields stored on the condition.
+#' @param .envir Environment in which the message's `{}` expressions are
+#'   evaluated, by default the caller's.
+#' @return Invisibly `NULL`; called for its side effect.
+#' @noRd
+metacore_validation_warn <- function(message, subclass, ..., .envir = parent.frame()) {
+  cli_warn(
+    message,
+    .envir = .envir,
+    class = c(
+      paste0("metacore_validation_warning_", subclass),
+      "metacore_validation_warning",
+      "metacore_warning"
+    ),
+    call = NULL,
+    ...
+  )
+}
+
+#' Condition classes raised by metacore validation
+#'
+#' Warnings raised while a metacore object is validated (by [metacore()],
+#' [load_metacore()], [select_dataset()], and the spec readers that build a
+#' metacore object) are classed conditions, so a caller can handle a known,
+#' expected warning without matching its message text. Every such warning has
+#' the classes `metacore_validation_warning` and `metacore_warning`, and a more
+#' specific class `metacore_validation_warning_<check>` where `<check>` is one
+#' of:
+#'
+#' * `column_all_missing`: a column of a specification table only contains
+#'   missing values. Fields: `table`, `column`.
+#' * `column_check_failed`: a column fails its type check. Fields: `table`,
+#'   `column`, `check`.
+#' * `disallowed_words`: a column contains values outside its permitted set.
+#'   Fields: `table`, `column`, `values`.
+#' * `table_null`: a specification table is `NULL`. Field: `table`.
+#' * `table_column_names`: a specification table has the wrong column names.
+#'   Fields: `table`, `expected`.
+#' * `checks_not_performed`: the remaining checks were skipped. Field: `reason`.
+#' * `variables_without_var_spec`: variables in `ds_vars` without a `var_spec`
+#'   entry. Field: `variables`.
+#' * `variables_without_value_spec` and `value_spec_without_ds_vars`: the two
+#'   directions of the `ds_vars`/`value_spec` cross-check. Field: `variables`.
+#' * `derivation_ids_not_found` and `derivations_unused`: the two directions of
+#'   the `value_spec`/`derivations` cross-check. Fields: `variables` or
+#'   `derivation_ids`.
+#' * `code_ids_not_found` and `codelists_unused`: the two directions of the
+#'   `value_spec`/`codelist` cross-check. Fields: `variables` or `codelists`.
+#' * `supp_not_unique`, `supp_flag_without_supp`, and `supp_without_ds_vars`:
+#'   the `supp` table checks. Field: `variables` where applicable.
+#'
+#' @examples
+#' # Muffle only the warning about an intentionally empty `key_seq` column and
+#' # let every other validation warning through:
+#' \dontrun{
+#' withCallingHandlers(
+#'   load_metacore(path),
+#'   metacore_validation_warning_column_all_missing = function(w) {
+#'     if (identical(w$column, "key_seq")) invokeRestart("muffleWarning")
+#'   }
+#' )
+#' }
+#' @name metacore_conditions
+NULL
+
 #' Column Validation Function
 #'
 #' @param .data the dataframe to check the column for
@@ -53,12 +130,15 @@ check_structure <- function(.data, col, func, any_na_acceptable, nm) {
   column <- as_string(col)
   vec <- .data %>% pull(!!col)
   warning_string <- NULL
+  warning_subclass <- NULL
+  warning_check <- NULL
   error_message <- NULL
 
   if (any(is.na(vec)) & !any_na_acceptable) {
     error_message <- str_glue("`{column}` from the `{nm}` table contains missing values. Actual values are needed.")
   } else if (all(is.na(vec))) {
     warning_string <- str_glue("`{column}` from the `{nm}` table only contains missing values.")
+    warning_subclass <- "column_all_missing"
   } else {
     failures <- vec %>%
       discard(~ do.call(func, list(.))) %>%
@@ -70,16 +150,31 @@ check_structure <- function(.data, col, func, any_na_acceptable, nm) {
       if (is.primitive(func)) {
         assertion_func <- prim_name(func)
         warning_string <- str_glue("{nm}${column} fails {assertion_func} check")
+        warning_subclass <- "column_check_failed"
+        warning_check <- assertion_func
       } else {
-        cli_warn(c(
-          "The following {qty(all_fails)} word{?s} in {nm}${column} {qty(all_fails)} {?is/are} not allowed:",
-          "i" = ansi_collapse(all_fails, last = ", ")
-        ), call. = FALSE)
+        metacore_validation_warn(
+          c(
+            "The following {qty(all_fails)} word{?s} in {nm}${column} {qty(all_fails)} {?is/are} not allowed:",
+            "i" = ansi_collapse(all_fails, last = ", ")
+          ),
+          subclass = "disallowed_words",
+          table = nm,
+          column = column,
+          values = all_fails
+        )
       }
     }
   }
 
-  list(warning = warning_string, error = error_message)
+  list(
+    warning = warning_string,
+    warning_subclass = warning_subclass,
+    warning_table = nm,
+    warning_column = column,
+    warning_check = warning_check,
+    error = error_message
+  )
 }
 
 #' Check Words in Column

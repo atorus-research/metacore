@@ -21,10 +21,14 @@ ds_vars_check <- function(ds_vars, var_spec) {
       unique()
 
     if (var_check_dbl %>% length() != 0) {
-      cli_warn(c(
-        "The following variable(s) do not have labels and lengths:",
-        "i" = ansi_collapse(var_check_dbl, last = ", ")
-      ), call. = FALSE)
+      metacore_validation_warn(
+        c(
+          "The following variable(s) do not have labels and lengths:",
+          "i" = ansi_collapse(var_check_dbl, last = ", ")
+        ),
+        subclass = "variables_without_var_spec",
+        variables = var_check_dbl
+      )
     }
   }
 }
@@ -51,20 +55,28 @@ value_check <- function(ds_vars, value_spec) {
     variables <- not_in_val %>%
       mutate(full = str_c(.data$dataset, .data$variable, sep = ".")) %>%
       pull(.data$full)
-    cli_warn(c(
-      "The following variables are in the ds_vars table, but don't have value specs:",
-      "i" = ansi_collapse(variables, last = ", ")
-    ), call. = FALSE)
+    metacore_validation_warn(
+      c(
+        "The following variables are in the ds_vars table, but don't have value specs:",
+        "i" = ansi_collapse(variables, last = ", ")
+      ),
+      subclass = "variables_without_value_spec",
+      variables = variables
+    )
   }
   # Check the variables in value spec that aren't in ds_vars
   not_in_ds <- anti_join(value_vars, ds_vars, by = c("dataset", "variable"))
   if (nrow(not_in_ds) != 0) {
     variables <- not_in_ds %>%
       pull(.data$variable)
-    cli_warn(c(
-      "The following variables have value specifications, but aren't in the ds_vars table:",
-      "i" = ansi_collapse(variables, last = ", ")
-    ), call. = FALSE)
+    metacore_validation_warn(
+      c(
+        "The following variables have value specifications, but aren't in the ds_vars table:",
+        "i" = ansi_collapse(variables, last = ", ")
+      ),
+      subclass = "value_spec_without_ds_vars",
+      variables = variables
+    )
   }
 }
 
@@ -86,19 +98,27 @@ derivation_check <- function(value_spec, derivations) {
   if (nrow(not_in_val) != 0) {
     variables <- not_in_val %>%
       pull(.data$variable)
-    cli_warn(c(
-      "The following variables have derivation ids not found in the derivations table:",
-      "i" = ansi_collapse(variables, last = ", ")
-    ), call. = FALSE)
+    metacore_validation_warn(
+      c(
+        "The following variables have derivation ids not found in the derivations table:",
+        "i" = ansi_collapse(variables, last = ", ")
+      ),
+      subclass = "derivation_ids_not_found",
+      variables = variables
+    )
   }
   # Check the derivations in derivation that aren't in value spec
   not_in_deriv <- anti_join(derivations, deriv_vars, by = c("derivation_id"))
   if (nrow(not_in_deriv) != 0) {
     deriv <- not_in_deriv$derivation_id
-    cli_warn(c(
-      "The following derivations are never used:",
-      "i" = paste(deriv, collapse = ", ")
-    ), call. = FALSE)
+    metacore_validation_warn(
+      c(
+        "The following derivations are never used:",
+        "i" = paste(deriv, collapse = ", ")
+      ),
+      subclass = "derivations_unused",
+      derivation_ids = deriv
+    )
   }
 }
 
@@ -121,20 +141,28 @@ codelist_check <- function(value_spec, codelist) {
       mutate(cat = str_c(dataset, variable, sep = ".")) %>%
       pull(cat) %>%
       unique()
-    cli_warn(c(
-      "The following variables have code ids not found in the codelist(s):",
-      "i" = ansi_collapse(variables, last = ", ")
-    ), call. = FALSE)
+    metacore_validation_warn(
+      c(
+        "The following variables have code ids not found in the codelist(s):",
+        "i" = ansi_collapse(variables, last = ", ")
+      ),
+      subclass = "code_ids_not_found",
+      variables = variables
+    )
   }
   # Check the code_ids in codelist that aren't in value spec
   not_in_cl <- anti_join(codelist, code_vars, by = c("code_id"))
   if (nrow(not_in_cl)) {
     cl_nm <- not_in_cl %>%
       pull(.data$name)
-    cli_warn(c(
-      "The following codelists are never used:",
-      "i" = paste(cl_nm, collapse = ", ")
-    ), call. = FALSE)
+    metacore_validation_warn(
+      c(
+        "The following codelists are never used:",
+        "i" = paste(cl_nm, collapse = ", ")
+      ),
+      subclass = "codelists_unused",
+      codelists = cl_nm
+    )
   }
 }
 
@@ -155,7 +183,10 @@ supp_check <- function(ds_vars, supp) {
     distinct(.data$dataset, .data$variable) %>%
     nrow() == nrow(supp)
   if (!dist_test) {
-    cli_warn("Supp table contains non-unique dataset/variable combinations")
+    metacore_validation_warn(
+      "Supp table contains non-unique dataset/variable combinations",
+      subclass = "supp_not_unique"
+    )
   }
 
   ds_vars <- ds_vars %>%
@@ -167,20 +198,28 @@ supp_check <- function(ds_vars, supp) {
     variables <- not_in_supp %>%
       mutate(full = str_c(.data$dataset, .data$variable, sep = ".")) %>%
       pull(.data$full)
-    cli_warn(c(
-      "The following variables are in the ds_vars table and tagged as supplement, but don't have supp specs:",
-      "i" = ansi_collapse(variables, last = ", ")
-    ), call. = FALSE)
+    metacore_validation_warn(
+      c(
+        "The following variables are in the ds_vars table and tagged as supplement, but don't have supp specs:",
+        "i" = ansi_collapse(variables, last = ", ")
+      ),
+      subclass = "supp_flag_without_supp",
+      variables = variables
+    )
   }
   # Check the variables in value spec that aren't in ds_vars
   not_in_ds <- anti_join(supp, ds_vars, by = c("dataset", "variable"))
   if (nrow(not_in_ds) != 0) {
     variables <- not_in_ds %>%
       pull(.data$variable)
-    cli_warn(c(
-      "The following variables are have supp specifications, but aren't in the ds_vars table:",
-      "i" = ansi_collapse(variables, last = ", ")
-    ), call. = FALSE)
+    metacore_validation_warn(
+      c(
+        "The following variables are have supp specifications, but aren't in the ds_vars table:",
+        "i" = ansi_collapse(variables, last = ", ")
+      ),
+      subclass = "supp_without_ds_vars",
+      variables = variables
+    )
   }
 }
 
@@ -220,10 +259,12 @@ var_name_check <- function(envrionment) {
     name
     if (is.null(tbl)) {
       # Checks for null tables
-      print_message <- name %>%
-        str_remove("[:punct:]") %>%
-        paste("is null")
-      cli_warn(print_message, call. = FALSE)
+      table <- str_remove(name, "[:punct:]")
+      metacore_validation_warn(
+        paste(table, "is null"),
+        subclass = "table_null",
+        table = table
+      )
       FALSE
     } else if (!setequal(names(tbl), col_names[[name]])) {
       # writes a message if the column names don't match
@@ -233,7 +274,12 @@ var_name_check <- function(envrionment) {
           "'", ., "' has incorrect column names. It should be:\n",
           str_c(col_names[[name]], collapse = ", "), "\n"
         )
-      cli_warn(print_message, call. = FALSE)
+      metacore_validation_warn(
+        print_message,
+        subclass = "table_column_names",
+        table = str_remove(name, "[:punct:]"),
+        expected = col_names[[name]]
+      )
       FALSE
     } else {
       TRUE
@@ -389,11 +435,17 @@ check_columns <- function(ds_spec = NULL, ds_vars = NULL, var_spec = NULL, value
   }
 
   # warnings
-  warnings <- map(messages, "warning") %>%
-    compact()
+  warnings <- messages %>%
+    keep(~ !is.null(.x$warning))
   if (length(warnings) > 0) {
     for (warning in warnings) {
-      cli_warn(warning[1], call. = FALSE)
+      metacore_validation_warn(
+        as.character(warning$warning),
+        subclass = warning$warning_subclass,
+        table = warning$warning_table,
+        column = warning$warning_column,
+        check = warning$warning_check
+      )
     }
   }
 }
