@@ -39,11 +39,11 @@ input). The named vector \code{cols} is used to determine which is the correct
 sheet and renames the columns
 }
 \seealso{
-Other spec builders: 
-\code{\link{spec_type_to_codelist}()},
-\code{\link{spec_type_to_derivations}()},
-\code{\link{spec_type_to_ds_spec}()},
-\code{\link{spec_type_to_value_spec}()},
-\code{\link{spec_type_to_var_spec}()}
+Other spec builders:
+\code{\link[=spec_type_to_codelist]{spec_type_to_codelist()}},
+\code{\link[=spec_type_to_derivations]{spec_type_to_derivations()}},
+\code{\link[=spec_type_to_ds_spec]{spec_type_to_ds_spec()}},
+\code{\link[=spec_type_to_value_spec]{spec_type_to_value_spec()}},
+\code{\link[=spec_type_to_var_spec]{spec_type_to_var_spec()}}
 }
 \concept{spec builders}
